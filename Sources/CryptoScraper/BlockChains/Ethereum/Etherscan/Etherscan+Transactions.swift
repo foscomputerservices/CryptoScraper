@@ -6,12 +6,15 @@
 import Foundation
 
 public extension Etherscan {
-    func getTransactions(address: CryptoContract) async throws -> [CryptoTransaction] {
+    /// Retrieves the ``CryptoTransaction``s for the given contract
+    ///
+    /// - Parameter account: The contract from which to retrieve the transactions
+    func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction] {
         let response: TransactionResponse = try await Self.endPiont.appending(
-            queryItems: TransactionResponse.httpQuery(address: address, apiKey: Self.apiKey)
+            queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.apiKey)
         ).fetch()
 
-        return try response.cryptoTransactions(ethContract: address.chain.mainContract)
+        return try response.cryptoTransactions(ethContract: account.chain.mainContract)
     }
 }
 
@@ -26,7 +29,7 @@ private struct TransactionResponse: Decodable {
 
     func cryptoTransactions(ethContract: CryptoContract) throws -> [CryptoTransaction] {
         guard success else {
-            throw EtherscanResponseError.requestFailed
+            throw EtherscanResponseError.requestFailed("<Unknown Error>")
         }
 
         return result.map { $0.cryptoTransaction(ethContract: ethContract) }
@@ -82,10 +85,10 @@ private struct Transaction: Decodable {
         init(transaction: Transaction, ethContract: CryptoContract) {
             self.fromContract = transaction.from.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.from, chain: .ethereum)
+                : EthereumContract(address: transaction.from)
             self.toContract = transaction.to.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.to, chain: .ethereum)
+                : EthereumContract(address: transaction.to)
 
             let amount = Int64(transaction.value)
             self.amount = amount == nil

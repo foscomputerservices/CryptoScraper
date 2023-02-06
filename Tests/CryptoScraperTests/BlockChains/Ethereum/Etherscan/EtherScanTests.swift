@@ -3,7 +3,7 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
-@testable import CryptoScraper
+import CryptoScraper
 import XCTest
 
 final class EtherScanTests: XCTestCase {
@@ -15,12 +15,13 @@ final class EtherScanTests: XCTestCase {
         return address
     }()
 
-    let accountContract: EthereumContract = .init(address: EtherScanTests.ethContractAddress, chain: .ethereum)
+    // User account contract
+    let accountContract = EthereumContract(address: EtherScanTests.ethContractAddress)
 
     func testGetAccountBalance() async throws {
         let etherScan = Etherscan()
 
-        let balance = try await etherScan.getAccountBalance(address: accountContract)
+        let balance = try await etherScan.getBalance(forAccount: accountContract)
         XCTAssertGreaterThan(balance.quantity, 0)
 
         let ethBalance = accountContract.displayAmount(amount: balance.quantity, inUnits: .ether)
@@ -30,7 +31,36 @@ final class EtherScanTests: XCTestCase {
     func testGetTransactions() async throws {
         let etherScan = Etherscan()
 
-        let transactions = try await etherScan.getTransactions(address: accountContract)
+        let transactions = try await etherScan.getTransactions(forAccount: accountContract)
         XCTAssertGreaterThan(transactions.count, 0)
     }
+
+    func testGetTokenBalance_ETH() async throws {
+        let etherScan = Etherscan()
+        let ethToken = accountContract.chain.mainContract!
+
+        do {
+            let ethBalance = try await etherScan.getBalance(forToken: ethToken, forAccount: accountContract)
+            XCTAssertGreaterThan(ethBalance.quantity, 0)
+            print("*** Ethereum balance \(ethBalance.quantity)")
+        } catch let e as EtherscanResponseError {
+            print("*** Error: \(e.localizedDescription)")
+            throw e
+        }
+    }
+
+    func testGetTokenBalance_RLC() async throws {
+        let etherScan = Etherscan()
+        let rlcToken = EthereumContract(address: "0x607F4C5BB672230e8672085532f7e901544a7375")
+
+        do {
+            let ethBalance = try await etherScan.getBalance(forToken: rlcToken, forAccount: accountContract)
+            XCTAssertGreaterThan(ethBalance.quantity, 0)
+            print("*** Ethereum balance \(ethBalance.quantity)")
+        } catch let e as EtherscanResponseError {
+            print("*** Error: \(e.localizedDescription)")
+            throw e
+        }
+    }
+
 }

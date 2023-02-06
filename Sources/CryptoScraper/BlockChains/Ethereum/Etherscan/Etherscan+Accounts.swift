@@ -6,12 +6,15 @@
 import Foundation
 
 public extension Etherscan {
-    func getAccountBalance(address: CryptoContract) async throws -> CryptoAmount {
+    /// Returns the balance (in Ethereum) of the given account
+    ///
+    /// - Parameter account: The Ethereum account to query the balance for
+    func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
         let response: AccountResponse = try await Self.endPiont.appending(
-            queryItems: AccountResponse.httpQuery(address: address, apiKey: Self.apiKey)
+            queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.apiKey)
         ).fetch()
 
-        return try response.cryptoAmount(ethContract: address.chain.mainContract)
+        return try response.cryptoAmount(forAccount: account.chain.mainContract)
     }
 }
 
@@ -24,9 +27,9 @@ private struct AccountResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoAmount(ethContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount ethContract: CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw EtherscanResponseError.requestFailed
+            throw EtherscanResponseError.requestFailed(result)
         }
 
         guard let amount = Int64(result) else {
@@ -37,10 +40,10 @@ private struct AccountResponse: Decodable {
     }
 
     // https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address
-    static func httpQuery(address: CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(account: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "balance"),
-        .init(name: "address", value: address.address),
+        .init(name: "address", value: account.address),
         .init(name: "tag", value: "latest"),
         .init(name: "apiKey", value: apiKey)
     ] }

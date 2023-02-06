@@ -15,9 +15,18 @@ public struct Etherscan: CryptoScanner {
 
         return key
     }
+
+    public init() {}
 }
 
-enum EtherscanResponseError: Error {
-    case requestFailed
+public enum EtherscanResponseError: Error {
+    case requestFailed(_ error: String)
     case invalidAmount
+
+    public var localizedDescription: String {
+        switch self {
+        case .requestFailed(let message): return message
+        case .invalidAmount: return "Invalid amount"
+        }
+    }
 }

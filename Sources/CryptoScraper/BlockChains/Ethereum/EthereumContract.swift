@@ -5,9 +5,9 @@
 
 import Foundation
 
-struct EthereumContract: CryptoContract {
+public struct EthereumContract: CryptoContract {
     // https://etherscan.io/unitconverter
-    enum Unit {
+    public enum Unit {
         case wei
         case kwei
         case mwei
@@ -20,13 +20,16 @@ struct EthereumContract: CryptoContract {
         case gether
         case tether
 
-        var chainBaseUnit: Unit { .wei }
+        public var chainBaseUnit: Unit { .wei }
     }
 
     // MARK: CryptoContract Protocol
 
-    let address: String
-    let chain: CryptoChain
+    public let address: String
+    public let chain: CryptoChain
+    public var isChainToken: Bool {
+        address == EthereumChain.ethContractAddress
+    }
 
     /// Converts a given amount for display in other chain units
     ///
@@ -38,8 +41,16 @@ struct EthereumContract: CryptoContract {
     /// - Parameters:
     ///   - amount: The amount in the chain's base unit
     ///   - inUnits: The units to display the amount in
-    func displayAmount(amount: Int64, inUnits: Unit) -> Double {
+    public func displayAmount(amount: Int64, inUnits: Unit) -> Double {
         Double(amount) / Double(inUnits.divisorFromBase)
+    }
+
+    /// Initializes the ``EthereumContract``
+    ///
+    /// - Parameters:
+    ///   - address: The address of the contract
+    public init(address: String) {
+        self.init(address: address, chain: .ethereum)
     }
 
     init(address: String, chain: EthereumChain) {
