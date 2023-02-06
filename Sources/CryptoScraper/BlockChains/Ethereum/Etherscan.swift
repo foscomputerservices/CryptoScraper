@@ -17,9 +17,16 @@ public struct Etherscan: CryptoScanner {
 
     func getAccountBalance(address: CryptoContract) async throws -> CryptoAmount {
         let dataFetch = FoundationDataFetch.default
-        let url = Self.endPiont.appending(
-            queryItems: AccountResponse.httpQuery(address: address, apiKey: Self.apiKey)
-        )
+        let url: URL
+
+        if #available(macOS 13.0, *) {
+            url = Self.endPiont.appending(
+                queryItems: AccountResponse.httpQuery(address: address, apiKey: Self.apiKey)
+            )
+        } else {
+            url = URL(string: Self.endPiont.absoluteString + AccountResponse.queryStr(
+                address: address, apiKey: Self.apiKey))!
+        }
 
         let response: AccountResponse = try await dataFetch.fetch(url)
         return try response.cryptoAmount(ethContract: address.chain.mainContract)
@@ -60,4 +67,17 @@ private struct AccountResponse: Codable {
         .init(name: "tag", value: "latest"),
         .init(name: "apiKey", value: apiKey)
     ] }
+
+    static func queryStr(address: CryptoContract, apiKey: String) -> String {
+        httpQuery(address: address, apiKey: apiKey).reduce("") { result, next in
+            var result = result
+
+            result += result.isEmpty ? "?" : "&"
+            result += next.name
+            result += "="
+            result += next.value!
+
+            return result
+        }
+    }
 }
