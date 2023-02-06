@@ -9,14 +9,15 @@ public struct EthereumChain: CryptoChain {
     // MARK: CryptoChain
 
     public let userReadableName: String = "Ethereum"
-    public let scanners: [CryptoScanner] = [
-        //        Etherscan(apiKey: <#T##String#>)
-    ]
+    public let scanners: [CryptoScanner]
     public private(set) var chainContracts: [CryptoContract]
     public private(set) var mainContract: CryptoContract!
 
     public init() {
         self.chainContracts = []
+        self.scanners = [
+            Etherscan()
+        ]
 
         self.mainContract = EthereumContract(address: "ETH", chain: self)
         self.chainContracts = [

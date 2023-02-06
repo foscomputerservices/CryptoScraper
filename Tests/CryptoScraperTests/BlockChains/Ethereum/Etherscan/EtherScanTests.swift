@@ -26,4 +26,11 @@ final class EtherScanTests: XCTestCase {
         let ethBalance = accountContract.displayAmount(amount: balance.quantity, inUnits: .ether)
         XCTAssertGreaterThan(ethBalance, 0)
     }
+
+    func testGetTransactions() async throws {
+        let etherScan = Etherscan()
+
+        let transactions = try await etherScan.getTransactions(address: accountContract)
+        XCTAssertGreaterThan(transactions.count, 0)
+    }
 }
