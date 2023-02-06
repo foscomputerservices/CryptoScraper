@@ -7,7 +7,7 @@ on:
 jobs:
   linux_build_library:
     runs-on: macos-12
-    secrets:
+    env:
       ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
       ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
 
