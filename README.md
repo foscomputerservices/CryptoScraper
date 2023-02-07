@@ -1,5 +1,7 @@
 # CryptoScraper
 
+![Run unit tests](https://github.com/foscomputerservices/CryptoScraper/actions/workflows/ci.yml/badge.svg)
+
 CryptoScraper is a package for generalizing the retrieval of information from crypto block chains.
 
 ## How To Get Started
