@@ -62,5 +62,4 @@ final class EtherScanTests: XCTestCase {
             throw e
         }
     }
-
 }

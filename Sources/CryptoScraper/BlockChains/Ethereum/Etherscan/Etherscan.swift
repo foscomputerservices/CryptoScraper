@@ -22,11 +22,16 @@ public struct Etherscan: CryptoScanner {
 public enum EtherscanResponseError: Error {
     case requestFailed(_ error: String)
     case invalidAmount
+    case invalidData(type: String, field: String, value: String)
 
     public var localizedDescription: String {
         switch self {
-        case .requestFailed(let message): return message
-        case .invalidAmount: return "Invalid amount"
+        case .requestFailed(let message):
+            return message
+        case .invalidAmount:
+            return "Invalid amount"
+        case .invalidData(let type, let field, let value):
+            return "Invalid field data '\(value)' for \(type):\(field)"
         }
     }
 }

@@ -32,7 +32,7 @@ private struct TransactionResponse: Decodable {
             throw EtherscanResponseError.requestFailed("<Unknown Error>")
         }
 
-        return result.map { $0.cryptoTransaction(ethContract: ethContract) }
+        return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
     }
 
     // https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
@@ -71,8 +71,8 @@ private struct Transaction: Decodable {
     let methodId: String
     let functionName: String
 
-    func cryptoTransaction(ethContract: CryptoContract) -> CryptoTransaction {
-        MappedTransaction(transaction: self, ethContract: ethContract)
+    func cryptoTransaction(ethContract: CryptoContract) throws -> CryptoTransaction {
+        try MappedTransaction(transaction: self, ethContract: ethContract)
     }
 
     private struct MappedTransaction: CryptoTransaction {
@@ -81,8 +81,17 @@ private struct Transaction: Decodable {
         let fromContract: CryptoContract?
         let toContract: CryptoContract?
         let amount: CryptoAmount
+        let timeStamp: Date
+        let transactionId: String
+        let gas: Int?
+        let gasPrice: CryptoAmount?
+        let gasUsed: CryptoAmount?
+        let successful: Bool
 
-        init(transaction: Transaction, ethContract: CryptoContract) {
+        let methodId: String
+        let functionName: String?
+
+        init(transaction: Transaction, ethContract: CryptoContract) throws {
             self.fromContract = transaction.from.isEmpty
                 ? nil
                 : EthereumContract(address: transaction.from)
@@ -94,6 +103,30 @@ private struct Transaction: Decodable {
             self.amount = amount == nil
                 ? .init(quantity: 0, contract: ethContract)
                 : .init(quantity: amount!, contract: ethContract)
+            guard let timestamp = TimeInterval(transaction.timeStamp) else {
+                throw EtherscanResponseError.invalidData(
+                    type: "Transaction",
+                    field: "timestamp",
+                    value: transaction.timeStamp
+                )
+            }
+            self.timeStamp = Date(timeIntervalSince1970: timestamp)
+            self.transactionId = transaction.hash
+            self.gas = Int(transaction.gas)
+
+            let gasPrice = Int64(transaction.gasPrice)
+            self.gasPrice = gasPrice == nil
+                ? nil
+                : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+            let gasUsed = Int64(transaction.gasUsed)
+            self.gasUsed = gasUsed == nil
+                ? nil
+                : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+            self.successful = !(Bool(transaction.isError) ?? true /* default to isError == true */ )
+            self.methodId = transaction.methodId
+            self.functionName = transaction.functionName.isEmpty
+                ? nil
+                : transaction.functionName
         }
     }
 }
