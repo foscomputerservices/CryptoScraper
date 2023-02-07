@@ -10,6 +10,7 @@ jobs:
     env:
       ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
       ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
      - uses: actions/checkout@v2
