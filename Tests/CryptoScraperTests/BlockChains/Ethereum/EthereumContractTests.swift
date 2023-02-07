@@ -8,7 +8,7 @@ import XCTest
 
 final class EtherContractTests: XCTestCase {
     func testWeiToETHConversion() throws {
-        let ethChain = EthereumChain()
+        let ethChain = EthereumChain.default
         let ethContract = ethChain.mainContract as! EthereumContract
 
         let weiAmount: Int64 = 1000000000000000000

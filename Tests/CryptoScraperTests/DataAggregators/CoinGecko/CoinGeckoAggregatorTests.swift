@@ -22,6 +22,10 @@ final class CoinGeckoAggregatorTests: XCTestCase {
             XCTAssertGreaterThan(coins.count, 4500)
         } catch let e as DataFetchError {
             XCTFail(e.localizedDescription)
+        } catch let e as CoinGeckoError {
+            if e.status.errorCode != 429 { // 429 -- Rate limit exceeded
+                XCTFail(e.localizedDescription)
+            }
         }
     }
 }

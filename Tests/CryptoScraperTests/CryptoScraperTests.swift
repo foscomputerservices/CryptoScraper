@@ -3,14 +3,13 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
-@testable import CryptoScraper
+import CryptoScraper
 import XCTest
 
 final class CryptoScraperTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(CryptoScraper().text, "Hello, World!")
+    func testInitialization() async throws {
+        try await CryptoScraper.initialize()
+
+        XCTAssertGreaterThan(EthereumChain.default.chainCryptos.count, 4500)
     }
 }
