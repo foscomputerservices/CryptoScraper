@@ -7,7 +7,7 @@ import Foundation
 
 public struct CryptoAmount {
     /// The quantity of the coin in the chain's base units
-    public let quantity: Int64
+    public let quantity: UInt128
 
     /// The contract that defines the crypto
     public let contract: CryptoContract

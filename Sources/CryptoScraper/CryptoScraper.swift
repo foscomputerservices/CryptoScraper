@@ -3,8 +3,7 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
-public struct CryptoScraper {
-
+public enum CryptoScraper {
     private static var defaultAggregator: CryptoDataAggregator {
         CoinGeckoAggregator()
     }

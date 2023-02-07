@@ -1,12 +1,12 @@
-// EthereumContract.swift
+// FantomContract.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public struct EthereumContract: CryptoContract {
-    // https://etherscan.io/unitconverter
+public struct FantomContract: CryptoContract {
+    // https://etherscan.io/unitconverter -- Cannot find a FTMScan equivalent page 🤷‍♂️
     public enum Unit {
         case wei
         case kwei
@@ -28,7 +28,7 @@ public struct EthereumContract: CryptoContract {
     public let address: String
     public let chain: CryptoChain
     public var isChainToken: Bool {
-        address == EthereumChain.ethContractAddress
+        address == FantomChain.ftmContractAddress
     }
 
     /// Converts a given amount for display in other chain units
@@ -45,21 +45,21 @@ public struct EthereumContract: CryptoContract {
         Double(amount) / Double(inUnits.divisorFromBase)
     }
 
-    /// Initializes the ``EthereumContract``
+    /// Initializes the ``FantomContract``
     ///
     /// - Parameters:
     ///   - address: The address of the contract
     public init(address: String) {
-        self.init(address: address, chain: .ethereum)
+        self.init(address: address, chain: .fantom)
     }
 
-    init(address: String, chain: EthereumChain) {
+    init(address: String, chain: FantomChain) {
         self.address = address
         self.chain = chain
     }
 }
 
-private extension EthereumContract.Unit {
+private extension FantomContract.Unit {
     var divisorFromBase: UInt128 {
         let exponent: Double
 

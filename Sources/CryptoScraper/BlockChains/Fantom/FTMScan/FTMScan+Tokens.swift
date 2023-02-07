@@ -1,18 +1,18 @@
-// Etherscan+Tokens.swift
+// FTMScan+Tokens.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension Etherscan {
+public extension FTMScan {
     /// Returns balance of the given token for the given address
     ///
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
     func getBalance(forToken contract: CryptoContract, forAccount account: CryptoContract) async throws -> CryptoAmount {
-        // Cannot retrieve ETH contract, but retrieve ETH balance
+        // Cannot retrieve FTM contract, but retrieve FTM balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
         } else {
@@ -20,7 +20,7 @@ public extension Etherscan {
                 queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: Self.apiKey)
             ).fetch()
 
-            return try response.cryptoBalance(forToken: contract, ethContract: account.chain.mainContract)
+            return try response.cryptoBalance(forToken: contract, ftmContract: account.chain.mainContract)
         }
     }
 
@@ -48,18 +48,18 @@ private struct TokenBalanceResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoBalance(forToken: CryptoContract, ethContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoBalance(forToken: CryptoContract, ftmContract: CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw EtherscanResponseError.requestFailed(result)
+            throw FTMScanResponseError.requestFailed(result)
         }
         guard let amount = UInt128(result) else {
-            throw EtherscanResponseError.invalidAmount
+            throw FTMScanResponseError.invalidAmount
         }
 
         return .init(quantity: amount, contract: forToken)
     }
 
-    // https://docs.etherscan.io/api-endpoints/tokens#get-erc20-token-account-balance-for-tokencontractaddress
+    // https://docs.ftmscan.com/api-endpoints/tokens#get-erc-20-token-account-balance-by-contractaddress
     static func httpQuery(forToken contract: CryptoContract, address: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "tokenbalance"),
@@ -81,13 +81,13 @@ private struct TokenInfoResponse: Decodable {
 
     func cryptoInfo() throws -> CryptoInfo {
         guard success, let tokenInfo = result.first else {
-            throw EtherscanResponseError.requestFailed("<< Unknown Error >>")
+            throw FTMScanResponseError.requestFailed("<< Unknown Error >>")
         }
 
         return tokenInfo.cryptoInfo()
     }
 
-    // https://docs.etherscan.io/api-endpoints/tokens#get-token-info-by-contractaddress
+    // https://docs.ftmscan.com/api-endpoints/tokens#get-token-info-by-contractaddress
     static func httpQuery(forToken contract: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "token"),
         .init(name: "action", value: "tokeninfo"),
@@ -150,7 +150,7 @@ private struct TokenInfo: Decodable {
         let whitepaper: URL?
 
         init(tokenInfo: TokenInfo) {
-            let contract = EthereumContract(address: tokenInfo.contractAddress)
+            let contract = FantomContract(address: tokenInfo.contractAddress)
             self.contractAddress = contract
             self.tokenName = tokenInfo.tokenName
             self.symbol = tokenInfo.symbol
