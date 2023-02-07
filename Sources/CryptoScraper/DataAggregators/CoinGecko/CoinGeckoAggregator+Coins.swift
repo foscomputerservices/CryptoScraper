@@ -107,12 +107,43 @@ private extension Collection<CoinResponse> {
     }
 }
 
+private var unknownChain = Set<String>()
+
 private extension String {
     var chain: CryptoChain? {
+
         switch self {
         case "ethereum": return .ethereum
         case "fantom": return .fantom
-        default: return nil
+        case "binance-smart-chain": return .binance
+
+        // TODO: Unsupported chains
+        case "polygon-pos", "tron", "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
+            "tomochain", "cronos", "energi", "moonriver", "optimistic-ethereum", "solana", "zilliqa", "icon",
+            "astar", "cube", "neo", "telos", "oasis", "tezos", "aurora", "yocoin", "bitgert", "dogechain",
+            "harmony-shard-0", "stellar", "huobi-token", "bitkub-chain", "sora", "xdai",
+            "smartbch", "near-protocol", "cardano",  "kardiachain",  "karura", "chiliz",
+            "boba", "Bitcichain", "metis-andromeda", "elrond", "osmosis", "syscoin", "klay-token",
+            "moonbeam", "celo", "secret", "terra", "evmos", "cosmos", "okex-chain", "proof-of-memes",
+            "velas", "ronin", "ethereumpow", "fuse", "elastos", "theta", "milkomeda-cardano",
+            "meter", "hedera-hashgraph", "binancecoin", "xdc-network", "aptos", "xrp",
+            "arbitrum-nova", "nuls", "rootstock", "mixin-network", "songbird", "canto",
+            "fusion-network", "hydra", "kucoin-community-chain", "kava", "step-network",
+            "defi-kingdoms-blockchain", "echelon", "ethereum-classic", "vechain", "bitcoin-cash",
+            "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
+            "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
+            "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
+            "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero":
+            return nil
+
+        default:
+            #if DEBUG
+            if !unknownChain.contains(self) {
+                unknownChain.insert(self)
+                print("\(self)")
+            }
+            #endif
+            return nil
         }
     }
 }

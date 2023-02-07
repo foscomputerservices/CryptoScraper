@@ -16,6 +16,7 @@ enum BlockChains {
 
         EthereumChain.default.loadChainCryptos(from: coins)
         FantomChain.default.loadChainCryptos(from: coins)
+        BinanceSmartChain.default.loadChainCryptos(from: coins)
 
         initialized = true
     }
