@@ -9,7 +9,7 @@ public protocol CryptoInfo {
     var contractAddress: CryptoContract { get }
     var tokenName: String { get }
     var symbol: String { get }
-    var tokenType: String { get }
+    var tokenType: String? { get }
     var totalSupply: CryptoAmount? { get }
     var blueCheckmark: Bool? { get }
     var description: String? { get }

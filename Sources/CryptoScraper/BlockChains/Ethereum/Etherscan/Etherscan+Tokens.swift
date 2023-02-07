@@ -16,7 +16,7 @@ public extension Etherscan {
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
         } else {
-            let response: TokenBalanceResponse = try await Self.endPiont.appending(
+            let response: TokenBalanceResponse = try await Self.endPoint.appending(
                 queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: Self.apiKey)
             ).fetch()
 
@@ -31,7 +31,7 @@ public extension Etherscan {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     func getInfo(forToken contract: CryptoContract) async throws -> CryptoInfo {
-        let response: TokenInfoResponse = try await Self.endPiont.appending(
+        let response: TokenInfoResponse = try await Self.endPoint.appending(
             queryItems: TokenInfoResponse.httpQuery(forToken: contract, apiKey: Self.apiKey)
         ).fetch()
 
@@ -131,7 +131,7 @@ private struct TokenInfo: Decodable {
         let contractAddress: CryptoContract
         let tokenName: String
         let symbol: String
-        let tokenType: String
+        let tokenType: String?
         let totalSupply: CryptoAmount?
         let blueCheckmark: Bool?
         let description: String?
