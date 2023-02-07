@@ -8,6 +8,10 @@ import Foundation
 public struct CoinGeckoError: Decodable, Error {
     public let status: ErrorStatus
 
+    public var rateLimitReached: Bool {
+        status.errorCode == 429
+    }
+
     public struct ErrorStatus: Decodable {
         public let errorCode: Int
         public let errorMessage: String

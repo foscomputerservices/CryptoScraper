@@ -111,6 +111,7 @@ private extension String {
     var chain: CryptoChain? {
         switch self {
         case "ethereum": return .ethereum
+        case "fantom": return .fantom
         default: return nil
         }
     }

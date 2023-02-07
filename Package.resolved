@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "awesomenumberskit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/oscbyspro/AwesomeNumbersKit.git",
+      "state" : {
+        "revision" : "c026389b1762bfe75902d3ee5a5c1f1c31404d1a",
+        "version" : "0.3.4"
+      }
+    }
+  ],
+  "version" : 2
+}

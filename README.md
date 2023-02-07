@@ -21,7 +21,8 @@ To begin api keys need to be set in order to access various services.  These key
 | Service | Environment Variable | Required |
 |----------------- | ----------------- | -------- |
 | [Etherscan](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | ETHER_SCAN_KEY | Yes | 
-| [CoinGecko](https://www.coingecko.com/en/api) | ETHER_SCAN_KEY| No | 
+| [Fantom](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | FTM_SCAN_KEY | Yes | 
+| [CoinGecko](https://www.coingecko.com/en/api) | ETHER_SCAN_KEY| Yes | 
 
 To begin using the framework call the initialization method to initialize the block chains with their contract data.
 
@@ -38,6 +39,7 @@ In order for testing to succeed, a test contract is needed for each chain.  Thes
 | Service | Environment Variable |
 | --------------- | -------------------- |
 | Ethereum | ETH_TEST_CONTRACT_ADDRESS |
+| Fantom | FTM_TEST_CONTRACT_ADDRESS |
 
 ## Contributing
 

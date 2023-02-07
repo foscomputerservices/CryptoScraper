@@ -1,27 +1,27 @@
-// Etherscan.swift
+// FTMScan.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public struct Etherscan: CryptoScanner {
-    static let endPoint: URL = .init(string: "https://api.etherscan.io/api")!
+public struct FTMScan: CryptoScanner {
+    static let endPoint: URL = .init(string: "https://api.ftmscan.com/api")!
 
     static var apiKey: String {
-        guard let key = ProcessInfo.processInfo.environment["ETHER_SCAN_KEY"] else {
-            fatalError("ETHER_SCAN_KEY is not set in the environment")
+        guard let key = ProcessInfo.processInfo.environment["FTM_SCAN_KEY"] else {
+            fatalError("FTM_SCAN_KEY is not set in the environment")
         }
 
         return key
     }
 
-    public let userReadableName: String = "Etherscan"
+    public let userReadableName: String = "FTM Scan"
 
     public init() {}
 }
 
-public enum EtherscanResponseError: Error {
+public enum FTMScanResponseError: Error {
     case requestFailed(_ error: String)
     case invalidAmount
     case invalidData(type: String, field: String, value: String)

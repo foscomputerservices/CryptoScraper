@@ -1,14 +1,14 @@
-// Etherscan+Accounts.swift
+// FTMScan+Accounts.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension Etherscan {
-    /// Returns the balance (in Ethereum) of the given account
+public extension FTMScan {
+    /// Returns the balance (in Fantom) of the given account
     ///
-    /// - Parameter account: The Ethereum account to query the balance for
+    /// - Parameter account: The Fantom account to query the balance for
     func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
         let response: AccountResponse = try await Self.endPoint.appending(
             queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.apiKey)
@@ -27,19 +27,19 @@ private struct AccountResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoAmount(forAccount ethContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount ftmContract: CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw EtherscanResponseError.requestFailed(result)
+            throw FTMScanResponseError.requestFailed(result)
         }
 
         guard let amount = UInt128(result) else {
-            throw EtherscanResponseError.invalidAmount
+            throw FTMScanResponseError.invalidAmount
         }
 
-        return .init(quantity: amount, contract: ethContract)
+        return .init(quantity: amount, contract: ftmContract)
     }
 
-    // https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address
+    // https://docs.ftmscan.com/api-endpoints/accounts#get-ftm-balance-for-a-single-address
     static func httpQuery(account: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "balance"),

@@ -1,11 +1,11 @@
-// Etherscan+Transactions.swift
+// FTMScan+Transactions.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension Etherscan {
+public extension FTMScan {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
@@ -14,7 +14,7 @@ public extension Etherscan {
             queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.apiKey)
         ).fetch()
 
-        return try response.cryptoTransactions(ethContract: account.chain.mainContract)
+        return try response.cryptoTransactions(ftmContract: account.chain.mainContract)
     }
 }
 
@@ -27,15 +27,15 @@ private struct TransactionResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoTransactions(ethContract: CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ftmContract: CryptoContract) throws -> [CryptoTransaction] {
         guard success else {
-            throw EtherscanResponseError.requestFailed("<Unknown Error>")
+            throw FTMScanResponseError.requestFailed("<Unknown Error>")
         }
 
-        return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
+        return try result.map { try $0.cryptoTransaction(ftmContract: ftmContract) }
     }
 
-    // https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
+    // https://docs.ftmscan.com/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
     static func httpQuery(address: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "txlist"),
@@ -71,8 +71,8 @@ private struct Transaction: Decodable {
     let methodId: String
     let functionName: String
 
-    func cryptoTransaction(ethContract: CryptoContract) throws -> CryptoTransaction {
-        try MappedTransaction(transaction: self, ethContract: ethContract)
+    func cryptoTransaction(ftmContract: CryptoContract) throws -> CryptoTransaction {
+        try MappedTransaction(transaction: self, ftmContract: ftmContract)
     }
 
     private struct MappedTransaction: CryptoTransaction {
@@ -91,20 +91,20 @@ private struct Transaction: Decodable {
         let methodId: String
         let functionName: String?
 
-        init(transaction: Transaction, ethContract: CryptoContract) throws {
+        init(transaction: Transaction, ftmContract: CryptoContract) throws {
             self.fromContract = transaction.from.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.from)
+                : FantomContract(address: transaction.from)
             self.toContract = transaction.to.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.to)
+                : FantomContract(address: transaction.to)
 
             let amount = UInt128(transaction.value)
             self.amount = amount == nil
-                ? .init(quantity: 0, contract: ethContract)
-                : .init(quantity: amount!, contract: ethContract)
+                ? .init(quantity: 0, contract: ftmContract)
+                : .init(quantity: amount!, contract: ftmContract)
             guard let timestamp = TimeInterval(transaction.timeStamp) else {
-                throw EtherscanResponseError.invalidData(
+                throw FTMScanResponseError.invalidData(
                     type: "Transaction",
                     field: "timestamp",
                     value: transaction.timeStamp
@@ -117,11 +117,11 @@ private struct Transaction: Decodable {
             let gasPrice = UInt128(transaction.gasPrice)
             self.gasPrice = gasPrice == nil
                 ? nil
-                : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+                : CryptoAmount(quantity: gasPrice!, contract: ftmContract)
             let gasUsed = UInt128(transaction.gasUsed)
             self.gasUsed = gasUsed == nil
                 ? nil
-                : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                : CryptoAmount(quantity: gasUsed!, contract: ftmContract)
             self.successful = !(Bool(transaction.isError) ?? true /* default to isError == true */ )
             self.methodId = transaction.methodId
             self.functionName = transaction.functionName.isEmpty

@@ -23,7 +23,7 @@ final class CoinGeckoAggregatorTests: XCTestCase {
         } catch let e as DataFetchError {
             XCTFail(e.localizedDescription)
         } catch let e as CoinGeckoError {
-            if e.status.errorCode != 429 { // 429 -- Rate limit exceeded
+            if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)
             }
         }
