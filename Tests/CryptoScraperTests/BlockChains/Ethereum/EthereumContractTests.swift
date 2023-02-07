@@ -3,7 +3,7 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
-@testable import CryptoScraper
+import CryptoScraper
 import XCTest
 
 final class EtherContractTests: XCTestCase {

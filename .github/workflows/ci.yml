@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  linux_build_library:
+  run_tests:
     runs-on: macos-12
     env:
       ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
