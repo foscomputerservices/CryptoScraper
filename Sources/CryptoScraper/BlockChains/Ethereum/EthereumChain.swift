@@ -15,8 +15,7 @@ public final class EthereumChain: CryptoChain {
 
     public func loadChainCryptos(from coins: [CryptoInfo]) {
         chainCryptos = coins.filter { coin in
-            coin.contractAddress.address == mainContract!.address &&
-                coin.contractAddress.chain.userReadableName == userReadableName
+            coin.contractAddress.chain.userReadableName == userReadableName
         }
     }
 
@@ -26,7 +25,9 @@ public final class EthereumChain: CryptoChain {
 
     static let ethContractAddress = "ETH"
 
-    public init() {
+    public static let `default`: EthereumChain = .init()
+
+    private init() {
         self.chainCryptos = []
         self.scanners = [
             Etherscan()
@@ -37,5 +38,5 @@ public final class EthereumChain: CryptoChain {
 }
 
 public extension CryptoChain where Self == EthereumChain {
-    static var ethereum: EthereumChain { .init() }
+    static var ethereum: EthereumChain { .default }
 }

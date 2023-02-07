@@ -20,24 +20,27 @@ public enum DataFetchError: Error {
     }
 }
 
+private struct DummyError: Decodable, Error {}
+
 final class FoundationDataFetch {
     private let urlSession: URLSession
 
     static let `default`: FoundationDataFetch = .init(urlSession: FoundationDataFetch.UrlSession())
 
     func fetch<ResultValue: Decodable>(_ url: URL) async throws -> ResultValue {
-        try await fetch(url.absoluteString)
+        try await fetch(url.absoluteString, errorType: DummyError.self)
     }
 
-    func fetch<ResultValue: Decodable>(_ urlStr: String) async throws -> ResultValue {
-        // urlSession.data NYI in Linux foundation
-//        guard let url = URL(string: urlStr) else {
-//            throw DataFetchError.message("Unable to convert \(urlStr) to URL???")
-//        }
-//
-//        let data = try await urlSession.data(from: url).0
-//
-//        return try data.fromJSON()
+    /// Fetches the given data of type ``ResultValue`` from the given ``URL``
+    ///
+    /// - Parameters:
+    ///   - url: The ``URL`` that identifies the source of the data
+    ///   - errorType: An ``Error`` type to attempt to decode returned data as an error if unable to decode as ``ResultValue``
+    func fetch<ResultValue: Decodable>(_ url: URL, errorType: (some Decodable & Error).Type) async throws -> ResultValue {
+        try await fetch(url.absoluteString, errorType: errorType)
+    }
+
+    private func fetch<ResultValue: Decodable, ResultError: Decodable & Error>(_ urlStr: String, errorType: ResultError.Type) async throws -> ResultValue {
         guard let url = URL(string: urlStr) else {
             throw DataFetchError.message("Unable to convert \(urlStr) to URL???")
         }
@@ -46,7 +49,7 @@ final class FoundationDataFetch {
             urlSession
                 .dataTask(with: url) { data, _, e in
                     var result: ResultValue?
-                    var error: DataFetchError?
+                    var error: Error?
 
                     if let data {
                         do {
@@ -58,12 +61,17 @@ final class FoundationDataFetch {
                                 result = try data.fromJSON()
                             }
                         } catch let e as DecodingError {
-                            error = .message(e.localizedDescription)
+                            guard errorType != DummyError.self, let errorResult: ResultError? = try? data.fromJSON() else {
+                                error = DataFetchError.message(e.localizedDescription)
+                                return
+                            }
+
+                            error = errorResult
                         } catch let e {
-                            error = .message(e.localizedDescription)
+                            error = DataFetchError.message(e.localizedDescription)
                         }
                     } else if let e {
-                        error = .message(e.localizedDescription)
+                        error = DataFetchError.message(e.localizedDescription)
                     } else {
                         error = DataFetchError.message("Unable to retrieve data, unknown error")
                     }

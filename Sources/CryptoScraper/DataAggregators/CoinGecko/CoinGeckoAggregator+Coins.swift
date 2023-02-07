@@ -6,13 +6,13 @@
 import Foundation
 
 public extension CoinGeckoAggregator {
-    /// Returns **true** if the site is responding
+    /// Returns the coins known to the aggregator
     func listCoins() async throws -> [CryptoInfo] {
         let response: [CoinResponse] = try await Self.endPoint
             .appending(path: "coins/list")
             .appending(
                 queryItems: CoinsResponse.httpQuery()
-            ).fetch()
+            ).fetch(errorType: CoinGeckoError.self)
 
         return try response.coins()
     }

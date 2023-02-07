@@ -4,7 +4,15 @@
 //
 
 public struct CryptoScraper {
-    public private(set) var text = "Hello, World!"
 
-    public init() {}
+    private static var defaultAggregator: CryptoDataAggregator {
+        CoinGeckoAggregator()
+    }
+
+    /// Initializes the block chains
+    public static func initialize(dataAggregator: CryptoDataAggregator? = nil) async throws {
+        let dataAggregator = dataAggregator ?? defaultAggregator
+
+        try await BlockChains.initializeChains(dataAggregator: dataAggregator)
+    }
 }

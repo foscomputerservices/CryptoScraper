@@ -10,6 +10,15 @@ extension URL {
         try await (dataFetch ?? FoundationDataFetch.default).fetch(self)
     }
 
+    /// Fetches the given data of type ``ResultValue`` from the given ``URL``
+    ///
+    /// - Parameters:
+    ///   - dataFetch: An optional implementation of ``FoundationDataFetch`` to use to retrieve the data
+    ///   - errorType: An ``Error`` type to attempt to decode returned data as an error if unable to decode as ``ResultValue``
+    func fetch<ResultValue: Decodable>(_ dataFetch: FoundationDataFetch? = nil, errorType: (some Decodable & Error).Type) async throws -> ResultValue {
+        try await (dataFetch ?? FoundationDataFetch.default).fetch(self, errorType: errorType)
+    }
+
     // These are replacements for the macOS 13 only api
     func appending(queryItems: [URLQueryItem]) -> URL {
         URL(string: absoluteString + queryItems.queryStr)!
