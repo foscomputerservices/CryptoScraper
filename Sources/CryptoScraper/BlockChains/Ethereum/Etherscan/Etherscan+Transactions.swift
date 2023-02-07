@@ -10,7 +10,7 @@ public extension Etherscan {
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
     func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction] {
-        let response: TransactionResponse = try await Self.endPiont.appending(
+        let response: TransactionResponse = try await Self.endPoint.appending(
             queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.apiKey)
         ).fetch()
 

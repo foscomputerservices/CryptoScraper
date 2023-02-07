@@ -8,9 +8,16 @@ import Foundation
 import FoundationNetworking
 #endif
 
-enum DataFetchError: Error {
+public enum DataFetchError: Error {
     case message(_ message: String)
     case badStatus(_ httpStatusCode: Int)
+
+    public var localizedDescription: String {
+        switch self {
+        case .message(let message): return message
+        case .badStatus(let code): return "Status code: \(code)"
+        }
+    }
 }
 
 final class FoundationDataFetch {
@@ -50,6 +57,8 @@ final class FoundationDataFetch {
                             } else {
                                 result = try data.fromJSON()
                             }
+                        } catch let e as DecodingError {
+                            error = .message(e.localizedDescription)
                         } catch let e {
                             error = .message(e.localizedDescription)
                         }

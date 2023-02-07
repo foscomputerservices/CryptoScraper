@@ -6,7 +6,7 @@
 import Foundation
 
 public struct Etherscan: CryptoScanner {
-    static let endPiont: URL = .init(string: "https://api.etherscan.io/api")!
+    static let endPoint: URL = .init(string: "https://api.etherscan.io/api")!
 
     static var apiKey: String {
         guard let key = ProcessInfo.processInfo.environment["ETHER_SCAN_KEY"] else {
@@ -15,6 +15,8 @@ public struct Etherscan: CryptoScanner {
 
         return key
     }
+
+    public let userReadableName: String = "Coin Gecko"
 
     public init() {}
 }

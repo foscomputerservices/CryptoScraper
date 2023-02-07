@@ -10,7 +10,7 @@ public extension Etherscan {
     ///
     /// - Parameter account: The Ethereum account to query the balance for
     func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
-        let response: AccountResponse = try await Self.endPiont.appending(
+        let response: AccountResponse = try await Self.endPoint.appending(
             queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.apiKey)
         ).fetch()
 

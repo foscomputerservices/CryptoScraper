@@ -10,9 +10,13 @@ extension URL {
         try await (dataFetch ?? FoundationDataFetch.default).fetch(self)
     }
 
-    // This is a replacement for the macOS 13 only api
-    public func appending(queryItems: [URLQueryItem]) -> URL {
+    // These are replacements for the macOS 13 only api
+    func appending(queryItems: [URLQueryItem]) -> URL {
         URL(string: absoluteString + queryItems.queryStr)!
+    }
+
+    func appending(path: some StringProtocol) -> URL {
+        appendingPathComponent(String(path))
     }
 }
 
