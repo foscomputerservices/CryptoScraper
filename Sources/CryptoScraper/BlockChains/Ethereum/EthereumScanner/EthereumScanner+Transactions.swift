@@ -1,17 +1,17 @@
-// Etherscan+Transactions.swift
+// EthereumScanner+Transactions.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension Etherscan {
+public extension EthereumScanner {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
     func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction] {
         let response: TransactionResponse = try await Self.endPoint.appending(
-            queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.apiKey)
+            queryItems: TransactionResponse.httpQuery(address: account, apiKey: try Self.requireApiKey())
         ).fetch()
 
         return try response.cryptoTransactions(ethContract: account.chain.mainContract)
@@ -29,7 +29,7 @@ private struct TransactionResponse: Decodable {
 
     func cryptoTransactions(ethContract: CryptoContract) throws -> [CryptoTransaction] {
         guard success else {
-            throw EtherscanResponseError.requestFailed("<Unknown Error>")
+            throw EthereumScannerResponseError.requestFailed("<Unknown Error>")
         }
 
         return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
@@ -104,7 +104,7 @@ private struct Transaction: Decodable {
                 ? .init(quantity: 0, contract: ethContract)
                 : .init(quantity: amount!, contract: ethContract)
             guard let timestamp = TimeInterval(transaction.timeStamp) else {
-                throw EtherscanResponseError.invalidData(
+                throw EthereumScannerResponseError.invalidData(
                     type: "Transaction",
                     field: "timestamp",
                     value: transaction.timeStamp
