@@ -34,7 +34,6 @@ extension EthereumScanner {
 }
 
 public enum EthereumScannerResponseError: Error {
-
     /// The request failed for some unknown reason, see *error*
     case requestFailed(_ error: String)
 

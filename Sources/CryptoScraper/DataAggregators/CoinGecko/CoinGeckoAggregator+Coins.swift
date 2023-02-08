@@ -115,9 +115,10 @@ private extension String {
         case "ethereum": return .ethereum
         case "fantom": return .fantom
         case "binance-smart-chain": return .binance
+        case "polygon-pos": return .polygon
 
         // TODO: Unsupported chains
-        case "polygon-pos", "tron", "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
+        case "tron", "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
              "tomochain", "cronos", "energi", "moonriver", "optimistic-ethereum", "solana", "zilliqa", "icon",
              "astar", "cube", "neo", "telos", "oasis", "tezos", "aurora", "yocoin", "bitgert", "dogechain",
              "harmony-shard-0", "stellar", "huobi-token", "bitkub-chain", "sora", "xdai",

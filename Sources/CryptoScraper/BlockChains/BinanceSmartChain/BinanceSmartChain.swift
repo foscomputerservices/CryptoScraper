@@ -29,11 +29,17 @@ public final class BinanceSmartChain: CryptoChain {
 
     private init() {
         self.chainCryptos = []
-        self.scanners = [
-            BscScan()
-        ]
+        self.scanners = Self.configuredScanners
 
         self.mainContract = BNBContract(address: Self.bnbContractAddress, chain: self)
+    }
+
+    private static var configuredScanners: [CryptoScanner] {
+        var result = [CryptoScanner]()
+
+        if BscScan.serviceConfigured { result.append(BscScan()) }
+
+        return result
     }
 }
 

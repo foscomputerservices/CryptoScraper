@@ -14,6 +14,7 @@ final class BlockChainsTests: XCTestCase {
             XCTAssertGreaterThan(EthereumChain.default.chainCryptos.count, 4500)
             XCTAssertGreaterThan(FantomChain.default.chainCryptos.count, 300)
             XCTAssertGreaterThan(BinanceSmartChain.default.chainCryptos.count, 4700)
+            XCTAssertGreaterThan(PolygonChain.default.chainCryptos.count, 900)
         } catch let e as CoinGeckoError {
             if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)
