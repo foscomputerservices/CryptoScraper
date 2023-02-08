@@ -14,6 +14,8 @@ jobs:
       FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
       BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
       BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
+      POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
+      POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
 
     steps:
      - uses: actions/checkout@v2
@@ -31,6 +33,8 @@ jobs:
       FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
       BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
       BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
+      POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
+      POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
 
     steps:
      - uses: actions/checkout@v2
