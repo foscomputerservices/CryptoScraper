@@ -1,14 +1,14 @@
-// FantomChain.swift
+// PolygonChain.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public final class FantomChain: CryptoChain {
+public final class PolygonChain: CryptoChain {
     // MARK: CryptoChain
 
-    public let userReadableName: String = "Fantom"
+    public let userReadableName: String = "Matic"
     public let scanners: [CryptoScanner]
     public private(set) var chainCryptos: [CryptoInfo]
     public private(set) var mainContract: CryptoContract!
@@ -20,29 +20,29 @@ public final class FantomChain: CryptoChain {
     }
 
     public func contract(for address: String) throws -> CryptoContract {
-        FantomContract(address: address)
+        MaticContract(address: address)
     }
 
-    static let ftmContractAddress = "FTM"
+    static let maticContractAddress = "Matic"
 
-    public static let `default`: FantomChain = .init()
+    public static let `default`: PolygonChain = .init()
 
     private init() {
         self.chainCryptos = []
         self.scanners = Self.configuredScanners
 
-        self.mainContract = FantomContract(address: Self.ftmContractAddress, chain: self)
+        self.mainContract = MaticContract(address: Self.maticContractAddress, chain: self)
     }
 
     private static var configuredScanners: [CryptoScanner] {
         var result = [CryptoScanner]()
 
-        if FTMScan.serviceConfigured { result.append(FTMScan()) }
+        if PolygonScan.serviceConfigured { result.append(PolygonScan()) }
 
         return result
     }
 }
 
-public extension CryptoChain where Self == FantomChain {
-    static var fantom: FantomChain { .default }
+public extension CryptoChain where Self == PolygonChain {
+    static var polygon: PolygonChain { .default }
 }
