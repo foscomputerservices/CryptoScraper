@@ -5,35 +5,13 @@
 
 import Foundation
 
-public struct Etherscan: CryptoScanner {
-    static let endPoint: URL = .init(string: "https://api.etherscan.io/api")!
+/// A ``CryptoScanner`` implementation for the Etherscan web service
+public struct Etherscan: EthereumScanner {
+    // MARK: EthereumScanner Protocol
 
-    static var apiKey: String {
-        guard let key = ProcessInfo.processInfo.environment["ETHER_SCAN_KEY"] else {
-            fatalError("ETHER_SCAN_KEY is not set in the environment")
-        }
-
-        return key
-    }
-
+    public static let endPoint: URL = .init(string: "https://api.etherscan.io/api")!
+    public static let apiKeyName: String = "ETHER_SCAN_KEY"
     public let userReadableName: String = "Etherscan"
 
     public init() {}
-}
-
-public enum EtherscanResponseError: Error {
-    case requestFailed(_ error: String)
-    case invalidAmount
-    case invalidData(type: String, field: String, value: String)
-
-    public var localizedDescription: String {
-        switch self {
-        case .requestFailed(let message):
-            return message
-        case .invalidAmount:
-            return "Invalid amount"
-        case .invalidData(let type, let field, let value):
-            return "Invalid field data '\(value)' for \(type):\(field)"
-        }
-    }
 }

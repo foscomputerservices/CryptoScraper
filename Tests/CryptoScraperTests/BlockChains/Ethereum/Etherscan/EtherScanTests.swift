@@ -18,9 +18,10 @@ final class EtherScanTests: XCTestCase {
     // User account contract
     let accountContract = EthereumContract(address: EtherScanTests.ethContractAddress)
 
-    func testGetAccountBalance() async throws {
-        let etherScan = Etherscan()
+    private static let etherScan = Etherscan()
+    private var etherScan: Etherscan { EtherScanTests.etherScan }
 
+    func testGetAccountBalance() async throws {
         let balance = try await etherScan.getBalance(forAccount: accountContract)
         XCTAssertGreaterThan(balance.quantity, 0)
 
@@ -29,35 +30,32 @@ final class EtherScanTests: XCTestCase {
     }
 
     func testGetTransactions() async throws {
-        let etherScan = Etherscan()
-
         let transactions = try await etherScan.getTransactions(forAccount: accountContract)
         XCTAssertGreaterThan(transactions.count, 0)
     }
 
     func testGetTokenBalance_ETH() async throws {
-        let etherScan = Etherscan()
         let ethToken = accountContract.chain.mainContract!
 
         do {
             let ethBalance = try await etherScan.getBalance(forToken: ethToken, forAccount: accountContract)
             XCTAssertGreaterThan(ethBalance.quantity, 0)
             print("*** Ethereum balance \(ethBalance.quantity)")
-        } catch let e as EtherscanResponseError {
+        } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
         }
     }
 
     func testGetTokenBalance_RLC() async throws {
-        let etherScan = Etherscan()
         let rlcToken = EthereumContract(address: "0x607F4C5BB672230e8672085532f7e901544a7375")
 
         do {
             let ethBalance = try await etherScan.getBalance(forToken: rlcToken, forAccount: accountContract)
             XCTAssertGreaterThan(ethBalance.quantity, 0)
+            XCTAssertEqual(ethBalance.contract.address, rlcToken.address)
             print("*** Ethereum balance \(ethBalance.quantity)")
-        } catch let e as EtherscanResponseError {
+        } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
         }

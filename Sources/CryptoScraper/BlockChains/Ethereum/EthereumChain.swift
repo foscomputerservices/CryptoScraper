@@ -29,11 +29,17 @@ public final class EthereumChain: CryptoChain {
 
     private init() {
         self.chainCryptos = []
-        self.scanners = [
-            Etherscan()
-        ]
+        self.scanners = Self.configuredScanners
 
         self.mainContract = EthereumContract(address: Self.ethContractAddress, chain: self)
+    }
+
+    private static var configuredScanners: [CryptoScanner] {
+        var result = [CryptoScanner]()
+
+        if Etherscan.serviceConfigured { result.append(Etherscan()) }
+
+        return result
     }
 }
 

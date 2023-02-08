@@ -1,11 +1,11 @@
-// Etherscan+Tokens.swift
+// EthereumScanner+Tokens.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension Etherscan {
+public extension EthereumScanner {
     /// Returns balance of the given token for the given address
     ///
     /// - Parameters:
@@ -17,7 +17,7 @@ public extension Etherscan {
             return try await getBalance(forAccount: account)
         } else {
             let response: TokenBalanceResponse = try await Self.endPoint.appending(
-                queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: Self.apiKey)
+                queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: try Self.requireApiKey())
             ).fetch()
 
             return try response.cryptoBalance(forToken: contract, ethContract: account.chain.mainContract)
@@ -32,7 +32,7 @@ public extension Etherscan {
     ///   - contract: The contract of the token to query
     func getInfo(forToken contract: CryptoContract) async throws -> CryptoInfo {
         let response: TokenInfoResponse = try await Self.endPoint.appending(
-            queryItems: TokenInfoResponse.httpQuery(forToken: contract, apiKey: Self.apiKey)
+            queryItems: TokenInfoResponse.httpQuery(forToken: contract, apiKey: try Self.requireApiKey())
         ).fetch()
 
         return try response.cryptoInfo()
@@ -50,10 +50,10 @@ private struct TokenBalanceResponse: Decodable {
 
     func cryptoBalance(forToken: CryptoContract, ethContract: CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw EtherscanResponseError.requestFailed(result)
+            throw EthereumScannerResponseError.requestFailed(result)
         }
         guard let amount = UInt128(result) else {
-            throw EtherscanResponseError.invalidAmount
+            throw EthereumScannerResponseError.invalidAmount
         }
 
         return .init(quantity: amount, contract: forToken)
@@ -81,7 +81,7 @@ private struct TokenInfoResponse: Decodable {
 
     func cryptoInfo() throws -> CryptoInfo {
         guard success, let tokenInfo = result.first else {
-            throw EtherscanResponseError.requestFailed("<< Unknown Error >>")
+            throw EthereumScannerResponseError.requestFailed("<< Unknown Error >>")
         }
 
         return tokenInfo.cryptoInfo()

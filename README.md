@@ -20,9 +20,9 @@ To begin api keys need to be set in order to access various services.  These key
 
 | Service | Environment Variable | Required |
 |----------------- | ----------------- | -------- |
-| [Etherscan](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | ETHER_SCAN_KEY | Yes | 
-| [Fantom](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | FTM_SCAN_KEY | Yes |
-| [BinanceSmartChain](https://docs.bscscan.com/getting-started/viewing-api-usage-statistics) | BSC_SCAN_KEY | Yes | 
+| [Etherscan](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | ETHER_SCAN_KEY | No | 
+| [Fantom](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics#creating-an-api-key) | FTM_SCAN_KEY | No |
+| [BinanceSmartChain](https://docs.bscscan.com/getting-started/viewing-api-usage-statistics) | BSC_SCAN_KEY | No | 
 | [CoinGecko](https://www.coingecko.com/en/api) | ETHER_SCAN_KEY| Yes | 
 
 To begin using the framework call the initialization method to initialize the block chains with their contract data.

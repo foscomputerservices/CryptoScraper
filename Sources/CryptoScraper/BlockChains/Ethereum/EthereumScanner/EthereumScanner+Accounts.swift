@@ -1,17 +1,17 @@
-// BscScan+Accounts.swift
+// EthereumScanner+Accounts.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
 import Foundation
 
-public extension BscScan {
-    /// Returns the balance (in BNB) of the given account
+public extension EthereumScanner {
+    /// Returns the balance (in Ethereum) of the given account
     ///
-    /// - Parameter account: The Bsc account to query the balance for
+    /// - Parameter account: The Ethereum account to query the balance for
     func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
         let response: AccountResponse = try await Self.endPoint.appending(
-            queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.apiKey)
+            queryItems: AccountResponse.httpQuery(account: account, apiKey: try Self.requireApiKey())
         ).fetch()
 
         return try response.cryptoAmount(forAccount: account.chain.mainContract)
@@ -27,19 +27,19 @@ private struct AccountResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoAmount(forAccount bnbContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount ethContract: CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw BscScanResponseError.requestFailed(result)
+            throw EthereumScannerResponseError.requestFailed(result)
         }
 
         guard let amount = UInt128(result) else {
-            throw BscScanResponseError.invalidAmount
+            throw EthereumScannerResponseError.invalidAmount
         }
 
-        return .init(quantity: amount, contract: bnbContract)
+        return .init(quantity: amount, contract: ethContract)
     }
 
-    // https://docs.bscscan.com/api-endpoints/accounts#get-bnb-balance-for-a-single-address
+    // https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address
     static func httpQuery(account: CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "balance"),
