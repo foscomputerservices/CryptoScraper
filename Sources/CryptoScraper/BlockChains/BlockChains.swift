@@ -17,6 +17,7 @@ enum BlockChains {
 
         let coins = try await dataAggregator.listCoins()
 
+        BitcoinChain.default.loadChainCryptos(from: coins)
         EthereumChain.default.loadChainCryptos(from: coins)
         FantomChain.default.loadChainCryptos(from: coins)
         BinanceSmartChain.default.loadChainCryptos(from: coins)

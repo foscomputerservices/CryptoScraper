@@ -7,7 +7,7 @@ import CryptoScraper
 import XCTest
 
 final class OptimisticEtherscanTests: XCTestCase {
-    static let optContractAddress: String = {
+    private static let optContractAddress: String = {
         guard let address = ProcessInfo.processInfo.environment["OPTIMISTIC_TEST_CONTRACT_ADDRESS"] else {
             fatalError("Environment OPTIMISTIC_TEST_CONTRACT_ADDRESS is not set")
         }

@@ -1,6 +1,6 @@
 # CryptoScraper
 
-![Run unit tests](https://github.com/foscomputerservices/CryptoScraper/actions/workflows/ci.yml/badge.svg) ![Swift 5.7+](https://img.shields.io/badge/swift-5.7+-brightgreen.svg) ![Swift Package Manager](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat)
+![Run unit tests](https://github.com/foscomputerservices/CryptoScraper/actions/workflows/ci.yml/badge.svg) ![Swift Package Manager](https://img.shields.io/badge/spm-compatible-brightgreen.svg?style=flat) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffoscomputerservices%2FCryptoScraper%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/foscomputerservices/CryptoScraper) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffoscomputerservices%2FCryptoScraper%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/foscomputerservices/CryptoScraper)
 
 CryptoScraper is a package for generalizing the retrieval of information from crypto block chains.
 
@@ -41,6 +41,7 @@ In order for testing to succeed, a test contract is needed for each chain.  Thes
 
 | Service | Environment Variable |
 | --------------- | -------------------- |
+| Bitcoin | BTC_TEST_CONTRACT_ADDRESS |
 | Ethereum | ETH_TEST_CONTRACT_ADDRESS |
 | Fantom | FTM_TEST_CONTRACT_ADDRESS |
 | BNB | BSC_TEST_CONTRACT_ADDRESS |
