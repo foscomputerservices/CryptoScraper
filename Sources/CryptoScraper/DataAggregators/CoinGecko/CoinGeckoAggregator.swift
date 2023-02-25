@@ -18,8 +18,10 @@ public struct CoinGeckoAggregator: CryptoDataAggregator {
         return .init(string: "http://api.coingecko.com/api/v3")!
     }()
 
+    private static var _apiKey: String?
     static var apiKey: String? {
-        ProcessInfo.processInfo.environment["COIN_GECKO_KEY"]
+        get { _apiKey ?? ProcessInfo.processInfo.environment["COIN_GECKO_KEY"] }
+        set { _apiKey = newValue }
     }
 
     public init() {}
