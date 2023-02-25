@@ -13,5 +13,11 @@ public struct OptimisticEtherscan: EthereumScanner {
     public static let apiKeyName: String = "OPTIMISTIC_ETHER_SCAN_KEY"
     public let userReadableName: String = "OptimisticEtherscan"
 
+    private static var _apiKey: String?
+    public static var apiKey: String? {
+        get { _apiKey ?? ProcessInfo.processInfo.environment[apiKeyName] }
+        set { _apiKey = newValue }
+    }
+
     public init() {}
 }
