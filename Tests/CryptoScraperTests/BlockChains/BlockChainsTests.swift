@@ -11,7 +11,7 @@ final class BlockChainsTests: XCTestCase {
         do {
             try await BlockChains.initializeChains(dataAggregator: CoinGeckoAggregator())
 
-            XCTAssertGreaterThan(BitcoinChain.default.chainCryptos.count, 1)
+            XCTAssertEqual(BitcoinChain.default.chainCryptos.count, 1)
             XCTAssertGreaterThan(EthereumChain.default.chainCryptos.count, 4500)
             XCTAssertGreaterThan(FantomChain.default.chainCryptos.count, 300)
             XCTAssertGreaterThan(BinanceSmartChain.default.chainCryptos.count, 3000)
