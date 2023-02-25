@@ -62,7 +62,7 @@ final class FoundationDataFetch {
                             }
                         } catch let e as DecodingError {
                             guard errorType != DummyError.self, let errorResult: ResultError? = try? data.fromJSON() else {
-                                error = DataFetchError.message(e.localizedDescription)
+                                continuation.resume(throwing: DataFetchError.message(e.localizedDescription))
                                 return
                             }
 

@@ -7,7 +7,7 @@ import CryptoScraper
 import XCTest
 
 final class EtherScanTests: XCTestCase {
-    static let ethContractAddress: String = {
+    private static let ethContractAddress: String = {
         guard let address = ProcessInfo.processInfo.environment["ETH_TEST_CONTRACT_ADDRESS"] else {
             fatalError("Environment ETH_TEST_CONTRACT_ADDRESS is not set")
         }

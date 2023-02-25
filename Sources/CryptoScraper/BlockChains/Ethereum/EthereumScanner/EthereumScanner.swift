@@ -21,23 +21,6 @@ public protocol EthereumScanner: CryptoScanner {
 
     /// A unique, but user-readable name for the scanner (e.g. Etherscan, BscScan, etc.)
     var userReadableName: String { get }
-
-    /// Returns the balance of the given account
-    ///
-    /// - Parameter account: The ``CryptoContract`` account to query the balance for
-    func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount
-
-    /// Returns balance of the given token for a given account
-    ///
-    /// - Parameters:
-    ///   - contract: The ``CryptoContract`` of the token to query
-    ///   - address: The ``CryptoContract`` address that holds the token
-    func getBalance(forToken contract: CryptoContract, forAccount account: CryptoContract) async throws -> CryptoAmount
-
-    /// Retrieves the ``CryptoTransaction``s for the given contract
-    ///
-    /// - Parameter account: The ``CryptoContract`` from which to retrieve the transactions
-    func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction]
 }
 
 extension EthereumScanner {
