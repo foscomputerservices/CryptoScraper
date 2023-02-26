@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// Provides standardized meta-data using [Coin Market Cap's REST API](https://coinmarketcap.com/api)
 public struct CoinMarketCapAggregator: CryptoDataAggregator {
     public let userReadableName: String = "CoinMarketCap"
 

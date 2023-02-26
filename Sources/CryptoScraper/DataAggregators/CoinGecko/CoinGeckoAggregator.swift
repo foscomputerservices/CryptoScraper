@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// Provides standardized meta-data using [Coin Gecko's REST APIs](https://www.coingecko.com/en/api)
 public struct CoinGeckoAggregator: CryptoDataAggregator {
     public let userReadableName: String = "Coin Gecko"
 
