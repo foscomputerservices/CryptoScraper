@@ -27,27 +27,61 @@ final class FoundationDataFetch {
 
     static let `default`: FoundationDataFetch = .init(urlSession: FoundationDataFetch.UrlSession())
 
-    func fetch<ResultValue: Decodable>(_ url: URL) async throws -> ResultValue {
-        try await fetch(url.absoluteString, errorType: DummyError.self)
+    /// Fetches the given data of type ``ResultValue`` from the given ``URL``
+    ///
+    /// - Parameters:
+    ///   - url: The ``URL`` that identifies the source of the data
+    ///   - headers: Any extra HTTP headers that need to be sent with the request
+    ///
+    /// - Note: The following headers are automatically sent to all requests:
+    ///
+    ///  | Key | Value |
+    ///  | ---------------------- | ---------------------------------- |
+    ///  | Accept | application/json;charset=utf-8 |
+    ///  | Accept-Encoding | application/json;charset=utf-8 |
+    ///  | Content-Type | application/json;charset=utf-8 |
+    func fetch<ResultValue: Decodable>(_ url: URL, headers: [(field: String, value: String)]?) async throws -> ResultValue {
+        try await fetch(url.absoluteString, headers: headers, errorType: DummyError.self)
     }
 
     /// Fetches the given data of type ``ResultValue`` from the given ``URL``
     ///
     /// - Parameters:
     ///   - url: The ``URL`` that identifies the source of the data
+    ///   - headers: Any extra HTTP headers that need to be sent with the request
     ///   - errorType: An ``Error`` type to attempt to decode returned data as an error if unable to decode as ``ResultValue``
-    func fetch<ResultValue: Decodable>(_ url: URL, errorType: (some Decodable & Error).Type) async throws -> ResultValue {
-        try await fetch(url.absoluteString, errorType: errorType)
+    ///
+    /// - Note: The following headers are automatically sent to all requests:
+    ///
+    ///  | Key | Value |
+    ///  | ---------------------- | ---------------------------------- |
+    ///  | Accept | application/json;charset=utf-8 |
+    ///  | Accept-Encoding | application/json;charset=utf-8 |
+    ///  | Content-Type | application/json;charset=utf-8 |
+    func fetch<ResultValue: Decodable>(_ url: URL, headers: [(field: String, value: String)]?, errorType: (some Decodable & Error).Type) async throws -> ResultValue {
+        try await fetch(url.absoluteString, headers: headers, errorType: errorType)
     }
 
-    private func fetch<ResultValue: Decodable, ResultError: Decodable & Error>(_ urlStr: String, errorType: ResultError.Type) async throws -> ResultValue {
+    private func fetch<ResultValue: Decodable, ResultError: Decodable & Error>(_ urlStr: String, headers: [(field: String, value: String)]?, errorType: ResultError.Type) async throws -> ResultValue {
         guard let url = URL(string: urlStr) else {
             throw DataFetchError.message("Unable to convert \(urlStr) to URL???")
         }
 
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "Get"
+        urlRequest.setValue("application/json;charset=utf-8", forHTTPHeaderField: "Accept")
+        urlRequest.setValue("application/json;charset=utf-8", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("deflate, gzip", forHTTPHeaderField: "Accept-Encoding")
+
+        if let headers {
+            for header in headers {
+                urlRequest.setValue(header.value, forHTTPHeaderField: header.field)
+            }
+        }
+
         return try await withCheckedThrowingContinuation { continuation in
             urlSession
-                .dataTask(with: url) { data, _, e in
+                .dataTask(with: urlRequest) { data, _, e in
                     var result: ResultValue?
                     var error: Error?
 
@@ -86,7 +120,7 @@ final class FoundationDataFetch {
         }
     }
 
-    func send<ResultValue: Decodable>(data: Data, to urlStr: String, httpMethod: String, callback: @escaping (Result<ResultValue, DataFetchError>) -> Void) {
+    func send<ResultValue: Decodable>(data: Data, to urlStr: String, httpMethod: String, headers: [(field: String, value: String)]?, callback: @escaping (Result<ResultValue, DataFetchError>) -> Void) {
         guard let url = URL(string: urlStr) else {
             callback(.failure(.message("Unable to convert \(urlStr) to URL???")))
             return
@@ -96,6 +130,13 @@ final class FoundationDataFetch {
         urlRequest.httpMethod = httpMethod
         urlRequest.httpBody = data
         urlRequest.setValue("application/json;charset=utf-8", forHTTPHeaderField: "Content-Type")
+        urlRequest.setValue("deflate, gzip", forHTTPHeaderField: "Accept-Encoding")
+
+        if let headers {
+            for header in headers {
+                urlRequest.setValue(header.value, forHTTPHeaderField: header.field)
+            }
+        }
 
         urlSession
             .dataTask(with: urlRequest) { data, response, error in

@@ -6,10 +6,17 @@
 import Foundation
 
 public struct CoinGeckoAggregator: CryptoDataAggregator {
-    // MARK: CryptoChain
-
     public let userReadableName: String = "Coin Gecko"
 
+    /// Returns **true** if the aggregator is configured correctly
+    ///
+    /// NOTE: This value has *nothing* to do with online availability.
+    public static var isAvailable: Bool { apiKey != nil }
+
+    public init() {}
+}
+
+extension CoinGeckoAggregator {
     static let endPoint: URL = {
         if let apiKey {
             return .init(string: "https://pro-api.coingecko.com/api/v3")!
@@ -23,6 +30,4 @@ public struct CoinGeckoAggregator: CryptoDataAggregator {
         get { _apiKey ?? ProcessInfo.processInfo.environment["COIN_GECKO_KEY"] }
         set { _apiKey = newValue }
     }
-
-    public init() {}
 }

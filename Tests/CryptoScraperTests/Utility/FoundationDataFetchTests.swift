@@ -11,7 +11,7 @@ final class FoundationDataFetchTests: XCTestCase {
         let url = URL(string: "https://google.com")!
         let dataFetch = FoundationDataFetch.default
 
-        let result: String? = try await dataFetch.fetch(url)
+        let result: String? = try await dataFetch.fetch(url, headers: nil)
 
         XCTAssertNotNil(result)
         guard let result else { return }

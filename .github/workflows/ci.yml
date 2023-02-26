@@ -8,6 +8,7 @@ jobs:
   run_tests:
     runs-on: macos-12
     env:
+      COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
       BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
       ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
       ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
@@ -30,6 +31,7 @@ jobs:
     runs-on: macos-12
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
       BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
       ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
       ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
