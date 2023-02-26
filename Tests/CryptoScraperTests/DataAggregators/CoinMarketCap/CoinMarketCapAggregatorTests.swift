@@ -1,4 +1,4 @@
-// CoinGeckoAggregatorTests.swift
+// CoinMarketCapAggregatorTests.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
@@ -6,23 +6,16 @@
 import CryptoScraper
 import XCTest
 
-final class CoinGeckoAggregatorTests: XCTestCase {
-    func testIsAlive() async throws {
-        let aggregator = CoinGeckoAggregator()
-
-        let status = await aggregator.isAlive()
-        XCTAssertTrue(status)
-    }
-
+final class CoinMarketCapAggregatorTests: XCTestCase {
     func testListCoins() async throws {
-        let aggregator = CoinGeckoAggregator()
+        let aggregator = CoinMarketCapAggregator()
 
         do {
             let coins = try await aggregator.listCoins()
-            XCTAssertGreaterThan(coins.count, 10500)
+            XCTAssertGreaterThan(coins.count, 6200)
         } catch let e as DataFetchError {
             XCTFail(e.localizedDescription)
-        } catch let e as CoinGeckoError {
+        } catch let e as CoinMarketCapError {
             if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)
             }

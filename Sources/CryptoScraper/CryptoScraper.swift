@@ -10,6 +10,8 @@ public enum CryptoScraper {
     }
 
     /// Initializes the block chains
+    ///
+    /// - Note: The default ``CryptoDataAggregator`` is ``CoinGeckoAggregator``
     public static func initialize(dataAggregator: CryptoDataAggregator? = nil) async throws {
         let dataAggregator = dataAggregator ?? defaultAggregator
 

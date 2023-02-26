@@ -27,4 +27,25 @@ final class BlockChainsTests: XCTestCase {
             }
         }
     }
+
+    func testInitialize_CoinMarketCap() async throws {
+        do {
+            try await BlockChains.initializeChains(dataAggregator: CoinMarketCapAggregator())
+
+            XCTAssertEqual(BitcoinChain.default.chainCryptos.count, 1)
+            XCTAssertGreaterThan(EthereumChain.default.chainCryptos.count, 3200)
+            XCTAssertGreaterThan(FantomChain.default.chainCryptos.count, 90)
+            XCTAssertGreaterThan(BinanceSmartChain.default.chainCryptos.count, 2800)
+            XCTAssertGreaterThan(PolygonChain.default.chainCryptos.count, 200)
+            XCTAssertGreaterThan(OptimismChain.default.chainCryptos.count, 10)
+        } catch let e as CoinMarketCapError {
+            if !e.rateLimitReached {
+                XCTFail(e.localizedDescription)
+            } else {
+                print("******************************************")
+                print("*** Unable to test, rate-limit reached ***")
+                print("******************************************")
+            }
+        }
+    }
 }

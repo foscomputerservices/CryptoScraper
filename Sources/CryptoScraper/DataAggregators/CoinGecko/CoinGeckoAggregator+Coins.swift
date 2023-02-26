@@ -39,23 +39,23 @@ private struct CoinResponse: Decodable {
         let contractAddress: CryptoContract
         let tokenName: String
         let symbol: String
-        let tokenType: String?
-        let totalSupply: CryptoAmount?
-        let blueCheckmark: Bool?
-        let description: String?
-        let website: URL?
-        let email: String?
-        let blog: URL?
-        let reddit: URL?
-        let slack: String?
-        let facebook: URL?
-        let twitter: URL?
-        let gitHub: URL?
-        let telegram: URL?
-        let wechat: URL?
-        let linkedin: URL?
-        let discord: URL?
-        let whitepaper: URL?
+        let tokenType: String? = nil
+        let totalSupply: CryptoAmount? = nil
+        let blueCheckmark: Bool? = nil
+        let description: String? = nil
+        let website: URL? = nil
+        let email: String? = nil
+        let blog: URL? = nil
+        let reddit: URL? = nil
+        let slack: String? = nil
+        let facebook: URL? = nil
+        let twitter: URL? = nil
+        let gitHub: URL? = nil
+        let telegram: URL? = nil
+        let wechat: URL? = nil
+        let linkedin: URL? = nil
+        let discord: URL? = nil
+        let whitepaper: URL? = nil
 
         static func coins(from coinResponse: CoinResponse) throws -> [CryptoInfo] {
             var result = [Coin]()
@@ -76,23 +76,6 @@ private struct CoinResponse: Decodable {
             self.contractAddress = contractAddress
             self.tokenName = coinResponse.name
             self.symbol = coinResponse.symbol
-            self.tokenType = nil
-            self.totalSupply = nil
-            self.blueCheckmark = nil
-            self.description = nil
-            self.website = nil
-            self.email = nil
-            self.blog = nil
-            self.reddit = nil
-            self.slack = nil
-            self.facebook = nil
-            self.twitter = nil
-            self.gitHub = nil
-            self.telegram = nil
-            self.wechat = nil
-            self.linkedin = nil
-            self.discord = nil
-            self.whitepaper = nil
         }
     }
 }
@@ -134,7 +117,7 @@ private extension String {
              "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
              "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
              "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
-             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero":
+             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo":
             return nil
 
         default:
