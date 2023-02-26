@@ -25,7 +25,8 @@ To begin, api keys need to be set in order to access various services.  These ke
 | [BinanceSmartChain](https://docs.bscscan.com/getting-started/viewing-api-usage-statistics) | BSC_SCAN_KEY | No | 
 | [Polygon](https://docs.polygonscan.com/getting-started/viewing-api-usage-statistics) | POLYGON_SCAN_KEY | No |
 | [Optimism](https://docs.optimism.etherscan.io/getting-started/viewing-api-usage-statistics) | OPTIMISTIC_ETHER_SCAN_KEY | No |
-| [CoinGecko](https://www.coingecko.com/en/api) | ETHER_SCAN_KEY| Yes | 
+| [CoinGecko](https://www.coingecko.com/en/api) | COIN_GECKO_KEY| No |
+| [CoinMarketCap](https://www.coingecko.com/en/api) | COIN_MARKETCAP_KEY| No | 
 
 To begin using the framework call the initialization method to initialize the block chains with their contract data.
 

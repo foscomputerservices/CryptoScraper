@@ -23,7 +23,7 @@ CoinGeckoAggregator.apiKey = "<my CoinGecko API key>"
 
 #### Initialize the Library
 
-The final initialization step is to initialize the library.  This will perform a one-time load of token infromation via the ``CryptoDataAggregator``.
+The final initialization step is to initialize the library.  This will perform a one-time load of token information via the ``CryptoDataAggregator``.  This will use the ``CoinGeckoAggregator`` by default.
 
 ```swift
 try await CryptoScraper.initialize()
