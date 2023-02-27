@@ -70,23 +70,6 @@ private struct TokenInfo: CryptoInfo {
     let contractAddress: CryptoContract
     let tokenName: String
     let symbol: String
-    let tokenType: String? = nil
-    let totalSupply: CryptoAmount? = nil
-    let blueCheckmark: Bool? = nil
-    let description: String? = nil
-    let website: URL? = nil
-    let email: String? = nil
-    let blog: URL? = nil
-    let reddit: URL? = nil
-    let slack: String? = nil
-    let facebook: URL? = nil
-    let twitter: URL? = nil
-    let gitHub: URL? = nil
-    let telegram: URL? = nil
-    let wechat: URL? = nil
-    let linkedin: URL? = nil
-    let discord: URL? = nil
-    let whitepaper: URL? = nil
 
     init?(_ response: CurrencyMapItem) throws {
         guard let platform = response.platform, let chain = platform.chain else { return nil }
@@ -134,9 +117,10 @@ private extension String {
         case "BNB": return .binance
         case "Polygon": return .polygon
         case "Optimism": return .optimism
+        case "TRON": return .tron
 
         // TODO: Unsupported chains
-        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "TRON", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra":
+        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra":
             return nil
 
         default:

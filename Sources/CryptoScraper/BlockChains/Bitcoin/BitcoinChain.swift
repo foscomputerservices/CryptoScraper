@@ -48,21 +48,5 @@ private struct BTCCryptoInfo: CryptoInfo {
 
     let tokenName: String = "Bitcoin"
     let symbol: String = "BTC"
-    let tokenType: String? = nil
-    let totalSupply: CryptoAmount? = nil
-    let blueCheckmark: Bool? = nil
-    let description: String? = nil
-    let website: URL? = nil
-    let email: String? = nil
-    let blog: URL? = nil
-    let reddit: URL? = nil
-    let slack: String? = nil
-    let facebook: URL? = nil
-    let twitter: URL? = nil
-    let gitHub: URL? = nil
-    let telegram: URL? = nil
-    let wechat: URL? = nil
-    let linkedin: URL? = nil
-    let discord: URL? = nil
     let whitepaper: URL? = URL(string: "https://bitcoin.org/en/bitcoin-paper")!
 }
