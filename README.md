@@ -48,6 +48,7 @@ In order for testing to succeed, a test contract is needed for each chain.  Thes
 | BNB | BSC_TEST_CONTRACT_ADDRESS |
 | Matic | POLYGON_TEST_CONTRACT_ADDRESS |
 | Optimism | OPTIMISTIC_TEST_CONTRACT_ADDRESS |
+| Tron | TRON_TEST_CONTRACT_ADDRESS |
 
 ## Full Documentation
 

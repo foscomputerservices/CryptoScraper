@@ -17,6 +17,7 @@ final class BlockChainsTests: XCTestCase {
             XCTAssertGreaterThan(BinanceSmartChain.default.chainCryptos.count, 3000)
             XCTAssertGreaterThan(PolygonChain.default.chainCryptos.count, 900)
             XCTAssertGreaterThan(OptimismChain.default.chainCryptos.count, 80)
+            XCTAssertGreaterThan(TronChain.default.chainCryptos.count, 120)
         } catch let e as CoinGeckoError {
             if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)
@@ -38,6 +39,7 @@ final class BlockChainsTests: XCTestCase {
             XCTAssertGreaterThan(BinanceSmartChain.default.chainCryptos.count, 2800)
             XCTAssertGreaterThan(PolygonChain.default.chainCryptos.count, 200)
             XCTAssertGreaterThan(OptimismChain.default.chainCryptos.count, 10)
+            XCTAssertGreaterThan(TronChain.default.chainCryptos.count, 80)
         } catch let e as CoinMarketCapError {
             if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)

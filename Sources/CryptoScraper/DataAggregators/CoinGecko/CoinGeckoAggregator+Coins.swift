@@ -39,23 +39,6 @@ private struct CoinResponse: Decodable {
         let contractAddress: CryptoContract
         let tokenName: String
         let symbol: String
-        let tokenType: String? = nil
-        let totalSupply: CryptoAmount? = nil
-        let blueCheckmark: Bool? = nil
-        let description: String? = nil
-        let website: URL? = nil
-        let email: String? = nil
-        let blog: URL? = nil
-        let reddit: URL? = nil
-        let slack: String? = nil
-        let facebook: URL? = nil
-        let twitter: URL? = nil
-        let gitHub: URL? = nil
-        let telegram: URL? = nil
-        let wechat: URL? = nil
-        let linkedin: URL? = nil
-        let discord: URL? = nil
-        let whitepaper: URL? = nil
 
         static func coins(from coinResponse: CoinResponse) throws -> [CryptoInfo] {
             var result = [Coin]()
@@ -100,9 +83,10 @@ private extension String {
         case "binance-smart-chain": return .binance
         case "polygon-pos": return .polygon
         case "optimistic-ethereum": return .optimism
+        case "tron": return .tron
 
         // TODO: Unsupported chains
-        case "tron", "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
+        case "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
              "tomochain", "cronos", "energi", "moonriver", "solana", "zilliqa", "icon",
              "astar", "cube", "neo", "telos", "oasis", "tezos", "aurora", "yocoin", "bitgert", "dogechain",
              "harmony-shard-0", "stellar", "huobi-token", "bitkub-chain", "sora", "xdai",
