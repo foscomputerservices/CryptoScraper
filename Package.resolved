@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/oscbyspro/AwesomeNumbersKit.git",
       "state" : {
-        "revision" : "c026389b1762bfe75902d3ee5a5c1f1c31404d1a",
-        "version" : "0.3.4"
+        "revision" : "37f07994f9f3555c62378122d72067c994ff2a88",
+        "version" : "0.6.2"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/foscomputerservices/FOSUtilities.git",
       "state" : {
         "branch" : "main",
-        "revision" : "0c9322d1fd556839ca71ad107320995d0c8f984b"
+        "revision" : "485931dd6d3abc2c3716d62d465914af1f4b61b7"
       }
     }
   ],

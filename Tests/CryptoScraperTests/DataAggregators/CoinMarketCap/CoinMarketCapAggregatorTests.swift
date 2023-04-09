@@ -4,8 +4,8 @@
 //
 
 import CryptoScraper
-import FOSTesting
 import FOSFoundation
+import FOSTesting
 import XCTest
 
 final class CoinMarketCapAggregatorTests: XCTestCase {

@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "CryptoScraper",
     platforms: [
-        .macOS(.v13),
+        .macOS(.v12),
         .iOS(.v15)
         // .linux()
     ],
