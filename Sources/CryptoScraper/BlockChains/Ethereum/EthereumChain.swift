@@ -9,37 +9,50 @@ public final class EthereumChain: CryptoChain {
     // MARK: CryptoChain
 
     public let userReadableName: String = "Ethereum"
-    public let scanners: [CryptoScanner]
-    public private(set) var chainCryptos: [CryptoInfo]
-    public private(set) var mainContract: CryptoContract!
 
-    public func loadChainCryptos(from coins: [CryptoInfo]) {
-        chainCryptos = coins.filter { coin in
-            coin.contractAddress.chain.userReadableName == userReadableName
+    public var chainTokenInfos: Set<SimpleTokenInfo<EthereumContract>> {
+        guard let result = tokens?.values else { return [] }
+
+        return .init(result)
+    }
+
+    public private(set) var mainContract: EthereumContract!
+
+    public func contract(for address: String) throws -> EthereumContract {
+        .init(address: address)
+    }
+
+    public func loadChainTokens(from dataAggregator: CryptoDataAggregator) async throws {
+        try await loadChainTokens(
+            from: dataAggregator.tokens(
+                for: EthereumContract.self
+            )
+        )
+    }
+
+    private var tokens: [String: SimpleTokenInfo<EthereumContract>]?
+    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<EthereumContract>>) {
+        tokens = tokens ?? [:]
+
+        for token in newTokens {
+            // I do not understand why the next line is needed 🤷‍♂️
+            let token = token as! SimpleTokenInfo<EthereumContract>
+            tokens![token.contractAddress.address] = token
         }
     }
 
-    public func contract(for address: String) throws -> CryptoContract {
-        EthereumContract(address: address)
+    public func tokenInfo(for address: String) -> SimpleTokenInfo<EthereumContract>? {
+        tokens?[address]
     }
+
+    public let scanner: Etherscan? = .init()
 
     static let ethContractAddress = "ETH"
 
     public static let `default`: EthereumChain = .init()
 
     private init() {
-        self.chainCryptos = []
-        self.scanners = Self.configuredScanners
-
-        self.mainContract = EthereumContract(address: Self.ethContractAddress, chain: self)
-    }
-
-    private static var configuredScanners: [CryptoScanner] {
-        var result = [CryptoScanner]()
-
-        if Etherscan.serviceConfigured { result.append(Etherscan()) }
-
-        return result
+        self.mainContract = EthereumContract(address: Self.ethContractAddress)
     }
 }
 

@@ -9,6 +9,8 @@ import Foundation
 public struct FTMScan: EthereumScanner {
     // MARK: EthereumScanner Protocol
 
+    public typealias Contract = FantomContract
+
     public static let endPoint: URL = .init(string: "https://api.ftmscan.com/api")!
     public static let apiKeyName: String = "FTM_SCAN_KEY"
     public let userReadableName: String = "FTMScan"
@@ -19,5 +21,8 @@ public struct FTMScan: EthereumScanner {
         set { _apiKey = newValue }
     }
 
-    public init() {}
+    /// If ``serviceConfigured`` == *true* returns a new instance
+    public init?() {
+        guard Self.serviceConfigured else { return nil }
+    }
 }

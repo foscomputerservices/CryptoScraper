@@ -52,7 +52,7 @@ In order for testing to succeed, a test contract is needed for each chain.  Thes
 
 ## Full Documentation
 
-For complete documentation, please refer to the DocC documation in Xcode or [here](https://swiftpackageindex.com/foscomputerservices/CryptoScraper) for an online version (see the documentation tab in the top-right).
+For complete documentation, please refer to the DocC documentation in Xcode or [here](https://swiftpackageindex.com/foscomputerservices/CryptoScraper) for an online version (see the documentation tab in the top-right).
 
 ## Contributing
 
@@ -60,7 +60,7 @@ All contributions are welcome!  Please see [CONTRIBUTING.md](https://github.com/
 
 ## Maintainers
 
-This project is maintained by [David Hunt](https://www.linkedin.com/in/davidhun/) owner of [FOS Computerservices, LLC](https://www.linkedin.com/company/1856731).
+This project is maintained by [David Hunt](https://www.linkedin.com/in/davidhun/) owner of [FOS Computer services, LLC](https://www.linkedin.com/company/1856731).
 
 ## License
 

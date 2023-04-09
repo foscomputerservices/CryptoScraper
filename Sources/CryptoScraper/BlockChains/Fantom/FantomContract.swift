@@ -3,9 +3,12 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import FOSFoundation
 import Foundation
 
-public struct FantomContract: CryptoContract {
+public struct FantomContract: CryptoContract, Codable, Stubbable {
+    public typealias Chain = FantomChain
+
     // https://etherscan.io/unitconverter -- Cannot find a FTMScan equivalent page 🤷‍♂️
     public enum Unit {
         case wei
@@ -26,7 +29,7 @@ public struct FantomContract: CryptoContract {
     // MARK: CryptoContract Protocol
 
     public let address: String
-    public let chain: CryptoChain
+    public var chain: Chain { Chain.default }
     public var isChainToken: Bool {
         address == FantomChain.ftmContractAddress
     }
@@ -50,12 +53,31 @@ public struct FantomContract: CryptoContract {
     /// - Parameters:
     ///   - address: The address of the contract
     public init(address: String) {
-        self.init(address: address, chain: .fantom)
+        self.address = address
+    }
+}
+
+public extension FantomContract {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.address = try container.decode(String.self, forKey: .address)
     }
 
-    init(address: String, chain: FantomChain) {
-        self.address = address
-        self.chain = chain
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(address, forKey: .address)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case address
+    }
+}
+
+public extension FantomContract {
+    static func stub() -> Self {
+        .init(address: "a-fake-contract-address")
     }
 }
 

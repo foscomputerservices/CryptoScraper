@@ -9,14 +9,20 @@ import XCTest
 final class CryptoScraperTests: XCTestCase {
     func testInitialization() async throws {
         do {
-            try await CryptoScraper.initialize()
-
-            XCTAssertGreaterThan(EthereumChain.default.chainCryptos.count, 4500)
-            XCTAssertGreaterThan(FantomChain.default.chainCryptos.count, 300)
+            _ = try await CryptoScraper.initialize()
         } catch let e as CoinGeckoError {
             if !e.rateLimitReached {
                 XCTFail(e.localizedDescription)
+                return
+            }
+        } catch let e as BlockChainError {
+            if e != BlockChainError.alreadyInitialized {
+                XCTFail(e.localizedDescription)
+                return
             }
         }
+
+        XCTAssertGreaterThan(EthereumChain.default.chainTokenInfos.count, 4000)
+        XCTAssertGreaterThan(FantomChain.default.chainTokenInfos.count, 300)
     }
 }

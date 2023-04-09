@@ -9,7 +9,7 @@ public extension BlockChainInfo {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction] {
+    func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
         do {
             let response: SingleAddressResponse = try await Self.endPoint.appending(path: "rawaddr").appending(path: account.address).appending(
                 queryItems: SingleAddressResponse.httpQuery(address: account)
@@ -44,12 +44,12 @@ private struct SingleAddressResponse: Decodable {
     let finalBalance: UInt64
     let transactions: [Transaction]
 
-    func cryptoTransactions(forAccount account: CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(forAccount account: any CryptoContract) throws -> [CryptoTransaction] {
         try transactions.flatMap { try $0.cryptoTransactions(forAccount: account) }
     }
 
     // https://www.blockchain.com/explorer/api/blockchain_api - Single Address
-    static func httpQuery(address: CryptoContract, limit: UInt? = nil, offset: UInt? = nil) -> [URLQueryItem] {
+    static func httpQuery(address: any CryptoContract, limit: UInt? = nil, offset: UInt? = nil) -> [URLQueryItem] {
         var result = [URLQueryItem]()
 
         if let limit {
@@ -128,7 +128,7 @@ private struct Transaction: Decodable {
     let result: Int64
     let balance: UInt64
 
-    func cryptoTransactions(forAccount account: CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(forAccount account: some CryptoContract) throws -> [CryptoTransaction] {
         var result = [CryptoTransaction]()
 
         // NOTE: We're mapping BTC transactions to an EVM-style contract standard as
@@ -141,7 +141,7 @@ private struct Transaction: Decodable {
         // Find only the outgoing transactions, the other txns are back to us
         // https://www.bitcoin.com/get-started/how-bitcoin-transactions-work/
         for outTx in out.filter({ $0.address != account.address }) {
-            result.append(try MappedTransaction(transaction: self, outTx: outTx, forAccount: account))
+            try result.append(MappedTransaction(transaction: self, outTx: outTx, forAccount: account))
         }
 
         if fee > 0 {
@@ -172,30 +172,32 @@ private struct Transaction: Decodable {
         case balance
     }
 
-    private struct FeeTransaction: CryptoTransaction {
-        let fromContract: CryptoContract?
-        let toContract: CryptoContract? = nil
+    private struct FeeTransaction<FromC: CryptoContract>: CryptoTransaction {
+        var fromContract: (any CryptoContract)? { _fromContract }
+        var toContract: (any CryptoContract)? { nil }
         let amount: CryptoAmount
         let timeStamp: Date
-        let transactionId: String = ""
-        let gas: Int? = nil
+        var transactionId: String { "" }
+        var gas: Int? { nil }
         let gasPrice: CryptoAmount?
-        let gasUsed: CryptoAmount? = nil
-        let successful: Bool = true
+        var gasUsed: CryptoAmount? { nil }
+        var successful: Bool { true }
 
-        init(fee: UInt64, timeStamp: UInt, forAccount account: CryptoContract) {
-            self.fromContract = account
+        private let _fromContract: FromC
+
+        init(fee: UInt64, timeStamp: UInt, forAccount account: FromC) {
+            self._fromContract = account
             self.amount = .init(quantity: 0, contract: BitcoinChain.bitcoin.mainContract)
             self.timeStamp = Date(timeIntervalSince1970: TimeInterval(timeStamp))
             self.gasPrice = .init(quantity: UInt128(fee), contract: BitcoinChain.bitcoin.mainContract)
         }
     }
 
-    private struct MappedTransaction: CryptoTransaction {
+    private struct MappedTransaction<FromC: CryptoContract>: CryptoTransaction {
         // MARK: CryptoTransaction
 
-        let fromContract: CryptoContract?
-        let toContract: CryptoContract?
+        var fromContract: (any CryptoContract)? { _fromContract }
+        var toContract: (any CryptoContract)? { _toContract }
         let amount: CryptoAmount
         let timeStamp: Date
         let transactionId: String
@@ -207,9 +209,12 @@ private struct Transaction: Decodable {
         let methodId: String
         let functionName: String?
 
-        init(transaction: Transaction, outTx: TxOutput, forAccount account: CryptoContract) throws {
-            self.fromContract = account
-            self.toContract = outTx.contract
+        private let _fromContract: FromC
+        private let _toContract: BitcoinContract?
+
+        init(transaction: Transaction, outTx: TxOutput, forAccount account: FromC) throws {
+            self._fromContract = account
+            self._toContract = outTx.contract
             self.amount = outTx.amount
             self.timeStamp = Date(timeIntervalSince1970: TimeInterval(transaction.time))
             self.transactionId = transaction.hash

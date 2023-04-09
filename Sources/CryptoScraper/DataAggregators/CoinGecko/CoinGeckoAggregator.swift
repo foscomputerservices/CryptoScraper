@@ -6,13 +6,15 @@
 import Foundation
 
 /// Provides standardized meta-data using [Coin Gecko's REST APIs](https://www.coingecko.com/en/api)
-public struct CoinGeckoAggregator: CryptoDataAggregator {
+public final actor CoinGeckoAggregator: CryptoDataAggregator {
     public let userReadableName: String = "Coin Gecko"
 
     /// Returns **true** if the aggregator is configured correctly
     ///
     /// NOTE: This value has *nothing* to do with online availability.
     public static var isAvailable: Bool { apiKey != nil }
+
+    var cachedTokensResponse: [CoinGeckoTokenResponse]?
 
     public init() {}
 }

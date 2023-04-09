@@ -18,7 +18,7 @@ final class EtherScanTests: XCTestCase {
     // User account contract
     let accountContract = EthereumContract(address: EtherScanTests.ethContractAddress)
 
-    private static let etherScan = Etherscan()
+    private static let etherScan = Etherscan()!
     private var etherScan: Etherscan { EtherScanTests.etherScan }
 
     func testGetAccountBalance() async throws {
@@ -40,7 +40,6 @@ final class EtherScanTests: XCTestCase {
         do {
             let ethBalance = try await etherScan.getBalance(forToken: ethToken, forAccount: accountContract)
             XCTAssertGreaterThan(ethBalance.quantity, 0)
-            print("*** Ethereum balance \(ethBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
@@ -54,7 +53,6 @@ final class EtherScanTests: XCTestCase {
             let ethBalance = try await etherScan.getBalance(forToken: rlcToken, forAccount: accountContract)
             XCTAssertGreaterThan(ethBalance.quantity, 0)
             XCTAssertEqual(ethBalance.contract.address, rlcToken.address)
-            print("*** Ethereum balance \(ethBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

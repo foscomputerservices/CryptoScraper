@@ -6,9 +6,9 @@
 import Foundation
 
 /// Describes a top-level transaction in the block chain
-public protocol CryptoTransaction {
-    var fromContract: CryptoContract? { get }
-    var toContract: CryptoContract? { get }
+public protocol CryptoTransaction: Codable {
+    var fromContract: (any CryptoContract)? { get }
+    var toContract: (any CryptoContract)? { get }
     var amount: CryptoAmount { get }
     var timeStamp: Date { get }
     var transactionId: String { get }

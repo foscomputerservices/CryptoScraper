@@ -9,12 +9,14 @@ public extension EthereumScanner {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getTransactions(forAccount account: CryptoContract) async throws -> [CryptoTransaction] {
+    func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
         let response: TransactionResponse = try await Self.endPoint.appending(
-            queryItems: TransactionResponse.httpQuery(address: account, apiKey: try Self.requireApiKey())
+            queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.requireApiKey())
         ).fetch()
 
-        return try response.cryptoTransactions(ethContract: account.chain.mainContract)
+        return try response.cryptoTransactions(
+            ethContract: account.chain.mainContract
+        )
     }
 }
 
@@ -27,7 +29,7 @@ private struct TransactionResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoTransactions(ethContract: CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed("<Unknown Error>")
         }
@@ -36,7 +38,7 @@ private struct TransactionResponse: Decodable {
     }
 
     // https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
-    static func httpQuery(address: CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(address: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "txlist"),
         .init(name: "address", value: address.address),
@@ -71,15 +73,15 @@ private struct Transaction: Decodable {
     let methodId: String
     let functionName: String
 
-    func cryptoTransaction(ethContract: CryptoContract) throws -> CryptoTransaction {
+    func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
         try MappedTransaction(transaction: self, ethContract: ethContract)
     }
 
-    private struct MappedTransaction: CryptoTransaction {
+    private struct MappedTransaction<Contract: CryptoContract>: CryptoTransaction {
         // MARK: CryptoTransaction
 
-        let fromContract: CryptoContract?
-        let toContract: CryptoContract?
+        var fromContract: (any CryptoContract)? { _fromContract }
+        var toContract: (any CryptoContract)? { _toContract }
         let amount: CryptoAmount
         let timeStamp: Date
         let transactionId: String
@@ -91,13 +93,16 @@ private struct Transaction: Decodable {
         let methodId: String
         let functionName: String?
 
-        init(transaction: Transaction, ethContract: CryptoContract) throws {
-            self.fromContract = transaction.from.isEmpty
+        private let _fromContract: Contract?
+        private let _toContract: Contract?
+
+        init(transaction: Transaction, ethContract: Contract) throws {
+            self._fromContract = transaction.from.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.from)
-            self.toContract = transaction.to.isEmpty
+                : Contract(address: transaction.from)
+            self._toContract = transaction.to.isEmpty
                 ? nil
-                : EthereumContract(address: transaction.to)
+                : Contract(address: transaction.to)
 
             let amount = UInt128(transaction.value)
             self.amount = amount == nil

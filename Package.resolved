@@ -8,6 +8,15 @@
         "revision" : "c026389b1762bfe75902d3ee5a5c1f1c31404d1a",
         "version" : "0.3.4"
       }
+    },
+    {
+      "identity" : "fosutilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/foscomputerservices/FOSUtilities.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "0c9322d1fd556839ca71ad107320995d0c8f984b"
+      }
     }
   ],
   "version" : 2

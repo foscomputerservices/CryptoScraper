@@ -6,68 +6,92 @@
 import Foundation
 
 public extension CoinGeckoAggregator {
-    /// Returns the coins known to the aggregator
-    func listCoins() async throws -> [CryptoInfo] {
-        let response: [CoinResponse] = try await Self.endPoint
-            .appending(path: "coins/list")
-            .appending(
-                queryItems: CoinsResponse.httpQuery()
-            ).fetch(errorType: CoinGeckoError.self)
+    /// Returns the known tokens for a given ``CryptoContract`` type
+    func tokens<Contract: CryptoContract>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
+        let response: [CoinGeckoTokenResponse]
+        if let cachedTokensResponse {
+            response = cachedTokensResponse
+        } else {
+            response = try await Self.endPoint
+                .appending(path: "coins/list")
+                .appending(
+                    queryItems: TokensResponse.httpQuery()
+                ).fetch(errorType: CoinGeckoError.self)
+            cachedTokensResponse = response
+        }
 
-        return try response.coins()
+        return try response.tokens(for: contract)
     }
 }
 
-private struct CoinsResponse: Decodable {
+private struct TokensResponse: Decodable {
     // https://www.coingecko.com/en/api/documentation
     static func httpQuery() -> [URLQueryItem] { [
         .init(name: "include_platform", value: "true")
     ] }
 }
 
-private struct CoinResponse: Decodable {
+struct CoinGeckoTokenResponse: Decodable {
     let id: String
     let symbol: String
     let name: String
     let platforms: [String: String?]
 
-    func coins() throws -> [CryptoInfo] {
-        try Coin.coins(from: self)
+    fileprivate func tokens<Contract: CryptoContract>(for contract: Contract.Type) throws -> [Token<Contract>] {
+        let contracts = try equivalentContracts()
+
+        return try contracts.reduce(into: [Token<Contract>]()) { result, next in
+            let chain = next.chain as (any CryptoChain)
+            let mainContract = chain.mainContract as (any CryptoContract)
+
+            guard type(of: mainContract) == Contract.self else {
+                return
+            }
+
+            try result.append(Token(
+                contractAddress: chain.contract(for: next.address) as! Contract,
+                tokenResponse: self,
+                equivalentContracts: contracts
+                    .filter { $0.isSame(as: next) }
+                    .map { $0 as! Contract }
+            ))
+        }
     }
 
-    private struct Coin: CryptoInfo {
-        let contractAddress: CryptoContract
+    fileprivate struct Token<Contract: CryptoContract>: TokenInfo {
+        let contractAddress: Contract
+        let equivalentContracts: [Contract]
         let tokenName: String
         let symbol: String
 
-        static func coins(from coinResponse: CoinResponse) throws -> [CryptoInfo] {
-            var result = [Coin]()
+        init(contractAddress: Contract, tokenResponse: CoinGeckoTokenResponse, equivalentContracts: [Contract]) {
+            self.contractAddress = contractAddress
+            self.tokenName = tokenResponse.name
+            self.symbol = tokenResponse.symbol
+            self.equivalentContracts = equivalentContracts
+        }
+    }
 
-            for platform in coinResponse.platforms where platform.value != nil && (!platform.key.isEmpty && !platform.value!.isEmpty) {
-                guard let chain = platform.key.chain else {
-                    continue
-                }
-                let contractAddress = try chain.contract(for: platform.value!)
-
-                result.append(.init(contractAddress: contractAddress, coinResponse: coinResponse))
+    private func equivalentContracts() throws -> [any CryptoContract] {
+        try platforms.compactMap { platform, contractId in
+            guard
+                let chain = platform.chain,
+                let contractId,
+                !contractId.isEmpty
+            else {
+                return nil
             }
 
-            return result
-        }
-
-        private init(contractAddress: CryptoContract, coinResponse: CoinResponse) {
-            self.contractAddress = contractAddress
-            self.tokenName = coinResponse.name
-            self.symbol = coinResponse.symbol
+            return try chain.contract(for: contractId) as (any CryptoContract)
         }
     }
 }
 
-private extension Collection<CoinResponse> {
-    func coins() throws -> [CryptoInfo] {
-        try reduce(into: [CryptoInfo]()) { result, next in
-            for coin in try next.coins() {
-                result.append(coin)
+private extension Collection<CoinGeckoTokenResponse> {
+    func tokens<Contract: CryptoContract>(for contract: Contract.Type) throws -> Set<SimpleTokenInfo<Contract>> {
+        try reduce(into: Set<SimpleTokenInfo<Contract>>()) { result, next in
+            for token in try next.tokens(for: contract) {
+                result.insert(.init(tokenInfo: token))
             }
         }
     }
@@ -76,7 +100,7 @@ private extension Collection<CoinResponse> {
 private var unknownChain = Set<String>()
 
 private extension String {
-    var chain: CryptoChain? {
+    var chain: (any CryptoChain)? {
         switch self {
         case "ethereum": return .ethereum
         case "fantom": return .fantom
@@ -101,14 +125,14 @@ private extension String {
              "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
              "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
              "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
-             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo":
+             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain":
             return nil
 
         default:
             #if DEBUG
-            if !unknownChain.contains(self) {
+            if !isEmpty, !unknownChain.contains(self) {
                 unknownChain.insert(self)
-                print("\(self)")
+                print("CoinGeckoAggregator: Unknown chain \(self)")
             }
             #endif
             return nil

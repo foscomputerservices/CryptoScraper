@@ -7,7 +7,9 @@ import Foundation
 
 /// A ``CryptoScanner`` implementation for the BlockChain.info web service
 public struct BlockChainInfo: CryptoScanner {
-    // MARK: EthereumScanner Protocol
+    // MARK: CryptoScanner Protocol
+
+    public typealias Contract = BitcoinContract
 
     public static let endPoint: URL = .init(string: "https://blockchain.info")!
     public let userReadableName: String = "BlockChain.info"
