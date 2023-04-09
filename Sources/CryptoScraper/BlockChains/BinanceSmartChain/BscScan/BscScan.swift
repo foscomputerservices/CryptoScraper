@@ -9,6 +9,8 @@ import Foundation
 public struct BscScan: EthereumScanner {
     // MARK: EthereumScanner Protocol
 
+    public typealias Contract = BNBContract
+
     public static let endPoint: URL = .init(string: "https://api.bscscan.com/api")!
     public static let apiKeyName: String = "BSC_SCAN_KEY"
     public let userReadableName: String = "BscScan"
@@ -19,5 +21,8 @@ public struct BscScan: EthereumScanner {
         set { _apiKey = newValue }
     }
 
-    public init() {}
+    /// If ``serviceConfigured`` == *true* returns a new instance
+    public init?() {
+        guard Self.serviceConfigured else { return nil }
+    }
 }

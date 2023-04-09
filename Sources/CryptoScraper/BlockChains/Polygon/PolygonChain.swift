@@ -9,37 +9,50 @@ public final class PolygonChain: CryptoChain {
     // MARK: CryptoChain
 
     public let userReadableName: String = "Matic"
-    public let scanners: [CryptoScanner]
-    public private(set) var chainCryptos: [CryptoInfo]
-    public private(set) var mainContract: CryptoContract!
 
-    public func loadChainCryptos(from coins: [CryptoInfo]) {
-        chainCryptos = coins.filter { coin in
-            coin.contractAddress.chain.userReadableName == userReadableName
+    public var chainTokenInfos: Set<SimpleTokenInfo<MaticContract>> {
+        guard let result = tokens?.values else { return [] }
+
+        return .init(result)
+    }
+
+    public private(set) var mainContract: MaticContract!
+
+    public func contract(for address: String) throws -> MaticContract {
+        .init(address: address)
+    }
+
+    public func loadChainTokens(from dataAggregator: CryptoDataAggregator) async throws {
+        try await loadChainTokens(
+            from: dataAggregator.tokens(
+                for: MaticContract.self
+            )
+        )
+    }
+
+    private var tokens: [String: SimpleTokenInfo<MaticContract>]?
+    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<MaticContract>>) {
+        tokens = tokens ?? [:]
+
+        for token in newTokens {
+            // I do not understand why the next line is needed 🤷‍♂️
+            let token = token as! SimpleTokenInfo<MaticContract>
+            tokens![token.contractAddress.address] = token
         }
     }
 
-    public func contract(for address: String) throws -> CryptoContract {
-        MaticContract(address: address)
+    public func tokenInfo(for address: String) -> SimpleTokenInfo<MaticContract>? {
+        tokens?[address]
     }
+
+    public let scanner: PolygonScan? = .init()
 
     static let maticContractAddress = "Matic"
 
     public static let `default`: PolygonChain = .init()
 
     private init() {
-        self.chainCryptos = []
-        self.scanners = Self.configuredScanners
-
-        self.mainContract = MaticContract(address: Self.maticContractAddress, chain: self)
-    }
-
-    private static var configuredScanners: [CryptoScanner] {
-        var result = [CryptoScanner]()
-
-        if PolygonScan.serviceConfigured { result.append(PolygonScan()) }
-
-        return result
+        self.mainContract = .init(address: Self.maticContractAddress)
     }
 }
 

@@ -6,7 +6,12 @@ on:
 
 jobs:
   run_tests:
-    runs-on: macos-12
+    name: Test Swift v${{ matrix.swift }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["5.7"]
     env:
       COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
       BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
@@ -23,37 +28,45 @@ jobs:
       TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
 
     steps:
-     - uses: actions/checkout@v2
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: ${{ matrix.swift }}
+      - uses: actions/checkout@v2
 
-     - name: Run Tests
-       run: swift test --enable-code-coverage
+      - name: Run Tests
+        run: swift test
 
-  analyze_code_coverage:
-    runs-on: macos-12
-    env:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
-      BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
-      ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
-      ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
-      FTM_SCAN_KEY: ${{ secrets.FTM_SCAN_KEY }}
-      FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
-      BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
-      BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
-      POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
-      POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
-      OPTIMISTIC_ETHER_SCAN_KEY: ${{ secrets.OPTIMISTIC_ETHER_SCAN_KEY }}
-      OPTIMISTIC_TEST_CONTRACT_ADDRESS: ${{ secrets.OPTIMISTIC_TEST_CONTRACT_ADDRESS }}
-      TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
+  #####################################
+  # swift 5.8 has removed generate-xcodeproj, so we'll need to find a different
+  # way to do this.  I'm sure there will be an update soon.
+  #####################################
 
-    steps:
-     - uses: actions/checkout@v2
+  # analyze_code_coverage:
+  #   runs-on: macos-12
+  #   env:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  #     COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
+  #     BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
+  #     ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
+  #     ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
+  #     FTM_SCAN_KEY: ${{ secrets.FTM_SCAN_KEY }}
+  #     FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
+  #     BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
+  #     BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
+  #     POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
+  #     POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
+  #     OPTIMISTIC_ETHER_SCAN_KEY: ${{ secrets.OPTIMISTIC_ETHER_SCAN_KEY }}
+  #     OPTIMISTIC_TEST_CONTRACT_ADDRESS: ${{ secrets.OPTIMISTIC_TEST_CONTRACT_ADDRESS }}
+  #     TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
 
-     - name: Generate an xcodeproj
-       run: swift package generate-xcodeproj
+  #   steps:
+  #    - uses: actions/checkout@v2
 
-     - name: Run Tests w/ code coverage
-       run: xcodebuild test -scheme CryptoScraper-Package -destination platform="macOS" -enableCodeCoverage YES
+  #    - name: Generate an xcodeproj
+  #      run: swift package generate-xcodeproj
 
-     - name: Upload coverage reports to Codecov
-       uses: codecov/codecov-action@v3
+  #    - name: Run Tests w/ code coverage
+  #      run: xcodebuild test -scheme CryptoScraper-Package -destination platform="macOS" -enableCodeCoverage YES
+
+  #    - name: Upload coverage reports to Codecov
+  #      uses: codecov/codecov-action@v3

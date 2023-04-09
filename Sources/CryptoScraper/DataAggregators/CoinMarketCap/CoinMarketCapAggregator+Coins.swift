@@ -9,15 +9,24 @@ public extension CoinMarketCapAggregator {
     /// Returns the coins known to the aggregator
     ///
     /// - See also: https://coinmarketcap.com/api/documentation/v1/#operation/getV1CryptocurrencyMap
-    func listCoins() async throws -> [CryptoInfo] {
-        let response: CurrencyMapResponse = try await Self.endPoint
-            .appending(path: "v1/cryptocurrency/map")
-            .fetch(
-                headers: try headers(),
-                errorType: CoinMarketCapResponseError.self
-            )
+    func tokens<Contract: CryptoContract>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
+        let response: CurrencyMapResponse
 
-        return try response.coins()
+        if let cachedResponse = cachedMapResponse {
+            response = cachedResponse
+        } else {
+            response = try await Self.endPoint
+                .appending(path: "v1/cryptocurrency/map")
+                .fetch(
+                    headers: headers(),
+                    errorType: CoinMarketCapResponseError.self
+                )
+
+            // Cache the response for later use
+            cachedMapResponse = response
+        }
+
+        return try response.tokens(for: contract)
     }
 
     private func headers() throws -> [(field: String, value: String)] {
@@ -29,12 +38,12 @@ public extension CoinMarketCapAggregator {
     }
 }
 
-private struct CurrencyMapResponse: Decodable {
-    let data: [CurrencyMapItem]
+struct CurrencyMapResponse: Decodable {
+    fileprivate let data: [CurrencyMapItem]
     let status: CoinMarketCapError.ErrorStatus
 
-    func coins() throws -> [CryptoInfo] {
-        try data.coins()
+    func tokens<Contract: CryptoContract>(for contract: Contract.Type) throws -> Set<SimpleTokenInfo<Contract>> {
+        try data.tokens(for: contract)
     }
 }
 
@@ -49,8 +58,18 @@ private struct CurrencyMapItem: Decodable {
     let lastHistoricalData: String
     let platform: Platform?
 
-    func coin() throws -> CryptoInfo? {
-        try TokenInfo(self)
+    func token<Contract: CryptoContract>(for contract: Contract.Type) throws -> CoinMarketCapTokenInfo<Contract>? {
+        guard let platform, let chain = platform.chain else {
+            return nil
+        }
+        guard (chain.mainContract as (any CryptoContract)) is Contract else {
+            return nil
+        }
+
+        return try CoinMarketCapTokenInfo(
+            response: self,
+            contract: chain.contract(for: platform.tokenAddress) as! Contract
+        )
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -66,15 +85,13 @@ private struct CurrencyMapItem: Decodable {
     }
 }
 
-private struct TokenInfo: CryptoInfo {
-    let contractAddress: CryptoContract
+private struct CoinMarketCapTokenInfo<Contract: CryptoContract>: TokenInfo {
+    let contractAddress: Contract
     let tokenName: String
     let symbol: String
 
-    init?(_ response: CurrencyMapItem) throws {
-        guard let platform = response.platform, let chain = platform.chain else { return nil }
-
-        self.contractAddress = try chain.contract(for: platform.tokenAddress)
+    init(response: CurrencyMapItem, contract: Contract) {
+        self.contractAddress = contract
         self.tokenName = response.name
         self.symbol = response.symbol
     }
@@ -88,7 +105,7 @@ private struct Platform: Decodable {
     let slug: String
     let tokenAddress: String
 
-    var chain: CryptoChain? {
+    var chain: (any CryptoChain)? {
         name.chain
     }
 
@@ -102,15 +119,18 @@ private struct Platform: Decodable {
 }
 
 private extension Collection<CurrencyMapItem> {
-    func coins() throws -> [CryptoInfo] {
-        try compactMap { try $0.coin() }
+    func tokens<Contract: CryptoContract>(for contract: Contract.Type) throws -> Set<SimpleTokenInfo<Contract>> {
+        try compactMap { try $0.token(for: contract) }
+            .reduce(into: Set<SimpleTokenInfo<Contract>>()) { result, next in
+                result.insert(.init(tokenInfo: next))
+            }
     }
 }
 
 private var unknownChain = Set<String>()
 
 private extension String {
-    var chain: CryptoChain? {
+    var chain: (any CryptoChain)? {
         switch self {
         case "Ethereum": return .ethereum
         case "Fantom": return .fantom
@@ -120,14 +140,14 @@ private extension String {
         case "TRON": return .tron
 
         // TODO: Unsupported chains
-        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra":
+        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra", "Rootstock Smart Bitcoin", "Core", "OKT Chain", "Arbitrum", "Kava", "Radix", "zkSync":
             return nil
 
         default:
             #if DEBUG
-            if !unknownChain.contains(self) {
+            if !isEmpty, !unknownChain.contains(self) {
                 unknownChain.insert(self)
-                print("\(self)")
+                print("CoinMarketCapAggregator: Unknown chain \(self)")
             }
             #endif
             return nil

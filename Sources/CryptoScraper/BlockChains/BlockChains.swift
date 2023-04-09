@@ -13,18 +13,34 @@ enum BlockChains {
     /// All supported block chains are initialized and loaded with the crypto coin specifications
     /// that are known to the provided ``CryptoDataAggregator``
     static func initializeChains(dataAggregator: CryptoDataAggregator) async throws {
-        guard !initialized else { return }
+        guard !initialized else { throw BlockChainError.alreadyInitialized }
 
-        let coins = try await dataAggregator.listCoins()
-
-        BitcoinChain.default.loadChainCryptos(from: coins)
-        EthereumChain.default.loadChainCryptos(from: coins)
-        FantomChain.default.loadChainCryptos(from: coins)
-        BinanceSmartChain.default.loadChainCryptos(from: coins)
-        PolygonChain.default.loadChainCryptos(from: coins)
-        OptimismChain.default.loadChainCryptos(from: coins)
-        TronChain.default.loadChainCryptos(from: coins)
+        for chain in knownBlockChains {
+            try await chain.loadChainTokens(from: dataAggregator)
+        }
 
         initialized = true
+    }
+
+    /// Returns all of the block chains supported by the framework
+    static var knownBlockChains: [any CryptoChain] { [
+        BitcoinChain.default,
+        EthereumChain.default,
+        FantomChain.default,
+        BinanceSmartChain.default,
+        PolygonChain.default,
+        OptimismChain.default,
+        TronChain.default
+    ] }
+}
+
+public enum BlockChainError: Error {
+    case alreadyInitialized
+
+    public var localizedError: String {
+        switch self {
+        case .alreadyInitialized:
+            return "The library has already been initialized"
+        }
     }
 }

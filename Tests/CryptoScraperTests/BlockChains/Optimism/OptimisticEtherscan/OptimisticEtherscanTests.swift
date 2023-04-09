@@ -19,7 +19,7 @@ final class OptimisticEtherscanTests: XCTestCase {
     let accountContract = OptimismContract(address: OptimisticEtherscanTests.optContractAddress)
 
     private static let optimisticEtherscan = OptimisticEtherscan()
-    private var optimismScan: OptimisticEtherscan { OptimisticEtherscanTests.optimisticEtherscan }
+    private var optimismScan: OptimisticEtherscan { OptimisticEtherscanTests.optimisticEtherscan! }
 
     func testGetAccountBalance() async throws {
         let balance = try await optimismScan.getBalance(forAccount: accountContract)
@@ -40,7 +40,6 @@ final class OptimisticEtherscanTests: XCTestCase {
         do {
             let optBalance = try await optimismScan.getBalance(forToken: optToken, forAccount: accountContract)
             XCTAssertGreaterThan(optBalance.quantity, 0)
-            print("*** Optimism balance \(optBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

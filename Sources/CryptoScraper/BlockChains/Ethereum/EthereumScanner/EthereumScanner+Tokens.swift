@@ -11,16 +11,19 @@ public extension EthereumScanner {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
-    func getBalance(forToken contract: CryptoContract, forAccount account: CryptoContract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
         // Cannot retrieve ETH contract, but retrieve ETH balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
         } else {
             let response: TokenBalanceResponse = try await Self.endPoint.appending(
-                queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: try Self.requireApiKey())
+                queryItems: TokenBalanceResponse.httpQuery(forToken: contract, address: account, apiKey: Self.requireApiKey())
             ).fetch()
 
-            return try response.cryptoBalance(forToken: contract, ethContract: account.chain.mainContract)
+            return try response.cryptoBalance(
+                forToken: contract,
+                ethContract: account.chain.mainContract
+            )
         }
     }
 
@@ -30,9 +33,9 @@ public extension EthereumScanner {
     ///
     /// - Parameters:
     ///   - contract: The contract of the token to query
-    func getInfo(forToken contract: CryptoContract) async throws -> CryptoInfo {
+    func getInfo(forToken contract: EthereumContract) async throws -> SimpleTokenInfo<EthereumContract> {
         let response: TokenInfoResponse = try await Self.endPoint.appending(
-            queryItems: TokenInfoResponse.httpQuery(forToken: contract, apiKey: try Self.requireApiKey())
+            queryItems: TokenInfoResponse.httpQuery(forToken: contract, apiKey: Self.requireApiKey())
         ).fetch()
 
         return try response.cryptoInfo()
@@ -48,7 +51,7 @@ private struct TokenBalanceResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoBalance(forToken: CryptoContract, ethContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoBalance<C: CryptoContract>(forToken: C, ethContract: C) throws -> CryptoAmount {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(result)
         }
@@ -60,7 +63,7 @@ private struct TokenBalanceResponse: Decodable {
     }
 
     // https://docs.etherscan.io/api-endpoints/tokens#get-erc20-token-account-balance-for-tokencontractaddress
-    static func httpQuery(forToken contract: CryptoContract, address: CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(forToken contract: any CryptoContract, address: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "tokenbalance"),
         .init(name: "contractaddress", value: contract.address),
@@ -73,13 +76,13 @@ private struct TokenBalanceResponse: Decodable {
 private struct TokenInfoResponse: Decodable {
     let status: String
     let message: String
-    let result: [TokenInfo] // It says array in the spec 🤷‍♂️
+    let result: [EthereumTokenInfo] // It says array in the spec 🤷‍♂️
 
     var success: Bool {
         status == "1" || message == "OK"
     }
 
-    func cryptoInfo() throws -> CryptoInfo {
+    func cryptoInfo() throws -> SimpleTokenInfo<EthereumContract> {
         guard success, let tokenInfo = result.first else {
             throw EthereumScannerResponseError.requestFailed("<< Unknown Error >>")
         }
@@ -88,7 +91,7 @@ private struct TokenInfoResponse: Decodable {
     }
 
     // https://docs.etherscan.io/api-endpoints/tokens#get-token-info-by-contractaddress
-    static func httpQuery(forToken contract: CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(forToken contract: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
         .init(name: "module", value: "token"),
         .init(name: "action", value: "tokeninfo"),
         .init(name: "contractaddress", value: contract.address),
@@ -96,7 +99,7 @@ private struct TokenInfoResponse: Decodable {
     ] }
 }
 
-private struct TokenInfo: Decodable {
+private struct EthereumTokenInfo: Decodable {
     let contractAddress: String
     let tokenName: String
     let symbol: String
@@ -121,58 +124,41 @@ private struct TokenInfo: Decodable {
     let whitepaper: String
     let tokenPriceUSD: String
 
-    func cryptoInfo() -> CryptoInfo {
-        MappedInfo(tokenInfo: self)
+    func cryptoInfo() -> SimpleTokenInfo<EthereumContract> {
+        SimpleTokenInfo(tokenInfo: self)
     }
+}
 
-    private struct MappedInfo: CryptoInfo {
-        // MARK: CryptoTransaction
+private extension SimpleTokenInfo where Contract == EthereumContract {
+    init(tokenInfo: EthereumTokenInfo) {
+        self.contractAddress = EthereumContract(address: tokenInfo.contractAddress)
+        self.equivalentContracts = .init()
+        self.tokenName = tokenInfo.tokenName
+        self.symbol = tokenInfo.symbol
+        self.imageURL = nil
+        self.tokenType = tokenInfo.tokenType
 
-        let contractAddress: CryptoContract
-        let tokenName: String
-        let symbol: String
-        let tokenType: String?
-        let totalSupply: CryptoAmount?
-        let blueCheckmark: Bool?
-        let description: String?
-        let website: URL?
-        let email: String?
-        let blog: URL?
-        let reddit: URL?
-        let slack: String?
-        let facebook: URL?
-        let twitter: URL?
-        let gitHub: URL?
-        let telegram: URL?
-        let wechat: URL?
-        let linkedin: URL?
-        let discord: URL?
-        let whitepaper: URL?
-
-        init(tokenInfo: TokenInfo) {
-            let contract = EthereumContract(address: tokenInfo.contractAddress)
-            self.contractAddress = contract
-            self.tokenName = tokenInfo.tokenName
-            self.symbol = tokenInfo.symbol
-            self.tokenType = tokenInfo.tokenType
-
-            let totalSupply = UInt128(tokenInfo.totalSupply)
-            self.totalSupply = totalSupply == nil ? nil : .init(quantity: totalSupply!, contract: contract)
-            self.blueCheckmark = Bool(tokenInfo.blueCheckmark)
-            self.description = tokenInfo.description
-            self.website = URL(string: tokenInfo.website)
-            self.email = tokenInfo.email.isEmpty ? nil : tokenInfo.email
-            self.blog = URL(string: tokenInfo.website)
-            self.reddit = URL(string: tokenInfo.website)
-            self.slack = tokenInfo.slack.isEmpty ? nil : tokenInfo.slack
-            self.facebook = URL(string: tokenInfo.facebook)
-            self.twitter = URL(string: tokenInfo.twitter)
-            self.gitHub = URL(string: tokenInfo.gitHub)
-            self.telegram = URL(string: tokenInfo.telegram)
-            self.wechat = URL(string: tokenInfo.wechat)
-            self.linkedin = URL(string: tokenInfo.linkedin)
-            self.discord = URL(string: tokenInfo.discord)
-            self.whitepaper = URL(string: tokenInfo.whitepaper)
-        }
+        let totalSupply = UInt128(tokenInfo.totalSupply)
+        self.totalSupply = totalSupply == nil
+            ? nil
+            : .init(
+                quantity: totalSupply!,
+                contract: EthereumChain.default.mainContract
+            )
+        self.blueCheckmark = Bool(tokenInfo.blueCheckmark)
+        self.description = tokenInfo.description
+        self.website = URL(string: tokenInfo.website)
+        self.email = tokenInfo.email.isEmpty ? nil : tokenInfo.email
+        self.blog = URL(string: tokenInfo.website)
+        self.reddit = URL(string: tokenInfo.website)
+        self.slack = tokenInfo.slack.isEmpty ? nil : tokenInfo.slack
+        self.facebook = URL(string: tokenInfo.facebook)
+        self.twitter = URL(string: tokenInfo.twitter)
+        self.gitHub = URL(string: tokenInfo.gitHub)
+        self.telegram = URL(string: tokenInfo.telegram)
+        self.wechat = URL(string: tokenInfo.wechat)
+        self.linkedin = URL(string: tokenInfo.linkedin)
+        self.discord = URL(string: tokenInfo.discord)
+        self.whitepaper = URL(string: tokenInfo.whitepaper)
     }
 }

@@ -8,36 +8,53 @@ import Foundation
 public final class TronChain: CryptoChain {
     // MARK: CryptoChain
 
-    public let userReadableName: String = "Tron"
-    public let scanners: [CryptoScanner]
-    public private(set) var chainCryptos: [CryptoInfo]
-    public private(set) var mainContract: CryptoContract!
+    public typealias Contract = TronContract
 
-    public func loadChainCryptos(from coins: [CryptoInfo]) {
-        chainCryptos = coins.filter { coin in
-            coin.contractAddress.chain.userReadableName == userReadableName
+    public let userReadableName: String = "Tron"
+
+    public var chainTokenInfos: Set<SimpleTokenInfo<TronContract>> {
+        guard let result = tokens?.values else { return [] }
+
+        return .init(result)
+    }
+
+    public private(set) var mainContract: TronContract!
+
+    public func contract(for address: String) throws -> TronContract {
+        .init(address: address)
+    }
+
+    public func loadChainTokens(from dataAggregator: CryptoDataAggregator) async throws {
+        try await loadChainTokens(
+            from: dataAggregator.tokens(
+                for: TronContract.self
+            )
+        )
+    }
+
+    private var tokens: [String: SimpleTokenInfo<TronContract>]?
+    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<TronContract>>) {
+        tokens = tokens ?? [:]
+
+        for token in newTokens {
+            // I do not understand why the next line is needed 🤷‍♂️
+            let token = token as! SimpleTokenInfo<TronContract>
+            tokens![token.contractAddress.address] = token
         }
     }
 
-    public func contract(for address: String) throws -> CryptoContract {
-        TronContract(address: address)
+    public func tokenInfo(for address: String) -> SimpleTokenInfo<TronContract>? {
+        tokens?[address]
     }
+
+    public let scanner: TronScan? = .init()
 
     static let trxContractAddress = "TRX"
 
     public static let `default`: TronChain = .init()
 
     private init() {
-        self.chainCryptos = []
-        self.scanners = Self.configuredScanners
-
-        let mainContract = TronContract(address: Self.trxContractAddress, chain: self)
-        self.mainContract = mainContract
-        self.chainCryptos = [TRXCryptoInfo(contractAddress: mainContract)]
-    }
-
-    private static var configuredScanners: [CryptoScanner] {
-        [TronScan()]
+        self.mainContract = TronContract(address: Self.trxContractAddress)
     }
 }
 
@@ -45,10 +62,11 @@ public extension CryptoChain where Self == TronChain {
     static var tron: TronChain { .default }
 }
 
-private struct TRXCryptoInfo: CryptoInfo {
-    let contractAddress: CryptoContract
-
-    let tokenName: String = "Tron"
-    let symbol: String = "TRX"
-    let whitepaper: URL? = URL(string: "https://tron.network/static/doc/white_paper_v_2_0.pdf")!
-}
+#warning("Do we need this???")
+// public struct TRXTokenInfo: TokenInfo {
+//    public let contractAddress: TronContract
+//
+//    public let tokenName: String = "Tron"
+//    public let symbol: String = "TRX"
+//    public let whitepaper: URL? = URL(string: "https://tron.network/static/doc/white_paper_v_2_0.pdf")!
+// }

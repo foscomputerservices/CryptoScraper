@@ -9,7 +9,7 @@ public extension BlockChainInfo {
     /// Returns the balance (in BTC) of the given account
     ///
     /// - Parameter account: The Bitcoin account to query the balance for
-    func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "balance").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch()
@@ -22,7 +22,7 @@ public extension BlockChainInfo {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
-    func getBalance(forToken contract: CryptoContract, forAccount account: CryptoContract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
         // Cannot retrieve ETH contract, but retrieve ETH balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
@@ -51,12 +51,17 @@ private struct BalanceResponse: Decodable {
         !responses.isEmpty
     }
 
-    func cryptoAmount(forAccount btcContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
         guard success, let response = responses.first(where: { $0.key == btcContract.address })?.value else {
             throw BlockChainInfoResponseError.unknownContract(btcContract.address)
         }
 
-        return .init(quantity: UInt128(response.finalBalance), contract: btcContract.chain.mainContract)
+        let chain = btcContract.chain as (any CryptoChain)
+
+        return .init(
+            quantity: UInt128(response.finalBalance),
+            contract: chain.mainContract as (any CryptoContract)
+        )
     }
 
     init(from decoder: Decoder) throws {
@@ -66,7 +71,7 @@ private struct BalanceResponse: Decodable {
     }
 
     // https://www.blockchain.com/explorer/api/blockchain_api - Balance
-    static func httpQuery(account: CryptoContract) -> [URLQueryItem] { [
+    static func httpQuery(account: any CryptoContract) -> [URLQueryItem] { [
         .init(name: "active", value: account.address)
     ] }
 

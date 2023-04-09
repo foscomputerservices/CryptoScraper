@@ -44,7 +44,6 @@ final class TronScanTests: XCTestCase {
         do {
             let trxBalance = try await tronScan.getBalance(forToken: trxToken, forAccount: accountContract)
             XCTAssertGreaterThan(trxBalance.quantity, 0)
-            print("*** TRX balance \(trxBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
@@ -58,7 +57,6 @@ final class TronScanTests: XCTestCase {
             let trxBalance = try await tronScan.getBalance(forToken: kleverToken, forAccount: accountContract)
             XCTAssertGreaterThan(trxBalance.quantity, 0)
             XCTAssertEqual(trxBalance.contract.address, kleverToken.address)
-            print("*** Klever TRX balance \(trxBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

@@ -18,7 +18,7 @@ final class PolygonScanTests: XCTestCase {
     // User account contract
     private let accountContract = MaticContract(address: PolygonScanTests.maticContractAddress)
 
-    private static let polygonScan = PolygonScan()
+    private static let polygonScan = PolygonScan()!
     private var polygonScan: PolygonScan { PolygonScanTests.polygonScan }
 
     func testGetAccountBalance() async throws {
@@ -44,7 +44,6 @@ final class PolygonScanTests: XCTestCase {
         do {
             let maticBalance = try await polygonScan.getBalance(forToken: maticToken, forAccount: accountContract)
             XCTAssertGreaterThan(maticBalance.quantity, 0)
-            print("*** Matic balance \(maticBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
@@ -58,7 +57,6 @@ final class PolygonScanTests: XCTestCase {
             let wrappedMaticBalance = try await polygonScan.getBalance(forToken: wrappedMaticToken, forAccount: accountContract)
             XCTAssertGreaterThan(wrappedMaticBalance.quantity, 0)
             XCTAssertEqual(wrappedMaticBalance.contract.address, wrappedMaticToken.address)
-            print("*** Wrapped Matic balance \(wrappedMaticBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

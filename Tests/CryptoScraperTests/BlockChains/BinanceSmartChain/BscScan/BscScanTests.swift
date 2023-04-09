@@ -18,7 +18,7 @@ final class BscScanTests: XCTestCase {
     // User account contract
     let accountContract = BNBContract(address: BscScanTests.bnbContractAddress)
 
-    private static let bscScan = BscScan()
+    private static let bscScan = BscScan()!
     private var bscScan: BscScan { BscScanTests.bscScan }
 
     func testGetAccountBalance() async throws {
@@ -44,7 +44,6 @@ final class BscScanTests: XCTestCase {
         do {
             let bnbBalance = try await bscScan.getBalance(forToken: bnbToken, forAccount: accountContract)
             XCTAssertGreaterThan(bnbBalance.quantity, 0)
-            print("*** BNB balance \(bnbBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

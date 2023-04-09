@@ -9,6 +9,8 @@ import Foundation
 public struct TronScan: CryptoScanner {
     // MARK: EthereumScanner Protocol
 
+    public typealias Contract = TronContract
+
     public static let endPoint: URL = .init(string: "https://apilist.tronscan.org/api")!
     public let userReadableName: String = "TronScan"
 

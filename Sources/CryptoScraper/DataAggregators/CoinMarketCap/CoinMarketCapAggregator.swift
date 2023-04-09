@@ -6,13 +6,15 @@
 import Foundation
 
 /// Provides standardized meta-data using [Coin Market Cap's REST API](https://coinmarketcap.com/api)
-public struct CoinMarketCapAggregator: CryptoDataAggregator {
+public final actor CoinMarketCapAggregator: CryptoDataAggregator {
     public let userReadableName: String = "CoinMarketCap"
 
     /// Returns **true** if the aggregator is configured correctly
     ///
     /// NOTE: This value has *nothing* to do with online availability.
     public static var isAvailable: Bool { apiKey != nil }
+
+    var cachedMapResponse: CurrencyMapResponse?
 
     public init() {}
 }

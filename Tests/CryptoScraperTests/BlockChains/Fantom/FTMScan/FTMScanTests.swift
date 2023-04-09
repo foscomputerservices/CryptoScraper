@@ -18,7 +18,7 @@ final class FTMScanTests: XCTestCase {
     // User account contract
     private let accountContract = FantomContract(address: FTMScanTests.ftmContractAddress)
 
-    private static let ftmScan = FTMScan()
+    private static let ftmScan = FTMScan()!
     private var ftmScan: FTMScan { FTMScanTests.ftmScan }
 
     func testGetAccountBalance() async throws {
@@ -44,7 +44,6 @@ final class FTMScanTests: XCTestCase {
         do {
             let ftmBalance = try await ftmScan.getBalance(forToken: ftmToken, forAccount: accountContract)
             XCTAssertGreaterThan(ftmBalance.quantity, 0)
-            print("*** Fantom balance \(ftmBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e
@@ -58,7 +57,6 @@ final class FTMScanTests: XCTestCase {
             let ftmBalance = try await ftmScan.getBalance(forToken: tShareToken, forAccount: accountContract)
             XCTAssertGreaterThan(ftmBalance.quantity, 0)
             XCTAssertEqual(ftmBalance.contract.address, tShareToken.address)
-            print("*** Fantom balance \(ftmBalance.quantity)")
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

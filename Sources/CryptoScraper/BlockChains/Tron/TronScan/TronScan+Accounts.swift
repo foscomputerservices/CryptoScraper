@@ -9,7 +9,7 @@ public extension TronScan {
     /// Returns the balance (in TRX) of the given account
     ///
     /// - Parameter account: The Tron account to query the balance for
-    func getBalance(forAccount account: CryptoContract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch()
@@ -22,7 +22,7 @@ public extension TronScan {
     /// - Parameters:
     ///   - contract: The ``CryptoContract`` of the token to query
     ///   - address: The ``CryptoContract`` address that holds the token
-    func getBalance(forToken contract: CryptoContract, forAccount account: CryptoContract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch()
@@ -44,7 +44,7 @@ private struct BalanceResponse: Decodable {
         !responses.isEmpty
     }
 
-    func cryptoAmount(forAccount btcContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
         guard success else {
             throw TronScanResponseError.unknownContract(btcContract.address)
         }
@@ -52,7 +52,7 @@ private struct BalanceResponse: Decodable {
         return .init(quantity: responses.trxBalance, contract: TronChain.default.mainContract)
     }
 
-    func cryptoAmount(forToken contract: CryptoContract, forAccount btcContract: CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forToken contract: any CryptoContract, forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
         guard success else {
             throw TronScanResponseError.unknownContract(btcContract.address)
         }
@@ -61,7 +61,7 @@ private struct BalanceResponse: Decodable {
     }
 
     // https://github.com/tronscan/tronscan-frontend/blob/dev2019/document/api.md#4
-    static func httpQuery(account: CryptoContract) -> [URLQueryItem] { [
+    static func httpQuery(account: any CryptoContract) -> [URLQueryItem] { [
         .init(name: "address", value: account.address)
     ] }
 
@@ -97,7 +97,7 @@ private extension Collection<TRBalance> {
             .reduce(UInt128(0), +)
     }
 
-    func trxBalance(forToken contract: CryptoContract) -> UInt128 {
+    func trxBalance(forToken contract: any CryptoContract) -> UInt128 {
         filter { contract.isChainToken ? $0.tokenAbbr == "trx" : $0.tokenId == contract.address }
             .compactMap(\.trxBalance)
             .reduce(UInt128(0), +)
