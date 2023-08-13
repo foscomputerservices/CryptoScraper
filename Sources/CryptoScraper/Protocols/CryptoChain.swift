@@ -47,9 +47,14 @@ public protocol CryptoChain: AnyObject, Hashable, Identifiable {
     /// Returns a ``CryptoScanner``, if one has bee configured,
     /// that can be used to retrieve information about various ``CryptoContract``s
     var scanner: Scanner? { get }
+
+    /// Returns a default instance of the ``CryptoChain``
+    static var `default`: Self { get }
 }
 
 public extension CryptoChain {
+    static var zero: ZeroAmountChain { ZeroAmountChain() }
+
     // MARK: Identifiable Protocol
 
     var id: String {

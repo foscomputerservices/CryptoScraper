@@ -5,12 +5,21 @@
 
 import Foundation
 
+public enum ERCTokenType: CaseIterable {
+    case erc20
+    case erc721
+    case erc1155
+}
+
 /// A protocol and standardized implementation of an Ethereum-style scanner
 ///
 /// Most Ethereum-based scanners work in much the same way as they all are
 /// forks of the same codebase.  Conforming to this protocol provides an
 /// implementation of these standardized services.
 public protocol EthereumScanner: CryptoScanner {
+    /// Returns a set of ``ERCTokenType``s that the scanner supports
+    static var supportedERCTokenTypes: Set<ERCTokenType> { get }
+
     /// The base URL of the scanner
     static var endPoint: URL { get }
 
@@ -46,6 +55,17 @@ public enum EthereumScannerResponseError: Error {
     /// The environment variable specifying the Api Key was not set
     case missingApiKey(_ keyName: String)
 
+    /// Too many requests were made
+    case rateLimitReached
+
+    public var rateLimitReached: Bool {
+        if case EthereumScannerResponseError.rateLimitReached = self {
+            return true
+        }
+
+        return false
+    }
+
     public var localizedDescription: String {
         switch self {
         case .requestFailed(let message):
@@ -56,6 +76,8 @@ public enum EthereumScannerResponseError: Error {
             return "Invalid field data '\(value)' for \(type):\(field)"
         case .missingApiKey(let keyName):
             return "An API Key was not provided in the environment \(keyName)"
+        case .rateLimitReached:
+            return "Rate limit reached"
         }
     }
 }

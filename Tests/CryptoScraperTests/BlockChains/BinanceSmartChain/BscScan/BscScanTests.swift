@@ -34,8 +34,20 @@ final class BscScanTests: XCTestCase {
     }
 
     func testGetTransactions() async throws {
-        let transactions = try await bscScan.getTransactions(forAccount: accountContract)
-        XCTAssertGreaterThan(transactions.count, 0)
+        sleep(2) // Overcomes rate limiting
+
+        do {
+            let transactions = try await bscScan.getTransactions(forAccount: accountContract)
+            XCTAssertGreaterThan(transactions.count, 0)
+        } catch let e as EthereumScannerResponseError {
+            if !e.rateLimitReached {
+                XCTFail(e.localizedDescription)
+            } else {
+                print("*************************************************")
+                print("*** Error: Unable to test, rate-limit reached ***")
+                print("*************************************************")
+            }
+        }
     }
 
     func testGetTokenBalance_BNB() async throws {

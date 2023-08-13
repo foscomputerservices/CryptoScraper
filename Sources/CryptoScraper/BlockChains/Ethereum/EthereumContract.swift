@@ -24,6 +24,24 @@ public struct EthereumContract: CryptoContract, Codable, Stubbable {
         case tether
 
         public var chainBaseUnit: Unit { .wei }
+
+        public func convertDown(amount: UInt128, smallerUnits units: Unit) -> UInt128 {
+            let currentExp = exponent
+            let newExp = units.exponent
+
+            guard newExp < currentExp else {
+                fatalError("Cannot convert to larger units")
+            }
+
+            if newExp == currentExp {
+                return amount
+            }
+
+            let exponent = UInt128(currentExp - newExp)
+            let power = UInt128(pow(10, Double(exponent)))
+
+            return amount * power
+        }
     }
 
     // MARK: CryptoContract Protocol
@@ -53,7 +71,7 @@ public struct EthereumContract: CryptoContract, Codable, Stubbable {
     /// - Parameters:
     ///   - address: The address of the contract
     public init(address: String) {
-        self.address = address
+        self.address = address.lowercased()
     }
 }
 
@@ -85,22 +103,22 @@ public extension EthereumContract {
 
 private extension EthereumContract.Unit {
     var divisorFromBase: UInt128 {
-        let exponent: Double
+        UInt128(pow(10, Double(exponent)))
+    }
 
+    var exponent: Int {
         switch self {
-        case .wei: exponent = 1
-        case .kwei: exponent = 3
-        case .mwei: exponent = 6
-        case .gwei: exponent = 9
-        case .szabo: exponent = 12
-        case .finney: exponent = 15
-        case .ether: exponent = 18
-        case .kether: exponent = 21
-        case .mether: exponent = 24
-        case .gether: exponent = 27
-        case .tether: exponent = 30
+        case .wei: return 1
+        case .kwei: return 3
+        case .mwei: return 6
+        case .gwei: return 9
+        case .szabo: return 12
+        case .finney: return 15
+        case .ether: return 18
+        case .kether: return 21
+        case .mether: return 24
+        case .gether: return 27
+        case .tether: return 30
         }
-
-        return UInt128(pow(10, exponent))
     }
 }

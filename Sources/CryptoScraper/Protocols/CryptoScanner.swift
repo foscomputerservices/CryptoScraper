@@ -24,8 +24,21 @@ public protocol CryptoScanner {
     ///   - address: The ``CryptoContract`` address that holds the token
     func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount
 
-    /// Retrieves the ``CryptoTransaction``s for the given contract
+    /// Retrieves the ``CryptoTransaction``s for the given account
+    ///
+    /// - NOTE: The way that block chains work, there can be multiple ``CryptoTransaction``s
+    ///   with the same ``hash`` value.  Each entry provides information about the overall transaction
+    ///   and is interpreted in a ``CryptoChain``-specifc mannar.
     ///
     /// - Parameter account: The ``CryptoContract`` from which to retrieve the transactions
     func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction]
+
+    /// Retrieves the ``CryptoTransaction``s for the given ``Data``
+    ///
+    /// - NOTE: The way that block chains work, there can be multiple ``CryptoTransaction``s
+    ///   with the same ``hash`` value.  Each entry provides information about the overall transaction
+    ///   and is interpreted in a ``CryptoChain``-specifc mannar.
+    ///
+    /// - Parameter account: The ``CryptoContract`` from which to retrieve the transactions
+    func loadTransactions(from data: Data) throws -> [CryptoTransaction]
 }

@@ -6,6 +6,7 @@
 import FOSFoundation
 import Foundation
 
+/// Represents a quantity of crypto in the chain's base units
 public struct CryptoAmount: Comparable, Codable, Stubbable {
     /// The quantity of the coin in the chain's base units
     public let quantity: UInt128
@@ -24,9 +25,19 @@ public struct CryptoAmount: Comparable, Codable, Stubbable {
     public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.quantity < rhs.quantity
     }
+
+    public init(quantity: UInt128, contract: any CryptoContract) {
+        self.quantity = quantity
+        self.contract = contract
+    }
 }
 
 public extension CryptoAmount {
+    /// Returns a ``CryptoAmount`` that has a quantity of zero
+    static var zero: CryptoAmount {
+        .init(quantity: 0, contract: ZeroAmountContract.zero)
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -55,7 +66,10 @@ public extension CryptoAmount {
     }
 }
 
+/// Errors that a ``CryptoAmount`` can generate during processing
 public enum CryptoAmountError: Error {
+
+    /// An unknown ``CryptoChain`` named *name* was referenced
     case unknownChain(name: String)
 }
 

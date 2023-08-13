@@ -31,12 +31,10 @@ public final class BinanceSmartChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<BNBContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<BNBContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<BNBContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<BNBContract>
             tokens![token.contractAddress.address] = token
         }
     }
@@ -47,7 +45,7 @@ public final class BinanceSmartChain: CryptoChain {
 
     public let scanner: BscScan? = .init()
 
-    static let bnbContractAddress = "BNB"
+    static let bnbContractAddress = "bnb"
 
     public static let `default`: BinanceSmartChain = .init()
 

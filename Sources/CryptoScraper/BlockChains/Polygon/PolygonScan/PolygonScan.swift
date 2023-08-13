@@ -11,6 +11,7 @@ public struct PolygonScan: EthereumScanner {
 
     public typealias Contract = MaticContract
 
+    public static let supportedERCTokenTypes: Set<ERCTokenType> = [.erc20]
     public static let endPoint: URL = .init(string: "https://api.polygonscan.com/api")!
     public static let apiKeyName: String = "POLYGON_SCAN_KEY"
     public let userReadableName: String = "PolygonScan"

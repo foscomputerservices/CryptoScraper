@@ -11,6 +11,7 @@ public struct OptimisticEtherscan: EthereumScanner {
 
     public typealias Contract = OptimismContract
 
+    public static let supportedERCTokenTypes: Set<ERCTokenType> = [.erc20]
     public static let endPoint: URL = .init(string: "https://api-optimistic.etherscan.io/api")!
     public static let apiKeyName: String = "OPTIMISTIC_ETHER_SCAN_KEY"
     public let userReadableName: String = "OptimisticEtherscan"

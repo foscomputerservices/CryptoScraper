@@ -11,6 +11,7 @@ public struct BscScan: EthereumScanner {
 
     public typealias Contract = BNBContract
 
+    public static let supportedERCTokenTypes: Set<ERCTokenType> = [.erc20, .erc721]
     public static let endPoint: URL = .init(string: "https://api.bscscan.com/api")!
     public static let apiKeyName: String = "BSC_SCAN_KEY"
     public let userReadableName: String = "BscScan"

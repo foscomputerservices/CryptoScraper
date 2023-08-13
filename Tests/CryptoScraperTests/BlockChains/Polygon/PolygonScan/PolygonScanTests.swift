@@ -34,8 +34,22 @@ final class PolygonScanTests: XCTestCase {
     }
 
     func testGetTransactions() async throws {
-        let transactions = try await polygonScan.getTransactions(forAccount: accountContract)
-        XCTAssertGreaterThan(transactions.count, 0)
+        sleep(2) // Overcomes rate limiting
+
+        do {
+            let transactions = try await polygonScan.getTransactions(
+                forAccount: accountContract
+            )
+            XCTAssertGreaterThan(transactions.count, 0)
+        } catch let e as EthereumScannerResponseError {
+            if !e.rateLimitReached {
+                XCTFail(e.localizedDescription)
+            } else {
+                print("*************************************************")
+                print("*** Error: Unable to test, rate-limit reached ***")
+                print("*************************************************")
+            }
+        }
     }
 
     func testGetTokenBalance_Matic() async throws {
@@ -57,6 +71,18 @@ final class PolygonScanTests: XCTestCase {
             let wrappedMaticBalance = try await polygonScan.getBalance(forToken: wrappedMaticToken, forAccount: accountContract)
             XCTAssertGreaterThan(wrappedMaticBalance.quantity, 0)
             XCTAssertEqual(wrappedMaticBalance.contract.address, wrappedMaticToken.address)
+        } catch let e as EthereumScannerResponseError {
+            print("*** Error: \(e.localizedDescription)")
+            throw e
+        }
+    }
+
+    func testGetTokenTransactions_WrappedMatic() async throws {
+        let wrappedMaticToken = MaticContract(address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270")
+
+        do {
+            let wMaticTxns = try await polygonScan.getERC20Transactions(forToken: wrappedMaticToken, forAccount: accountContract)
+            XCTAssertGreaterThan(wMaticTxns.count, 0)
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

@@ -12,7 +12,7 @@ public extension BlockChainInfo {
     func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "balance").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
-        ).fetch()
+        ).fetch(errorType: BalanceError.self)
 
         return try response.cryptoAmount(forAccount: account)
     }
@@ -85,5 +85,18 @@ private struct BalanceResponse: Decodable {
             case numberOfTransactions = "n_tx"
             case totalReceived = "total_received"
         }
+    }
+}
+
+private struct BalanceError: Error, Decodable {
+    let error: String
+    let message: String
+
+    var localizedDescription: String {
+        "\(error): \(message)"
+    }
+
+    var blockChainError: BlockChainInfoResponseError {
+        .requestFailed(localizedDescription)
     }
 }

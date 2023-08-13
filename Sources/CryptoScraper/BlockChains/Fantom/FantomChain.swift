@@ -31,12 +31,10 @@ public final class FantomChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<FantomContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<FantomContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<FantomContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<FantomContract>
             tokens![token.contractAddress.address] = token
         }
     }
@@ -47,7 +45,7 @@ public final class FantomChain: CryptoChain {
 
     public let scanner: FTMScan? = .init()
 
-    static let ftmContractAddress = "FTM"
+    static let ftmContractAddress = "ftm"
 
     public static let `default`: FantomChain = .init()
 

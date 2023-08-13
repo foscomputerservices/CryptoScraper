@@ -19,6 +19,10 @@ public protocol CryptoContract: Hashable, Codable, Identifiable {
     /// Returns **true** if the ``CryptoContract`` represents the block chain's coin
     var isChainToken: Bool { get }
 
+    /// Returns **true** if the contract represents a Token known to the chain, but
+    /// **not** the chain token
+    var isToken: Bool { get }
+
     /// Returns the ``TokenInfo`` that describes the details of the ``CryptoContract``
     var tokenInfo: Chain.Info? { get }
 
@@ -27,10 +31,30 @@ public protocol CryptoContract: Hashable, Codable, Identifiable {
 }
 
 public extension CryptoContract {
+    var zero: ZeroAmountContract { .zero }
+
     // MARK: Default Implementations
 
     var tokenInfo: Chain.Info? {
         chain.tokenInfo(for: address)
+    }
+
+    var isToken: Bool {
+        address != chain.mainContract!.address
+    }
+
+    /// Returns **true** if the contracts are equivalent as described by ``TokenInfo``.isEquivalent(to:)
+    func isEquivalent(to other: Chain.Contract) -> Bool {
+        tokenInfo?.isEquivalent(to: other) ?? false
+    }
+
+    func isEquivalent<OtherContract: CryptoContract>(to other: OtherContract) -> Bool {
+        if OtherContract.self == Self.self {
+            return isEquivalent(to: other as! Self)
+        }
+
+        // TODO: Implement isEquivalent for cross-chain comparisons
+        fatalError("isEquivalent is NYI cross-chain")
     }
 
     // MARK: Identifiable Protocol
@@ -54,11 +78,6 @@ public extension CryptoContract {
         guard Other.self == type(of: self) else { return false }
 
         return (other as! Self) == self
-    }
-
-    /// Returns **true** if the contracts are equivalent as described by ``TokenInfo``.isEquivalent(to:)
-    func isEquivalent(to other: Chain.Contract) -> Bool {
-        tokenInfo?.isEquivalent(to: other) ?? false
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
