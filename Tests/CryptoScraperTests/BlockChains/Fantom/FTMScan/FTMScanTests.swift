@@ -34,8 +34,22 @@ final class FTMScanTests: XCTestCase {
     }
 
     func testGetTransactions() async throws {
-        let transactions = try await ftmScan.getTransactions(forAccount: accountContract)
-        XCTAssertGreaterThan(transactions.count, 0)
+        sleep(2) // Overcomes rate limiting
+
+        do {
+            let transactions = try await ftmScan.getTransactions(
+                forAccount: accountContract
+            )
+            XCTAssertGreaterThan(transactions.count, 0)
+        } catch let e as EthereumScannerResponseError {
+            if !e.rateLimitReached {
+                XCTFail(e.localizedDescription)
+            } else {
+                print("*************************************************")
+                print("*** Error: Unable to test, rate-limit reached ***")
+                print("*************************************************")
+            }
+        }
     }
 
     func testGetTokenBalance_FTM() async throws {
@@ -57,6 +71,18 @@ final class FTMScanTests: XCTestCase {
             let ftmBalance = try await ftmScan.getBalance(forToken: tShareToken, forAccount: accountContract)
             XCTAssertGreaterThan(ftmBalance.quantity, 0)
             XCTAssertEqual(ftmBalance.contract.address, tShareToken.address)
+        } catch let e as EthereumScannerResponseError {
+            print("*** Error: \(e.localizedDescription)")
+            throw e
+        }
+    }
+
+    func testGetTokenTransactions_tShare() async throws {
+        let tShareToken = FantomContract(address: "0x4cdF39285D7Ca8eB3f090fDA0C069ba5F4145B37")
+
+        do {
+            let tShareTxns = try await ftmScan.getERC20Transactions(forToken: tShareToken, forAccount: accountContract)
+            XCTAssertGreaterThan(tShareTxns.count, 0)
         } catch let e as EthereumScannerResponseError {
             print("*** Error: \(e.localizedDescription)")
             throw e

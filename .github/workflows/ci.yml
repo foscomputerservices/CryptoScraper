@@ -11,7 +11,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        swift: ["5.7"]
+        swift: ["5.8"]
+
     env:
       COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
       BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
@@ -31,10 +32,48 @@ jobs:
       - uses: swift-actions/setup-swift@v1
         with:
           swift-version: ${{ matrix.swift }}
+
       - uses: actions/checkout@v2
 
       - name: Run Tests
         run: swift test
+
+  # Unable to build at this time with a dependency of SwiftNIO
+  # Soon maybe? https://forums.swift.org/t/windows-nio/35003
+  #
+  # run_tests_windows:
+  #   name: Test Swift v${{ matrix.swift }} on ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [windows-latesst]
+  #       swift: ["5.8.1"]
+
+  #   env:
+  #     COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
+  #     BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
+  #     ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
+  #     ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
+  #     FTM_SCAN_KEY: ${{ secrets.FTM_SCAN_KEY }}
+  #     FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
+  #     BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
+  #     BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
+  #     POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
+  #     POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
+  #     OPTIMISTIC_ETHER_SCAN_KEY: ${{ secrets.OPTIMISTIC_ETHER_SCAN_KEY }}
+  #     OPTIMISTIC_TEST_CONTRACT_ADDRESS: ${{ secrets.OPTIMISTIC_TEST_CONTRACT_ADDRESS }}
+  #     TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
+
+  #   steps:
+  #     - uses: compnerd/gha-setup-swift@main
+  #       with:
+  #         branch: swift-${{ matrix.swift }}-release
+  #         tag: ${{ matrix.swift }}-RELEASE
+
+  #     - uses: actions/checkout@v2
+
+  #     - name: Run Tests
+  #       run: swift test
 
   #####################################
   # swift 5.8 has removed generate-xcodeproj, so we'll need to find a different

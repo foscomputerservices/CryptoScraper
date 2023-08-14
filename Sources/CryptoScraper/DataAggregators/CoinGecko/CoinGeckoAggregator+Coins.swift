@@ -125,7 +125,7 @@ private extension String {
              "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
              "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
              "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
-             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain":
+             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain", "pulsechain", "sui", "base", "ordinals", "linea", "the-open-network", "kujira", "trustless-computer", "mantle", "eos-evm", "rollux", "callisto", "tenet", "neon-evm":
             return nil
 
         default:

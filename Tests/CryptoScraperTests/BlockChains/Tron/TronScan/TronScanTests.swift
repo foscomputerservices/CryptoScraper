@@ -34,6 +34,7 @@ final class TronScanTests: XCTestCase {
     }
 
     func testGetTransactions() async throws {
+        sleep(2) // Overcomes rate limiting
         let transactions = try await tronScan.getTransactions(forAccount: accountContract)
         XCTAssertGreaterThan(transactions.count, 0)
     }

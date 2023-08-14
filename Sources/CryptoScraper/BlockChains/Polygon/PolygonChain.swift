@@ -31,12 +31,10 @@ public final class PolygonChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<MaticContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<MaticContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<MaticContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<MaticContract>
             tokens![token.contractAddress.address] = token
         }
     }
@@ -47,7 +45,7 @@ public final class PolygonChain: CryptoChain {
 
     public let scanner: PolygonScan? = .init()
 
-    static let maticContractAddress = "Matic"
+    static let maticContractAddress = "matic"
 
     public static let `default`: PolygonChain = .init()
 

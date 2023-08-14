@@ -22,7 +22,13 @@ final class CryptoScraperTests: XCTestCase {
             }
         }
 
-        XCTAssertGreaterThan(EthereumChain.default.chainTokenInfos.count, 4000)
-        XCTAssertGreaterThan(FantomChain.default.chainTokenInfos.count, 300)
+        XCTAssertGreaterThan(
+            EthereumChain.default.chainTokenInfos.count,
+            CoinGeckoAggregator.expectedMinTokenCount(for: EthereumContract.self)
+        )
+        XCTAssertGreaterThan(
+            FantomChain.default.chainTokenInfos.count,
+            CoinGeckoAggregator.expectedMinTokenCount(for: FantomContract.self)
+        )
     }
 }

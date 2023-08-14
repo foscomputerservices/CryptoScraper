@@ -55,7 +55,7 @@ private struct CurrencyMapItem: Decodable {
     let isActive: Int
     let status: String?
     let firstHistoricalData: String
-    let lastHistoricalData: String
+    let lastHistoricalData: String?
     let platform: Platform?
 
     func token<Contract: CryptoContract>(for contract: Contract.Type) throws -> CoinMarketCapTokenInfo<Contract>? {
@@ -134,13 +134,13 @@ private extension String {
         switch self {
         case "Ethereum": return .ethereum
         case "Fantom": return .fantom
-        case "BNB": return .binance
+        case "BNB", "BNB Smart Chain (BEP20)": return .binance
         case "Polygon": return .polygon
         case "Optimism": return .optimism
-        case "TRON": return .tron
+        case "TRON", "Tron20": return .tron
 
         // TODO: Unsupported chains
-        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra", "Rootstock Smart Bitcoin", "Core", "OKT Chain", "Arbitrum", "Kava", "Radix", "zkSync":
+        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra", "Rootstock Smart Bitcoin", "Core", "OKT Chain", "Arbitrum", "Kava", "Radix", "zkSync", "Fuse", "Sui", "WEMIX", "Klever", "NULS", "BNB Beacon Chain (BEP2)", "Avalanche C-Chain", "RSK RBTC", "Tron10", "ONT", "Xinfin Network", "Arbitrum Nova", "Gnosis Chain", "HECO", "Fusion Network", "zkSync Era", "OKExChain", "KCC", "Elrond", "Sora", "Hedera Hashgraph", "Bitcichain", "XRP Ledger", "IoTex", "Near", "Metis Andromeda", "Songbird Network", "Theta Network", "Avalanche DFK", "Flow", "SUI", "Dogechain", "Canto", "Step", "Wemix", "TON", "PulseChain", "EOS EVM", "Ordinals-BRC20", "Polygon zkEVM", "Mantle", "NEON EVM", "Linea", "Base":
             return nil
 
         default:

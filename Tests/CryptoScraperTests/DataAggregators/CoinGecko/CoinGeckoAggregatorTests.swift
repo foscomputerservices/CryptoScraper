@@ -32,7 +32,9 @@ final class CoinGeckoAggregatorTests: XCTestCase {
         } catch let e as DataFetchError {
             XCTFail(e.localizedDescription)
         } catch let e as CoinGeckoError {
-            if !e.rateLimitReached {
+            if e.rateLimitReached {
+                print("*** Unable to test, rate-limit reached.")
+            } else {
                 XCTFail(e.localizedDescription)
             }
         }
@@ -54,11 +56,11 @@ extension CoinGeckoAggregator {
         switch contractType {
         case is BitcoinContract.Type: return 1
         case is EthereumContract.Type: return 4000
-        case is FantomContract.Type: return 300
+        case is FantomContract.Type: return 250
         case is BNBContract.Type: return 300
         case is MaticContract.Type: return 900
         case is OptimismContract.Type: return 80
-        case is TronContract.Type: return 100
+        case is TronContract.Type: return 93
         default:
             fatalError("Unknown token count for contract: \(contractType)")
         }

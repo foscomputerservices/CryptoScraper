@@ -6,7 +6,7 @@
 import Foundation
 
 public final class BitcoinChain: CryptoChain {
-    // MARK: CryptoChain
+    // MARK: CryptoChain Protocol
 
     public let userReadableName: String = "Bitcoin"
 
@@ -31,12 +31,10 @@ public final class BitcoinChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<BitcoinContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<BitcoinContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<BitcoinContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<BitcoinContract>
             tokens![token.contractAddress.address] = token
         }
 
@@ -51,7 +49,7 @@ public final class BitcoinChain: CryptoChain {
 
     public let scanner: BlockChainInfo? = .init()
 
-    static var btcContractAddress: String { "BTC" }
+    static let btcContractAddress: String = "btc"
 
     public static var `default`: BitcoinChain = .init()
 

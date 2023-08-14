@@ -11,6 +11,7 @@ public struct Etherscan: EthereumScanner {
 
     public typealias Contract = EthereumContract
 
+    public static let supportedERCTokenTypes: Set<ERCTokenType> = Set(ERCTokenType.allCases)
     public static let endPoint: URL = .init(string: "https://api.etherscan.io/api")!
     public static let apiKeyName: String = "ETHER_SCAN_KEY"
     public let userReadableName: String = "Etherscan"

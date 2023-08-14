@@ -31,12 +31,10 @@ public final class EthereumChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<EthereumContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<EthereumContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<EthereumContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<EthereumContract>
             tokens![token.contractAddress.address] = token
         }
     }
@@ -47,7 +45,7 @@ public final class EthereumChain: CryptoChain {
 
     public let scanner: Etherscan? = .init()
 
-    static let ethContractAddress = "ETH"
+    static let ethContractAddress = "eth"
 
     public static let `default`: EthereumChain = .init()
 

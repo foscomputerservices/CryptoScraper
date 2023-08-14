@@ -16,6 +16,24 @@ public extension TronScan {
 
         return try response.cryptoTransactions(forAccount: account)
     }
+
+    /// Retrieves the ``CryptoTransaction`` entries from the provided ``Data``
+    func loadTransactions(from data: Data) throws -> [CryptoTransaction] {
+        guard !data.isEmpty else {
+            return []
+        }
+
+        var result = [CryptoTransaction]()
+        let mainContract = Contract(address: "dummy").chain.mainContract!
+
+        let response: SingleAddressResponse = try data.fromJSON()
+
+        result += try response.cryptoTransactions(
+            forAccount: mainContract
+        )
+
+        return result
+    }
 }
 
 // {
@@ -127,6 +145,7 @@ private struct Transaction: Decodable {
 }
 
 private struct TronTransaction: CryptoTransaction {
+    let hash: String
     var fromContract: (any CryptoContract)? { _fromContract }
     var toContract: (any CryptoContract)? { _toContract }
     let amount: CryptoAmount
@@ -136,11 +155,14 @@ private struct TronTransaction: CryptoTransaction {
     let gasPrice: CryptoAmount?
     var gasUsed: CryptoAmount? { nil }
     var successful: Bool { true }
+    var functionName: String? { nil }
+    var type: String? { nil }
 
     private let _fromContract: TronContract
     private let _toContract: TronContract
 
     init(transaction: Transaction) {
+        self.hash = transaction.hash
         self._fromContract = TronContract(address: transaction.ownerAddress)
         self._toContract = TronContract(address: transaction.toAddress)
         self.amount = .init(quantity: UInt128(transaction.amount) ?? 0, contract: TronChain.default.mainContract)

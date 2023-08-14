@@ -41,7 +41,7 @@ public struct BitcoinContract: CryptoContract, Codable, Stubbable {
     /// - Parameters:
     ///   - address: The address of the contract
     public init(address: String) {
-        self.address = address
+        self.address = address // Case sensitive for BTC
     }
 }
 

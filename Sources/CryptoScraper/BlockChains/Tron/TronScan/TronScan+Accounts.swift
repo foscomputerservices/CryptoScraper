@@ -44,17 +44,17 @@ private struct BalanceResponse: Decodable {
         !responses.isEmpty
     }
 
-    func cryptoAmount(forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forAccount trxContract: any CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw TronScanResponseError.unknownContract(btcContract.address)
+            throw TronScanResponseError.unknownContract(trxContract.address)
         }
 
         return .init(quantity: responses.trxBalance, contract: TronChain.default.mainContract)
     }
 
-    func cryptoAmount(forToken contract: any CryptoContract, forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
+    func cryptoAmount(forToken contract: any CryptoContract, forAccount trxContract: any CryptoContract) throws -> CryptoAmount {
         guard success else {
-            throw TronScanResponseError.unknownContract(btcContract.address)
+            throw TronScanResponseError.unknownContract(trxContract.address)
         }
 
         return .init(quantity: responses.trxBalance(forToken: contract), contract: contract)

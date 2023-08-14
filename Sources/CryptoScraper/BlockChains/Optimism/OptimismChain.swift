@@ -31,12 +31,10 @@ public final class OptimismChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<OptimismContract>]?
-    private func loadChainTokens(from newTokens: any Collection<SimpleTokenInfo<OptimismContract>>) {
+    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<OptimismContract>> {
         tokens = tokens ?? [:]
 
         for token in newTokens {
-            // I do not understand why the next line is needed 🤷‍♂️
-            let token = token as! SimpleTokenInfo<OptimismContract>
             tokens![token.contractAddress.address] = token
         }
     }
@@ -47,7 +45,7 @@ public final class OptimismChain: CryptoChain {
         tokens?[address]
     }
 
-    static let opContractAddress = "OP"
+    static let opContractAddress = EthereumChain.ethContractAddress // ETH is the chain token
 
     public static let `default`: OptimismChain = .init()
 

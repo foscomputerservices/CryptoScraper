@@ -51,7 +51,7 @@ public struct BNBContract: CryptoContract, Stubbable {
     /// - Parameters:
     ///   - address: The address of the contract
     public init(address: String) {
-        self.address = address
+        self.address = address.lowercased()
     }
 }
 
