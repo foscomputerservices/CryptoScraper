@@ -7,11 +7,12 @@ import FOSFoundation
 import Foundation
 
 public struct BitcoinContract: CryptoContract, Codable, Stubbable {
-    public enum Unit: String, Codable {
+    public enum Units: CurrencyUnits {
         case satoshi
         case btc
 
-        public var chainBaseUnit: Unit { .satoshi }
+        public static var chainBaseUnits: Self { .satoshi }
+        public static var defaultDisplayUnits: Self { .btc }
     }
 
     // MARK: CryptoContract Protocol
@@ -20,20 +21,6 @@ public struct BitcoinContract: CryptoContract, Codable, Stubbable {
     public var chain: BitcoinChain { Chain.default }
     public var isChainToken: Bool {
         address == BitcoinChain.btcContractAddress
-    }
-
-    /// Converts a given amount for display in other chain units
-    ///
-    /// - NOTE: The resulting value is for **display purposes only**; no
-    ///      calculations should be done using the result as all calculations
-    ///      should be performed in the chain's base units so that no
-    ///      rounding errors occur.
-    ///
-    /// - Parameters:
-    ///   - amount: The amount in the chain's base unit
-    ///   - inUnits: The units to display the amount in
-    public func displayAmount(amount: UInt128, inUnits: Unit) -> Double {
-        Double(amount) / Double(inUnits.divisorFromBase)
     }
 
     /// Initializes the ``BitcoinContract``
@@ -69,15 +56,29 @@ public extension BitcoinContract {
     }
 }
 
-private extension BitcoinContract.Unit {
+public extension BitcoinContract.Units {
     var divisorFromBase: UInt128 {
         let exponent: Double
 
         switch self {
-        case .satoshi: exponent = 1
+        case .satoshi: exponent = 0
         case .btc: exponent = 8
         }
 
         return UInt128(pow(10, exponent))
+    }
+
+    var displayIdentifier: String {
+        switch self {
+        case .satoshi: return "SAT"
+        case .btc: return "BTC"
+        }
+    }
+
+    var displayFractionDigits: Int {
+        switch self {
+        case .satoshi: return 0
+        case .btc: return 8
+        }
     }
 }

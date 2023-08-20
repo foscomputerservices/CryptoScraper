@@ -46,7 +46,7 @@ public enum EthereumScannerResponseError: Error {
     /// The request failed for some unknown reason, see *error*
     case requestFailed(_ error: String)
 
-    /// The amount received could not be converted to a ``CryptoAmount``
+    /// The amount received could not be converted to a ``Amount``
     case invalidAmount
 
     /// The  *value* for *field* could not be converted to type *type*

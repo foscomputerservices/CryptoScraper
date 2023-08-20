@@ -13,6 +13,7 @@ public protocol CryptoChain: AnyObject, Hashable, Identifiable {
     /// The type of ``TokenInfo`` for this chain
     associatedtype Info: TokenInfo where Info.Contract == Contract
 
+    /// The type of ``CryptoScanner`` for this chain
     associatedtype Scanner: CryptoScanner where Scanner.Contract == Contract
 
     /// A human-readable string that identifies this block chain
@@ -58,7 +59,7 @@ public extension CryptoChain {
     // MARK: Identifiable Protocol
 
     var id: String {
-        String(reflecting: Contract.self)
+        String(reflecting: Self.self)
     }
 
     // MARK: Hashable Protocol

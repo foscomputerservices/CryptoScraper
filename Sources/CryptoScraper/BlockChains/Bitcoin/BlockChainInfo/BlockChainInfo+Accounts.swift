@@ -9,12 +9,12 @@ public extension BlockChainInfo {
     /// Returns the balance (in BTC) of the given account
     ///
     /// - Parameter account: The Bitcoin account to query the balance for
-    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> Amount<BitcoinContract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "balance").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch(errorType: BalanceError.self)
 
-        return try response.cryptoAmount(forAccount: account)
+        return try response.amount(forAccount: account)
     }
 
     /// Returns balance of the given token for the given address
@@ -22,7 +22,7 @@ public extension BlockChainInfo {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
-    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<BitcoinContract> {
         // Cannot retrieve ETH contract, but retrieve ETH balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
@@ -51,16 +51,14 @@ private struct BalanceResponse: Decodable {
         !responses.isEmpty
     }
 
-    func cryptoAmount(forAccount btcContract: any CryptoContract) throws -> CryptoAmount {
+    func amount(forAccount btcContract: BitcoinContract) throws -> Amount<BitcoinContract> {
         guard success, let response = responses.first(where: { $0.key == btcContract.address })?.value else {
             throw BlockChainInfoResponseError.unknownContract(btcContract.address)
         }
 
-        let chain = btcContract.chain as (any CryptoChain)
-
         return .init(
             quantity: UInt128(response.finalBalance),
-            contract: chain.mainContract as (any CryptoContract)
+            currency: btcContract.chain.mainContract
         )
     }
 

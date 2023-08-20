@@ -25,7 +25,7 @@ final class OptimisticEtherscanTests: XCTestCase {
         let balance = try await optimismScan.getBalance(forAccount: accountContract)
         XCTAssertGreaterThan(balance.quantity, 0)
 
-        let optBalance = accountContract.displayAmount(amount: balance.quantity, inUnits: .ether)
+        let optBalance = balance.value(units: .ether)
         XCTAssertGreaterThan(optBalance, 0)
     }
 
@@ -60,8 +60,8 @@ final class OptimisticEtherscanTests: XCTestCase {
         }
     }
 
-    func testGetTokenBalance_wBTC() async throws {
-        let wBtcToken = OptimismContract(address: "0x68f180fcce6836688e9084f035309e29bf0a2095")
+    func testGetTokenBalance_awBTC() async throws {
+        let wBtcToken = OptimismContract(address: "0x078f358208685046a11c85e8ad32895ded33a249")
 
         do {
             let wBtcBalance = try await optimismScan.getBalance(forToken: wBtcToken, forAccount: accountContract)

@@ -31,7 +31,7 @@ public final class EthereumChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<EthereumContract>]?
-    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<EthereumContract>> {
+    private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<EthereumContract>>) {
         tokens = tokens ?? [:]
 
         for token in newTokens {

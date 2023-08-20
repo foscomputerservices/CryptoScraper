@@ -27,8 +27,9 @@ final class EVMNormalTransactionTests: XCTestCase {
                 .init(name: "owner", value: .address(value: "0f19af7e10354ec2dc3243eb20f39ebfdc86470e")),
                 .init(name: "witness", value: .address(value: "61fe0f138b860a7aaa0ae86fc0856917b0bb3988")),
                 .init(name: "data", value: .bytes(value: "67656c61746f6e6574776f726b245470281f255b8adf968bf12666c58df388dc00000000000000000000000000000000000000000000000000000000000000600000000000000000000000007130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c000000000000000000000000000000000000000000000000004aef5726a2ea8c000000000000000000000000".data(using: .utf8)!)),
-                .init(name: "secret", value: .address(value: "88f8ccc064ba2d39cf08d57b6e7504a7b6be8e4e")),
-            ])
+                .init(name: "secret", value: .address(value: "88f8ccc064ba2d39cf08d57b6e7504a7b6be8e4e"))
+            ]
+        )
     ]
 }
 
@@ -85,17 +86,19 @@ extension EVMArgumentValue: Equatable {
 }
 
 private struct TestTransaction: EVMNormalTransaction {
+    typealias Chain = ZeroAmountChain
+
     let methodId: String = ""
     let input: String
     let hash: String = ""
-    let fromContract: (any CryptoContract)? = nil
-    let toContract: (any CryptoContract)? = nil
-    let amount: CryptoAmount = .zero
+    let fromContract: Chain.Contract? = nil
+    let toContract: Chain.Contract? = nil
+    let amount: Amount<Chain.Contract> = .zero
     let timeStamp: Date = .init()
     let transactionId: String = ""
     let gas: Int? = nil
-    let gasPrice: CryptoAmount? = nil
-    let gasUsed: CryptoAmount? = nil
+    let gasPrice: Amount<Chain.Contract>? = nil
+    let gasUsed: Amount<Chain.Contract>? = nil
     let successful: Bool = true
     let functionName: String?
     let type: String? = nil

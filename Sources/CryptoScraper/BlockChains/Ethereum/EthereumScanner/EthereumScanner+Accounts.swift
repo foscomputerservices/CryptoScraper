@@ -9,12 +9,12 @@ public extension EthereumScanner {
     /// Returns the balance (in Ethereum) of the given account
     ///
     /// - Parameter account: The Ethereum account to query the balance for
-    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> Amount<Contract> {
         let response: AccountResponse = try await Self.endPoint.appending(
             queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.requireApiKey())
         ).fetch()
 
-        return try response.cryptoAmount(
+        return try response.amount(
             forAccount: account.chain.mainContract
         )
     }
@@ -29,7 +29,7 @@ private struct AccountResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoAmount(forAccount ethContract: some CryptoContract) throws -> CryptoAmount {
+    func amount<C: CryptoContract>(forAccount ethContract: C) throws -> Amount<C> {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(result)
         }
@@ -38,7 +38,7 @@ private struct AccountResponse: Decodable {
             throw EthereumScannerResponseError.invalidAmount
         }
 
-        return .init(quantity: amount, contract: ethContract)
+        return .init(quantity: amount, currency: ethContract)
     }
 
     // https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address

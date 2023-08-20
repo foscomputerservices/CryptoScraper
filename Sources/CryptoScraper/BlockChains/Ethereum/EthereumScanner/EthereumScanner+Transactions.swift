@@ -11,12 +11,12 @@ public extension EthereumScanner {
     /// - NOTE: This implementation includes ERC20 transactions as well as "normal" transactions.
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
         let response: TransactionResponse = try await Self.endPoint.appending(
             queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.requireApiKey())
         ).fetch()
 
-        var result = [CryptoTransaction]()
+        var result = [any CryptoTransaction]()
 
         result += try response.cryptoTransactions(
             ethContract: account.chain.mainContract
@@ -38,7 +38,7 @@ public extension EthereumScanner {
     ///
     /// - Parameter token: An optional token to filter the responses
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getInternalTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getInternalTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
         let response: InternalTransactionResponse = try await Self.endPoint.appending(
             queryItems: InternalTransactionResponse.httpQuery(address: account, apiKey: Self.requireApiKey())
         ).fetch()
@@ -52,7 +52,7 @@ public extension EthereumScanner {
     ///
     /// - Parameter token: An optional token to filter the responses
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getERC20Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getERC20Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
         let response: ERC20TokenTransactionResponse = try await Self.endPoint.appending(
@@ -68,7 +68,7 @@ public extension EthereumScanner {
     ///
     /// - Parameter token: An optional token to filter the responses
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getERC721Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getERC721Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
         let response: ERC721TokenTransactionResponse = try await Self.endPoint.appending(
@@ -84,7 +84,7 @@ public extension EthereumScanner {
     ///
     /// - Parameter token: An optional token to filter the responses
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getERC1155Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getERC1155Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
         let response: ERC1155TokenTransactionResponse = try await Self.endPoint.appending(
@@ -101,12 +101,12 @@ public extension EthereumScanner {
     /// Ethereum provides for many different sources of transactions, each with their own
     /// format.  This implementation tries each format and returns an empty array if nothing
     /// matches.
-    func loadTransactions(from data: Data) throws -> [CryptoTransaction] {
+    func loadTransactions(from data: Data) throws -> [any CryptoTransaction] {
         guard !data.isEmpty else {
             return []
         }
 
-        var result = [CryptoTransaction]()
+        var result = [any CryptoTransaction]()
         let mainContract = Contract(address: "dummy").chain.mainContract!
 
         // Try TransactionResponse
@@ -170,7 +170,7 @@ private struct TransactionResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(message)
         }
@@ -212,22 +212,22 @@ private struct TransactionResponse: Decodable {
         let methodId: String
         let functionName: String
 
-        func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
-            try MappedTransaction(transaction: self, ethContract: ethContract)
+        func cryptoTransaction<C: CryptoContract>(ethContract: C) throws -> any CryptoTransaction {
+            try MappedTransaction<C.Chain>(transaction: self, ethContract: ethContract)
         }
 
-        private struct MappedTransaction<Contract: CryptoContract>: EVMNormalTransaction {
+        private struct MappedTransaction<Chain: CryptoChain>: EVMNormalTransaction {
             // MARK: CryptoTransaction
 
             let hash: String
-            var fromContract: (any CryptoContract)? { _fromContract }
-            var toContract: (any CryptoContract)? { _toContract }
-            let amount: CryptoAmount
+            var fromContract: Chain.Contract? { _fromContract }
+            var toContract: Chain.Contract? { _toContract }
+            let amount: Amount<Chain.Contract>
             let timeStamp: Date
             let transactionId: String
             let gas: Int?
-            let gasPrice: CryptoAmount?
-            let gasUsed: CryptoAmount?
+            let gasPrice: Amount<Chain.Contract>?
+            let gasUsed: Amount<Chain.Contract>?
             let successful: Bool
 
             let methodId: String
@@ -235,22 +235,22 @@ private struct TransactionResponse: Decodable {
             let input: String
             var type: String? { "normal" }
 
-            private let _fromContract: Contract?
-            private let _toContract: Contract?
+            private let _fromContract: Chain.Contract?
+            private let _toContract: Chain.Contract?
 
-            init(transaction: Transaction, ethContract: Contract) throws {
+            init(transaction: Transaction, ethContract: Chain.Contract) throws {
                 self.hash = transaction.hash
                 self._fromContract = transaction.from.isEmpty
                     ? nil
-                    : Contract(address: transaction.from)
+                    : Chain.Contract(address: transaction.from)
                 self._toContract = transaction.to.isEmpty
                     ? nil
-                    : Contract(address: transaction.to)
+                    : Chain.Contract(address: transaction.to)
 
                 let amount = UInt128(transaction.value)
                 self.amount = amount == nil
-                    ? .init(quantity: 0, contract: ethContract)
-                    : .init(quantity: amount!, contract: ethContract)
+                    ? .init(quantity: 0, currency: ethContract)
+                    : .init(quantity: amount!, currency: ethContract)
                 guard let timestamp = TimeInterval(transaction.timeStamp) else {
                     throw EthereumScannerResponseError.invalidData(
                         type: "Transaction",
@@ -265,11 +265,11 @@ private struct TransactionResponse: Decodable {
                 let gasPrice = UInt128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
-                    : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+                    : Amount(quantity: gasPrice!, currency: ethContract)
                 let gasUsed = UInt128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
-                    : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                    : Amount(quantity: gasUsed!, currency: ethContract)
                 self.successful = transaction.isError == "0"
                 self.methodId = transaction.methodId
                 self.functionName = transaction.functionName.isEmpty
@@ -293,7 +293,7 @@ private struct InternalTransactionResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(message)
         }
@@ -329,42 +329,42 @@ private struct InternalTransactionResponse: Decodable {
         let isError: String
         let errCode: String
 
-        func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
-            try MappedTransaction(transaction: self, ethContract: ethContract)
+        func cryptoTransaction<C: CryptoContract>(ethContract: C) throws -> any CryptoTransaction {
+            try MappedTransaction<C.Chain>(transaction: self, ethContract: ethContract)
         }
 
-        private struct MappedTransaction<Contract: CryptoContract>: CryptoTransaction {
+        private struct MappedTransaction<Chain: CryptoChain>: CryptoTransaction {
             // MARK: CryptoTransaction
 
             let hash: String
-            var fromContract: (any CryptoContract)? { _fromContract }
-            var toContract: (any CryptoContract)? { _toContract }
-            let amount: CryptoAmount
+            var fromContract: Chain.Contract? { _fromContract }
+            var toContract: Chain.Contract? { _toContract }
+            let amount: Amount<Chain.Contract>
             let timeStamp: Date
             let transactionId: String
             let gas: Int?
-            let gasPrice: CryptoAmount?
-            let gasUsed: CryptoAmount?
+            let gasPrice: Amount<Chain.Contract>?
+            let gasUsed: Amount<Chain.Contract>?
             let successful: Bool
             let functionName: String?
             var type: String? { "internal" }
 
-            private let _fromContract: Contract?
-            private let _toContract: Contract?
+            private let _fromContract: Chain.Contract?
+            private let _toContract: Chain.Contract?
 
-            init(transaction: Transaction, ethContract: Contract) throws {
+            init(transaction: Transaction, ethContract: Chain.Contract) throws {
                 self.hash = transaction.hash
                 self._fromContract = transaction.from.isEmpty
                     ? nil
-                    : Contract(address: transaction.from)
+                    : Chain.Contract(address: transaction.from)
                 self._toContract = transaction.to.isEmpty
                     ? nil
-                    : Contract(address: transaction.to)
+                    : Chain.Contract(address: transaction.to)
 
                 let amount = UInt128(transaction.value)
                 self.amount = amount == nil
-                    ? .init(quantity: 0, contract: ethContract)
-                    : .init(quantity: amount!, contract: ethContract)
+                    ? .init(quantity: 0, currency: ethContract)
+                    : .init(quantity: amount!, currency: ethContract)
                 guard let timestamp = TimeInterval(transaction.timeStamp) else {
                     throw EthereumScannerResponseError.invalidData(
                         type: "Transaction",
@@ -378,11 +378,11 @@ private struct InternalTransactionResponse: Decodable {
 
                 // TODO: Gas price comes from the base transaction
                 let gasPrice = UInt128(0)
-                self.gasPrice = CryptoAmount(quantity: gasPrice, contract: ethContract)
+                self.gasPrice = Amount(quantity: gasPrice, currency: ethContract)
                 let gasUsed = UInt128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
-                    : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                    : Amount(quantity: gasUsed!, currency: ethContract)
                 self.successful = transaction.isError == "0"
                 self.functionName = nil
             }
@@ -402,7 +402,7 @@ private struct ERC20TokenTransactionResponse: Decodable {
         status == "1" || message == "OK" || message == "No transactions found"
     }
 
-    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(message)
         }
@@ -479,45 +479,45 @@ private struct ERC20TokenTransactionResponse: Decodable {
         let input: String
         let confirmations: String
 
-        func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
-            try MappedTransaction(transaction: self, ethContract: ethContract)
+        func cryptoTransaction<C: CryptoContract>(ethContract: C) throws -> any CryptoTransaction {
+            try MappedTransaction<C.Chain>(transaction: self, ethContract: ethContract)
         }
 
         // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
-        private struct MappedTransaction<Contract: CryptoContract>: CryptoTransaction {
+        private struct MappedTransaction<Chain: CryptoChain>: CryptoTransaction {
             // MARK: CryptoTransaction
 
             let hash: String
-            var fromContract: (any CryptoContract)? { _fromContract }
-            var toContract: (any CryptoContract)? { _toContract }
-            let amount: CryptoAmount
+            var fromContract: Chain.Contract? { _fromContract }
+            var toContract: Chain.Contract? { _toContract }
+            let amount: Amount<Chain.Contract>
             let timeStamp: Date
             let transactionId: String
             let gas: Int?
-            let gasPrice: CryptoAmount?
-            let gasUsed: CryptoAmount?
+            let gasPrice: Amount<Chain.Contract>?
+            let gasUsed: Amount<Chain.Contract>?
             let successful: Bool
             let functionName: String?
             var type: String? { "erc20" }
 
-            private let _fromContract: Contract?
-            private let _toContract: Contract?
+            private let _fromContract: Chain.Contract?
+            private let _toContract: Chain.Contract?
 
-            init(transaction: ERC20TokenTransaction, ethContract: Contract) throws {
-                let tokenContract = Contract(address: transaction.contractAddress)
+            init(transaction: ERC20TokenTransaction, ethContract: Chain.Contract) throws {
+                let tokenContract = Chain.Contract(address: transaction.contractAddress)
 
                 self.hash = transaction.hash
                 self._fromContract = transaction.from.isEmpty
                     ? nil
-                    : Contract(address: transaction.from)
+                    : Chain.Contract(address: transaction.from)
                 self._toContract = transaction.to.isEmpty
                     ? nil
-                    : Contract(address: transaction.to)
+                    : Chain.Contract(address: transaction.to)
 
                 let amount = UInt128(transaction.value)
                 self.amount = amount == nil
-                    ? .init(quantity: 0, contract: tokenContract)
-                    : .init(quantity: amount!, contract: tokenContract)
+                    ? .init(quantity: 0, currency: tokenContract)
+                    : .init(quantity: amount!, currency: tokenContract)
                 guard let timestamp = TimeInterval(transaction.timeStamp) else {
                     throw EthereumScannerResponseError.invalidData(
                         type: "Transaction",
@@ -532,11 +532,11 @@ private struct ERC20TokenTransactionResponse: Decodable {
                 let gasPrice = UInt128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
-                    : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+                    : Amount(quantity: gasPrice!, currency: ethContract)
                 let gasUsed = UInt128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
-                    : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                    : Amount(quantity: gasUsed!, currency: ethContract)
                 self.successful = true
                 self.functionName = nil
             }
@@ -556,7 +556,7 @@ private struct ERC721TokenTransactionResponse: Decodable {
         status == "1" || message == "OK" || message == "No transactions found"
     }
 
-    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(message)
         }
@@ -633,43 +633,43 @@ private struct ERC721TokenTransactionResponse: Decodable {
         let input: String
         let confirmations: String
 
-        func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
-            try MappedTransaction(transaction: self, ethContract: ethContract)
+        func cryptoTransaction<C: CryptoContract>(ethContract: C) throws -> any CryptoTransaction {
+            try MappedTransaction<C.Chain>(transaction: self, ethContract: ethContract)
         }
 
         // https://ethereum.org/en/developers/docs/standards/tokens/erc-721/ (NFT)
-        private struct MappedTransaction<Contract: CryptoContract>: CryptoTransaction {
+        private struct MappedTransaction<Chain: CryptoChain>: CryptoTransaction {
             // MARK: CryptoTransaction
 
             let hash: String
-            var fromContract: (any CryptoContract)? { _fromContract }
-            var toContract: (any CryptoContract)? { _toContract }
-            let amount: CryptoAmount
+            var fromContract: Chain.Contract? { _fromContract }
+            var toContract: Chain.Contract? { _toContract }
+            let amount: Amount<Chain.Contract>
             let timeStamp: Date
             let transactionId: String
             let gas: Int?
-            let gasPrice: CryptoAmount?
-            let gasUsed: CryptoAmount?
+            let gasPrice: Amount<Chain.Contract>?
+            let gasUsed: Amount<Chain.Contract>?
             let successful: Bool
             let functionName: String?
             var type: String? { "erc721" }
 
-            private let _fromContract: Contract?
-            private let _toContract: Contract?
+            private let _fromContract: Chain.Contract?
+            private let _toContract: Chain.Contract?
 
-            init(transaction: ERC721TokenTransaction, ethContract: Contract) throws {
-                let tokenContract = Contract(address: transaction.contractAddress)
+            init(transaction: ERC721TokenTransaction, ethContract: Chain.Contract) throws {
+                let tokenContract = Chain.Contract(address: transaction.contractAddress)
 
                 self.hash = transaction.hash
                 self._fromContract = transaction.from.isEmpty
                     ? nil
-                    : Contract(address: transaction.from)
+                    : Chain.Contract(address: transaction.from)
                 self._toContract = transaction.to.isEmpty
                     ? nil
-                    : Contract(address: transaction.to)
+                    : Chain.Contract(address: transaction.to)
 
                 // NFTs don't represent an amount
-                self.amount = .init(quantity: 0, contract: tokenContract)
+                self.amount = .init(quantity: 0, currency: tokenContract)
                 guard let timestamp = TimeInterval(transaction.timeStamp) else {
                     throw EthereumScannerResponseError.invalidData(
                         type: "Transaction",
@@ -684,11 +684,11 @@ private struct ERC721TokenTransactionResponse: Decodable {
                 let gasPrice = UInt128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
-                    : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+                    : Amount(quantity: gasPrice!, currency: ethContract)
                 let gasUsed = UInt128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
-                    : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                    : Amount(quantity: gasUsed!, currency: ethContract)
                 self.successful = true
                 self.functionName = nil
             }
@@ -708,7 +708,7 @@ private struct ERC1155TokenTransactionResponse: Decodable {
         status == "1" || message == "OK" || message == "No transactions found"
     }
 
-    func cryptoTransactions(ethContract: some CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(message)
         }
@@ -785,45 +785,45 @@ private struct ERC1155TokenTransactionResponse: Decodable {
         let tokenSymbol: String
         let confirmations: String
 
-        func cryptoTransaction(ethContract: some CryptoContract) throws -> CryptoTransaction {
-            try MappedTransaction(transaction: self, ethContract: ethContract)
+        func cryptoTransaction<C: CryptoContract>(ethContract: C) throws -> any CryptoTransaction {
+            try MappedTransaction<C.Chain>(transaction: self, ethContract: ethContract)
         }
 
         // https://eips.ethereum.org/EIPS/eip-1155
-        private struct MappedTransaction<Contract: CryptoContract>: CryptoTransaction {
+        private struct MappedTransaction<Chain: CryptoChain>: CryptoTransaction {
             // MARK: CryptoTransaction
 
             let hash: String
-            var fromContract: (any CryptoContract)? { _fromContract }
-            var toContract: (any CryptoContract)? { _toContract }
-            let amount: CryptoAmount
+            var fromContract: Chain.Contract? { _fromContract }
+            var toContract: Chain.Contract? { _toContract }
+            let amount: Amount<Chain.Contract>
             let timeStamp: Date
             let transactionId: String
             let gas: Int?
-            let gasPrice: CryptoAmount?
-            let gasUsed: CryptoAmount?
+            let gasPrice: Amount<Chain.Contract>?
+            let gasUsed: Amount<Chain.Contract>?
             let successful: Bool
             let functionName: String?
             var type: String? { "erc1155" }
 
-            private let _fromContract: Contract?
-            private let _toContract: Contract?
+            private let _fromContract: Chain.Contract?
+            private let _toContract: Chain.Contract?
 
-            init(transaction: ERC1155TokenTransaction, ethContract: Contract) throws {
-                let tokenContract = Contract(address: transaction.contractAddress)
+            init(transaction: ERC1155TokenTransaction, ethContract: Chain.Contract) throws {
+                let tokenContract = Chain.Contract(address: transaction.contractAddress)
 
                 self.hash = transaction.hash
                 self._fromContract = transaction.from.isEmpty
                     ? nil
-                    : Contract(address: transaction.from)
+                    : Chain.Contract(address: transaction.from)
                 self._toContract = transaction.to.isEmpty
                     ? nil
-                    : Contract(address: transaction.to)
+                    : Chain.Contract(address: transaction.to)
 
                 let amount = UInt128(transaction.tokenValue)
                 self.amount = amount == nil
-                    ? .init(quantity: 0, contract: tokenContract)
-                    : .init(quantity: amount!, contract: tokenContract)
+                    ? .init(quantity: 0, currency: tokenContract)
+                    : .init(quantity: amount!, currency: tokenContract)
                 guard let timestamp = TimeInterval(transaction.timeStamp) else {
                     throw EthereumScannerResponseError.invalidData(
                         type: "Transaction",
@@ -838,11 +838,11 @@ private struct ERC1155TokenTransactionResponse: Decodable {
                 let gasPrice = UInt128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
-                    : CryptoAmount(quantity: gasPrice!, contract: ethContract)
+                    : Amount(quantity: gasPrice!, currency: ethContract)
                 let gasUsed = UInt128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
-                    : CryptoAmount(quantity: gasUsed!, contract: ethContract)
+                    : Amount(quantity: gasUsed!, currency: ethContract)
                 self.successful = true
                 self.functionName = nil
             }

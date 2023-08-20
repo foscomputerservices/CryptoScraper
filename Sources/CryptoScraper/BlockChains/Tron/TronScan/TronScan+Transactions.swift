@@ -9,7 +9,7 @@ public extension TronScan {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
         let response: SingleAddressResponse = try await Self.endPoint.appending(path: "transaction").appending(
             queryItems: SingleAddressResponse.httpQuery(address: account)
         ).fetch()
@@ -18,12 +18,12 @@ public extension TronScan {
     }
 
     /// Retrieves the ``CryptoTransaction`` entries from the provided ``Data``
-    func loadTransactions(from data: Data) throws -> [CryptoTransaction] {
+    func loadTransactions(from data: Data) throws -> [any CryptoTransaction] {
         guard !data.isEmpty else {
             return []
         }
 
-        var result = [CryptoTransaction]()
+        var result = [any CryptoTransaction]()
         let mainContract = Contract(address: "dummy").chain.mainContract!
 
         let response: SingleAddressResponse = try data.fromJSON()
@@ -67,7 +67,7 @@ public extension TronScan {
 private struct SingleAddressResponse: Decodable {
     let data: [Transaction]
 
-    func cryptoTransactions(forAccount account: any CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(forAccount account: any CryptoContract) throws -> [any CryptoTransaction] {
         try data.flatMap { try $0.cryptoTransactions(forAccount: account) }
     }
 
@@ -139,36 +139,44 @@ private struct Transaction: Decodable {
     let contractData: ContractData
     let tokenInfo: TronTokenInfo
 
-    func cryptoTransactions(forAccount account: any CryptoContract) throws -> [CryptoTransaction] {
+    func cryptoTransactions(forAccount account: any CryptoContract) throws -> [any CryptoTransaction] {
         [TronTransaction(transaction: self)]
     }
 }
 
 private struct TronTransaction: CryptoTransaction {
+    typealias Chain = TronChain
+
     let hash: String
-    var fromContract: (any CryptoContract)? { _fromContract }
-    var toContract: (any CryptoContract)? { _toContract }
-    let amount: CryptoAmount
+    var fromContract: Chain.Contract? { _fromContract }
+    var toContract: Chain.Contract? { _toContract }
+    let amount: Amount<Chain.Contract>
     let timeStamp: Date
     let transactionId: String
     var gas: Int? { nil }
-    let gasPrice: CryptoAmount?
-    var gasUsed: CryptoAmount? { nil }
+    let gasPrice: Amount<Chain.Contract>?
+    var gasUsed: Amount<Chain.Contract>? { nil }
     var successful: Bool { true }
     var functionName: String? { nil }
     var type: String? { nil }
 
-    private let _fromContract: TronContract
-    private let _toContract: TronContract
+    private let _fromContract: Chain.Contract
+    private let _toContract: Chain.Contract
 
     init(transaction: Transaction) {
         self.hash = transaction.hash
         self._fromContract = TronContract(address: transaction.ownerAddress)
         self._toContract = TronContract(address: transaction.toAddress)
-        self.amount = .init(quantity: UInt128(transaction.amount) ?? 0, contract: TronChain.default.mainContract)
+        self.amount = .init(
+            quantity: UInt128(transaction.amount) ?? 0,
+            currency: TronChain.default.mainContract
+        )
         self.transactionId = transaction.hash
         self.timeStamp = Date(timeIntervalSince1970: TimeInterval(transaction.timestamp))
-        self.gasPrice = .init(quantity: UInt128(transaction.fee) ?? 0, contract: TronChain.default.mainContract)
+        self.gasPrice = .init(
+            quantity: UInt128(transaction.fee) ?? 0,
+            currency: TronChain.default.mainContract
+        )
     }
 }
 

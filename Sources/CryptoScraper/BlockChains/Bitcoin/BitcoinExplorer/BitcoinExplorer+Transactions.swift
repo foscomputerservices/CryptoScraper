@@ -9,9 +9,9 @@ public extension BitcoinExplorer {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
-    func getTransactions(forAccount account: Contract) async throws -> [CryptoTransaction] {
+    func getTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
         do {
-            var result = [CryptoTransaction]()
+            var result = [any CryptoTransaction]()
 
             for txnId in try await getTransactionIds(forAccount: account) {
                 let response: Transaction = try await Self.endPoint
@@ -19,7 +19,7 @@ public extension BitcoinExplorer {
                     .appending(path: txnId)
                     .fetch(errorType: TransactionError.self)
 
-                result.append(contentsOf: try response.cryptoTransactions(forAccount: account))
+                try result.append(contentsOf: response.cryptoTransactions(forAccount: account))
             }
 
             return result
@@ -29,12 +29,12 @@ public extension BitcoinExplorer {
     }
 
     /// Retrieves the ``CryptoTransaction`` entries from the provided ``Data``
-    func loadTransactions(from data: Data) throws -> [CryptoTransaction] {
+    func loadTransactions(from data: Data) throws -> [any CryptoTransaction] {
         guard !data.isEmpty else {
             return []
         }
 
-        var result = [CryptoTransaction]()
+        var result = [any CryptoTransaction]()
         let mainContract = BitcoinChain.default.mainContract!
 
         let response: Transaction = try data.fromJSON()
@@ -136,8 +136,8 @@ private struct Transaction: Decodable {
     let timestamp: UInt
     let fee: Fee
 
-    func cryptoTransactions(forAccount account: BitcoinContract) throws -> [CryptoTransaction] {
-        var result: [CryptoTransaction] = try valuesOut
+    func cryptoTransactions(forAccount account: BitcoinContract) throws -> [any CryptoTransaction] {
+        var result: [any CryptoTransaction] = try valuesOut
             .filter { $0.contract.address == account.address }
             .map { valueOut in
                 try MappedTransaction(
@@ -168,32 +168,34 @@ private struct Transaction: Decodable {
         case valuesIn = "vin"
         case valuesOut = "vout"
         case timestamp = "time"
-        case fee = "fee"
+        case fee
     }
 }
 
-private struct MappedTransaction<FromC: CryptoContract>: CryptoTransaction {
+private struct MappedTransaction: CryptoTransaction {
+    typealias Chain = BitcoinChain
+
     // MARK: CryptoTransaction
 
     let hash: String
-    var fromContract: (any CryptoContract)? { _fromContract }
-    var toContract: (any CryptoContract)? { _toContract }
-    let amount: CryptoAmount
+    var fromContract: Chain.Contract? { _fromContract }
+    var toContract: Chain.Contract? { _toContract }
+    let amount: Amount<Chain.Contract>
     let timeStamp: Date
     let transactionId: String
     let gas: Int?
-    var gasPrice: CryptoAmount?
-    let gasUsed: CryptoAmount?
+    var gasPrice: Amount<Chain.Contract>?
+    let gasUsed: Amount<Chain.Contract>?
     let successful: Bool
 
     let methodId: String
     let functionName: String?
     var type: String? { "normal" }
 
-    private let _fromContract: FromC
-    private let _toContract: BitcoinContract?
+    private let _fromContract: Chain.Contract
+    private let _toContract: Chain.Contract?
 
-    init(transaction: Transaction, outTx: ValueOut, forAccount account: FromC) throws {
+    init(transaction: Transaction, outTx: ValueOut, forAccount account: Chain.Contract) throws {
         self.hash = transaction.hash
         self._fromContract = account
         self._toContract = outTx.contract
@@ -237,9 +239,9 @@ private struct ValueOut: Decodable {
         return .init(address: address)
     }
 
-    var amount: CryptoAmount {
+    var amount: Amount<BitcoinChain.Contract> {
         let sats = UInt(value * 8.0)
-        return .init(quantity: UInt128(sats), contract: BitcoinChain.default.mainContract!)
+        return .init(quantity: UInt128(sats), currency: BitcoinChain.default.mainContract!)
     }
 
     struct ScriptPubKey: Decodable {
@@ -261,10 +263,11 @@ private struct ValueOut: Decodable {
 }
 
 private struct Fee: Decodable {
-    private let btcAmount: Double  // Values are in BTC! Ugh!!
+    private let btcAmount: Double // Values are in BTC! Ugh!!
     var amount: UInt64 {
         UInt64(btcAmount * 8.0)
     }
+
     let unit: String
 
     private enum CodingKeys: String, CodingKey {
@@ -274,27 +277,29 @@ private struct Fee: Decodable {
 }
 
 private struct FeeTransaction: CryptoTransaction {
+    typealias Chain = BitcoinChain
+
     let hash: String
-    var fromContract: (any CryptoContract)? { _fromContract }
-    var toContract: (any CryptoContract)? { nil }
-    let amount: CryptoAmount
+    var fromContract: Chain.Contract? { _fromContract }
+    var toContract: Chain.Contract? { nil }
+    let amount: Amount<Chain.Contract>
     let timeStamp: Date
     var transactionId: String { "" }
     var gas: Int? { nil }
-    let gasPrice: CryptoAmount?
-    var gasUsed: CryptoAmount? { nil }
+    let gasPrice: Amount<Chain.Contract>?
+    var gasUsed: Amount<Chain.Contract>? { nil }
     var successful: Bool { true }
     var functionName: String? { nil }
     var type: String? { "fee" }
 
-    private let _fromContract: BitcoinContract
+    private let _fromContract: Chain.Contract
 
     init(hash: String, fee: UInt64, timeStamp: UInt, forAccount account: BitcoinContract) {
         self.hash = hash
         self._fromContract = account
-        self.amount = .init(quantity: 0, contract: BitcoinChain.bitcoin.mainContract)
+        self.amount = .init(quantity: 0, currency: BitcoinChain.bitcoin.mainContract)
         self.timeStamp = Date(timeIntervalSince1970: TimeInterval(timeStamp))
-        self.gasPrice = .init(quantity: UInt128(fee), contract: BitcoinChain.bitcoin.mainContract)
+        self.gasPrice = .init(quantity: UInt128(fee), currency: BitcoinChain.bitcoin.mainContract)
     }
 }
 

@@ -12,8 +12,9 @@ final class EthereumContractTests: XCTestCase {
         let ethChain = EthereumChain.default
         let ethContract = ethChain.mainContract!
 
-        let weiAmount: UInt128 = 1000000000000000000
-        let ethAmount = ethContract.displayAmount(amount: weiAmount, inUnits: .ether)
+        // Don't specify units as it should default to .wei
+        let weiAmount = Amount(quantity: 1000000000000000000, currency: ethContract)
+        let ethAmount = weiAmount.value(units: .ether)
 
         XCTAssertEqual(ethAmount, Double(1.0))
     }

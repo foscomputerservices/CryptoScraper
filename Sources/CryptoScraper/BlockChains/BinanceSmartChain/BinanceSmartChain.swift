@@ -31,7 +31,7 @@ public final class BinanceSmartChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<BNBContract>]?
-    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<BNBContract>> {
+    private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<BNBContract>>) {
         tokens = tokens ?? [:]
 
         for token in newTokens {

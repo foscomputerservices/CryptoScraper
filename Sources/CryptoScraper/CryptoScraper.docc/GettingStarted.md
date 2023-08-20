@@ -40,7 +40,7 @@ let etherScan = Etherscan()
 let balance = try await etherScan.getBalance(forAccount: accountContract)
 ```
 
-The balance will be in ``CryptoAmount``.  See the documentation on that protocol for more information.
+The balance will be in ``Amount``.  See the documentation on that protocol for more information.
 
 #### Retrieving the balance of a particular coin for an account
 

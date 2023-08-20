@@ -33,7 +33,7 @@ public final class TronChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<TronContract>]?
-    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<TronContract>> {
+    private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<TronContract>>) {
         tokens = tokens ?? [:]
 
         for token in newTokens {

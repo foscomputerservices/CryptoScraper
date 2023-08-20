@@ -11,7 +11,7 @@ public extension EthereumScanner {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
-    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract> {
         // Cannot retrieve ETH contract, but retrieve ETH balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
@@ -51,7 +51,7 @@ private struct TokenBalanceResponse: Decodable {
         status == "1" || message == "OK"
     }
 
-    func cryptoBalance<C: CryptoContract>(forToken: C, ethContract: C) throws -> CryptoAmount {
+    func cryptoBalance<C: CryptoContract>(forToken: C, ethContract: C) throws -> Amount<C> {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(result)
         }
@@ -59,7 +59,7 @@ private struct TokenBalanceResponse: Decodable {
             throw EthereumScannerResponseError.invalidAmount
         }
 
-        return .init(quantity: amount, contract: forToken)
+        return .init(quantity: amount, currency: forToken)
     }
 
     // https://docs.etherscan.io/api-endpoints/tokens#get-erc20-token-account-balance-for-tokencontractaddress
@@ -143,7 +143,7 @@ private extension SimpleTokenInfo where Contract == EthereumContract {
             ? nil
             : .init(
                 quantity: totalSupply!,
-                contract: EthereumChain.default.mainContract
+                currency: EthereumChain.default.mainContract
             )
         self.blueCheckmark = Bool(tokenInfo.blueCheckmark)
         self.description = tokenInfo.description

@@ -12,8 +12,9 @@ final class MaticContractTests: XCTestCase {
         let polygonChain = PolygonChain.default
         let maticContract = polygonChain.mainContract!
 
-        let weiAmount: UInt128 = 1000000000000000000
-        let maticAmount = maticContract.displayAmount(amount: weiAmount, inUnits: .ether)
+        // Don't specify units as it should default to .wei
+        let weiAmount = Amount(quantity: 1000000000000000000, currency: maticContract)
+        let maticAmount = weiAmount.value(units: .ether)
 
         XCTAssertEqual(maticAmount, Double(1.0))
     }

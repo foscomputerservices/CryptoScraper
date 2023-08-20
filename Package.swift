@@ -22,7 +22,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/oscbyspro/AwesomeNumbersKit.git", from: "0.3.4"),
         .package(url: "https://github.com/Boilertalk/Web3.swift.git", from: "0.8.3"),
-         .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main")
+        .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main")
 //        .package(path: "../FOSUtilities")
     ],
     targets: [
