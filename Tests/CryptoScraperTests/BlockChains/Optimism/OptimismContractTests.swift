@@ -12,8 +12,9 @@ final class OptimismContractTests: XCTestCase {
         let optChain = OptimismChain.default
         let optContract = optChain.mainContract!
 
-        let weiAmount: UInt128 = 1000000000000000000
-        let optAmount = optContract.displayAmount(amount: weiAmount, inUnits: .ether)
+        // Don't specify units as it should default to .wei
+        let weiAmount = Amount(quantity: 1000000000000000000, currency: optContract)
+        let optAmount = weiAmount.value(units: .ether)
 
         XCTAssertEqual(optAmount, Double(1.0))
     }

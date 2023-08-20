@@ -10,7 +10,7 @@ public struct OptimismContract: CryptoContract, Codable, Stubbable {
     public typealias Chain = OptimismChain
 
     // https://etherscan.io/unitconverter
-    public enum Unit {
+    public enum Units: String, CurrencyUnits {
         case wei
         case kwei
         case mwei
@@ -23,7 +23,18 @@ public struct OptimismContract: CryptoContract, Codable, Stubbable {
         case gether
         case tether
 
-        public var chainBaseUnit: Unit { .wei }
+        public static var chainBaseUnits: Self { .wei }
+        public static var defaultDisplayUnits: Self { .ether }
+    }
+
+    // MARK: CurrencyFormatter
+
+    public var formatter: Formatter {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .currency
+        numberFormatter.currencyCode = "OP"
+
+        return numberFormatter
     }
 
     // MARK: CryptoContract Protocol
@@ -32,20 +43,6 @@ public struct OptimismContract: CryptoContract, Codable, Stubbable {
     public var chain: Chain { Chain.default }
     public var isChainToken: Bool {
         address == OptimismChain.opContractAddress
-    }
-
-    /// Converts a given amount for display in other chain units
-    ///
-    /// - NOTE: The resulting value is for **display purposes only**; no
-    ///      calculations should be done using the result as all calculations
-    ///      should be performed in the chain's base units so that no
-    ///      rounding errors occur.
-    ///
-    /// - Parameters:
-    ///   - amount: The amount in the chain's base unit
-    ///   - inUnits: The units to display the amount in
-    public func displayAmount(amount: UInt128, inUnits: Unit) -> Double {
-        Double(amount) / Double(inUnits.divisorFromBase)
     }
 
     /// Initializes the ``OptimismContract``
@@ -81,7 +78,7 @@ public extension OptimismContract {
     }
 }
 
-private extension OptimismContract.Unit {
+public extension OptimismContract.Units {
     var divisorFromBase: UInt128 {
         let exponent: Double
 
@@ -100,5 +97,27 @@ private extension OptimismContract.Unit {
         }
 
         return UInt128(pow(10, exponent))
+    }
+
+    var displayIdentifier: String {
+        self == .ether
+            ? "OP"
+            : "OP(\(rawValue))"
+    }
+
+    var displayFractionDigits: Int {
+        switch self {
+        case .wei: return 0
+        case .kwei: return 3
+        case .mwei: return 6
+        case .gwei: return 9
+        case .szabo: return 12
+        case .finney: return 15
+        case .ether: return 18
+        case .kether: return 21
+        case .mether: return 24
+        case .gether: return 27
+        case .tether: return 30
+        }
     }
 }

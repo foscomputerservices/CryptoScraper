@@ -13,7 +13,7 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
     public let symbol: String
     public let imageURL: URL?
     public let tokenType: String?
-    public let totalSupply: CryptoAmount?
+    public let totalSupply: Amount<Contract>?
     public let blueCheckmark: Bool?
     public let description: String?
     public let website: URL?
@@ -30,7 +30,7 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
     public let discord: URL?
     public let whitepaper: URL?
 
-    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: CryptoAmount? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil) {
+    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: Amount<Contract>? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil) {
         self.contractAddress = contractAddress
         self.equivalentContracts = equivalentContracts
         self.tokenName = tokenName

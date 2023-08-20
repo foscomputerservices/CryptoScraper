@@ -25,7 +25,7 @@ public protocol TokenInfo: Codable, Hashable, Identifiable {
     var imageURL: URL? { get }
 
     var tokenType: String? { get }
-    var totalSupply: CryptoAmount? { get }
+    var totalSupply: Amount<Contract>? { get }
     var blueCheckmark: Bool? { get }
     var description: String? { get }
     var website: URL? { get }
@@ -55,7 +55,7 @@ public extension TokenInfo {
     var equivalentContracts: Set<Contract> { [] }
     var imageURL: URL? { nil }
     var tokenType: String? { nil }
-    var totalSupply: CryptoAmount? { nil }
+    var totalSupply: Amount<Contract>? { nil }
     var blueCheckmark: Bool? { nil }
     var description: String? { nil }
     var website: URL? { nil }

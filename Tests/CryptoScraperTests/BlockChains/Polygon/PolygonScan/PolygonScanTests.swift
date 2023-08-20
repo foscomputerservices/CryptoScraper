@@ -26,7 +26,7 @@ final class PolygonScanTests: XCTestCase {
             let balance = try await polygonScan.getBalance(forAccount: accountContract)
             XCTAssertGreaterThan(balance.quantity, 0)
 
-            let maticBalance = accountContract.displayAmount(amount: balance.quantity, inUnits: .ether)
+            let maticBalance = balance.value(units: .ether)
             XCTAssertGreaterThan(maticBalance, 0)
         } catch let e as EthereumScannerResponseError {
             XCTFail(e.localizedDescription)

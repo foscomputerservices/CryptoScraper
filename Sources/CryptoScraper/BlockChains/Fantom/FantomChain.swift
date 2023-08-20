@@ -31,7 +31,7 @@ public final class FantomChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<FantomContract>]?
-    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<FantomContract>> {
+    private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<FantomContract>>) {
         tokens = tokens ?? [:]
 
         for token in newTokens {

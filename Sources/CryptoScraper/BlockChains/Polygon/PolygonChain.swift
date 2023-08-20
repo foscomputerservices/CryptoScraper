@@ -31,7 +31,7 @@ public final class PolygonChain: CryptoChain {
     }
 
     private var tokens: [String: SimpleTokenInfo<MaticContract>]?
-    private func loadChainTokens<Tokens>(from newTokens: Tokens) where Tokens: Collection<SimpleTokenInfo<MaticContract>> {
+    private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<MaticContract>>) {
         tokens = tokens ?? [:]
 
         for token in newTokens {

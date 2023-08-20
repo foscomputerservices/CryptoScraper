@@ -6,24 +6,26 @@
 import CryptoScraper
 import Foundation
 
-public struct TestCoinTransaction<FC, TC>: CryptoTransaction where FC: CryptoContract, TC: CryptoContract {
+public struct TestCoinTransaction: CryptoTransaction {
+    public typealias Chain = TestCoinChain
+
     public let hash: String
-    public var fromContract: (any CryptoContract)? { _fromContract }
-    public var toContract: (any CryptoContract)? { _toContract }
-    public let amount: CryptoAmount
+    public var fromContract: Chain.Contract? { _fromContract }
+    public var toContract: Chain.Contract? { _toContract }
+    public let amount: Amount<Chain.Contract>
     public let timeStamp: Date
     public let transactionId: String
     public let gas: Int?
-    public let gasPrice: CryptoAmount?
-    public let gasUsed: CryptoAmount?
+    public let gasPrice: Amount<Chain.Contract>?
+    public let gasUsed: Amount<Chain.Contract>?
     public let successful: Bool
     public let functionName: String?
     public var type: String? { nil }
 
-    private let _fromContract: FC?
-    private let _toContract: TC?
+    private let _fromContract: Chain.Contract?
+    private let _toContract: Chain.Contract?
 
-    public init(hash: String, fromContract: FC?, toContract: TC?, amount: CryptoAmount, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: CryptoAmount? = nil, gasUsed: CryptoAmount? = nil, successful: Bool = true, functionName: String? = nil) {
+    public init(hash: String, fromContract: Chain.Contract?, toContract: Chain.Contract?, amount: Amount<Chain.Contract>, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: Amount<Chain.Contract>? = nil, gasUsed: Amount<Chain.Contract>? = nil, successful: Bool = true, functionName: String? = nil) {
         self.hash = hash
         self._fromContract = fromContract
         self._toContract = toContract
@@ -38,8 +40,8 @@ public struct TestCoinTransaction<FC, TC>: CryptoTransaction where FC: CryptoCon
     }
 }
 
-public extension TestCoinTransaction where FC == TestCoinContract {
-    init(hash: String, toContract: TC?, amount: CryptoAmount, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: CryptoAmount? = nil, gasUsed: CryptoAmount? = nil, successful: Bool = true, functionName: String? = nil) {
+public extension TestCoinTransaction {
+    init(hash: String, toContract: Chain.Contract?, amount: Amount<Chain.Contract>, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: Amount<Chain.Contract>? = nil, gasUsed: Amount<Chain.Contract>? = nil, successful: Bool = true, functionName: String? = nil) {
         self.hash = hash
         self._fromContract = nil
         self._toContract = toContract
@@ -54,8 +56,8 @@ public extension TestCoinTransaction where FC == TestCoinContract {
     }
 }
 
-public extension TestCoinTransaction where TC == TestCoinContract {
-    init(hash: String, fromContract: FC?, amount: CryptoAmount, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: CryptoAmount? = nil, gasUsed: CryptoAmount? = nil, successful: Bool = true, functionName: String? = nil) {
+public extension TestCoinTransaction {
+    init(hash: String, fromContract: Chain.Contract?, amount: Amount<Chain.Contract>, timeStamp: Date, transactionId: String, gas: Int? = nil, gasPrice: Amount<Chain.Contract>? = nil, gasUsed: Amount<Chain.Contract>? = nil, successful: Bool = true, functionName: String? = nil) {
         self.hash = hash
         self._fromContract = fromContract
         self._toContract = nil

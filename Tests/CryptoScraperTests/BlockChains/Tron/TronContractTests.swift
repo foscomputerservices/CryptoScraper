@@ -8,12 +8,13 @@ import FOSTesting
 import XCTest
 
 final class TRXContractTests: XCTestCase {
-    func testWeiToTRXConversion() throws {
+    func testSUNToTRXConversion() throws {
         let tronChain = TronChain.default
         let tronContract = tronChain.mainContract!
 
-        let weiAmount: UInt128 = 1000000000000000000
-        let trxAmount = tronContract.displayAmount(amount: weiAmount, inUnits: .ether)
+        // Don't specify units as it should default to .sun
+        let weiAmount = Amount(quantity: 1000000, currency: tronContract)
+        let trxAmount = weiAmount.value(units: .trx)
 
         XCTAssertEqual(trxAmount, Double(1.0))
     }

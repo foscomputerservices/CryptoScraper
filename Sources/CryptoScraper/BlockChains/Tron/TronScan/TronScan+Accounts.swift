@@ -9,12 +9,12 @@ public extension TronScan {
     /// Returns the balance (in TRX) of the given account
     ///
     /// - Parameter account: The Tron account to query the balance for
-    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> Amount<Contract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch()
 
-        return try response.cryptoAmount(forAccount: account.chain.mainContract)
+        return try response.amount(forAccount: account.chain.mainContract)
     }
 
     /// Returns the balance (in TRX) for a given token in the given account
@@ -22,12 +22,12 @@ public extension TronScan {
     /// - Parameters:
     ///   - contract: The ``CryptoContract`` of the token to query
     ///   - address: The ``CryptoContract`` address that holds the token
-    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
         ).fetch()
 
-        return try response.cryptoAmount(forToken: contract, forAccount: account.chain.mainContract)
+        return try response.amount(forToken: contract, forAccount: account.chain.mainContract)
     }
 }
 
@@ -44,24 +44,24 @@ private struct BalanceResponse: Decodable {
         !responses.isEmpty
     }
 
-    func cryptoAmount(forAccount trxContract: any CryptoContract) throws -> CryptoAmount {
+    func amount(forAccount trxContract: TronContract) throws -> Amount<TronContract> {
         guard success else {
             throw TronScanResponseError.unknownContract(trxContract.address)
         }
 
-        return .init(quantity: responses.trxBalance, contract: TronChain.default.mainContract)
+        return .init(quantity: responses.trxBalance, currency: TronChain.default.mainContract)
     }
 
-    func cryptoAmount(forToken contract: any CryptoContract, forAccount trxContract: any CryptoContract) throws -> CryptoAmount {
+    func amount(forToken contract: TronContract, forAccount trxContract: TronContract) throws -> Amount<TronContract> {
         guard success else {
             throw TronScanResponseError.unknownContract(trxContract.address)
         }
 
-        return .init(quantity: responses.trxBalance(forToken: contract), contract: contract)
+        return .init(quantity: responses.trxBalance(forToken: contract), currency: contract)
     }
 
     // https://github.com/tronscan/tronscan-frontend/blob/dev2019/document/api.md#4
-    static func httpQuery(account: any CryptoContract) -> [URLQueryItem] { [
+    static func httpQuery(account: TronContract) -> [URLQueryItem] { [
         .init(name: "address", value: account.address)
     ] }
 
@@ -97,7 +97,7 @@ private extension Collection<TRBalance> {
             .reduce(UInt128(0), +)
     }
 
-    func trxBalance(forToken contract: any CryptoContract) -> UInt128 {
+    func trxBalance(forToken contract: TronContract) -> UInt128 {
         filter { contract.isChainToken ? $0.tokenAbbr == "trx" : $0.tokenId == contract.address }
             .compactMap(\.trxBalance)
             .reduce(UInt128(0), +)

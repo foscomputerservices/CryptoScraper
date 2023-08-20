@@ -5,7 +5,7 @@
 
 import Foundation
 
-public protocol CryptoContract: Hashable, Codable, Identifiable {
+public protocol CryptoContract: Currency, Identifiable {
     /// The ``CryptoChain`` on which this contract resides
     associatedtype Chain: CryptoChain where Chain.Contract == Self
 
@@ -31,8 +31,6 @@ public protocol CryptoContract: Hashable, Codable, Identifiable {
 }
 
 public extension CryptoContract {
-    var zero: ZeroAmountContract { .zero }
-
     // MARK: Default Implementations
 
     var tokenInfo: Chain.Info? {

@@ -9,7 +9,7 @@ public extension BitcoinExplorer {
     /// Returns the balance (in BTC) of the given account
     ///
     /// - Parameter account: The Bitcoin account to query the balance for
-    func getBalance(forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forAccount account: Contract) async throws -> Amount<Contract> {
         let response: BalanceResponse = try await Self.endPoint
             .appending(path: "address")
             .appending(path: account.address)
@@ -18,7 +18,7 @@ public extension BitcoinExplorer {
             ])
             .fetch(errorType: BalanceError.self)
 
-        return try response.cryptoAmount
+        return try response.amount
     }
 
     /// Returns balance of the given token for the given address
@@ -26,7 +26,7 @@ public extension BitcoinExplorer {
     /// - Parameters:
     ///   - contract: The contract of the token to query
     ///   - address: The contract address that holds the token
-    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> CryptoAmount {
+    func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract> {
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
         } else {
@@ -96,13 +96,13 @@ private struct BalanceResponse: Decodable {
         }
     }
 
-    var cryptoAmount: CryptoAmount {
+    var amount: Amount<BitcoinChain.Contract> {
         get throws {
             let chain = BitcoinChain.default
 
             return .init(
                 quantity: UInt128(transactionHistory.satoshiBalance),
-                contract: chain.mainContract as (any CryptoContract)
+                currency: chain.mainContract
             )
         }
     }

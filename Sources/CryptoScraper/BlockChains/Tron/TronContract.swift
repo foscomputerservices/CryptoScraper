@@ -9,21 +9,13 @@ import Foundation
 public struct TronContract: CryptoContract, Codable, Stubbable {
     public typealias Chain = TronChain
 
-    // https://etherscan.io/unitconverter
-    public enum Unit {
-        case wei
-        case kwei
-        case mwei
-        case gwei
-        case szabo
-        case finney
-        case ether
-        case kether
-        case mether
-        case gether
-        case tether
+    // https://developers.tron.network/docs/token-standards-trx#denominations-of-trx
+    public enum Units: String, CurrencyUnits {
+        case sun
+        case trx
 
-        public var chainBaseUnit: Unit { .wei }
+        public static var chainBaseUnits: Self { .sun }
+        public static var defaultDisplayUnits: Self { .trx }
     }
 
     // MARK: CryptoContract Protocol
@@ -32,20 +24,6 @@ public struct TronContract: CryptoContract, Codable, Stubbable {
     public var chain: Chain { Chain.default }
     public var isChainToken: Bool {
         address == TronChain.trxContractAddress
-    }
-
-    /// Converts a given amount for display in other chain units
-    ///
-    /// - NOTE: The resulting value is for **display purposes only**; no
-    ///      calculations should be done using the result as all calculations
-    ///      should be performed in the chain's base units so that no
-    ///      rounding errors occur.
-    ///
-    /// - Parameters:
-    ///   - amount: The amount in the chain's base unit
-    ///   - inUnits: The units to display the amount in
-    public func displayAmount(amount: UInt128, inUnits: Unit) -> Double {
-        Double(amount) / Double(inUnits.divisorFromBase)
     }
 
     /// Initializes the ``TronContract``
@@ -81,24 +59,28 @@ public extension TronContract {
     }
 }
 
-private extension TronContract.Unit {
+public extension TronContract.Units {
     var divisorFromBase: UInt128 {
         let exponent: Double
 
         switch self {
-        case .wei: exponent = 1
-        case .kwei: exponent = 3
-        case .mwei: exponent = 6
-        case .gwei: exponent = 9
-        case .szabo: exponent = 12
-        case .finney: exponent = 15
-        case .ether: exponent = 18
-        case .kether: exponent = 21
-        case .mether: exponent = 24
-        case .gether: exponent = 27
-        case .tether: exponent = 30
+        case .sun: exponent = 1
+        case .trx: exponent = 6
         }
 
         return UInt128(pow(10, exponent))
+    }
+
+    var displayIdentifier: String {
+        self == .trx
+            ? "TRX"
+            : "TRX(\(rawValue))"
+    }
+
+    var displayFractionDigits: Int {
+        switch self {
+        case .sun: return 0
+        case .trx: return 6
+        }
     }
 }
