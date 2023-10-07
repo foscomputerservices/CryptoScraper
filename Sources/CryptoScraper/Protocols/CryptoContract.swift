@@ -33,8 +33,14 @@ public protocol CryptoContract: Currency, Identifiable {
 public extension CryptoContract {
     // MARK: Default Implementations
 
+    var chain: Chain { .default }
+
     var tokenInfo: Chain.Info? {
         chain.tokenInfo(for: address)
+    }
+
+    var isChainToken: Bool {
+        address == chain.mainContract!.address
     }
 
     var isToken: Bool {

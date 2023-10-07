@@ -30,7 +30,6 @@ public protocol CryptoTransaction: Codable, Comparable {
 }
 
 public extension CryptoTransaction {
-
     /// Returns the ``CryptoChain`` that owns this ``CryptoContract``
     var chain: Contract.Chain {
         .default
@@ -57,6 +56,7 @@ public extension CryptoTransaction {
     }
 
     // MARK: Equatable Protocol
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         // - NOTE: The way that block chains work, there can be multiple ``CryptoTransaction``s
         //   with the same ``hash`` value, so we need to compare more than just *hash*
@@ -74,7 +74,7 @@ public extension CryptoTransaction {
 
     // MARK: Comparable Protocol
 
-    static func < (lhs:Self, rhs: Self) -> Bool {
+    static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.timeStamp < rhs.timeStamp
     }
 }

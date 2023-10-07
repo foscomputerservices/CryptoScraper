@@ -17,11 +17,9 @@ public struct BitcoinContract: CryptoContract, Codable, Stubbable {
 
     // MARK: CryptoContract Protocol
 
+    public typealias Chain = BitcoinChain
+
     public let address: String
-    public var chain: BitcoinChain { Chain.default }
-    public var isChainToken: Bool {
-        address == BitcoinChain.btcContractAddress
-    }
 
     /// Initializes the ``BitcoinContract``
     ///

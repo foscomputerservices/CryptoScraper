@@ -7,8 +7,6 @@ import FOSFoundation
 import Foundation
 
 public struct TronContract: CryptoContract, Codable, Stubbable {
-    public typealias Chain = TronChain
-
     // https://developers.tron.network/docs/token-standards-trx#denominations-of-trx
     public enum Units: String, CurrencyUnits {
         case sun
@@ -20,11 +18,9 @@ public struct TronContract: CryptoContract, Codable, Stubbable {
 
     // MARK: CryptoContract Protocol
 
+    public typealias Chain = TronChain
+
     public let address: String
-    public var chain: Chain { Chain.default }
-    public var isChainToken: Bool {
-        address == TronChain.trxContractAddress
-    }
 
     /// Initializes the ``TronContract``
     ///

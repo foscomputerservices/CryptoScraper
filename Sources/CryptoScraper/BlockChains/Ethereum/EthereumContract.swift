@@ -7,8 +7,6 @@ import FOSFoundation
 import Foundation
 
 public struct EthereumContract: CryptoContract, Codable, Stubbable {
-    public typealias Chain = EthereumChain
-
     // https://etherscan.io/unitconverter
     public enum Units: String, CurrencyUnits {
         case wei
@@ -39,11 +37,9 @@ public struct EthereumContract: CryptoContract, Codable, Stubbable {
 
     // MARK: CryptoContract Protocol
 
+    public typealias Chain = EthereumChain
+
     public let address: String
-    public var chain: Chain { Chain.default }
-    public var isChainToken: Bool {
-        address == EthereumChain.ethContractAddress
-    }
 
     /// Initializes the ``EthereumContract``
     ///

@@ -7,25 +7,7 @@ import FOSFoundation
 import Foundation
 
 public struct MaticContract: CryptoContract, Codable, Stubbable {
-    public typealias Chain = PolygonChain
-
-    // https://etherscan.io/unitconverter -- Cannot find a PolygonScan equivalent page 🤷‍♂️
-    public enum Units: String, CurrencyUnits {
-        case wei
-        case kwei
-        case mwei
-        case gwei
-        case szabo
-        case finney
-        case ether
-        case kether
-        case mether
-        case gether
-        case tether
-
-        public static var chainBaseUnits: Self { .wei }
-        public static var defaultDisplayUnits: Self { .ether }
-    }
+    public typealias Units = EthereumContract.Units
 
     // MARK: CurrencyFormatter
 
@@ -39,11 +21,9 @@ public struct MaticContract: CryptoContract, Codable, Stubbable {
 
     // MARK: CryptoContract Protocol
 
+    public typealias Chain = PolygonChain
+
     public let address: String
-    public var chain: Chain { Chain.default }
-    public var isChainToken: Bool {
-        address == PolygonChain.maticContractAddress
-    }
 
     /// Initializes the ``MaticContract``
     ///
@@ -75,49 +55,5 @@ public extension MaticContract {
 public extension MaticContract {
     static func stub() -> Self {
         .init(address: "a-fake-contract-address")
-    }
-}
-
-public extension MaticContract.Units {
-    var divisorFromBase: UInt128 {
-        let exponent: Double
-
-        switch self {
-        case .wei: exponent = 1
-        case .kwei: exponent = 3
-        case .mwei: exponent = 6
-        case .gwei: exponent = 9
-        case .szabo: exponent = 12
-        case .finney: exponent = 15
-        case .ether: exponent = 18
-        case .kether: exponent = 21
-        case .mether: exponent = 24
-        case .gether: exponent = 27
-        case .tether: exponent = 30
-        }
-
-        return UInt128(pow(10, exponent))
-    }
-
-    var displayIdentifier: String {
-        self == .ether
-            ? "Matic"
-            : "Matic(\(rawValue))"
-    }
-
-    var displayFractionDigits: Int {
-        switch self {
-        case .wei: return 0
-        case .kwei: return 3
-        case .mwei: return 6
-        case .gwei: return 9
-        case .szabo: return 12
-        case .finney: return 15
-        case .ether: return 18
-        case .kether: return 21
-        case .mether: return 24
-        case .gether: return 27
-        case .tether: return 30
-        }
     }
 }

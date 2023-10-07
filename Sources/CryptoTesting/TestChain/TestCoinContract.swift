@@ -24,10 +24,6 @@ public struct TestCoinContract: CryptoContract {
     // MARK: CryptoContract Protocol
 
     public let address: String
-    public var chain: TestCoinChain { TestCoinChain.default }
-    public var isChainToken: Bool {
-        address == TestCoinChain.tcContractAddress
-    }
 
     public init(address: String) {
         self.address = address.lowercased()
