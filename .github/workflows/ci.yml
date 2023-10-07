@@ -38,6 +38,29 @@ jobs:
       - name: Run Tests
         run: swift test
 
+  # Ensure that compilation succeeds on iOS-based platforms
+  run_ios_build_tests:
+    name: Test ${{ matrix.ios_platform }} on Xcode v${{ matrix.xcode_version }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        ios_platform: ["ios", "tvos"] # , "watchos", "visionos"]
+        xcode_version: ["15.0"]
+
+    steps:
+      # - uses: maxim-lobanov/setup-xcode@v1
+      #   with:
+      #     xcode-version: ${{ matrix.xcode_version }}
+
+      - uses: actions/checkout@v2
+
+      - name: Install xcpretty
+        run: |
+          gem install xcpretty --silent --quiet --no-document
+
+      - name: Run ${{ matrix.ios_platform }} Tests
+        run: xcrun xcodebuild -IDEClonedSourcePackagesDirPathOverride="$PWD/.dependencies" -derivedDataPath "$PWD/.derivedData" build -scheme CryptoScraper -destination "generic/platform=${{ matrix.ios_platform }}" | xcpretty
+
   # Unable to build at this time with a dependency of SwiftNIO
   # Soon maybe? https://forums.swift.org/t/windows-nio/35003
   #
