@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.9
 
 import PackageDescription
 
@@ -6,7 +6,10 @@ let package = Package(
     name: "CryptoScraper",
     platforms: [
         .macOS(.v12),
-        .iOS(.v15)
+        .iOS(.v15),
+        .macCatalyst(.v15),
+        .tvOS(.v15),
+        .watchOS(.v7)
         // .linux()
     ],
     products: [
@@ -20,8 +23,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/oscbyspro/AwesomeNumbersKit.git", from: "0.3.4"),
-        .package(url: "https://github.com/Boilertalk/Web3.swift.git", from: "0.8.3"),
+        .package(url: "https://github.com/oscbyspro/Numberick.git", .upToNextMajor(from: "0.13.0")),
+        .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
         .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main")
 //        .package(path: "../FOSUtilities")
     ],
@@ -29,7 +32,7 @@ let package = Package(
         .target(
             name: "CryptoScraper",
             dependencies: [
-                .byName(name: "AwesomeNumbersKit"),
+                .product(name: "Numberick", package: "Numberick"),
                 .product(name: "Web3", package: "Web3.swift"),
                 .product(name: "Web3ContractABI", package: "Web3.swift"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")

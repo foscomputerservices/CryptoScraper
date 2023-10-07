@@ -16,7 +16,7 @@ public struct TestCoinContract: CryptoContract {
 
         public static var chainBaseUnits: TestCoinContract.Units { .unit }
         public static var defaultDisplayUnits: TestCoinContract.Units { .unit }
-        public var divisorFromBase: ANKFullWidthKit.UInt128 { 1 }
+        public var divisorFromBase: Numberick.UInt128 { 1 }
         public var displayIdentifier: String { "Unit" }
         public var displayFractionDigits: Int { 0 }
     }

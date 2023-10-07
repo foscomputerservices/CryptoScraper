@@ -48,7 +48,7 @@ extension CoinMarketCapAggregator {
         switch contractType {
         case is BitcoinContract.Type: return 1
         case is EthereumContract.Type: return 3200
-        case is FantomContract.Type: return 80
+        case is FantomContract.Type: return 75
         case is BNBContract.Type: return 300
         case is MaticContract.Type: return 250
         case is OptimismContract.Type: return 10
