@@ -9,7 +9,7 @@ let package = Package(
         .iOS(.v15),
         .macCatalyst(.v15),
         .tvOS(.v15),
-        .watchOS(.v7)
+        // .watchOS(.v7) -- Web3 dependency breaks watchOS
         // .linux()
     ],
     products: [
