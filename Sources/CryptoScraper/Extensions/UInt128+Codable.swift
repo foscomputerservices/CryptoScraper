@@ -27,3 +27,12 @@ extension UInt128: Codable {
         case high
     }
 }
+
+extension NBKDoubleWidth {
+    @inlinable init(stringLiteral source: String) {
+        let decoder = NBK.IntegerDescription.DecoderDecodingRadix()
+        if let value: Self = decoder.decode(source) { self = value } else {
+            fatalError("Unable to convert \(source) to NBKDoubleWidth")
+        }
+    }
+}
