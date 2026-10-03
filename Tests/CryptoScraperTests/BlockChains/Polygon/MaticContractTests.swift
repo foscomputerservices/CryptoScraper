@@ -5,10 +5,10 @@
 
 import CryptoScraper
 import FOSTesting
-import XCTest
+import Testing
 
-final class MaticContractTests: XCTestCase {
-    func testWeiToMaticConversion() throws {
+@Suite struct MaticContractTests {
+    @Test func testWeiToMaticConversion() throws {
         let polygonChain = PolygonChain.default
         let maticContract = polygonChain.mainContract!
 
@@ -16,14 +16,14 @@ final class MaticContractTests: XCTestCase {
         let weiAmount = Amount(quantity: 1000000000000000000, currency: maticContract)
         let maticAmount = weiAmount.value(units: .ether)
 
-        XCTAssertEqual(maticAmount, Double(1.0))
+        #expect(maticAmount == Double(1.0))
     }
 
-    func testChainToken() {
-        XCTAssertTrue(PolygonChain.default.mainContract!.isChainToken)
+    @Test func testChainToken() {
+        #expect(PolygonChain.default.mainContract!.isChainToken)
     }
 
-    func testCodable() throws {
-        try FOSAssertCodable(MaticContract.self)
+    @Test func testCodable() throws {
+        try expectCodable(MaticContract.self)
     }
 }

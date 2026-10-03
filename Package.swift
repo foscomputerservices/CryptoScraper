@@ -1,15 +1,15 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 
 import PackageDescription
 
 let package = Package(
     name: "CryptoScraper",
     platforms: [
-        .macOS(.v12),
-        .iOS(.v15),
-        .macCatalyst(.v15),
-        .tvOS(.v15),
-        // .watchOS(.v7) -- Web3 dependency breaks watchOS
+        .macOS("26.0"),
+        .iOS("26.0"),
+        .macCatalyst("26.0"),
+        .tvOS("26.0"),
+        .watchOS("26.0")
         // .linux()
     ],
     products: [
@@ -20,29 +20,44 @@ let package = Package(
         .library(
             name: "CryptoTesting",
             targets: ["CryptoTesting"]
+        ),
+        .library(
+            name: "CryptoAsset",
+            targets: ["CryptoAsset"]
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/oscbyspro/Numberick.git", .upToNextMajor(from: "0.13.0")),
+        .package(url: "https://github.com/oscbyspro/Numberick.git", .upToNextMajor(from: "0.17.0")),
         .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
-        .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main")
+        .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main"),
+        // Test-only: the two-driver encoding test of CryptoAssetTests
+        .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.119.0")),
+        .package(url: "https://github.com/vapor/fluent.git", .upToNextMajor(from: "4.12.0")),
+        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", .upToNextMajor(from: "4.8.0")),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", .upToNextMajor(from: "2.10.0"))
 //        .package(path: "../FOSUtilities")
     ],
     targets: [
         .target(
-            name: "CryptoScraper",
+            name: "CryptoAsset",
             dependencies: [
-                .product(name: "Numberick", package: "Numberick"),
-                .product(name: "Web3", package: "Web3.swift"),
-                .product(name: "Web3ContractABI", package: "Web3.swift"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")
-            ]
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
         ),
-        .target(
-            name: "CryptoTesting",
+        .testTarget(
+            name: "CryptoAssetTests",
             dependencies: [
-                .byName(name: "CryptoScraper")
-            ]
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities"),
+                .product(name: "FOSTestingVapor", package: "FOSUtilities"),
+                .product(name: "Vapor", package: "vapor"),
+                .product(name: "Fluent", package: "fluent"),
+                .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
+                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
             name: "CryptoScraperTests",
@@ -50,7 +65,25 @@ let package = Package(
                 .byName(name: "CryptoScraper"),
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
                 .product(name: "FOSTesting", package: "FOSUtilities")
-            ]
+            ],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "CryptoScraper",
+            dependencies: [
+                .product(name: "Numberick", package: "Numberick"),
+                .product(name: "Web3", package: "Web3.swift"),
+                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                .product(name: "FOSFoundation", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "CryptoTesting",
+            dependencies: [
+                .byName(name: "CryptoScraper")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v5)]
         )
     ]
 )

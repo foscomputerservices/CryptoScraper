@@ -5,12 +5,12 @@
 
 import Foundation
 
-extension UInt128: Codable {
+extension NBKDoubleWidth: Codable where High: Codable, High.Magnitude: Codable, Low: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let low = try container.decode(UInt.self, forKey: .low)
-        let high = try container.decode(UInt.self, forKey: .high)
+        let low = try container.decode(Low.self, forKey: .low)
+        let high = try container.decode(High.self, forKey: .high)
 
         self.init(ascending: (low: low, high: high))
     }
@@ -30,9 +30,11 @@ extension UInt128: Codable {
 
 extension NBKDoubleWidth {
     @inlinable init(stringLiteral source: String) {
-        let decoder = NBK.IntegerDescription.DecoderDecodingRadix()
-        if let value: Self = decoder.decode(source) { self = value } else {
+        let decoder = NBK.IntegerDescription.DecoderDecodingRadix<Magnitude>()
+        guard let components = decoder.decode(source) else {
             fatalError("Unable to convert \(source) to NBKDoubleWidth")
         }
+
+        self.init(sign: components.sign, magnitude: components.magnitude)!
     }
 }

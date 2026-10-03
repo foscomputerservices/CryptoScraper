@@ -5,20 +5,20 @@
 
 import CryptoScraper
 import FOSTesting
-import XCTest
+import Testing
 
-final class AmountTests: XCTestCase {
-    func testChainBaseUnitInit() {
-        let satAmount: UInt128 = 100000000
+@Suite struct AmountTests {
+    @Test func testChainBaseUnitInit() {
+        let satAmount: Int128 = 100000000
         let amount = Amount(
             quantity: satAmount,
             currency: BitcoinChain.default.mainContract
         )
 
-        XCTAssertEqual(amount.quantity, satAmount)
+        #expect(amount.quantity == satAmount)
     }
 
-    func testChainAlternateUnitInit() {
+    @Test func testChainAlternateUnitInit() {
         let btcAmount = 1.0
         let amount = Amount(
             quantity: btcAmount,
@@ -26,10 +26,10 @@ final class AmountTests: XCTestCase {
             units: .btc
         )
 
-        XCTAssertEqual(amount.quantity, 100000000)
+        #expect(amount.quantity == 100000000)
     }
 
-    func testEquality1() {
+    @Test func testEquality1() {
         let amount1 = Amount(
             quantity: 100000000,
             currency: BitcoinChain.default.mainContract
@@ -41,10 +41,10 @@ final class AmountTests: XCTestCase {
             units: .btc
         )
 
-        XCTAssertEqual(amount1, amount2)
+        #expect(amount1 == amount2)
     }
 
-    func testEquality2() {
+    @Test func testEquality2() {
         let amount1 = Amount(
             quantity: 1,
             currency: BitcoinChain.default.mainContract
@@ -56,10 +56,10 @@ final class AmountTests: XCTestCase {
             units: .btc
         )
 
-        XCTAssertNotEqual(amount1, amount2)
+        #expect(amount1 != amount2)
     }
 
-    func testComparable() {
+    @Test func testComparable() {
         let amount1 = Amount(
             quantity: 1,
             currency: BitcoinChain.default.mainContract
@@ -71,14 +71,14 @@ final class AmountTests: XCTestCase {
             units: .btc
         )
 
-        XCTAssertLessThan(amount1, amount2)
-        XCTAssertLessThanOrEqual(amount1, amount1)
-        XCTAssertGreaterThan(amount2, amount1)
-        XCTAssertGreaterThanOrEqual(amount1, amount1)
+        #expect(amount1 < amount2)
+        #expect(amount1 <= amount1)
+        #expect(amount2 > amount1)
+        #expect(amount1 >= amount1)
     }
 
-    func testValue() {
-        let satAmount: UInt128 = 100000000
+    @Test func testValue() {
+        let satAmount: Int128 = 100000000
         let btcAmount = 1.0
 
         let amount = Amount(
@@ -86,23 +86,31 @@ final class AmountTests: XCTestCase {
             currency: BitcoinChain.default.mainContract
         )
 
-        XCTAssertEqual(amount.value(units: .satoshi), Double(satAmount))
-        XCTAssertEqual(amount.value(units: .btc), btcAmount)
+        #expect(amount.value(units: .satoshi) == Double(satAmount))
+        #expect(amount.value(units: .btc) == btcAmount)
     }
 
-    func testDisplay() {
-        let satAmount: UInt128 = 100000000
+    @Test func testDisplay() {
+        let satAmount: Int128 = 100000000
 
         let amount = Amount(
             quantity: satAmount,
             currency: BitcoinChain.default.mainContract
         )
 
-        XCTAssertEqual(amount.display(units: .satoshi), "SAT 100,000,000")
-        XCTAssertEqual(amount.display(), "BTC 1.00000000")
+        #expect(amount.display(units: .satoshi) == "SAT 100,000,000")
+        #expect(amount.display() == "BTC 1.00000000")
     }
 
-    func testCodable() throws {
-        try FOSAssertCodable(Amount<USD>.self)
+    @Test func testwBTCUnits() {
+        let wBTCContract = EthereumContract(address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599")
+        let btcAmountDecimal: Double = 0.1
+        let btcAmount = Amount(quantity: btcAmountDecimal, currency: wBTCContract, units: .defaultDisplayUnits)
+
+        #expect(btcAmount.value(units: .defaultDisplayUnits) == 0.1)
+    }
+
+    @Test func testCodable() throws {
+        try expectCodable(Amount<USD>.self)
     }
 }

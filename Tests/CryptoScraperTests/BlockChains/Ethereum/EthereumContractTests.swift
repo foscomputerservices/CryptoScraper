@@ -5,10 +5,10 @@
 
 import CryptoScraper
 import FOSTesting
-import XCTest
+import Testing
 
-final class EthereumContractTests: XCTestCase {
-    func testWeiToETHConversion() throws {
+@Suite struct EthereumContractTests {
+    @Test func testWeiToETHConversion() throws {
         let ethChain = EthereumChain.default
         let ethContract = ethChain.mainContract!
 
@@ -16,14 +16,14 @@ final class EthereumContractTests: XCTestCase {
         let weiAmount = Amount(quantity: 1000000000000000000, currency: ethContract)
         let ethAmount = weiAmount.value(units: .ether)
 
-        XCTAssertEqual(ethAmount, Double(1.0))
+        #expect(ethAmount == Double(1.0))
     }
 
-    func testChainToken() {
-        XCTAssertTrue(EthereumChain.default.mainContract!.isChainToken)
+    @Test func testChainToken() {
+        #expect(EthereumChain.default.mainContract!.isChainToken)
     }
 
-    func testCodable() throws {
-        try FOSAssertCodable(EthereumContract.self)
+    @Test func testCodable() throws {
+        try expectCodable(EthereumContract.self)
     }
 }

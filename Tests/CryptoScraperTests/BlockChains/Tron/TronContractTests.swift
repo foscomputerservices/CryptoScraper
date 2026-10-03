@@ -5,10 +5,10 @@
 
 import CryptoScraper
 import FOSTesting
-import XCTest
+import Testing
 
-final class TRXContractTests: XCTestCase {
-    func testSUNToTRXConversion() throws {
+@Suite struct TRXContractTests {
+    @Test func testSUNToTRXConversion() throws {
         let tronChain = TronChain.default
         let tronContract = tronChain.mainContract!
 
@@ -16,14 +16,14 @@ final class TRXContractTests: XCTestCase {
         let weiAmount = Amount(quantity: 1000000, currency: tronContract)
         let trxAmount = weiAmount.value(units: .trx)
 
-        XCTAssertEqual(trxAmount, Double(1.0))
+        #expect(trxAmount == Double(1.0))
     }
 
-    func testChainToken() {
-        XCTAssertTrue(TronChain.default.mainContract!.isChainToken)
+    @Test func testChainToken() {
+        #expect(TronChain.default.mainContract!.isChainToken)
     }
 
-    func testCodable() throws {
-        try FOSAssertCodable(TronContract.self)
+    @Test func testCodable() throws {
+        try expectCodable(TronContract.self)
     }
 }
