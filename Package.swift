@@ -37,7 +37,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/oscbyspro/Numberick.git", .upToNextMajor(from: "0.17.0")),
         .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
-        .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", branch: "main"),
+        .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", from: "0.19.1"),
         // Test-only: the two-driver encoding test of CryptoAssetTests
         .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.119.0")),
         .package(url: "https://github.com/vapor/fluent.git", .upToNextMajor(from: "4.12.0")),
