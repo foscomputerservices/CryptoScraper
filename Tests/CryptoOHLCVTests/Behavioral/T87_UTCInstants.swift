@@ -56,7 +56,13 @@ struct T87_UTCInstantsTests {
         _ = try await Retrieve.make(feed, store: try FileOHLCVStore(directory: directory))
             .fetch(market: Fx.btcusdt, interval: Fx.day, from: jan1, through: date(ms: Fx.jan1Ms + 5 * Fx.dayMs - 1))
         let kept = try await FileOHLCVStore(directory: directory).bars(market: "BTCUSDT", interval: Fx.day)
-        #expect(kept.map { ms($0.openTime) } == (0..<5).map { Fx.jan1Ms + Int64($0) * Fx.dayMs })
-        #expect(kept.map { ms($0.closeTime) } == (1...5).map { Fx.jan1Ms + Int64($0) * Fx.dayMs - 1 })
+        // Split for Swift 6.2's type checker on Linux, which cannot resolve the two map closures inside #expect in time; the
+        // values compared are exactly the originals' (a platform adaptation, not a change to the assertion).
+        let keptOpens: [Int64] = kept.map { ms($0.openTime) }
+        let expectedOpens: [Int64] = (0..<5).map { Fx.jan1Ms + Int64($0) * Fx.dayMs }
+        let keptCloses: [Int64] = kept.map { ms($0.closeTime) }
+        let expectedCloses: [Int64] = (1...5).map { Fx.jan1Ms + Int64($0) * Fx.dayMs - 1 }
+        #expect(keptOpens == expectedOpens)
+        #expect(keptCloses == expectedCloses)
     }
 }
