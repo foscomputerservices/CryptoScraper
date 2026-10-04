@@ -107,6 +107,20 @@ struct EncodingTests {
         #expect(bottom.contains(#""asset":{"#))
     }
 
+    // The decode side of the pin: the documented shape (§ 9.7) as committed JSON text, so a change that keeps
+    // encoding but breaks decoding is caught. The asset is a committed text too, at exponent 2.
+    @Test func amountsDocumentedShapeDecodesAtTheTwoExtremes() throws {
+        let asset = #"{"unitExponent":2,"wholeUnit":{"exponent":2,"name":"dollar","symbol":"$","fractionDigits":2},"baseUnit":{"name":"cent","symbol":"¢","exponent":0},"between":[],"displayUnit":{"name":"dollar","symbol":"$","exponent":2,"fractionDigits":2},"symbol":"USD"}"#
+        let top = #"{"baseUnits":170141183460469231731687303715884105727,"asset":"# + asset + "}"
+        let bottom = #"{"baseUnits":-170141183460469231731687303715884105728,"asset":"# + asset + "}"
+        let decodedTop: Amount = try top.fromJSON()
+        let decodedBottom: Amount = try bottom.fromJSON()
+        #expect(decodedTop.baseUnits == Int128.max)
+        #expect(decodedBottom.baseUnits == Int128.min)
+        #expect(decodedTop.asset == .usd)
+        #expect(decodedBottom.asset == .usd)
+    }
+
     private func expectDecodingError<T: Decodable>(_ type: T.Type, from json: String,
                                                    sourceLocation: SourceLocation = #_sourceLocation) throws {
         do {

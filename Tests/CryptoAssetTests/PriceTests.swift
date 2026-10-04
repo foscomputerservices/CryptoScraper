@@ -118,4 +118,51 @@ struct PriceTests {
             _ = Price(Amount(whole: 6_500_000_000, of: Fixtures.cheap), per: .btc) * Fraction(integer: 27)
         }
     }
+
+    // The top decade of the cost's divisor: a 30-exponent base asset divides the full-width product by 10^39, and a
+    // result between Int128.max ÷ 10 and Int128.max is exact, with no intermediate quotient that must fit.
+
+    private static let thirtyExponent = try! Asset(symbol: "THIRTY", unitExponent: 30)
+
+    // A price whose scaled quote is 1.7 × 10^38: 1.7 × 10^37 USD base units for 10^38 base units of the asset.
+    private static func priceNearTheTop(of base: Asset) -> Price {
+        Price(Amount(baseUnits: 17_000_000_000_000_000_000_000_000_000_000_000_000, asset: .usd),
+              per: Amount(baseUnits: 100_000_000_000_000_000_000_000_000_000_000_000_000, asset: base))
+    }
+
+    @Test func costAtADivisorOfTenToThe39IsExactAboveAnIntMaxTenth() {
+        let price = Self.priceNearTheTop(of: Self.thirtyExponent)
+        // 1.7 × 10^38 × 1.5 × 10^38 ÷ 10^39 = 2.55 × 10^37, above Int128.max ÷ 10 (1.7 × 10^37)
+        let size = Amount(baseUnits: 150_000_000_000_000_000_000_000_000_000_000_000_000, asset: Self.thirtyExponent)
+        let expected: Int128 = 25_500_000_000_000_000_000_000_000_000_000_000_000
+        #expect(expected > Int128.max / 10)
+        #expect(price.cost(of: size) == Amount(baseUnits: expected, asset: .usd))
+        // the sign and the truncation toward zero hold at the top decade
+        #expect(price.cost(of: Amount(baseUnits: -size.baseUnits, asset: Self.thirtyExponent))
+                == Amount(baseUnits: -expected, asset: .usd))
+        #expect(price.cost(of: Amount(baseUnits: size.baseUnits + 1, asset: Self.thirtyExponent))
+                == Amount(baseUnits: expected, asset: .usd))
+        #expect(price.cost(of: Amount(baseUnits: -size.baseUnits - 1, asset: Self.thirtyExponent))
+                == Amount(baseUnits: -expected, asset: .usd))
+    }
+
+    @Test func costAtADivisorOfTenToThe39AtTheWidestOperands() {
+        let price = Self.priceNearTheTop(of: Self.thirtyExponent)
+        let widest = Amount(baseUnits: .max, asset: Self.thirtyExponent)
+        // 17 × 10^37 × (2^127 − 1) ÷ 10^39, by hand: 17 × 170141183460469231731687303715884105727 ÷ 100
+        #expect(price.cost(of: widest) == Amount(baseUnits: 28_924_001_188_279_769_394_386_841_631_700_297_973, asset: .usd))
+        let widestNegative = Amount(baseUnits: .min, asset: Self.thirtyExponent)
+        #expect(price.cost(of: widestNegative) == Amount(baseUnits: -28_924_001_188_279_769_394_386_841_631_700_297_973, asset: .usd))
+    }
+
+    // One step past Int128.max, at the divisor below it: a 29-exponent asset divides by 10^38.
+    @Test func costPastInt128MaxStillTraps() async {
+        await #expect(processExitsWith: .failure) {
+            let base = try! Asset(symbol: "TWENTYNINE", unitExponent: 29)
+            // a scaled quote of 1.7 × 10^38 again, at the exponent whose divisor is 10^38
+            let price = Price(Amount(baseUnits: 170_000_000_000_000_000_000_000_000_000_000_000_000, asset: .usd),
+                              per: Amount(baseUnits: 100_000_000_000_000_000_000_000_000_000_000_000_000, asset: base))
+            _ = price.cost(of: Amount(baseUnits: .max, asset: base))
+        }
+    }
 }

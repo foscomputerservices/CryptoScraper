@@ -36,14 +36,41 @@ extension Int128 {
     }
 
     // self × multiplier ÷ 10^exponent at full width, toward zero, for any exponent up to 39 (a price's scale on
-    // top of a 30-exponent asset). Above 38 the divisor does not fit an Int128, so the full-width product is
-    // divided by 10^38 first and the quotient by the rest; truncation composes, so the result is the same.
+    // top of a 30-exponent asset). Above 38 the divisor does not fit an Int128, so the magnitude of the 256-bit
+    // product is divided by 10 first, a digit at a time through UInt128's own full-width division with the
+    // remainder carried across the two halves, and the 256-bit quotient by 10^(exponent − 1), which fits; truncation
+    // composes, so the result is exact wherever it fits an Int128, with no intermediate quotient that must fit.
     func scaled(by multiplier: Int128, overPowerOfTen exponent: Int) -> Int128 {
         if exponent <= 38 {
             return scaled(by: multiplier, over: .powerOfTen(exponent))
         }
-        let first = scaled(by: multiplier, over: .powerOfTen(38))
-        return first / .powerOfTen(exponent - 38)
+        precondition(exponent == 39, "10^\(exponent) is past the divisors this library scales by")
+
+        // The product's sign and its magnitude as 256 unsigned bits.
+        let (high, low) = multipliedFullWidth(by: multiplier)
+        let negative = high < 0
+        var magnitudeHigh = UInt128(bitPattern: high)
+        var magnitudeLow = low
+        if negative {
+            magnitudeLow = ~low &+ 1
+            magnitudeHigh = ~magnitudeHigh &+ (low == 0 ? 1 : 0)
+        }
+
+        // ÷ 10 across the halves: the high half's remainder is below 10, so the low half's division fits.
+        let tenth = UInt128(10)
+        let (quotientHigh, carry) = magnitudeHigh.quotientAndRemainder(dividingBy: tenth)
+        let (quotientLow, _) = tenth.dividingFullWidth((carry, magnitudeLow))
+
+        // ÷ 10^38: the product is under 2^254, so the high half after ÷ 10 is under 10^38 and the quotient fits.
+        let divisor = UInt128(bitPattern: .powerOfTen(38))
+        let (magnitude, _) = divisor.dividingFullWidth((quotientHigh, quotientLow))
+
+        if negative {
+            precondition(magnitude <= UInt128(bitPattern: .min), "\(self) × \(multiplier) ÷ 10^\(exponent) does not fit an Int128")
+            return Int128(bitPattern: 0 &- magnitude)
+        }
+        precondition(magnitude <= UInt128(Int128.max), "\(self) × \(multiplier) ÷ 10^\(exponent) does not fit an Int128")
+        return Int128(magnitude)
     }
 
     // self × multiplier, trapping where the product does not fit.

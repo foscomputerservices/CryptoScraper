@@ -53,7 +53,7 @@ extension Asset {
 extension Asset.Unit {
     public static func stub() -> Self { .stub(name: "pebble") }
 
-    public static func stub(name: String = "pebble", exponent: Int = 2,
+    public static func stub(name: String = "pebble", exponent: Int = 3,
                             symbol: String? = nil, fractionDigits: Int? = nil) -> Self {
         .init(name: name, exponent: exponent, symbol: symbol, fractionDigits: fractionDigits)
     }
@@ -85,11 +85,12 @@ extension Fraction {
 }
 
 extension Price {
-    public static func stub() -> Self { .stub(quote: Amount(whole: 42, of: .stub())) }
+    public static func stub() -> Self { .stub(quote: .stub(baseUnits: 42 * 10_000, asset: .stub())) }
 
-    // 42 whole FRED per one BARNEY: two reserved fakes, so the quote and the base are never one asset.
+    // 42 whole FRED (exponent 4, so 42 × 10^4 base units) per one BARNEY: two reserved fakes, so the quote and the
+    // base are never one asset.
     public static func stub(
-        quote: Amount = Amount(whole: 42, of: .stub()),
+        quote: Amount = .stub(baseUnits: 42 * 10_000, asset: .stub()),
         base: Asset = .stub(symbol: .stub(text: "BARNEY"))
     ) -> Self {
         .init(quote, per: base)

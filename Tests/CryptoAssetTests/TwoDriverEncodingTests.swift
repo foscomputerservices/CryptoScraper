@@ -16,11 +16,28 @@ import Vapor
 // R5 on both drivers: an Amount, a Fraction and a Price stored whole as JSON columns and read back by
 // `JSONDecoder`, through FOSTestingVapor's in-memory SQLite harness and, opt-in, a local Postgres.
 //
-// Postgres runs only when CRYPTOASSET_POSTGRES_URL is set, e.g.
-//   CRYPTOASSET_POSTGRES_URL=postgres://david@localhost:5432/postgres swift test --filter TwoDriver
-// The test creates its own table and drops it again.
+// Postgres runs only when CRYPTOASSET_POSTGRES_URL is set AND the URL's database name ends in `_test`, e.g.
+//   createdb cryptoasset_test
+//   CRYPTOASSET_POSTGRES_URL=postgres://david@localhost:5432/cryptoasset_test swift test --filter TwoDriver
+// The test reverts, migrates and writes to the database the URL names, so it refuses any other name: a URL that
+// points at a shared or production database skips the test instead of touching it. It creates its own table,
+// `cryptoasset_encoding_test_rows`, a name no production schema has, and drops it again; a failed drop is
+// recorded as an issue, never swallowed.
 
 private let postgresURL = ProcessInfo.processInfo.environment["CRYPTOASSET_POSTGRES_URL"]
+
+// The database name of a Postgres URL: the last path component, before any query or fragment.
+func postgresDatabaseName(of url: String) -> String? {
+    guard let components = URLComponents(string: url) else { return nil }
+    let name = components.path.split(separator: "/").last.map(String.init)
+    return name?.isEmpty == false ? name : nil
+}
+
+func isTestDatabase(_ url: String) -> Bool {
+    postgresDatabaseName(of: url)?.hasSuffix("_test") == true
+}
+
+private let postgresTestEnabled = postgresURL.map(isTestDatabase) ?? false
 
 @Suite("Encoding on both drivers", .serialized)
 struct TwoDriverEncodingTests {
@@ -34,7 +51,19 @@ struct TwoDriverEncodingTests {
         Self.expectEqual(read, rows)
     }
 
-    @Test(.enabled(if: postgresURL != nil, "set CRYPTOASSET_POSTGRES_URL to run against a local Postgres"))
+    @Test func onlyADatabaseNamedForTestingIsAccepted() {
+        #expect(isTestDatabase("postgres://david@localhost:5432/cryptoasset_test"))
+        #expect(isTestDatabase("postgres://david:pw@db.example.com/fosline_test?sslmode=require"))
+        #expect(!isTestDatabase("postgres://david@localhost:5432/postgres"))
+        #expect(!isTestDatabase("postgres://david@localhost:5432/cryptoasset_test_backup"))
+        #expect(!isTestDatabase("postgres://david@localhost:5432/test"))
+        #expect(!isTestDatabase("postgres://david@localhost:5432/"))
+        #expect(!isTestDatabase("postgres://david@localhost:5432"))
+        #expect(!isTestDatabase("not a url"))
+    }
+
+    @Test(.enabled(if: postgresTestEnabled,
+                   "set CRYPTOASSET_POSTGRES_URL to a Postgres whose database name ends in _test (createdb cryptoasset_test); any other name is refused"))
     func postgresStoresAndReadsBackEqual() async throws {
         let rows = Self.rows()
         let app = try await Application.make(.testing)
@@ -48,9 +77,22 @@ struct TwoDriverEncodingTests {
             try await app.asyncShutdown()
             Self.expectEqual(read, rows)
         } catch {
-            try? await app.autoRevert()
-            try? await app.asyncShutdown()
+            await Self.cleanUp(app)
             throw error
+        }
+    }
+
+    // The error that brought the test here propagates; a failure of its cleanup is recorded beside it.
+    static func cleanUp(_ app: Application) async {
+        do {
+            try await app.autoRevert()
+        } catch {
+            Issue.record("cleanup could not drop \(EncodingRow.schema): \(error)")
+        }
+        do {
+            try await app.asyncShutdown()
+        } catch {
+            Issue.record("cleanup could not shut the application down: \(error)")
         }
     }
 
@@ -100,7 +142,7 @@ struct TwoDriverEncodingTests {
 
 // A minimal test-only model: each value whole in one JSON column, as fosline's data models store them.
 final class EncodingRow: Model, @unchecked Sendable {
-    static let schema = "crypto_asset_encoding_rows"
+    static let schema = "cryptoasset_encoding_test_rows"
 
     @ID(key: .id) var id: UUID?
     @Field(key: "position") var position: Int

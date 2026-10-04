@@ -47,6 +47,14 @@ struct StubsTests {
         #expect(BarInterval.stub().count == 42)
     }
 
+    @Test func theUnitStubsExponentIsOneNoShippedAssetUses() {
+        let shipped = Set([Asset.usd, .usdc, .usdt, .btc, .eth].flatMap { asset in
+            [asset.unitExponent] + asset.units.map(\.exponent)
+        })
+        #expect(!shipped.contains(Asset.Unit.stub().exponent))
+        #expect(Asset.Unit.stub().exponent <= Asset.stub().unitExponent)
+    }
+
     @Test func theUnitStubsAreFakes() {
         #expect(Asset.Unit.stub().name == "pebble")
         #expect(Asset.UnitDescription.stub().name == "pebble")
