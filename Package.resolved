@@ -1,5 +1,5 @@
 {
-  "originHash" : "bb3f13515fd87e1ac034c067baeaa226b28883e3ac4632a541ef5d591200b473",
+  "originHash" : "9a322175a3feccf6e18c8a4104ecf6db1c686798a369eb81f92ed48b61856268",
   "pins" : [
     {
       "identity" : "aexml",
@@ -125,15 +125,6 @@
       "state" : {
         "revision" : "3498e60218e6003894ff95192d756e238c01f44e",
         "version" : "4.7.1"
-      }
-    },
-    {
-      "identity" : "numberick",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/oscbyspro/Numberick.git",
-      "state" : {
-        "revision" : "0c9bcde35208e04762bee6fb8f08333c39c82eb9",
-        "version" : "0.17.0"
       }
     },
     {

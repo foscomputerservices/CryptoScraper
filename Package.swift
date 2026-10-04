@@ -35,7 +35,6 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/oscbyspro/Numberick.git", .upToNextMajor(from: "0.17.0")),
         .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
         .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", from: "0.19.1"),
         // Test-only: the two-driver encoding test of CryptoAssetTests
@@ -121,7 +120,6 @@ let package = Package(
         .target(
             name: "CryptoScraper",
             dependencies: [
-                .product(name: "Numberick", package: "Numberick"),
                 .product(name: "Web3", package: "Web3.swift"),
                 .product(name: "Web3ContractABI", package: "Web3.swift"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")

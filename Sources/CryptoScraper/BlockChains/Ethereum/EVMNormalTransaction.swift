@@ -152,7 +152,7 @@ private enum EVMArgumentType {
         switch self {
         case .uint256:
             let value = value.trimmingCharacters(in: zeroCharSet)
-            typedValue = .uint256(value: UInt128(stringLiteral: value))
+            typedValue = .uint256(value: UInt128(value) ?? 0) // decimal text; Numberick's literal parse read it the same way
         case .address: typedValue = .address(value: value)
         case .bytes: typedValue = .bytes(value: value.data(using: .utf8)!)
         case .bytes32: typedValue = .bytes(value: value.data(using: .utf8)!)
@@ -180,7 +180,7 @@ private enum EVMArgumentType {
             guard !buffSizeStr.unicodeScalars.contains(where: { badChars.contains($0) }) else {
                 return 0
             }
-            let buffLen = UInt128(stringLiteral: buffSizeStr)
+            let buffLen = UInt128(buffSizeStr) ?? 0 // digits only, the guard above
             return UInt(buffLen) + 64
         case .bytes32: return 40
         }
