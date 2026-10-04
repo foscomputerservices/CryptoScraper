@@ -7,12 +7,15 @@ import FOSFoundation
 import Foundation
 
 /// Represents a quantity of value in a ``Currency``'s base units
-public struct Amount<C: Currency>: Comparable, Codable {
+public struct Amount<C: Currency>: Hashable, Comparable, Codable {
     /// The quantity of the coin in the ``Currency``'s base units
-    public let quantity: UInt128
+    public let quantity: Int128
 
     /// The ``Currency`` that defines units for the *quantity*
     public let currency: C
+
+    /// An internal optimization for .value(units: .defaultDisplayUnits)
+    private let value: Double
 
     /// Returns the value of ``Amount`` in the given units
     ///
@@ -23,7 +26,11 @@ public struct Amount<C: Currency>: Comparable, Codable {
     /// - Parameter units: The ``CurrencyUnits`` in which to show the ``Amount``'s
     ///    *quantity*
     public func value(units: C.Units = .defaultDisplayUnits) -> Double {
-        currency.value(of: quantity, in: units)
+        if units == .defaultDisplayUnits {
+            return value
+        } else {
+            return currency.value(of: quantity, in: units)
+        }
     }
 
     /// Returns a ``String`` representation of ``Amount`` in the given ``CurrencyUnits``
@@ -34,6 +41,27 @@ public struct Amount<C: Currency>: Comparable, Codable {
     ///    (default: *defaultDisplayUnits*)
     public func display(units: C.Units = .defaultDisplayUnits) -> String {
         currency.display(quantity: quantity, in: units)
+    }
+
+    // MARK: Codable Protocol
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.quantity = try container.decode(Int128.self, forKey: CodingKeys.quantity)
+        self.currency = try container.decode(C.self, forKey: CodingKeys.currency)
+        self.value = currency.value(of: self.quantity, in: .defaultDisplayUnits)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = try encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(quantity, forKey: .quantity)
+        try container.encode(currency, forKey: .currency)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case quantity
+        case currency
     }
 
     // MARK: Equatable Protocol
@@ -52,14 +80,31 @@ public struct Amount<C: Currency>: Comparable, Codable {
         return lhs.quantity < rhs.quantity
     }
 
+    public static func + (lhs: Self, rhs: Self) -> Self {
+        return .init(quantity: lhs.quantity + rhs.quantity, currency: lhs.currency)
+    }
+
+    public static func - (lhs: Self, rhs: Self) -> Self {
+        return .init(quantity: lhs.quantity - rhs.quantity, currency: lhs.currency)
+    }
+
+    public static func * (lhs: Self, rhs: Self) -> Self {
+        return .init(quantity: lhs.quantity * rhs.quantity, currency: lhs.currency)
+    }
+
+    public static func / (lhs: Self, rhs: Self) -> Self {
+        return .init(quantity: lhs.quantity / rhs.quantity, currency: lhs.currency)
+    }
+
     /// Initializes ``Amount`` using a *quantity* in the ``Currency``'s *chainBaseUnits*
     ///
     /// - Parameters:
     ///   - quantity: The amount of the given ``Currency`` in **chainBaseUnits**
     ///   - currency: The ``Currency`` that *quantity* is valued in
-    public init(quantity: UInt128, currency: C) {
+    public init(quantity: Int128, currency: C) {
         self.quantity = quantity
         self.currency = currency
+        self.value = currency.value(of: quantity, in: .defaultDisplayUnits)
     }
 
     /// Initializes ``Amount`` using a *quantity* in the ``Currency``'s ``Units``
@@ -75,6 +120,7 @@ public struct Amount<C: Currency>: Comparable, Codable {
     public init(quantity: Double, currency: C, units: C.Units) {
         self.quantity = currency.baseUnitsValue(of: quantity, in: units)
         self.currency = currency
+        self.value = currency.value(of: self.quantity, in: .defaultDisplayUnits)
     }
 }
 

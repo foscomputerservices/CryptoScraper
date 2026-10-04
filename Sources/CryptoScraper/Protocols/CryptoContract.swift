@@ -5,7 +5,7 @@
 
 import Foundation
 
-public protocol CryptoContract: Currency, Identifiable {
+public protocol CryptoContract: Currency, Identifiable, Hashable {
     /// The ``CryptoChain`` on which this contract resides
     associatedtype Chain: CryptoChain where Chain.Contract == Self
 

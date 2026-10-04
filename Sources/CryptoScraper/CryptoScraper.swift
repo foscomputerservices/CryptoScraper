@@ -9,10 +9,17 @@ public enum CryptoScraper {
         CoinGeckoAggregator()
     }
 
+    private static var initialized = false
+
     /// Initializes the block chains
+    ///
+    /// This method may be called multiple times, but does nothing after the 1st call. It is **not** thread-safe.
     ///
     /// - Note: The default ``CryptoDataAggregator`` is ``CoinGeckoAggregator``
     public static func initialize(dataAggregator: CryptoDataAggregator? = nil) async throws {
+        guard !initialized else { return }
+        initialized = true
+
         let dataAggregator = dataAggregator ?? defaultAggregator
 
         try await BlockChains.initializeChains(dataAggregator: dataAggregator)

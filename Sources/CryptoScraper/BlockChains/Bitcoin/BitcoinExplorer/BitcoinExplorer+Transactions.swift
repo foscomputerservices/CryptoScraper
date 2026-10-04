@@ -241,7 +241,7 @@ private struct ValueOut: Decodable {
 
     var amount: Amount<BitcoinChain.Contract> {
         let sats = UInt(value * 8.0)
-        return .init(quantity: UInt128(sats), currency: BitcoinChain.default.mainContract!)
+        return .init(quantity: Int128(sats), currency: BitcoinChain.default.mainContract!)
     }
 
     struct ScriptPubKey: Decodable {
@@ -264,8 +264,8 @@ private struct ValueOut: Decodable {
 
 private struct Fee: Decodable {
     private let btcAmount: Double // Values are in BTC! Ugh!!
-    var amount: UInt64 {
-        UInt64(btcAmount * 8.0)
+    var amount: Int64 {
+        Int64(btcAmount * 8.0)
     }
 
     let unit: String
@@ -294,12 +294,12 @@ private struct FeeTransaction: CryptoTransaction {
 
     private let _fromContract: Chain.Contract
 
-    init(hash: String, fee: UInt64, timeStamp: UInt, forAccount account: BitcoinContract) {
+    init(hash: String, fee: Int64, timeStamp: UInt, forAccount account: BitcoinContract) {
         self.hash = hash
         self._fromContract = account
         self.amount = .init(quantity: 0, currency: BitcoinChain.bitcoin.mainContract)
         self.timeStamp = Date(timeIntervalSince1970: TimeInterval(timeStamp))
-        self.gasPrice = .init(quantity: UInt128(fee), currency: BitcoinChain.bitcoin.mainContract)
+        self.gasPrice = .init(quantity: Int128(fee), currency: BitcoinChain.bitcoin.mainContract)
     }
 }
 

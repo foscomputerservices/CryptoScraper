@@ -31,6 +31,31 @@ private struct TokensResponse: Decodable {
     ] }
 }
 
+protocol CoinGeckoTokenInfo: TokenInfo {
+    var coinGeckoId: String { get }
+    var coinGeckoSymbol: String { get }
+    var coinGeckoName: String { get }
+    var coinGeckoPlatforms: [String: String?] { get }
+}
+
+extension SimpleTokenInfo<BitcoinContract>: CoinGeckoTokenInfo {
+    var coinGeckoId: String {
+        "bitcoin"
+    }
+    
+    var coinGeckoSymbol: String {
+        "btc"
+    }
+    
+    var coinGeckoName: String {
+        "btc"
+    }
+    
+    var coinGeckoPlatforms: [String : String?] {
+        [:]
+    }
+}
+
 struct CoinGeckoTokenResponse: Decodable {
     let id: String
     let symbol: String
@@ -58,17 +83,28 @@ struct CoinGeckoTokenResponse: Decodable {
         }
     }
 
-    fileprivate struct Token<Contract: CryptoContract>: TokenInfo {
+    fileprivate struct Token<Contract: CryptoContract>: CoinGeckoTokenInfo {
+        // MARK: TokenInfo
+
         let contractAddress: Contract
         let equivalentContracts: [Contract]
         let tokenName: String
         let symbol: String
+        var aggregatorId: String? { coinGeckoId }
+
+        // MARK: CoinGeckoTokenInfo
+        let coinGeckoId: String
+        var coinGeckoName: String { tokenName }
+        var coinGeckoSymbol: String { symbol }
+        let coinGeckoPlatforms: [String : String?]
 
         init(contractAddress: Contract, tokenResponse: CoinGeckoTokenResponse, equivalentContracts: [Contract]) {
             self.contractAddress = contractAddress
             self.tokenName = tokenResponse.name
             self.symbol = tokenResponse.symbol
             self.equivalentContracts = equivalentContracts
+            self.coinGeckoId = tokenResponse.id
+            self.coinGeckoPlatforms = tokenResponse.platforms
         }
     }
 
@@ -125,14 +161,14 @@ private extension String {
              "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
              "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
              "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
-             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain", "pulsechain", "sui", "base", "ordinals", "linea", "the-open-network", "kujira", "trustless-computer", "mantle", "eos-evm", "rollux", "callisto", "tenet", "neon-evm":
+             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain", "pulsechain", "sui", "base", "ordinals", "linea", "the-open-network", "kujira", "trustless-computer", "mantle", "eos-evm", "rollux", "callisto", "tenet", "neon-evm", "alephium", "archway", "orenium", "x-layer", "oraichain", "blast", "starknet", "akash", "sei-network", "degen", "lightlink", "mode", "opbnb", "bitrock", "shimmer_evm", "neutron", "migaloo", "manta-pacific", "radix", "injective", "fraxtal", "bsquared-network", "internet-computer", "juno", "beam", "bevm", "bitcanna", "bifrost-network", "scroll", "merlin-chain", "humanode", "immutable", "map-protocol", "shibarium", "lukso", "comdex", "ergo", "drc-20", "zora-network", "flow", "gravity-bridge", "crescent", "hypra-network", "xpla", "oasis-sapphire", "defichain", "kadena", "ki-chain", "astar-zkevm", "massa", "aura-network", "dymension", "zklink-nova", "omniflix", "octaspace", "clover", "quicksilver", "saga", "casper-network", "sge", "rails-network", "omax", "valobit", "filecoin", "zetachain", "zkfair", "wax":
             return nil
 
         default:
             #if DEBUG
             if !isEmpty, !unknownChain.contains(self) {
                 unknownChain.insert(self)
-                print("CoinGeckoAggregator: Unknown chain \(self)")
+//                print("CoinGeckoAggregator: Unknown chain \(self)")
             }
             #endif
             return nil

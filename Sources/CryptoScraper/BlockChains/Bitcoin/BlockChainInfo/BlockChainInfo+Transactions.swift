@@ -221,7 +221,7 @@ private struct Transaction: Decodable {
             self.hash = hash
             self.amount = .init(quantity: 0, currency: BitcoinChain.bitcoin.mainContract)
             self.timeStamp = Date(timeIntervalSince1970: TimeInterval(timeStamp))
-            self.gasPrice = .init(quantity: UInt128(fee), currency: BitcoinChain.bitcoin.mainContract)
+            self.gasPrice = .init(quantity: Int128(fee), currency: BitcoinChain.bitcoin.mainContract)
         }
     }
 
@@ -315,7 +315,7 @@ private struct TxOutput: Decodable {
     }
 
     var amount: Amount<BitcoinContract> {
-        .init(quantity: UInt128(value), currency: BitcoinChain.bitcoin.mainContract)
+        .init(quantity: Int128(value), currency: BitcoinChain.bitcoin.mainContract)
     }
 
     private enum CodingKeys: String, CodingKey {

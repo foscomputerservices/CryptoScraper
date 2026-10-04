@@ -20,9 +20,9 @@ public protocol CurrencyFormatter {
     /// - Parameters:
     ///   - quantity: The quantity, in **chainBaseUnits** to convert to *units*
     ///   - units: The ``CurrencyUnits`` to display *quantity* in
-    func value(of quantity: UInt128, in units: Units) -> Double
+    func value(of quantity: Int128, in units: Units) -> Double
 
-    /// Returns the ``UInt128`` value in *chainBaseUnits* converted from the given *quantity*
+    /// Returns the ``Int128`` value in *chainBaseUnits* converted from the given *quantity*
     ///
     /// - NOTE: This conversion should be used sparingly as it uses conversion from **double**,
     ///     which can have rounding problems.
@@ -30,14 +30,14 @@ public protocol CurrencyFormatter {
     /// - Parameters:
     ///   - quantity: The quantity, in *units*
     ///   - units: The ``Units`` that *quantity* is represented in
-    func baseUnitsValue(of quantity: Double, in units: Units) -> UInt128
+    func baseUnitsValue(of quantity: Double, in units: Units) -> Int128
 
     /// Returns a ``String`` that is a fully formatted representation of the given *quantity*
     ///
     /// - Parameters:
     ///   - quantity: The *quantity*, in **chainBaseUnits** to display
     ///   - units: The ``CurrencyUnits`` to display *quantity* in
-    func display(quantity: UInt128, in units: Units) -> String
+    func display(quantity: Int128, in units: Units) -> String
 }
 
 /// A description of the value units for a ``Currency``
@@ -68,7 +68,7 @@ public protocol CurrencyFormatter {
 ///       }
 ///   }
 /// ```
-public protocol CurrencyUnits: Codable, Stubbable {
+public protocol CurrencyUnits: Codable, Equatable, Stubbable {
     /// The standard unit used by the ``CryptoChain`` to store values
     static var chainBaseUnits: Self { get }
 
@@ -89,15 +89,15 @@ public protocol CurrencyUnits: Codable, Stubbable {
 }
 
 public extension CurrencyFormatter {
-    func value(of quantity: UInt128, in units: Units) -> Double {
+    func value(of quantity: Int128, in units: Units) -> Double {
         units.value(of: quantity)
     }
 
-    func baseUnitsValue(of quantity: Double, in units: Units) -> UInt128 {
+    func baseUnitsValue(of quantity: Double, in units: Units) -> Int128 {
         units.baseUnitsValue(of: quantity)
     }
 
-    func display(quantity: UInt128, in units: Units) -> String {
+    func display(quantity: Int128, in units: Units) -> String {
         units.display(quantity: quantity)
     }
 }
@@ -122,23 +122,23 @@ private extension CurrencyUnits {
     /// Converts *quantity* to the given ``CurrencyUnits``
     ///
     /// - Parameter quantity: amount in currency in **chainBaseUnits**
-    func value(of quantity: UInt128) -> Double {
+    func value(of quantity: Int128) -> Double {
         Double(quantity) / Double(divisorFromBase)
     }
 
     /// Converts *quantity* from the given ``CurrencyUnits`` to **chainBaseUnits**
     ///
     /// - Parameter quantity: amount of currency in ``CurrencyUnits``
-    func baseUnitsValue(of quantity: Double) -> UInt128 {
+    func baseUnitsValue(of quantity: Double) -> Int128 {
         let unitsDivisorFromBaseUnits = divisorFromBase
 
-        return UInt128(quantity * Double(unitsDivisorFromBaseUnits))
+        return Int128(quantity * Double(unitsDivisorFromBaseUnits))
     }
 
     /// Creates a ``String`` representation of *quantity* converted to the given ``CurrencyUnits``
     ///
     /// - Parameter quantity: amount of currency in **chainBaseUnits**
-    func display(quantity: UInt128) -> String {
+    func display(quantity: Int128) -> String {
         formatter.string(
             for: value(of: quantity)
         ) ?? "N/A"

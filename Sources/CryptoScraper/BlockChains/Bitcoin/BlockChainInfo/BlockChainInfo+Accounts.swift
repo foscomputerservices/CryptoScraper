@@ -57,7 +57,7 @@ private struct BalanceResponse: Decodable {
         }
 
         return .init(
-            quantity: UInt128(response.finalBalance),
+            quantity: Int128(response.finalBalance),
             currency: btcContract.chain.mainContract
         )
     }

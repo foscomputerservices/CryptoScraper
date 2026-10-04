@@ -48,11 +48,11 @@ extension CoinMarketCapAggregator {
         switch contractType {
         case is BitcoinContract.Type: return 1
         case is EthereumContract.Type: return 3200
-        case is FantomContract.Type: return 75
+        case is FantomContract.Type: return 65
         case is BNBContract.Type: return 300
         case is MaticContract.Type: return 250
         case is OptimismContract.Type: return 10
-        case is TronContract.Type: return 60
+        case is TronContract.Type: return 50
         default:
             fatalError("Unknown token count for contract: \(contractType)")
         }

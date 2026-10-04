@@ -101,7 +101,7 @@ private struct BalanceResponse: Decodable {
             let chain = BitcoinChain.default
 
             return .init(
-                quantity: UInt128(transactionHistory.satoshiBalance),
+                quantity: Int128(transactionHistory.satoshiBalance),
                 currency: chain.mainContract
             )
         }

@@ -1,4 +1,4 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [CryptoScraper]
+    - documentation_targets: [FOSUtilities, FOSMVVM]

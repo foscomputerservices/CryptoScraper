@@ -25,7 +25,7 @@ extension CoinGeckoAggregator {
             return .init(string: "https://pro-api.coingecko.com/api/v3")!
         }
 
-        return .init(string: "http://api.coingecko.com/api/v3")!
+        return .init(string: "https://api.coingecko.com/api/v3")!
     }()
 
     private static var _apiKey: String?

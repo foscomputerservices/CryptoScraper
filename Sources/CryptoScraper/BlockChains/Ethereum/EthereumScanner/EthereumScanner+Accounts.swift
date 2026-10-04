@@ -34,7 +34,7 @@ private struct AccountResponse: Decodable {
             throw EthereumScannerResponseError.requestFailed(result)
         }
 
-        guard let amount = UInt128(result) else {
+        guard let amount = Int128(result) else {
             throw EthereumScannerResponseError.invalidAmount
         }
 

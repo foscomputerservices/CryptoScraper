@@ -168,13 +168,13 @@ private struct TronTransaction: CryptoTransaction {
         self._fromContract = TronContract(address: transaction.ownerAddress)
         self._toContract = TronContract(address: transaction.toAddress)
         self.amount = .init(
-            quantity: UInt128(transaction.amount) ?? 0,
+            quantity: Int128(transaction.amount) ?? 0,
             currency: TronChain.default.mainContract
         )
         self.transactionId = transaction.hash
         self.timeStamp = Date(timeIntervalSince1970: TimeInterval(transaction.timestamp))
         self.gasPrice = .init(
-            quantity: UInt128(transaction.fee) ?? 0,
+            quantity: Int128(transaction.fee) ?? 0,
             currency: TronChain.default.mainContract
         )
     }

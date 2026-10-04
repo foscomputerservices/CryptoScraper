@@ -31,6 +31,18 @@ public struct BitcoinContract: CryptoContract, Codable, Stubbable {
 }
 
 public extension BitcoinContract {
+    var tokenInfo: SimpleTokenInfo<BitcoinContract>? {
+        .init(
+            contractAddress: self,
+            equivalentContracts: .init(),
+            tokenName: "Bitcoin",
+            symbol: "btc",
+            aggregatorId: "bitcoin"
+        )
+    }
+}
+
+public extension BitcoinContract {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

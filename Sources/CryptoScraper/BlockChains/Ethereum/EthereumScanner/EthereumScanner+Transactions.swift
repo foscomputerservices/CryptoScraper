@@ -247,7 +247,7 @@ private struct TransactionResponse: Decodable {
                     ? nil
                     : Chain.Contract(address: transaction.to)
 
-                let amount = UInt128(transaction.value)
+                let amount = Int128(transaction.value)
                 self.amount = amount == nil
                     ? .init(quantity: 0, currency: ethContract)
                     : .init(quantity: amount!, currency: ethContract)
@@ -262,11 +262,11 @@ private struct TransactionResponse: Decodable {
                 self.transactionId = transaction.hash
                 self.gas = Int(transaction.gas)
 
-                let gasPrice = UInt128(transaction.gasPrice)
+                let gasPrice = Int128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
                     : Amount(quantity: gasPrice!, currency: ethContract)
-                let gasUsed = UInt128(transaction.gasUsed)
+                let gasUsed = Int128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
                     : Amount(quantity: gasUsed!, currency: ethContract)
@@ -361,7 +361,7 @@ private struct InternalTransactionResponse: Decodable {
                     ? nil
                     : Chain.Contract(address: transaction.to)
 
-                let amount = UInt128(transaction.value)
+                let amount = Int128(transaction.value)
                 self.amount = amount == nil
                     ? .init(quantity: 0, currency: ethContract)
                     : .init(quantity: amount!, currency: ethContract)
@@ -377,9 +377,9 @@ private struct InternalTransactionResponse: Decodable {
                 self.gas = Int(transaction.gas)
 
                 // TODO: Gas price comes from the base transaction
-                let gasPrice = UInt128(0)
+                let gasPrice = Int128(0)
                 self.gasPrice = Amount(quantity: gasPrice, currency: ethContract)
-                let gasUsed = UInt128(transaction.gasUsed)
+                let gasUsed = Int128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
                     : Amount(quantity: gasUsed!, currency: ethContract)
@@ -514,7 +514,7 @@ private struct ERC20TokenTransactionResponse: Decodable {
                     ? nil
                     : Chain.Contract(address: transaction.to)
 
-                let amount = UInt128(transaction.value)
+                let amount = Int128(transaction.value)
                 self.amount = amount == nil
                     ? .init(quantity: 0, currency: tokenContract)
                     : .init(quantity: amount!, currency: tokenContract)
@@ -529,11 +529,11 @@ private struct ERC20TokenTransactionResponse: Decodable {
                 self.transactionId = transaction.hash
                 self.gas = Int(transaction.gas)
 
-                let gasPrice = UInt128(transaction.gasPrice)
+                let gasPrice = Int128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
                     : Amount(quantity: gasPrice!, currency: ethContract)
-                let gasUsed = UInt128(transaction.gasUsed)
+                let gasUsed = Int128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
                     : Amount(quantity: gasUsed!, currency: ethContract)
@@ -681,11 +681,11 @@ private struct ERC721TokenTransactionResponse: Decodable {
                 self.transactionId = transaction.hash
                 self.gas = Int(transaction.gas)
 
-                let gasPrice = UInt128(transaction.gasPrice)
+                let gasPrice = Int128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
                     : Amount(quantity: gasPrice!, currency: ethContract)
-                let gasUsed = UInt128(transaction.gasUsed)
+                let gasUsed = Int128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
                     : Amount(quantity: gasUsed!, currency: ethContract)
@@ -820,7 +820,7 @@ private struct ERC1155TokenTransactionResponse: Decodable {
                     ? nil
                     : Chain.Contract(address: transaction.to)
 
-                let amount = UInt128(transaction.tokenValue)
+                let amount = Int128(transaction.tokenValue)
                 self.amount = amount == nil
                     ? .init(quantity: 0, currency: tokenContract)
                     : .init(quantity: amount!, currency: tokenContract)
@@ -835,11 +835,11 @@ private struct ERC1155TokenTransactionResponse: Decodable {
                 self.transactionId = transaction.hash
                 self.gas = Int(transaction.gas)
 
-                let gasPrice = UInt128(transaction.gasPrice)
+                let gasPrice = Int128(transaction.gasPrice)
                 self.gasPrice = gasPrice == nil
                     ? nil
                     : Amount(quantity: gasPrice!, currency: ethContract)
-                let gasUsed = UInt128(transaction.gasUsed)
+                let gasUsed = Int128(transaction.gasUsed)
                 self.gasUsed = gasUsed == nil
                     ? nil
                     : Amount(quantity: gasUsed!, currency: ethContract)

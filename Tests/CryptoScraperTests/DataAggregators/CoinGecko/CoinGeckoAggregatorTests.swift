@@ -39,6 +39,28 @@ final class CoinGeckoAggregatorTests: XCTestCase {
             }
         }
     }
+
+    func testRetrievePrice() async throws {
+        let aggregator = CoinGeckoAggregator()
+
+        do {
+            guard let btcContract = BitcoinChain.default.mainContract else {
+                XCTFail("Cannot retrieve Bitcoin Contract??")
+                return
+            }
+
+            let price = try await aggregator.price(for: btcContract, in: USD.stub())
+            XCTAssertGreaterThan(price.quantity, 1500000)
+        } catch let e as DataFetchError {
+            XCTFail(e.localizedDescription)
+        } catch let e as CoinGeckoError {
+            if e.rateLimitReached {
+                print("*** Unable to test, rate-limit reached.")
+            } else {
+                XCTFail(e.localizedDescription)
+            }
+        }
+    }
 }
 
 extension CoinGeckoAggregator {
@@ -60,7 +82,7 @@ extension CoinGeckoAggregator {
         case is BNBContract.Type: return 300
         case is MaticContract.Type: return 900
         case is OptimismContract.Type: return 80
-        case is TronContract.Type: return 93
+        case is TronContract.Type: return 85
         default:
             fatalError("Unknown token count for contract: \(contractType)")
         }

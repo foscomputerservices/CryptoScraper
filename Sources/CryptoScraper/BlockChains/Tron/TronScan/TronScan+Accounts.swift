@@ -86,21 +86,22 @@ private protocol TRBalance {
 }
 
 private extension TRBalance {
-    var trxBalance: UInt128? {
-        UInt128(balance)
+    var trxBalance: Int128? {
+        Int128(balance)
     }
 }
 
 private extension Collection<TRBalance> {
-    var trxBalance: UInt128 {
+    var trxBalance: Int128 {
         compactMap(\.trxBalance)
-            .reduce(UInt128(0), +)
+            .reduce(Int128(0), +)
+
     }
 
-    func trxBalance(forToken contract: TronContract) -> UInt128 {
+    func trxBalance(forToken contract: TronContract) -> Int128 {
         filter { contract.isChainToken ? $0.tokenAbbr == "trx" : $0.tokenId == contract.address }
             .compactMap(\.trxBalance)
-            .reduce(UInt128(0), +)
+            .reduce(Int128(0), +)
     }
 }
 

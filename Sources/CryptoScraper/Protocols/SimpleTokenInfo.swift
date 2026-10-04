@@ -29,8 +29,9 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
     public let linkedin: URL?
     public let discord: URL?
     public let whitepaper: URL?
+    public let aggregatorId: String?
 
-    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: Amount<Contract>? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil) {
+    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: Amount<Contract>? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil, aggregatorId: String? = nil) {
         self.contractAddress = contractAddress
         self.equivalentContracts = equivalentContracts
         self.tokenName = tokenName
@@ -53,6 +54,7 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
         self.linkedin = linkedin
         self.discord = discord
         self.whitepaper = whitepaper
+        self.aggregatorId = aggregatorId
     }
 }
 
@@ -80,7 +82,8 @@ public extension SimpleTokenInfo {
             wechat: tokenInfo.wechat,
             linkedin: tokenInfo.linkedin,
             discord: tokenInfo.discord,
-            whitepaper: tokenInfo.whitepaper
+            whitepaper: tokenInfo.whitepaper,
+            aggregatorId: tokenInfo.aggregatorId
         )
     }
 }

@@ -38,7 +38,7 @@ try await CryptoScraper.initialize()
 
 ## Testing
 
-In order for testing to succeed, a test contract is needed for each chain.  These contracts can be provided in the environment as follows:
+In order for testing to succeed, a test contract (a wallet address) is needed for each chain.  These contracts can be provided in the environment as follows:
 
 | Service | Environment Variable |
 | --------------- | -------------------- |

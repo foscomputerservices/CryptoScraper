@@ -55,7 +55,7 @@ private struct TokenBalanceResponse: Decodable {
         guard success else {
             throw EthereumScannerResponseError.requestFailed(result)
         }
-        guard let amount = UInt128(result) else {
+        guard let amount = Int128(result) else {
             throw EthereumScannerResponseError.invalidAmount
         }
 
@@ -123,6 +123,7 @@ private struct EthereumTokenInfo: Decodable {
     let discord: String
     let whitepaper: String
     let tokenPriceUSD: String
+    let aggregatorId: String?
 
     func cryptoInfo() -> SimpleTokenInfo<EthereumContract> {
         SimpleTokenInfo(tokenInfo: self)
@@ -138,7 +139,7 @@ private extension SimpleTokenInfo where Contract == EthereumContract {
         self.imageURL = nil
         self.tokenType = tokenInfo.tokenType
 
-        let totalSupply = UInt128(tokenInfo.totalSupply)
+        let totalSupply = Int128(tokenInfo.totalSupply)
         self.totalSupply = totalSupply == nil
             ? nil
             : .init(
@@ -160,5 +161,6 @@ private extension SimpleTokenInfo where Contract == EthereumContract {
         self.linkedin = URL(string: tokenInfo.linkedin)
         self.discord = URL(string: tokenInfo.discord)
         self.whitepaper = URL(string: tokenInfo.whitepaper)
+        self.aggregatorId = tokenInfo.aggregatorId
     }
 }

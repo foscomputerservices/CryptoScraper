@@ -7,4 +7,8 @@ import FOSFoundation
 import Foundation
 
 /// A government-issued store of value
-public protocol FiatCurrency: Currency {}
+public protocol FiatCurrency: Currency {
+
+    /// A well-known representation of the currency (e.g. "usd")
+    var symbol: String { get }
+}

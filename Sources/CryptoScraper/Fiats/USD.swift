@@ -9,6 +9,8 @@ import Foundation
 public struct USD: FiatCurrency {
     // MARK: FiatCurrency Protocol
 
+    public let symbol: String = "usd"
+
     public enum Units: CurrencyUnits {
         case cents
         case dollars

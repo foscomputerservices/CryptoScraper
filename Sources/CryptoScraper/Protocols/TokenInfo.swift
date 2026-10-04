@@ -41,6 +41,7 @@ public protocol TokenInfo: Codable, Hashable, Identifiable {
     var linkedin: URL? { get }
     var discord: URL? { get }
     var whitepaper: URL? { get }
+    var aggregatorId: String? { get }
 
     /// Returns **true** if the contracts are equivalent
     ///
@@ -71,6 +72,7 @@ public extension TokenInfo {
     var linkedin: URL? { nil }
     var discord: URL? { nil }
     var whitepaper: URL? { nil }
+    var aggregatorId: String? { nil }
 
     func isEquivalent(to other: Contract) -> Bool {
         other.isSame(as: contractAddress) || equivalentContracts.contains { equiv in equiv.isSame(as: other) }

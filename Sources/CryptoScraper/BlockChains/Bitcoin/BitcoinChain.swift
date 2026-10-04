@@ -58,7 +58,7 @@ public final class BitcoinChain: CryptoChain {
     }
 
     private var btcTokenInfo: SimpleTokenInfo<BitcoinContract> {
-        .init(contractAddress: mainContract, equivalentContracts: [], tokenName: "Bitcoin", symbol: "BTC", imageURL: nil, tokenType: nil, totalSupply: nil, blueCheckmark: nil, description: nil, website: nil, email: nil, blog: nil, reddit: nil, slack: nil, facebook: nil, twitter: nil, gitHub: .init(string: "https://github.com/bitcoin"), telegram: nil, wechat: nil, linkedin: nil, discord: nil, whitepaper: .init(string: "https://bitcoin.org/bitcoin.pdf"))
+        .init(contractAddress: mainContract, equivalentContracts: [], tokenName: "Bitcoin", symbol: "BTC", imageURL: nil, tokenType: nil, totalSupply: nil, blueCheckmark: nil, description: nil, website: nil, email: nil, blog: nil, reddit: nil, slack: nil, facebook: nil, twitter: nil, gitHub: .init(string: "https://github.com/bitcoin"), telegram: nil, wechat: nil, linkedin: nil, discord: nil, whitepaper: .init(string: "https://bitcoin.org/bitcoin.pdf"), aggregatorId: "bitcoin")
     }
 }
 
