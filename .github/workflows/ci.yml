@@ -1,7 +1,7 @@
 name: CI
 
 # The package is Swift tools 6.0, language mode 6 on its new libraries, with a floor of 26 on the Apple platforms, so the
-# Apple jobs need Xcode 27 on a macOS 26 runner. The platforms list sets Apple floors only; Linux builds with a Swift 6 toolchain.
+# Apple jobs need the macOS 26 SDK: the newest Xcode 26 or 27 the macos-26 runner carries. The platforms list sets Apple floors only; Linux builds with a Swift 6 toolchain.
 
 on:
   workflow_dispatch:
@@ -51,15 +51,15 @@ jobs:
         run: swift test --filter "CryptoScraperTests"
 
   test_macos:
-    name: Test on macOS 26, Xcode 27
+    name: Test on macOS 26
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select the newest Xcode 27
+      - name: Select the newest Xcode
         run: |
-          XCODE=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$XCODE" ]; then echo "No Xcode 27 on this runner"; ls /Applications | grep Xcode; exit 1; fi
+          XCODE=$(ls -d /Applications/Xcode_2[67]*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE" ]; then echo "No Xcode 26 or 27 on this runner"; ls /Applications | grep Xcode; exit 1; fi
           sudo xcode-select -s "$XCODE"
           swift --version
 
@@ -87,10 +87,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select the newest Xcode 27
+      - name: Select the newest Xcode
         run: |
-          XCODE=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$XCODE" ]; then echo "No Xcode 27 on this runner"; exit 1; fi
+          XCODE=$(ls -d /Applications/Xcode_2[67]*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE" ]; then echo "No Xcode 26 or 27 on this runner"; exit 1; fi
           sudo xcode-select -s "$XCODE"
 
       - name: Build
