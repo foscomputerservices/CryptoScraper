@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["6.4"]
+        swift: ["6.2"]
     steps:
       - uses: swift-actions/setup-swift@v2
         with:
@@ -51,29 +51,17 @@ jobs:
         run: swift test --filter "CryptoScraperTests"
 
   test_macos:
-    name: Test on macOS 26, Swift ${{ matrix.swift }}
+    name: Test on macOS 26
     runs-on: macos-26
-    strategy:
-      fail-fast: false
-      matrix:
-        swift: ["6.4"]
     steps:
       - uses: actions/checkout@v4
 
-      # The old aggregator target resolves Numberick's Int128 against the standard library's differently on Swift 6.2
-      # and 6.3 than on 6.4, so the tests run on the 6.4 toolchain, over the newest Xcode's macOS 26 SDK.
       - name: Select the newest Xcode
         run: |
           XCODE=$(ls -d /Applications/Xcode_2[67]*.app 2>/dev/null | sort -V | tail -1)
           if [ -z "$XCODE" ]; then echo "No Xcode 26 or 27 on this runner"; ls /Applications | grep Xcode; exit 1; fi
           sudo xcode-select -s "$XCODE"
-
-      - uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: ${{ matrix.swift }}
-
-      - name: Toolchain
-        run: swift --version
+          swift --version
 
       - name: Build
         run: swift build
