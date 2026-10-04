@@ -9,7 +9,7 @@ import Testing
 
 @Suite struct AmountTests {
     @Test func testChainBaseUnitInit() {
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
         let amount = Amount(
             quantity: satAmount,
             currency: BitcoinChain.default.mainContract
@@ -78,7 +78,7 @@ import Testing
     }
 
     @Test func testValue() {
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
         let btcAmount = 1.0
 
         let amount = Amount(
@@ -91,7 +91,7 @@ import Testing
     }
 
     @Test func testDisplay() {
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
 
         let amount = Amount(
             quantity: satAmount,

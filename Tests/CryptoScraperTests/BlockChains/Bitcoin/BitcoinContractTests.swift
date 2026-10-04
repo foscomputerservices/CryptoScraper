@@ -12,7 +12,7 @@ import Testing
         let btcChain = BitcoinChain.default
         let btcContract = btcChain.mainContract!
 
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
         let btcAmount = btcContract.value(of: satAmount, in: .satoshi)
 
         #expect(btcAmount == Double(satAmount))
@@ -22,7 +22,7 @@ import Testing
         let btcChain = BitcoinChain.default
         let btcContract = btcChain.mainContract!
 
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
         let btcAmount = btcContract.value(of: satAmount, in: .btc)
 
         #expect(btcAmount == Double(1.0))
@@ -32,7 +32,7 @@ import Testing
         let btcChain = BitcoinChain.default
         let btcContract = btcChain.mainContract!
 
-        let satAmount: Swift.Int128 = 100000000
+        let satAmount: Int128 = 100000000
         let btcAmount = btcContract.value(of: satAmount, in: .defaultDisplayUnits)
 
         #expect(btcAmount == Double(1.0))
