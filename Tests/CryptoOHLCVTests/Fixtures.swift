@@ -18,8 +18,13 @@ import FoundationNetworking
 
 enum Recorded {
     static func data(_ path: String) -> Data {
-        let url = Bundle.module.resourceURL!.appendingPathComponent("Resources/\(path)")
-        return try! Data(contentsOf: url)
+        // SwiftPM lays a `.copy("Resources")` folder at the bundle's root on one toolchain and inside `Resources/` on
+        // another (Xcode 26.6's puts it one level deeper than Swift 6.4's), so both places are tried.
+        let base = Bundle.module.resourceURL!
+        for candidate in [base.appendingPathComponent("Resources/\(path)"), base.appendingPathComponent(path)] {
+            if let data = try? Data(contentsOf: candidate) { return data }
+        }
+        fatalError("No recorded fixture \(path) under \(base.path)")
     }
 
     static let page1 = data("Binance/klines-btcusdt-1d-page1.json")

@@ -9,6 +9,9 @@
 
 import Testing
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking // Linux: URLRequest and HTTPURLResponse live here (a platform import, not a change to any test)
+#endif
 import CryptoAsset
 import CryptoOHLCV
 import CryptoReference
