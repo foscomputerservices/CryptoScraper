@@ -24,6 +24,14 @@ let package = Package(
         .library(
             name: "CryptoAsset",
             targets: ["CryptoAsset"]
+        ),
+        .library(
+            name: "CryptoOHLCV",
+            targets: ["CryptoOHLCV"]
+        ),
+        .library(
+            name: "CryptoReference",
+            targets: ["CryptoReference"]
         )
     ],
     dependencies: [
@@ -57,6 +65,48 @@ let package = Package(
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver")
             ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "CryptoOHLCV",
+            dependencies: [
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoOHLCVTests",
+            dependencies: [
+                .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoAsset"),
+                .byName(name: "CryptoReference"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            exclude: ["Behavioral/README.md", "Behavioral/BehavioralAssumptions.md"],
+            resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "CryptoReference",
+            dependencies: [
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoReferenceTests",
+            dependencies: [
+                .byName(name: "CryptoReference"),
+                .byName(name: "CryptoAsset"),
+                .byName(name: "CryptoOHLCV"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            exclude: ["Behavioral/README.md", "Behavioral/BehavioralAssumptions.md"],
+            resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(

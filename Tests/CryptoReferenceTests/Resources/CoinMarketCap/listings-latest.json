@@ -1,0 +1,601 @@
+{
+ "status": {
+  "timestamp": "2026-09-13T20:17:54.071Z",
+  "error_code": 0,
+  "error_message": null,
+  "elapsed": 31,
+  "credit_count": 3,
+  "notice": null,
+  "total_count": 9000
+ },
+ "data": [
+  {
+   "id": 1,
+   "name": "Bitcoin",
+   "symbol": "BTC",
+   "slug": "bitcoin",
+   "cmc_rank": 1,
+   "date_added": "2010-07-13T00:00:00.000Z",
+   "tags": [
+    "mineable",
+    "pow",
+    "sha-256",
+    "store-of-value",
+    "state-channel",
+    "coinbase-ventures-portfolio",
+    "three-arrows-capital-portfolio",
+    "polychain-capital-portfolio",
+    "binance-labs-portfolio",
+    "blockchain-capital-portfolio",
+    "boostvc-portfolio",
+    "cms-holdings-portfolio",
+    "dcg-portfolio",
+    "dragonfly-capital-portfolio",
+    "electric-capital-portfolio",
+    "fabric-ventures-portfolio",
+    "framework-ventures-portfolio",
+    "galaxy-digital-portfolio",
+    "huobi-capital-portfolio",
+    "alameda-research-portfolio",
+    "a16z-portfolio",
+    "1confirmation-portfolio",
+    "winklevoss-capital-portfolio",
+    "usv-portfolio",
+    "placeholder-ventures-portfolio",
+    "pantera-capital-portfolio",
+    "multicoin-capital-portfolio",
+    "paradigm-portfolio",
+    "bitcoin-ecosystem",
+    "layer-1",
+    "ftx-bankruptcy-estate",
+    "2017-2018-alt-season",
+    "us-strategic-crypto-reserve",
+    "binance-ecosystem",
+    "binance-listing",
+    "sec-cftc-token-taxonomy",
+    "sec-cftc-digital-commodities"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 1551909218887.0142,
+     "volume_24h": 12588411043.22907,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 1027,
+   "name": "Ethereum",
+   "symbol": "ETH",
+   "slug": "ethereum",
+   "cmc_rank": 2,
+   "date_added": "2015-08-07T00:00:00.000Z",
+   "tags": [
+    "pos",
+    "smart-contracts",
+    "ethereum-ecosystem",
+    "coinbase-ventures-portfolio",
+    "three-arrows-capital-portfolio",
+    "polychain-capital-portfolio",
+    "binance-labs-portfolio",
+    "blockchain-capital-portfolio",
+    "boostvc-portfolio",
+    "cms-holdings-portfolio",
+    "dcg-portfolio",
+    "dragonfly-capital-portfolio",
+    "electric-capital-portfolio",
+    "fabric-ventures-portfolio",
+    "framework-ventures-portfolio",
+    "hashkey-capital-portfolio",
+    "kenetic-capital-portfolio",
+    "huobi-capital-portfolio",
+    "alameda-research-portfolio",
+    "a16z-portfolio",
+    "1confirmation-portfolio",
+    "winklevoss-capital-portfolio",
+    "usv-portfolio",
+    "placeholder-ventures-portfolio",
+    "pantera-capital-portfolio",
+    "multicoin-capital-portfolio",
+    "paradigm-portfolio",
+    "ethereum-pow-ecosystem",
+    "layer-1",
+    "ftx-bankruptcy-estate",
+    "sora-ecosystem",
+    "rsk-rbtc-ecosystem",
+    "world-liberty-financial-portfolio",
+    "us-strategic-crypto-reserve",
+    "binance-ecosystem",
+    "binance-listing",
+    "abstract-chain-ecosystem",
+    "unichain-ecosystem",
+    "soneium-ecosystem",
+    "sophon-ecosystem",
+    "sec-cftc-token-taxonomy",
+    "sec-cftc-digital-commodities",
+    "anubis-ecosystem",
+    "robinhood-ecosystem"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 305931258176.78973,
+     "volume_24h": 8939710796.928057,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 825,
+   "name": "Tether USDt",
+   "symbol": "USDT",
+   "slug": "tether",
+   "cmc_rank": 3,
+   "date_added": "2015-02-25T00:00:00.000Z",
+   "tags": [
+    "stablecoin",
+    "asset-backed-stablecoin",
+    "usd-stablecoin",
+    "ethereum-pow-ecosystem",
+    "fiat-stablecoin",
+    "tron20-ecosystem",
+    "rsk-rbtc-ecosystem",
+    "venom-ecosystem",
+    "world-liberty-financial-portfolio",
+    "binance-ecosystem",
+    "binance-listing",
+    "peaq-ecosystem",
+    "etherlink-ecosystem",
+    "duckchain-ecosystem",
+    "onus-ecosystem",
+    "sophon-ecosystem",
+    "xlayer-ecosystem"
+   ],
+   "platform": {
+    "id": 1027,
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "slug": "ethereum",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 183445922343.69626,
+     "volume_24h": 37252913514.8749,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 1839,
+   "name": "BNB",
+   "symbol": "BNB",
+   "slug": "bnb",
+   "cmc_rank": 4,
+   "date_added": "2017-07-25T00:00:00.000Z",
+   "tags": [
+    "marketplace",
+    "centralized-exchange",
+    "payments",
+    "smart-contracts",
+    "alameda-research-portfolio",
+    "multicoin-capital-portfolio",
+    "bnb-chain-ecosystem",
+    "layer-1",
+    "alleged-sec-securities",
+    "celsius-bankruptcy-estate",
+    "binance-ecosystem",
+    "binance-listing",
+    "etherlink-ecosystem",
+    "made-in-china"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 96044007918.52463,
+     "volume_24h": 1031608798.4090266,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 52,
+   "name": "XRP",
+   "symbol": "XRP",
+   "slug": "xrp",
+   "cmc_rank": 5,
+   "date_added": "2013-08-04T00:00:00.000Z",
+   "tags": [
+    "medium-of-exchange",
+    "enterprise-solutions",
+    "xrp-ecosystem",
+    "solana-ecosystem",
+    "arrington-xrp-capital-portfolio",
+    "galaxy-digital-portfolio",
+    "a16z-portfolio",
+    "pantera-capital-portfolio",
+    "ftx-bankruptcy-estate",
+    "2017-2018-alt-season",
+    "klaytn-ecosystem",
+    "made-in-america",
+    "us-strategic-crypto-reserve",
+    "binance-ecosystem",
+    "binance-listing",
+    "iso-20022",
+    "sec-cftc-token-taxonomy",
+    "sec-cftc-digital-commodities"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 85311885306.86938,
+     "volume_24h": 1027536294.5241221,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 3408,
+   "name": "USDC",
+   "symbol": "USDC",
+   "slug": "usd-coin",
+   "cmc_rank": 6,
+   "date_added": "2018-10-08T00:00:00.000Z",
+   "tags": [
+    "medium-of-exchange",
+    "stablecoin",
+    "asset-backed-stablecoin",
+    "stellar-ecosystem",
+    "coinbase-ventures-portfolio",
+    "usd-stablecoin",
+    "xdc-ecosystem",
+    "ethereum-pow-ecosystem",
+    "fiat-stablecoin",
+    "tron20-ecosystem",
+    "venom-ecosystem",
+    "made-in-america",
+    "world-liberty-financial-portfolio",
+    "sonic-ecosystem",
+    "binance-ecosystem",
+    "binance-listing",
+    "hyperevm-ecosystem",
+    "etherlink-ecosystem",
+    "unichain-ecosystem",
+    "vector-smart-chain-ecosystem",
+    "sophon-ecosystem",
+    "monad-ecosystem",
+    "xlayer-ecosystem"
+   ],
+   "platform": {
+    "id": 24091,
+    "name": "zkSync Era",
+    "symbol": "ZK",
+    "slug": "zksync-era",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 74249070751.99965,
+     "volume_24h": 5573460649.559718,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 5426,
+   "name": "Solana",
+   "symbol": "SOL",
+   "slug": "solana",
+   "cmc_rank": 7,
+   "date_added": "2020-04-10T00:00:00.000Z",
+   "tags": [
+    "pos",
+    "platform",
+    "solana-ecosystem",
+    "cms-holdings-portfolio",
+    "kenetic-capital-portfolio",
+    "alameda-research-portfolio",
+    "multicoin-capital-portfolio",
+    "okx-ventures-portfolio",
+    "layer-1",
+    "ftx-bankruptcy-estate",
+    "alleged-sec-securities",
+    "cmc-crypto-awards-2024",
+    "made-in-america",
+    "us-strategic-crypto-reserve",
+    "binance-ecosystem",
+    "binance-listing",
+    "sec-cftc-token-taxonomy",
+    "sec-cftc-digital-commodities",
+    "coinlist-launchpad"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 59301992005.9692,
+     "volume_24h": 1586358351.9254289,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 1958,
+   "name": "TRON",
+   "symbol": "TRX",
+   "slug": "tron",
+   "cmc_rank": 8,
+   "date_added": "2017-09-13T00:00:00.000Z",
+   "tags": [
+    "media",
+    "payments",
+    "tron-ecosystem",
+    "layer-1",
+    "dwf-labs-portfolio",
+    "alleged-sec-securities",
+    "2017-2018-alt-season",
+    "tron20-ecosystem",
+    "world-liberty-financial-portfolio",
+    "binance-ecosystem",
+    "binance-listing",
+    "made-in-china"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 32402470651.33696,
+     "volume_24h": 261107374.9641367,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 32196,
+   "name": "Hyperliquid",
+   "symbol": "HYPE",
+   "slug": "hyperliquid",
+   "cmc_rank": 9,
+   "date_added": "2024-07-15T10:14:50.000Z",
+   "tags": [
+    "decentralized-exchange-dex-token",
+    "defi",
+    "derivatives",
+    "layer-1",
+    "hyperliquid-ecosystem",
+    "binance-ecosystem",
+    "binance-listing",
+    "perpetuals"
+   ],
+   "platform": {
+    "id": 32196,
+    "name": "Hyperliquid",
+    "symbol": "HYPE",
+    "slug": "hyperliquid",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 19743778922.25119,
+     "volume_24h": 557115992.0144892,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 1437,
+   "name": "Zcash",
+   "symbol": "ZEC",
+   "slug": "zcash",
+   "cmc_rank": 10,
+   "date_added": "2016-10-29T00:00:00.000Z",
+   "tags": [
+    "mineable",
+    "pow",
+    "equihash",
+    "medium-of-exchange",
+    "privacy",
+    "zero-knowledge-proofs",
+    "quantum-resistant",
+    "binance-chain",
+    "boostvc-portfolio",
+    "dcg-portfolio",
+    "electric-capital-portfolio",
+    "fenbushi-capital-portfolio",
+    "hashkey-capital-portfolio",
+    "winklevoss-capital-portfolio",
+    "placeholder-ventures-portfolio",
+    "pantera-capital-portfolio",
+    "layer-1",
+    "standard-crypto-portfolio",
+    "2017-2018-alt-season",
+    "made-in-america",
+    "binance-ecosystem",
+    "binance-listing",
+    "privacy-coins"
+   ],
+   "platform": null,
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 18452523719.299755,
+     "volume_24h": 1395306635.481021,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 38590,
+   "name": "币安人生",
+   "symbol": "币安人生",
+   "slug": "bianrensheng",
+   "cmc_rank": 86,
+   "date_added": "2025-10-07T03:15:16.000Z",
+   "tags": [
+    "memes",
+    "bnb-chain-ecosystem",
+    "four-meme-ecosystem",
+    "binance-ecosystem",
+    "binance-listing",
+    "chinese-meme"
+   ],
+   "platform": {
+    "id": 1839,
+    "name": "BNB Smart Chain (BEP20)",
+    "symbol": "BNB",
+    "slug": "bnb-smart-chain-(bep20)",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 476489364.5476431,
+     "volume_24h": 3076212.51739159,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 38341,
+   "name": "Rain",
+   "symbol": "RAIN",
+   "slug": "rain",
+   "cmc_rank": 201,
+   "date_added": "2025-09-10T06:55:22.000Z",
+   "tags": [
+    "arbitrum-ecosystem"
+   ],
+   "platform": {
+    "id": 11841,
+    "name": "Arbitrum",
+    "symbol": "ARB",
+    "slug": "arbitrum",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 0,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 10862918232.257483,
+     "volume_24h": 43867459.28141891,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 35721,
+   "name": "Falcon USD",
+   "symbol": "USDf",
+   "slug": "falcon-finance",
+   "cmc_rank": 207,
+   "date_added": "2025-02-17T05:02:36.000Z",
+   "tags": [
+    "stablecoin",
+    "asset-backed-stablecoin",
+    "usd-stablecoin",
+    "xdc-ecosystem",
+    "dwf-labs-portfolio",
+    "wlfi-ecosystem"
+   ],
+   "platform": {
+    "id": 1027,
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "slug": "ethereum",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 0,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 1176702497.1804464,
+     "volume_24h": 702063.87087497,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 42007,
+   "name": "A Meme Coin",
+   "symbol": "MEME",
+   "slug": "a-meme-coin",
+   "cmc_rank": 341,
+   "date_added": "2026-09-04T10:57:20.000Z",
+   "tags": [
+    "memes",
+    "binance-alpha",
+    "binance-ecosystem",
+    "robinhood-ecosystem",
+    "robinhood-memes",
+    "stock-memes"
+   ],
+   "platform": {
+    "id": 40670,
+    "name": "Robinhood Chain",
+    "symbol": "-",
+    "slug": "robinhood-chain",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 0,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 57072087.850341216,
+     "volume_24h": 24163857.74253245,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  },
+  {
+   "id": 28301,
+   "name": "Memecoin",
+   "symbol": "MEME",
+   "slug": "meme",
+   "cmc_rank": 473,
+   "date_added": "2023-11-03T08:03:36.000Z",
+   "tags": [
+    "collectibles-nfts",
+    "memes",
+    "ethereum-ecosystem",
+    "binance-launchpool",
+    "binance-ecosystem",
+    "binance-listing"
+   ],
+   "platform": {
+    "id": 1027,
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "slug": "ethereum",
+    "token_address": "0x0"
+   },
+   "is_market_cap_included_in_calc": 1,
+   "last_updated": "2026-09-13T20:17:54.071Z",
+   "quote": {
+    "USD": {
+     "market_cap": 35215145.08045342,
+     "volume_24h": 4394828.59548609,
+     "last_updated": "2026-09-13T20:17:54.071Z"
+    }
+   }
+  }
+ ]
+}

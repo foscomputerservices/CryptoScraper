@@ -1,0 +1,1 @@
+{"code":-1003,"msg":"Too much request weight used; current limit is 6000 request weight per 1 MINUTE. Please use WebSocket Streams for live updates to avoid polling the API."}
