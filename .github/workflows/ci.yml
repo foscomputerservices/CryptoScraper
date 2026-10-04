@@ -1,7 +1,7 @@
 name: CI
 
-# The package is Swift tools 6.0, language mode 6 on its new libraries, with a floor of 26 on macOS, iOS, tvOS,
-# watchOS and Catalyst and no Linux, so it builds only with Xcode 27 on a macOS 26 runner.
+# The package is Swift tools 6.0, language mode 6 on its new libraries, with a floor of 26 on the Apple platforms, so the
+# Apple jobs need Xcode 27 on a macOS 26 runner. The platforms list sets Apple floors only; Linux builds with a Swift 6 toolchain.
 
 on:
   workflow_dispatch:
@@ -26,6 +26,30 @@ env:
   TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
 
 jobs:
+  test_linux:
+    name: Test on Ubuntu, Swift ${{ matrix.swift }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ["6.2"]
+    steps:
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ matrix.swift }}
+
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: swift build
+
+      - name: Test the libraries (no network)
+        run: swift test --filter "CryptoAssetTests|CryptoOHLCVTests|CryptoReferenceTests"
+
+      - name: Test the old aggregators (network)
+        continue-on-error: true
+        run: swift test --filter "CryptoScraperTests"
+
   test_macos:
     name: Test on macOS 26, Xcode 27
     runs-on: macos-26
