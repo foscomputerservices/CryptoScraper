@@ -30,6 +30,10 @@ let package = Package(
             targets: ["CryptoExchange"]
         ),
         .library(
+            name: "CryptoHyperliquid",
+            targets: ["CryptoHyperliquid"]
+        ),
+        .library(
             name: "CryptoOHLCV",
             targets: ["CryptoOHLCV"]
         ),
@@ -41,6 +45,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
         .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", from: "0.20.0"),
+        // CryptoHyperliquid alone: secp256k1 and Keccak-256 for the agent's signature (AR33)
+        .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.1"),
         // Test-only: the two-driver encoding test of CryptoAssetTests
         .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.119.0")),
         .package(url: "https://github.com/vapor/fluent.git", .upToNextMajor(from: "4.12.0")),
@@ -109,6 +116,31 @@ let package = Package(
             ],
             exclude: ["Behavioral/README.md", "Behavioral/BehavioralAssumptions.md"],
             resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "CryptoHyperliquid",
+            dependencies: [
+                .byName(name: "CryptoExchange"),
+                .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "secp256k1", package: "secp256k1.swift"),
+                .product(name: "CryptoSwift", package: "CryptoSwift")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoHyperliquidTests",
+            dependencies: [
+                .byName(name: "CryptoHyperliquid"),
+                .byName(name: "CryptoExchange"),
+                .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            resources: [.copy("Resources/Hyperliquid"), .process("Resources/hyperliquid-signing-vectors.json")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
