@@ -231,7 +231,7 @@ let package = Package(
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
                 .product(name: "FOSTesting", package: "FOSUtilities")
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "CryptoScraper",
@@ -240,14 +240,14 @@ let package = Package(
                 .product(name: "Web3ContractABI", package: "Web3.swift"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "CryptoTesting",
             dependencies: [
                 .byName(name: "CryptoScraper")
             ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v6)]
         )
     ]
 )

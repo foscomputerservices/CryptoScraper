@@ -87,3 +87,6 @@ public extension SimpleTokenInfo {
         )
     }
 }
+
+// A token description is plain values; it crosses domains whenever its contract does.
+extension SimpleTokenInfo: Sendable where Contract: Sendable {}

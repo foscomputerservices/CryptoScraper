@@ -5,14 +5,20 @@
 
 import CryptoScraper
 import Foundation
+import Synchronization
 
-public final class TestCoinChain: CryptoChain {
+public final class TestCoinChain: CryptoChain, Sendable {
     // MARK: CryptoChain Protocol
 
     public let userReadableName = "TestChain"
     public let chainTokenInfos: Set<SimpleTokenInfo<TestCoinContract>> = []
     public let mainContract: TestCoinContract!
-    public var equivalentContracts: [TestCoinContract: Set<TestCoinContract>]
+    // Settable by a test after the singleton exists and read from any domain, so it is held behind a `Mutex`.
+    private let _equivalentContracts = Mutex<[TestCoinContract: Set<TestCoinContract>]>([:])
+    public var equivalentContracts: [TestCoinContract: Set<TestCoinContract>] {
+        get { _equivalentContracts.withLock { $0 } }
+        set { _equivalentContracts.withLock { $0 = newValue } }
+    }
 
     public func contract(for address: String) throws -> TestCoinContract {
         .init(address: address)
@@ -35,10 +41,9 @@ public final class TestCoinChain: CryptoChain {
 
     static let tcContractAddress = "TestCoin"
 
-    public static var `default`: TestCoinChain = .init()
+    public static let `default`: TestCoinChain = .init()
 
     public init() {
         self.mainContract = .init(address: Self.tcContractAddress)
-        self.equivalentContracts = [:]
     }
 }

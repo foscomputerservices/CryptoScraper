@@ -6,7 +6,7 @@
 import Foundation
 
 /// A ``CryptoScanner`` implementation for the Bitcoin Explorer web service
-public struct BitcoinExplorer: CryptoScanner {
+public struct BitcoinExplorer: CryptoScanner, Sendable {
     // MARK: CryptoScanner Protocol
 
     public typealias Contract = BitcoinContract

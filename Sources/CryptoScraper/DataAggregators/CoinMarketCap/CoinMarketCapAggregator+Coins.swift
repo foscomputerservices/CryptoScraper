@@ -4,12 +4,13 @@
 //
 
 import Foundation
+import Synchronization
 
 public extension CoinMarketCapAggregator {
     /// Returns the coins known to the aggregator
     ///
     /// - See also: https://coinmarketcap.com/api/documentation/v1/#operation/getV1CryptocurrencyMap
-    func tokens<Contract: CryptoContract>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
+    func tokens<Contract: CryptoContract & Sendable>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
         let response: CurrencyMapResponse
 
         if let cachedResponse = cachedMapResponse {
@@ -38,7 +39,7 @@ public extension CoinMarketCapAggregator {
     }
 }
 
-struct CurrencyMapResponse: Decodable {
+struct CurrencyMapResponse: Decodable, Sendable {
     fileprivate let data: [CurrencyMapItem]
     let status: CoinMarketCapError.ErrorStatus
 
@@ -47,7 +48,7 @@ struct CurrencyMapResponse: Decodable {
     }
 }
 
-private struct CurrencyMapItem: Decodable {
+private struct CurrencyMapItem: Decodable, Sendable {
     let id: Int
     let name: String
     let symbol: String
@@ -98,7 +99,7 @@ private struct CoinMarketCapTokenInfo<Contract: CryptoContract>: TokenInfo {
 }
 
 /// Metadata about the parent cryptocurrency platform this cryptocurrency belongs to
-private struct Platform: Decodable {
+private struct Platform: Decodable, Sendable {
     let id: Int
     let name: String
     let symbol: String
@@ -127,7 +128,8 @@ private extension Collection<CurrencyMapItem> {
     }
 }
 
-private var unknownChain = Set<String>()
+// Debug bookkeeping written from whichever domain decodes a response, so it is held behind a `Mutex`.
+private let unknownChain = Mutex<Set<String>>([])
 
 private extension String {
     var chain: (any CryptoChain)? {
@@ -145,8 +147,7 @@ private extension String {
 
         default:
             #if DEBUG
-            if !isEmpty, !unknownChain.contains(self) {
-                unknownChain.insert(self)
+            if !isEmpty, unknownChain.withLock({ $0.insert(self).inserted }) {
                 print("CoinMarketCapAggregator: Unknown chain \(self)")
             }
             #endif

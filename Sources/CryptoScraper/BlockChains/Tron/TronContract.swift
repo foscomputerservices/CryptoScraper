@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct TronContract: CryptoContract, Codable, Stubbable {
+public struct TronContract: CryptoContract, Codable, Stubbable, Sendable {
     // https://developers.tron.network/docs/token-standards-trx#denominations-of-trx
     public enum Units: String, CurrencyUnits {
         case sun

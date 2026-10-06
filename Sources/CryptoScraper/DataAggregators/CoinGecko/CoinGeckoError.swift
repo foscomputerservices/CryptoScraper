@@ -12,7 +12,7 @@ public struct CoinGeckoError: Decodable, Error {
         status.errorCode == 429
     }
 
-    public struct ErrorStatus: Decodable {
+    public struct ErrorStatus: Decodable, Sendable {
         public let errorCode: Int
         public let errorMessage: String
 

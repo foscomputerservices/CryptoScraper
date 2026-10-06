@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct EthereumContract: CryptoContract, Codable, Stubbable {
+public struct EthereumContract: CryptoContract, Codable, Stubbable, Sendable {
     // https://etherscan.io/unitconverter
     public enum Units: String, CurrencyUnits {
         case wei

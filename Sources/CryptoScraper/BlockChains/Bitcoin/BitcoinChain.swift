@@ -4,19 +4,22 @@
 //
 
 import Foundation
+import Synchronization
 
-public final class BitcoinChain: CryptoChain {
+public final class BitcoinChain: CryptoChain, Sendable {
     // MARK: CryptoChain Protocol
 
     public let userReadableName: String = "Bitcoin"
 
     public var chainTokenInfos: Set<SimpleTokenInfo<BitcoinContract>> {
-        guard let result = tokens?.values else { return [] }
+        tokens.withLock { tokens in
+            guard let result = tokens?.values else { return [] }
 
-        return .init(result)
+            return .init(result)
+        }
     }
 
-    public private(set) var mainContract: BitcoinContract!
+    public let mainContract: BitcoinContract!
 
     public func contract(for address: String) throws -> BitcoinContract {
         BitcoinContract(address: address)
@@ -30,28 +33,32 @@ public final class BitcoinChain: CryptoChain {
         )
     }
 
-    private var tokens: [String: SimpleTokenInfo<BitcoinContract>]?
+    // The table is loaded after the singleton exists (``loadChainTokens(from:)``) and read from any
+    // concurrency domain, so it lives behind a `Mutex`; every other stored property is a `let`.
+    private let tokens = Mutex<[String: SimpleTokenInfo<BitcoinContract>]?>(nil)
     private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<BitcoinContract>>) {
-        tokens = tokens ?? [:]
+        tokens.withLock { tokens in
+            tokens = tokens ?? [:]
 
-        for token in newTokens {
-            tokens![token.contractAddress.address] = token
+            for token in newTokens {
+                tokens![token.contractAddress.address] = token
+            }
+
+            // Add the chain's token as it doesn't come from the
+            // data aggregators
+            tokens![Self.btcContractAddress] = btcTokenInfo
         }
-
-        // Add the chain's token as it doesn't come from the
-        // data aggregators
-        tokens![Self.btcContractAddress] = btcTokenInfo
     }
 
     public func tokenInfo(for address: String) -> SimpleTokenInfo<BitcoinContract>? {
-        tokens?[address]
+        tokens.withLock { $0?[address] }
     }
 
     public let scanner: BlockChainInfo? = .init()
 
     static let btcContractAddress: String = "btc"
 
-    public static var `default`: BitcoinChain = .init()
+    public static let `default`: BitcoinChain = .init()
 
     public init() {
         self.mainContract = BitcoinContract(address: Self.btcContractAddress)

@@ -4,10 +4,11 @@
 //
 
 import Foundation
+import Synchronization
 
 public extension CoinGeckoAggregator {
     /// Returns the known tokens for a given ``CryptoContract`` type
-    func tokens<Contract: CryptoContract>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
+    func tokens<Contract: CryptoContract & Sendable>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
         let response: [CoinGeckoTokenResponse]
         if let cachedTokensResponse {
             response = cachedTokensResponse
@@ -133,7 +134,8 @@ private extension Collection<CoinGeckoTokenResponse> {
     }
 }
 
-private var unknownChain = Set<String>()
+// Debug bookkeeping written from whichever domain decodes a response, so it is held behind a `Mutex`.
+private let unknownChain = Mutex<Set<String>>([])
 
 private extension String {
     var chain: (any CryptoChain)? {
@@ -166,8 +168,7 @@ private extension String {
 
         default:
             #if DEBUG
-            if !isEmpty, !unknownChain.contains(self) {
-                unknownChain.insert(self)
+            if !isEmpty, unknownChain.withLock({ $0.insert(self).inserted }) {
 //                print("CoinGeckoAggregator: Unknown chain \(self)")
             }
             #endif

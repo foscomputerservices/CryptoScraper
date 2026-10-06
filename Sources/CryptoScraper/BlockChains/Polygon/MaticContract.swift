@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct MaticContract: CryptoContract, Codable, Stubbable {
+public struct MaticContract: CryptoContract, Codable, Stubbable, Sendable {
     public typealias Units = EthereumContract.Units
 
     // MARK: CurrencyFormatter

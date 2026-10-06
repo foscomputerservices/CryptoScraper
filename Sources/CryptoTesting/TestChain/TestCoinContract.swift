@@ -7,7 +7,7 @@ import CryptoScraper
 import FOSFoundation
 import Foundation
 
-public struct TestCoinContract: CryptoContract {
+public struct TestCoinContract: CryptoContract, Sendable {
     // MARK: CurrencyFormatter
 
     public typealias Chain = TestCoinChain

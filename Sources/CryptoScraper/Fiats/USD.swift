@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct USD: FiatCurrency {
+public struct USD: FiatCurrency, Sendable {
     // MARK: FiatCurrency Protocol
 
     public let symbol: String = "usd"

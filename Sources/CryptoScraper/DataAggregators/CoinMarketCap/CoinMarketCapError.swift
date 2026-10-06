@@ -16,7 +16,7 @@ public struct CoinMarketCapError: Decodable, Error {
         status.errorCode == 429
     }
 
-    public struct ErrorStatus: Decodable {
+    public struct ErrorStatus: Decodable, Sendable {
         public let timestamp: String
         public let errorCode: Int
         public let errorMessage: String?
