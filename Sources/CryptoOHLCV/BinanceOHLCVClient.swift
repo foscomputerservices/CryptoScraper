@@ -74,7 +74,9 @@ public struct BinanceOHLCVClient: OHLCVClient {
             URLQueryItem(name: "limit", value: String(Self.pageLimit))
         ])
         let clock = now().milliseconds
+        // Only the klines Binance was asked for: a row outside the range is never handed up.
         return try rows
+            .filter { $0.openTime >= start && $0.openTime <= end }
             .map { try $0.bar(of: assets, now: clock) }
             .filter(\.isClosed)
     }

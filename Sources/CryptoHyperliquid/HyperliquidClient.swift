@@ -292,6 +292,12 @@ public struct HyperliquidClient: ExchangeClient {
 
     public func keyFacts() async throws -> ExchangeClientKeyFacts {
         let key = try agentKey()
+        // A key that is itself a main wallet is handed up as one: it trades, moves and withdraws, and nobody approved
+        // it (T41, T53: the consumer refuses it; the client only says what it is).
+        let role: HyperliquidUserRole = try await info(.map([("type", .string("userRole")), ("user", .string(key.address))]))
+        if role.role == "user" {
+            return ExchangeClientKeyFacts(canTrade: true, canTransfer: true, canWithdraw: true, approvedBy: nil, validUntil: nil)
+        }
         let main = try await mainWallet()
         let agents: [HyperliquidAgent] = try await info(.map([("type", .string("extraAgents")), ("user", .string(main))]))
         guard let mine = agents.first(where: { $0.address.lowercased() == key.address }) else {
