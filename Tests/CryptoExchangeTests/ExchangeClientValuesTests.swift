@@ -52,7 +52,8 @@ struct ExchangeClientValuesTests {
         let book = ExchangeClientBook(market: "BTC", mid: Self.mid, bestBid: bid, bestAsk: ask,
                                       volume: Amount(whole: 1_234, of: Self.btc), readAt: Date(timeIntervalSince1970: 0))
         #expect(book.bestBid < book.mid && book.mid < book.bestAsk)
-        #expect(book.bestAsk.spread(to: book.mid) > .zero  // OQ-C12: how far the ask is above the mid)
+        // OQ-C12: a spread is how far this price is above the other, so the ask's spread to the mid is positive
+        #expect(book.bestAsk.spread(to: book.mid) > .zero)
     }
 
     @Test func anOrderResultCarriesTheExchangesIdAndWords() {
