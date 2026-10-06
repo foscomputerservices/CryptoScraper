@@ -7,6 +7,9 @@ import CryptoAsset
 import FOSFoundation
 import Foundation
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 // The errors each exchange states on its public wire, shared, like the market names, by the exchange's OHLCV client
 // here and its exchange client in its plug-in library: Kraken's and Coinbase's error bodies, and each exchange's
 // "slow down" as a typed limit the OHLCV retrieval waits out (OHLCVClientLimitError).

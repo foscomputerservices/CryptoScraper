@@ -9,6 +9,9 @@ import CryptoExchange
 import CryptoOHLCV
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Testing
 
 // § 8.6 for Hyperliquid's exchange client: every member against recorded responses (the public reads and the owner's

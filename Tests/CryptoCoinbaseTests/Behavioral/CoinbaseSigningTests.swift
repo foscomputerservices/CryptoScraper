@@ -9,6 +9,9 @@ import CryptoCoinbase
 import CryptoExchange
 import CryptoKit
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Testing
 
 @Suite("AR32: Coinbase's HMAC")

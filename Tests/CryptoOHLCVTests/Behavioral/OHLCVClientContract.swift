@@ -9,6 +9,9 @@
 import CryptoAsset
 import CryptoOHLCV
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Synchronization
 import Testing
 

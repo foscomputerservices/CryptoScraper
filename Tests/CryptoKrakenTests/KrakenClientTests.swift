@@ -9,6 +9,9 @@ import CryptoExchange
 import CryptoOHLCV
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Testing
 
 // § 8.6 for Kraken's exchange client: the public reads recorded read-only on 2026-10-06; the private answers are

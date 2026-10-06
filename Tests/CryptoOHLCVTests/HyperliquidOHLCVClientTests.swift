@@ -8,6 +8,9 @@ import CryptoExchange
 import CryptoOHLCV
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Testing
 
 // § 8.6 and C32 for Hyperliquid's OHLCV client, against recorded responses.

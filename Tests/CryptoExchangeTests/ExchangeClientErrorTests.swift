@@ -7,6 +7,9 @@
 import CryptoAsset
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here
+#endif
 import Testing
 
 // The owner's ruling of 2026-10-06 ("yes, one shared error type"): C30's ExchangeClientError, and the one reading
