@@ -153,6 +153,8 @@ func cursor<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderI
 enum OrderOutcome<OrderId: Hashable & Sendable>: Hashable {
     case filled(units: Amount, at: Price, id: OrderId)
     case partlyFilled(units: Amount, at: Price, id: OrderId)
+    // Wiring, 2026-10-06 (the parent): C30 gained `resting(id:time:)` at the owner's word; the exhaustive switch below needs it. No assertion changed.
+    case resting(id: OrderId)
     case cancelledBeforeAccepted
     case cancelled(id: OrderId)
     case refused(text: String)
@@ -162,6 +164,7 @@ func outcome<OrderId>(_ result: ExchangeClientOrderResult<OrderId>) -> OrderOutc
     switch result {
     case let .filled(units, at, id, _): .filled(units: units, at: at, id: id)
     case let .partlyFilled(units, at, id, _): .partlyFilled(units: units, at: at, id: id)
+    case let .resting(id, _): .resting(id: id)
     case .cancelledBeforeAccepted: .cancelledBeforeAccepted
     case let .cancelled(id): .cancelled(id: id)
     case let .refused(_, text): .refused(text: text)
