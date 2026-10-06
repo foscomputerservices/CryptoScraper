@@ -93,15 +93,16 @@ public struct Price: Codable, Hashable, Comparable, Sendable, Stubbable {
         return lhs.scaledQuote < rhs.scaledQuote
     }
 
-    /// The spread from this price to `other`, in percentage points of this one
+    /// How far this price is above `other`, as a fraction of `other`: (self − other) ÷ other; negative below it
     ///
-    /// - Precondition: both prices share a base and a quote asset
+    /// - Precondition: both prices share a base and a quote asset; `other` is not zero
     public func spread(to other: Self) -> Fraction {
         requireOneAsset(base, other.base, "Price.spread(to:) (base)")
         requireOneAsset(quote, other.quote, "Price.spread(to:) (quote)")
-        precondition(!isZero, "Price.spread(to:) from a zero price")
-        // (other − self) ÷ self at the scale, toward zero: from this price to the other, relative to this one.
-        return .atScale((other.scaledQuote - scaledQuote).scaled(by: .assetScale, over: scaledQuote))
+        precondition(!other.isZero, "Price.spread(to:) against a zero price")
+        // (self − other) ÷ other at the scale, toward zero: the owner's reading of 2026-10-06 (OQ-C12), C5's example
+        // `ask.spread(to: mid)` read as how far the ask is above the mid, relative to the mid.
+        return .atScale((scaledQuote - other.scaledQuote).scaled(by: .assetScale, over: other.scaledQuote))
     }
 
     public var isZero: Bool {
