@@ -91,6 +91,9 @@ public struct KrakenClient: ExchangeClient {
         }
     }
 
+    /// The book from Kraken's ticker: its best bid and ask, their mid, and the last 24 hours' volume (`v[1]`) as the
+    /// base volume. Kraken publishes no turnover in the quote asset, so the quote volume is the base volume priced at
+    /// the mid, cut toward zero at the quote asset's base unit: the one figure here the exchange does not state itself.
     public func orderBook(market: KrakenMarketName) async throws -> ExchangeClientBook<KrakenMarketName> {
         do {
             let pair = try await self.pair(market)
@@ -103,7 +106,11 @@ public struct KrakenClient: ExchangeClient {
                 mid: try WireDecimal.midpoint(entry.bid, entry.ask).price(of: pair.quote, per: pair.base),
                 bestBid: try entry.bid.price(of: pair.quote, per: pair.base),
                 bestAsk: try entry.ask.price(of: pair.quote, per: pair.base),
-                volume: try entry.dayVolume.amount(of: pair.base),
+                baseVolume: try entry.dayVolume.amount(of: pair.base),
+                // Kraken's ticker publishes no turnover in the quote, only the base volume (v) and its average price
+                // (p): the quote volume is therefore the base volume priced at the mid, cut toward zero at the quote's
+                // base unit. The road not taken: the base volume priced at Kraken's own day average, p[1].
+                quoteVolume: try entry.dayVolume.times(WireDecimal.midpoint(entry.bid, entry.ask)).amountCutTowardZero(of: pair.quote),
                 readAt: now()
             )
         } catch {

@@ -144,3 +144,16 @@ extension KrakenClient {
 func == (windows: [ExchangeClientMaintenanceWindow], intervals: [DateInterval]) -> Bool {
     windows.map(\.interval) == intervals
 }
+
+// MARK: The book's two volumes (the owner's ruling of 2026-10-06: C30's book carries baseVolume and quoteVolume)
+
+// The projector's files name one `volume` and build a book with it. Wiring only, no assertion changed: its one volume
+// reads as the quote turnover (the projector's own reading was the notional), and its one-volume book stands that
+// amount as both.
+extension ExchangeClientBook {
+    var volume: Amount { quoteVolume }
+
+    init(market: Name, mid: Price, bestBid: Price, bestAsk: Price, volume: Amount, readAt: Date) {
+        self.init(market: market, mid: mid, bestBid: bestBid, bestAsk: bestAsk, baseVolume: volume, quoteVolume: volume, readAt: readAt)
+    }
+}

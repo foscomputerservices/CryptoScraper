@@ -45,7 +45,7 @@ public struct ExchangeClientMarket<Name: Hashable & Sendable>: Hashable, Sendabl
     }
 }
 
-/// A market's book as the exchange states it: its mid, its best bid and ask, its volume, and when it was read
+/// A market's book as the exchange states it: its mid, its best bid and ask, its two volumes, and when it was read
 ///
 /// ```swift
 /// let book = try await client.orderBook(market: name)
@@ -56,16 +56,18 @@ public struct ExchangeClientBook<Name: Hashable & Sendable>: Hashable, Sendable 
     public let mid: Price
     public let bestBid: Price
     public let bestAsk: Price
-    /// The base asset traded over the exchange's last day, as the exchange states it
-    public let volume: Amount
+    /// The exchange's two statements of the last day's trading, both as it publishes them: the base asset traded, and the turnover in the quote asset
+    public let baseVolume: Amount
+    public let quoteVolume: Amount
     public let readAt: Date
 
-    public init(market: Name, mid: Price, bestBid: Price, bestAsk: Price, volume: Amount, readAt: Date) {
+    public init(market: Name, mid: Price, bestBid: Price, bestAsk: Price, baseVolume: Amount, quoteVolume: Amount, readAt: Date) {
         self.market = market
         self.mid = mid
         self.bestBid = bestBid
         self.bestAsk = bestAsk
-        self.volume = volume
+        self.baseVolume = baseVolume
+        self.quoteVolume = quoteVolume
         self.readAt = readAt
     }
 }

@@ -123,8 +123,18 @@ struct CoinbaseClientTests {
         #expect(book.bestBid == Coinbase.price("85559.66"))
         #expect(book.bestAsk == Coinbase.price("85559.67"))
         #expect(book.mid == Coinbase.price("85559.665"))
-        #expect(book.volume == (try WireDecimal(parsing: "4586.69588742").amount(of: .btc)))
+        #expect(book.baseVolume == (try WireDecimal(parsing: "4586.69588742").amount(of: .btc)))
+        #expect(book.quoteVolume == (try WireDecimal(parsing: "392436140.65").amount(of: .usd)))  // approximate_quote_24h_volume
         #expect(book.readAt.timeIntervalSince1970 > 1_791_273_036)
+    }
+
+    @Test func aProductWithNoStatedTurnoverHasItsBaseVolumePricedAtTheMid() async throws {
+        let product = String(decoding: Recording.body("Coinbase/product-btc-usd.json"), as: UTF8.self)
+            .replacingOccurrences(of: #""approximate_quote_24h_volume":"392436140.65""#, with: #""approximate_quote_24h_volume":"""#)
+        let session = ReplaySession(route: Coinbase.route(["/market/products/BTC-USD": .ok(Data(product.utf8))]))
+        let book = try await Coinbase.client(session).orderBook(market: Coinbase.btcusd)
+        // 4586.69588742 × 85559.665, cut toward zero at USD's two digits
+        #expect(book.quoteVolume == (try WireDecimal(parsing: "392436163.58").amount(of: .usd)))
     }
 
     @Test func anOrderIsCreatedThenReadForItsFill() async throws {

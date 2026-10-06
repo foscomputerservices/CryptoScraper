@@ -50,7 +50,8 @@ struct ExchangeClientValuesTests {
         let bid = Price(Amount(baseUnits: 64_999_000_000, asset: Self.usdc), per: Self.btc)
         let ask = Price(Amount(baseUnits: 65_001_000_000, asset: Self.usdc), per: Self.btc)
         let book = ExchangeClientBook(market: "BTC", mid: Self.mid, bestBid: bid, bestAsk: ask,
-                                      volume: Amount(whole: 1_234, of: Self.btc), readAt: Date(timeIntervalSince1970: 0))
+                                      baseVolume: Amount(whole: 1_234, of: Self.btc), quoteVolume: Amount(whole: 80_210_000, of: Self.usdc),
+                                      readAt: Date(timeIntervalSince1970: 0))
         #expect(book.bestBid < book.mid && book.mid < book.bestAsk)
         // OQ-C12: a spread is how far this price is above the other, so the ask's spread to the mid is positive
         #expect(book.bestAsk.spread(to: book.mid) > .zero)

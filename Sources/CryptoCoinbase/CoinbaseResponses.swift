@@ -23,6 +23,7 @@ struct CoinbaseProduct: Decodable, Sendable {
     let quoteIncrement: WireDecimal
     let baseMinSize: WireDecimal
     let volume24h: WireDecimal?
+    let quoteVolume24h: WireDecimal?
     let status: String
     let restriction: String?
     let isPerpetual: Bool
@@ -32,7 +33,7 @@ struct CoinbaseProduct: Decodable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case productId = "product_id", baseCurrencyId = "base_currency_id", quoteCurrencyId = "quote_currency_id"
         case baseIncrement = "base_increment", quoteIncrement = "quote_increment", baseMinSize = "base_min_size"
-        case volume24h = "volume_24h", status
+        case volume24h = "volume_24h", quoteVolume24h = "approximate_quote_24h_volume", status
         case tradingDisabled = "trading_disabled", isDisabled = "is_disabled", cancelOnly = "cancel_only", limitOnly = "limit_only", postOnly = "post_only"
         case futureProductDetails = "future_product_details"
     }
@@ -63,6 +64,8 @@ struct CoinbaseProduct: Decodable, Sendable {
         // Coinbase writes an unknown day's volume as "", which is no number and no zero.
         let volumeText = try container.decodeIfPresent(String.self, forKey: .volume24h) ?? ""
         self.volume24h = volumeText.isEmpty ? nil : try WireDecimal(parsing: volumeText)
+        let turnoverText = try container.decodeIfPresent(String.self, forKey: .quoteVolume24h) ?? ""
+        self.quoteVolume24h = turnoverText.isEmpty ? nil : try WireDecimal(parsing: turnoverText)
         self.status = try container.decode(String.self, forKey: .status)
         let flags: [(CodingKeys, String)] = [(.tradingDisabled, "trading_disabled"), (.isDisabled, "is_disabled"), (.cancelOnly, "cancel_only"),
                                              (.limitOnly, "limit_only"), (.postOnly, "post_only")]

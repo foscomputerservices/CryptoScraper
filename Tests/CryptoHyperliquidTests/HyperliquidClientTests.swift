@@ -83,12 +83,13 @@ struct HyperliquidClientTests {
     @Test func theBookIsTheExchangesBestBidAndAskMidAndDayVolumeExactly() async throws {
         let session = ReplaySession(route: Hyperliquid.route())
         let book = try await Hyperliquid.client(session).orderBook(market: Hyperliquid.btc)
-        // l2Book: bid "85836.0", ask "85838.0", time 1791272943883; BTC's context: midPx "85831.0", dayNtlVlm
-        // "1994433.2905599999", the day's notional in USDC, cut toward zero at USDC's six digits
+        // l2Book: bid "85836.0", ask "85838.0", time 1791272943883; BTC's context: midPx "85831.0", dayBaseVlm
+        // "23.18704", dayNtlVlm "1994433.2905599999", the day's turnover in USDC, cut toward zero at USDC's six digits
         #expect(book.bestBid == Hyperliquid.price("85836"))
         #expect(book.bestAsk == Hyperliquid.price("85838"))
         #expect(book.mid == Hyperliquid.price("85831"))
-        #expect(book.volume == Amount(baseUnits: 1_994_433_290_559, asset: .usdc))
+        #expect(book.baseVolume == Amount(baseUnits: 2_318_704, asset: Hyperliquid.btcAsset))
+        #expect(book.quoteVolume == Amount(baseUnits: 1_994_433_290_559, asset: .usdc))
         #expect(book.readAt == Date(wireMilliseconds: 1_791_272_943_883))
     }
 

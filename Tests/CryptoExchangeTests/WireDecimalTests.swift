@@ -37,6 +37,16 @@ struct WireDecimalTests {
         #expect(try WireDecimal(WireDecimal(parsing: text).amount(of: Self.usdc)).text == text)
     }
 
+    @Test func aTurnoverFinerThanTheQuoteIsCutTowardZero() throws {
+        #expect(try WireDecimal(parsing: "1994433.2905599999").amountCutTowardZero(of: Self.usdc) == Amount(baseUnits: 1_994_433_290_559, asset: Self.usdc))
+        #expect(try WireDecimal(parsing: "-1.0000019").amountCutTowardZero(of: Self.usdc) == Amount(baseUnits: -1_000_001, asset: Self.usdc))
+        #expect(try WireDecimal(parsing: "392436140.65").amountCutTowardZero(of: Self.usdc) == Amount(baseUnits: 392_436_140_650_000, asset: Self.usdc))
+    }
+
+    @Test func aProductIsExact() throws {
+        #expect(try WireDecimal(parsing: "2101.23007377").times(WireDecimal(parsing: "85554.55")) == WireDecimal(parsing: "179769793.4078591535"))
+    }
+
     @Test func aFundingRateIsAnExactFraction() throws {
         let eighthOfABasisPoint = Fraction(Amount(whole: 125, of: Self.btc), over: Amount(whole: 10_000_000, of: Self.btc))
         #expect(try WireDecimal(parsing: "0.0000125").fraction() == eighthOfABasisPoint)

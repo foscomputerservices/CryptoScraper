@@ -33,8 +33,9 @@ import FoundationNetworking
 /// **Numbers.** A market's base asset is its coin at the coin's size decimals, so one lot is one base unit; its
 /// quote is USDC at six decimals (``Asset/usdc``), Hyperliquid's unit of account. Every number Hyperliquid sends as
 /// text is decoded exactly but two, each cut toward zero: a funding rate finer than nine digits at a ``Fraction``'s
-/// nine, and a book's day notional finer than USDC's six at six. A book's volume is the day's notional in USDC
-/// (`dayNtlVlm`), the quote, never base units: C35 divides it by a stake in the stream's unit of account.
+/// nine, and a book's day turnover finer than USDC's six at six. A book's two volumes are Hyperliquid's own two
+/// statements of the day: `dayBaseVlm`, the base asset traded, and `dayNtlVlm`, the turnover in USDC (stated to ten
+/// digits, BTC's "1994433.2905599999" on the test market, so cut toward zero at six).
 public struct HyperliquidClient: ExchangeClient {
     public typealias Credential = HyperliquidCredential
     public typealias MarketName = HyperliquidMarketName
@@ -104,7 +105,8 @@ public struct HyperliquidClient: ExchangeClient {
                 mid: try mid.price(of: .usdc, per: coin.asset),
                 bestBid: try bid.price(of: .usdc, per: coin.asset),
                 bestAsk: try ask.price(of: .usdc, per: coin.asset),
-                volume: try Self.notional(context.dayNtlVlm),
+                baseVolume: try context.dayBaseVlm.amount(of: coin.asset),
+                quoteVolume: try context.dayNtlVlm.amountCutTowardZero(of: .usdc),
                 readAt: Date(wireMilliseconds: book.time)
             )
         } catch {
@@ -276,17 +278,6 @@ public struct HyperliquidClient: ExchangeClient {
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-    }
-
-    // The day's notional as an amount of USDC, exactly, or cut toward zero at USDC's six digits: Hyperliquid states it
-    // as the sum of its fills' notionals, which carries up to ten digits (BTC's "1994433.2905599999" on the test market).
-    static func notional(_ text: WireDecimal) throws -> Amount {
-        let exponent = Asset.usdc.unitExponent
-        guard text.fractionDigits > exponent else {
-            return try text.amount(of: .usdc)
-        }
-        let cut = text.digits / WireDecimal.powerOfTen(text.fractionDigits - exponent)
-        return try WireDecimal(digits: cut, fractionDigits: exponent).amount(of: .usdc)
     }
 
     // A funding rate exactly, or cut toward zero at a Fraction's nine digits: Hyperliquid states rates to ten.

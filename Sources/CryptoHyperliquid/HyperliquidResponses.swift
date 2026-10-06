@@ -25,6 +25,7 @@ struct HyperliquidMetaAndContexts: Decodable, Sendable {
     struct Context: Decodable, Sendable {
         let markPx: WireDecimal?
         let midPx: WireDecimal?
+        let dayBaseVlm: WireDecimal
         let dayNtlVlm: WireDecimal
     }
 

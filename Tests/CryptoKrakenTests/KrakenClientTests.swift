@@ -104,7 +104,9 @@ struct KrakenClientTests {
         #expect(book.bestAsk == Kraken.price("85554.6"))
         #expect(book.bestBid == Kraken.price("85554.5"))
         #expect(book.mid == Kraken.price("85554.55"))
-        #expect(book.volume == (try WireDecimal(parsing: "2101.23007377").amount(of: Kraken.xbt)))
+        #expect(book.baseVolume == (try WireDecimal(parsing: "2101.23007377").amount(of: Kraken.xbt)))
+        // Kraken publishes no quote turnover: v[1] × the mid, 179769793.4078591535, cut toward zero at USD's four digits
+        #expect(book.quoteVolume == (try WireDecimal(parsing: "179769793.4078").amount(of: Kraken.usd)))
     }
 
     @Test func aFilledOrderIsQueriedForItsUnitsAndPrice() async throws {

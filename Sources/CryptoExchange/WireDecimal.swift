@@ -126,6 +126,29 @@ package struct WireDecimal: Hashable, Sendable {
         Amount(baseUnits: try scaled(toExponent: asset.unitExponent), asset: asset)
     }
 
+    /// This number of whole units of `asset`, cut toward zero at the asset's base unit: an exchange's day turnover,
+    /// which it may state finer than its quote asset holds (Hyperliquid's to ten digits for USDC's six)
+    ///
+    /// - Throws: ``AmountError/malformedText`` when it does not fit an amount
+    package func amountCutTowardZero(of asset: Asset) throws -> Amount {
+        guard fractionDigits > asset.unitExponent else {
+            return try amount(of: asset)
+        }
+        let cut = digits / Self.powerOfTen(fractionDigits - asset.unitExponent)
+        return try Self(digits: cut, fractionDigits: asset.unitExponent).amount(of: asset)
+    }
+
+    /// The product of two numbers, exactly: a base volume priced at a mid
+    ///
+    /// - Throws: ``AmountError/malformedText`` when the product overflows
+    package func times(_ other: Self) throws -> Self {
+        let (product, overflow) = digits.multipliedReportingOverflow(by: other.digits)
+        guard !overflow else {
+            throw AmountError.malformedText(text + " × " + other.text)
+        }
+        return Self(digits: product, fractionDigits: fractionDigits + other.fractionDigits)
+    }
+
     /// This number of whole `quote` units per one whole unit of `base`, exactly
     ///
     /// A price holds nine fraction digits below the quote's base unit (the one scale of CryptoAsset), so text finer

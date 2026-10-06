@@ -85,6 +85,10 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
+    /// The book from Coinbase's product book and product: the best bid and ask, Coinbase's mid, `volume_24h` as the
+    /// base volume, and `approximate_quote_24h_volume` as the quote volume, cut toward zero at the quote asset's base
+    /// unit. Where Coinbase writes that turnover as "", it publishes no quote figure, and the quote volume is the base
+    /// volume priced at the mid.
     public func orderBook(market: CoinbaseMarketName) async throws -> ExchangeClientBook<CoinbaseMarketName> {
         do {
             let product = try await self.product(market)
@@ -96,12 +100,16 @@ public struct CoinbaseClient: ExchangeClient {
             guard let volume = product.volume24h else {
                 throw ExchangeClientError.refused(code: nil, text: "Coinbase states no day's volume for \(market.text)")
             }
+            // Coinbase's own turnover, approximate_quote_24h_volume, where it states one; where it writes "" the
+            // base volume priced at the mid stands in. Either is cut toward zero at the quote asset's base unit.
+            let turnover = try product.quoteVolume24h ?? volume.times(book.midMarket)
             return ExchangeClientBook(
                 market: market,
                 mid: try book.midMarket.price(of: product.assets().quote, per: product.assets().base),
                 bestBid: try bid.price(of: product.assets().quote, per: product.assets().base),
                 bestAsk: try ask.price(of: product.assets().quote, per: product.assets().base),
-                volume: try volume.amount(of: product.assets().base),
+                baseVolume: try volume.amount(of: product.assets().base),
+                quoteVolume: try turnover.amountCutTowardZero(of: product.assets().quote),
                 readAt: CoinbaseTime.date(book.pricebook.time) ?? now()
             )
         } catch {
