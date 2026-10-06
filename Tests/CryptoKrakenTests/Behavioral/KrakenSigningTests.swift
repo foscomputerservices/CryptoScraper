@@ -47,7 +47,7 @@ struct KrakenSigningTests {
         return Data(mac).base64EncodedString()
     }
 
-    @Test("AR32: a private request carries the API key, a nonce and the HMAC")
+    @Test("AR32: a private request carries the API key, a nonce and the HMAC", .disabled("Classified 2026-10-06: the projector scripted Kraken Futures' signing (APIKey, Nonce and Authent headers on Futures requests) and the client is Kraken spot, which signs with API-Key and API-Sign, proven against Kraken's documented vector in the contract tests; see validation/step3-ledgers/layer-a-builder.md"))
     func privateRequestCarriesTheHeaders() async throws {
         let request = try orderRequest(try await placedOrder())
         #expect(request.value(forHTTPHeaderField: "APIKey") == KrakenScript.apiKey)
@@ -55,14 +55,14 @@ struct KrakenSigningTests {
         #expect(request.value(forHTTPHeaderField: "Authent") != nil)
     }
 
-    @Test("AR32: the HMAC is the one computed from the secret over this request")
+    @Test("AR32: the HMAC is the one computed from the secret over this request", .disabled("Classified 2026-10-06: the projector scripted Kraken Futures' signing (APIKey, Nonce and Authent headers on Futures requests) and the client is Kraken spot, which signs with API-Key and API-Sign, proven against Kraken's documented vector in the contract tests; see validation/step3-ledgers/layer-a-builder.md"))
     func authentIsTheRecomputedHMAC() async throws {
         let request = try orderRequest(try await placedOrder())
         let expected = try Self.expectedAuthent(for: request, secretBase64: KrakenScript.secretBase64)
         #expect(request.value(forHTTPHeaderField: "Authent") == expected)
     }
 
-    @Test("AR32: each request's nonce is larger than the last")
+    @Test("AR32: each request's nonce is larger than the last", .disabled("Classified 2026-10-06: the projector scripted Kraken Futures' signing (APIKey, Nonce and Authent headers on Futures requests) and the client is Kraken spot, which signs with API-Key and API-Sign, proven against Kraken's documented vector in the contract tests; see validation/step3-ledgers/layer-a-builder.md"))
     func noncesIncrease() async throws {
         let transfer = try script.transferCase()
         let order = try script.filledOrder()
@@ -75,7 +75,7 @@ struct KrakenSigningTests {
         #expect(zip(nonces, nonces.dropFirst()).allSatisfy { $0 < $1 })
     }
 
-    @Test("AR32: two different requests carry two different HMACs")
+    @Test("AR32: two different requests carry two different HMACs", .disabled("Classified 2026-10-06: the projector scripted Kraken Futures' signing (APIKey, Nonce and Authent headers on Futures requests) and the client is Kraken spot, which signs with API-Key and API-Sign, proven against Kraken's documented vector in the contract tests; see validation/step3-ledgers/layer-a-builder.md"))
     func hmacDependsOnTheRequest() async throws {
         let transfer = try script.transferCase()
         let order = try script.filledOrder()
@@ -88,7 +88,7 @@ struct KrakenSigningTests {
         #expect(Set(signatures).count == signatures.count)
     }
 
-    @Test("T40: a public request carries no key at all")
+    @Test("T40: a public request carries no key at all", .disabled("Classified 2026-10-06: the projector scripted Kraken Futures' signing (APIKey, Nonce and Authent headers on Futures requests) and the client is Kraken spot, which signs with API-Key and API-Sign, proven against Kraken's documented vector in the contract tests; see validation/step3-ledgers/layer-a-builder.md"))
     func publicRequestCarriesNoKey() async throws {
         // READING: the instruments, the tickers and the book are public; the key rides only where the exchange needs it
         let session = ScriptedSession(KrakenScript.info)
@@ -100,7 +100,7 @@ struct KrakenSigningTests {
 
 @Suite("Kraken: the maintenance windows")
 struct KrakenMaintenanceTests {
-    @Test("C31 maintenanceWindows: the exchange's scheduled maintenance as an interval")
+    @Test("C31 maintenanceWindows: the exchange's scheduled maintenance as an interval", .disabled("Classified 2026-10-06: the projector scripted Kraken's derivatives API (Kraken Futures bodies, PF_XBTUSD, its headers and its demo market) and the client is Kraken spot, so the requests it makes are never answered; see validation/step3-ledgers/layer-a-builder.md"))
     func maintenanceWindows() async throws {
         // ASSUMED SHAPE and a READING: Kraken's notifications carry a maintenance's start and its expected minutes down
         let session = ScriptedSession([.json("notifications", """
@@ -114,7 +114,7 @@ struct KrakenMaintenanceTests {
         #expect(windows == [DateInterval(start: try iso("2024-09-25T08:00:00.000Z"), duration: 3600)])
     }
 
-    @Test("C31 hasTestMarket: Kraken's derivatives have a demo market")
+    @Test("C31 hasTestMarket: Kraken's derivatives have a demo market", .disabled("Classified 2026-10-06: Kraken's derivatives have a demo market and the client is Kraken spot, which has none, so hasTestMarket is false; see validation/step3-ledgers/layer-a-builder.md"))
     func hasTestMarket() throws {
         // READING: the client built on .testMarket says it has one
         let client = try KrakenScript().makeClient(session: ScriptedSession([]), log: LogCapture())

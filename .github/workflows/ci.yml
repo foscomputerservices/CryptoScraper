@@ -43,16 +43,16 @@ jobs:
       - name: Build
         run: swift build
 
-      # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
+      # The contract tests run first. The behavioral suites, projected from the requirements in an isolated context
       # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
       # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
-      # four OHLCV conformers' suites), run in their own step and may carry classified reds, each recorded in fosline's
-      # step-2 and step-3 layer-A ledgers; they never gate the build.
+      # four OHLCV conformers' suites), run in their own step second, and gate the build like the contract tests: each
+      # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
+      # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
         run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
-      - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
-        continue-on-error: true
+      - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
         run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
 
       - name: Test the old aggregators (network)
@@ -79,16 +79,16 @@ jobs:
       # (CRYPTO_EXCHANGE_LIVE=1) and never run here. The old CryptoScraper
       # target's tests reach the chains' APIs with the secrets above and are run separately so a network failure
       # there does not hide a library failure.
-      # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
+      # The contract tests run first. The behavioral suites, projected from the requirements in an isolated context
       # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
       # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
-      # four OHLCV conformers' suites), run in their own step and may carry classified reds, each recorded in fosline's
-      # step-2 and step-3 layer-A ledgers; they never gate the build.
+      # four OHLCV conformers' suites), run in their own step second, and gate the build like the contract tests: each
+      # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
+      # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
         run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
-      - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
-        continue-on-error: true
+      - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
         run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
 
       - name: Test the old aggregators (network)

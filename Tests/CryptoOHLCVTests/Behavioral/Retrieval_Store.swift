@@ -70,7 +70,7 @@ struct Retrieval_StoreContractTests {
 
     // READING: the brief says what is kept is "readable back … in order"; the documents are silent on whether the
     // store or its caller orders it. This test asserts the store reads back in open-time order whatever the keep order.
-    @Test("§ 5.1 (READING): bars kept out of order read back in open-time order", arguments: StoreKind.allCases)
+    @Test("§ 5.1 (READING): bars kept out of order read back in open-time order", .disabled("Classified 2026-10-04: the file-store argument fails and the memory-store argument passes: the documents are silent on whether the store or its caller orders and dedupes, and the shipped file store keeps what it is handed, append-only, in the order handed; see validation/step2-ledgers/layer-a-builder.md"), arguments: StoreKind.allCases)
     func ordersOnRead(kind: StoreKind) async throws {
         let store = try kind.make()
         try await store.keep([storeBar(2), storeBar(0)], market: "BTCUSDT", interval: Fx.minute)
@@ -81,7 +81,7 @@ struct Retrieval_StoreContractTests {
 
     // READING: "nothing dropped or doubled" is said of the retrieval; the documents are silent on whether the store
     // itself refuses a double. This test asserts a bar kept twice at one open time reads back once.
-    @Test("§ 5.1 (READING): a bar kept twice at one open time reads back once", arguments: StoreKind.allCases)
+    @Test("§ 5.1 (READING): a bar kept twice at one open time reads back once", .disabled("Classified 2026-10-04: the file-store argument fails and the memory-store argument passes: the documents are silent on whether the store or its caller orders and dedupes, and the shipped file store keeps what it is handed, append-only, in the order handed; see validation/step2-ledgers/layer-a-builder.md"), arguments: StoreKind.allCases)
     func noDoubleOnKeep(kind: StoreKind) async throws {
         let store = try kind.make()
         try await store.keep([storeBar(0), storeBar(1)], market: "BTCUSDT", interval: Fx.minute)

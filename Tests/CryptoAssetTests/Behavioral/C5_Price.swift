@@ -180,7 +180,7 @@ struct C5_PriceTests {
 
     // C5: "The spread from this price to other, in percentage points of this one"
     // Gap: the sign of the spread (other less this, or this less other) is not stated; its size is asserted.
-    @Test func theSpreadIsInPercentagePointsOfThisPrice() {
+    @Test(.disabled("Classified 2026-10-06: written from C5's old DocC sentence, and the owner reversed the spread's direction (OQ-C12); see CryptoScraper commit 6d3e5e3")) func theSpreadIsInPercentagePointsOfThisPrice() {
         let ask = Self.mid * (.one + Fraction(basisPoints: 5))
         let spread = Self.mid.spread(to: ask)
         let fiveBasisPoints = Fraction(basisPoints: 5)
@@ -188,7 +188,7 @@ struct C5_PriceTests {
     }
 
     // C5: the spread is measured against this price, not the other: 1 to 2 is 100 %, 2 to 1 is 50 %
-    @Test func theSpreadIsMeasuredAgainstThisPrice() {
+    @Test(.disabled("Classified 2026-10-06: written from C5's old DocC sentence, and the owner reversed the spread's direction (OQ-C12); see CryptoScraper commit 6d3e5e3")) func theSpreadIsMeasuredAgainstThisPrice() {
         let one = Price(Amount(whole: 1, of: Fake.fred), per: Fake.barney)
         let two = Price(Amount(whole: 2, of: Fake.fred), per: Fake.barney)
         let up = one.spread(to: two)
