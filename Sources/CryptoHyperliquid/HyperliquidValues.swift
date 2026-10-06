@@ -92,7 +92,7 @@ public struct HyperliquidLedgerCursor: Codable, Hashable, Sendable, Stubbable {
 /// Hyperliquid's own refusal of a request: `{"status":"err","response":"User or API Wallet 0x… does not exist."}`
 ///
 /// Decoded by FOSFoundation's fetch as its `errorType`; a body whose status is "ok" is not an error and does not
-/// decode as one.
+/// decode as one. ``HyperliquidClient`` maps it into ``ExchangeClientError`` and throws that: this type never reaches a caller.
 public struct HyperliquidAPIError: Error, Decodable, Hashable, Sendable {
     /// Hyperliquid's words, as it wrote them
     public let text: String
@@ -112,33 +112,4 @@ public struct HyperliquidAPIError: Error, Decodable, Hashable, Sendable {
         }
         self.text = try container.decode(String.self, forKey: .response)
     }
-}
-
-/// Why ``HyperliquidClient`` could not do what was asked
-///
-/// ```swift
-/// catch HyperliquidClientError.refused(let text) { … }        // Hyperliquid's own words for a cancel it refused
-/// ```
-public enum HyperliquidClientError: Error, Hashable, Sendable {
-    /// The agent key is not 32 bytes, or not a valid secp256k1 secret
-    case malformedAgentKey
-    /// An address that is not 20 bytes of hex
-    case malformedAddress(String)
-    /// A member that signs, or reads an account, was asked of a client made without a credential
-    case noCredential
-    /// Hyperliquid does not know the agent key as an agent of any main wallet
-    case notAnAgent
-    /// An account that is neither an address nor a sub-account the main wallet lists
-    case unknownAccount(String)
-    /// A market Hyperliquid's `meta` does not list
-    case unknownMarket(HyperliquidMarketName)
-    /// A size or a price in an asset other than the market's, or a transfer of an asset other than USDC
-    case wrongAsset
-    /// A transfer between two accounts neither of which is the main wallet's: Hyperliquid moves money only between
-    /// the main account and one of its sub-accounts
-    case transferNeedsTheMainAccount
-    /// Hyperliquid answered "ok" to the request and refused the action in its statuses, in its own words
-    case refused(String)
-    /// Hyperliquid refused the request with an HTTP status and its body as it wrote it
-    case rejected(status: Int, text: String)
 }

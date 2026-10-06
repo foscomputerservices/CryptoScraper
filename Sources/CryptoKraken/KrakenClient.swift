@@ -17,7 +17,7 @@ import CryptoKit
 import Crypto
 #endif
 
-/// Kraken spot's exchange client (C31): its public and private REST, its signing, its typed errors
+/// Kraken spot's exchange client (C31): its public and private REST, its signing, its errors as ``ExchangeClientError``
 ///
 /// A private request is a form-encoded POST carrying an always-increasing nonce, signed with the API secret
 /// (AR32): `API-Sign` is the base64 of HMAC-SHA512, keyed with the decoded secret, over the request's path and the
@@ -73,96 +73,116 @@ public struct KrakenClient: ExchangeClient {
     // MARK: Markets and books
 
     public func markets() async throws -> [ExchangeClientMarket<KrakenMarketName>] {
-        let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [])
-        var markets: [ExchangeClientMarket<KrakenMarketName>] = []
-        for (key, info) in pairs.result.sorted(by: { $0.key < $1.key }) {
-            let pair = try await self.pair(key: key, info: info)
-            markets.append(ExchangeClientMarket(
-                name: pair.name, base: pair.base, quote: pair.quote,
-                lotSize: try WireDecimal(digits: 1, fractionDigits: info.lotDecimals).amount(of: pair.base),
-                minimumOrder: try info.ordermin.amount(of: pair.base),
-                maxLeverage: info.leverageBuy.max(), leverageSet: nil, isPerpetual: false
-            ))
+        do {
+            let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [])
+            var markets: [ExchangeClientMarket<KrakenMarketName>] = []
+            for (key, info) in pairs.result.sorted(by: { $0.key < $1.key }) {
+                let pair = try await self.pair(key: key, info: info)
+                markets.append(ExchangeClientMarket(
+                    name: pair.name, base: pair.base, quote: pair.quote,
+                    lotSize: try WireDecimal(digits: 1, fractionDigits: info.lotDecimals).amount(of: pair.base),
+                    minimumOrder: try info.ordermin.amount(of: pair.base),
+                    maxLeverage: info.leverageBuy.max(), leverageSet: nil, isPerpetual: false
+                ))
+            }
+            return markets
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        return markets
     }
 
     public func orderBook(market: KrakenMarketName) async throws -> ExchangeClientBook<KrakenMarketName> {
-        let pair = try await self.pair(market)
-        let ticker: KrakenResult<[String: KrakenTicker]> = try await publicGet("Ticker", [URLQueryItem(name: "pair", value: market.text)])
-        guard let entry = ticker.result.first?.value else {
-            throw KrakenClientError.unknownMarket(market)
+        do {
+            let pair = try await self.pair(market)
+            let ticker: KrakenResult<[String: KrakenTicker]> = try await publicGet("Ticker", [URLQueryItem(name: "pair", value: market.text)])
+            guard let entry = ticker.result.first?.value else {
+                throw ExchangeClientError.unknownMarket(market)
+            }
+            return ExchangeClientBook(
+                market: market,
+                mid: try WireDecimal.midpoint(entry.bid, entry.ask).price(of: pair.quote, per: pair.base),
+                bestBid: try entry.bid.price(of: pair.quote, per: pair.base),
+                bestAsk: try entry.ask.price(of: pair.quote, per: pair.base),
+                volume: try entry.dayVolume.amount(of: pair.base),
+                readAt: now()
+            )
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        return ExchangeClientBook(
-            market: market,
-            mid: try WireDecimal.midpoint(entry.bid, entry.ask).price(of: pair.quote, per: pair.base),
-            bestBid: try entry.bid.price(of: pair.quote, per: pair.base),
-            bestAsk: try entry.ask.price(of: pair.quote, per: pair.base),
-            volume: try entry.dayVolume.amount(of: pair.base),
-            readAt: now()
-        )
     }
 
     // MARK: Orders
 
     public func placeOrder(market: KrakenMarketName, side: ExchangeClientSide, size: Amount, limit: Price,
                            immediateOrCancel: Bool, reduceOnly: Bool, account: String) async throws -> ExchangeClientOrderResult<KrakenOrderId> {
-        let pair = try await self.pair(market)
-        guard size.asset == pair.base, limit.base == pair.base, limit.quote == pair.quote else {
-            throw KrakenClientError.wrongAsset
-        }
-        var fields = [("ordertype", "limit"), ("type", side == .buy ? "buy" : "sell"), ("volume", WireDecimal(size).text),
-                      ("pair", market.text), ("price", WireDecimal(limit).text)]
-        if immediateOrCancel { fields.append(("timeinforce", "IOC")) }
-        if reduceOnly { fields.append(("reduce_only", "true")) }
-
-        let added: KrakenResult<KrakenAddedOrder>
         do {
-            added = try await privatePost("AddOrder", fields)
-        } catch let error as KrakenAPIError where error.messages.allSatisfy({ $0.hasPrefix("EOrder:") }) {
-            let message = error.messages.first ?? "EOrder:"
-            return .refused(code: "EOrder", text: String(message.dropFirst("EOrder:".count)))
-        }
-        guard let txid = added.result.txid.first else {
-            throw KrakenClientError.refused("Kraken answered the order with no transaction id")
-        }
-        let id = try KrakenOrderId(validating: txid)
-        let queried: KrakenResult<[String: KrakenOrderInfo]> = try await privatePost("QueryOrders", [("txid", txid)])
-        guard let order = queried.result[txid] else {
-            throw KrakenClientError.refused("Kraken does not know the order it took: \(txid)")
-        }
-        let executed = try order.volExec.amount(of: pair.base)
-        let time = order.closetm ?? order.opentm
-        if executed.isZero {
-            switch order.status {
-            case "canceled", "expired": return .cancelled(id: id)
-            default: return .resting(id: id, time: time)
+            let pair = try await self.pair(market)
+            guard size.asset == pair.base, limit.base == pair.base, limit.quote == pair.quote else {
+                throw ExchangeClientError.wrongAsset
             }
+            var fields = [("ordertype", "limit"), ("type", side == .buy ? "buy" : "sell"), ("volume", WireDecimal(size).text),
+                          ("pair", market.text), ("price", WireDecimal(limit).text)]
+            if immediateOrCancel { fields.append(("timeinforce", "IOC")) }
+            if reduceOnly { fields.append(("reduce_only", "true")) }
+
+            let added: KrakenResult<KrakenAddedOrder>
+            do {
+                added = try await privatePost("AddOrder", fields)
+            } catch let error as KrakenAPIError where error.messages.allSatisfy({ $0.hasPrefix("EOrder:") }) {
+                let message = error.messages.first ?? "EOrder:"
+                return .refused(code: "EOrder", text: String(message.dropFirst("EOrder:".count)))
+            }
+            guard let txid = added.result.txid.first else {
+                throw ExchangeClientError.refused(code: nil, text: "Kraken answered the order with no transaction id")
+            }
+            let id = try KrakenOrderId(validating: txid)
+            let queried: KrakenResult<[String: KrakenOrderInfo]> = try await privatePost("QueryOrders", [("txid", txid)])
+            guard let order = queried.result[txid] else {
+                throw ExchangeClientError.refused(code: nil, text: "Kraken does not know the order it took: \(txid)")
+            }
+            let executed = try order.volExec.amount(of: pair.base)
+            let time = order.closetm ?? order.opentm
+            if executed.isZero {
+                switch order.status {
+                case "canceled", "expired": return .cancelled(id: id)
+                default: return .resting(id: id, time: time)
+                }
+            }
+            let price = try order.price.price(of: pair.quote, per: pair.base)
+            return executed == size
+                ? .filled(units: executed, at: price, id: id, time: time)
+                : .partlyFilled(units: executed, at: price, id: id, time: time)
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        let price = try order.price.price(of: pair.quote, per: pair.base)
-        return executed == size
-            ? .filled(units: executed, at: price, id: id, time: time)
-            : .partlyFilled(units: executed, at: price, id: id, time: time)
     }
 
     public func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<KrakenMarketName, KrakenOrderId>] {
-        let open: KrakenResult<KrakenOpenOrders> = try await privatePost("OpenOrders", [])
-        var orders: [ExchangeClientOpenOrder<KrakenMarketName, KrakenOrderId>] = []
-        for (txid, order) in open.result.open.sorted(by: { $0.key < $1.key }) {
-            let market = try KrakenMarketName(validating: order.descr.pair)
-            let pair = try await self.pair(market)
-            orders.append(ExchangeClientOpenOrder(
-                id: try KrakenOrderId(validating: txid), market: market, side: order.descr.type == "buy" ? .buy : .sell,
-                units: try order.vol.amount(of: pair.base) - order.volExec.amount(of: pair.base)
-            ))
+        do {
+            let open: KrakenResult<KrakenOpenOrders> = try await privatePost("OpenOrders", [])
+            var orders: [ExchangeClientOpenOrder<KrakenMarketName, KrakenOrderId>] = []
+            for (txid, order) in open.result.open.sorted(by: { $0.key < $1.key }) {
+                let market = try KrakenMarketName(validating: order.descr.pair)
+                let pair = try await self.pair(market)
+                orders.append(ExchangeClientOpenOrder(
+                    id: try KrakenOrderId(validating: txid), market: market, side: order.descr.type == "buy" ? .buy : .sell,
+                    units: try order.vol.amount(of: pair.base) - order.volExec.amount(of: pair.base)
+                ))
+            }
+            return orders
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        return orders
     }
 
     public func cancelOrder(_ id: KrakenOrderId, market: KrakenMarketName, account: String) async throws {
-        let cancelled: KrakenResult<KrakenCancelled> = try await privatePost("CancelOrder", [("txid", id.text)])
-        guard cancelled.result.count > 0 else {
-            throw KrakenClientError.refused("Kraken cancelled no order for \(id.text)")
+        do {
+            let cancelled: KrakenResult<KrakenCancelled> = try await privatePost("CancelOrder", [("txid", id.text)])
+            guard cancelled.result.count > 0 else {
+                throw ExchangeClientError.refused(code: nil, text: "Kraken cancelled no order for \(id.text)")
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
     }
 
@@ -170,63 +190,71 @@ public struct KrakenClient: ExchangeClient {
 
     /// The account's equivalent balance and free margin in USD, and its open margin positions
     public func accountState(account: String) async throws -> ExchangeClientAccountState<KrakenMarketName> {
-        let usd = try await asset(key: "ZUSD")
-        let balance: KrakenResult<KrakenTradeBalance> = try await privatePost("TradeBalance", [("asset", "ZUSD")])
-        let open: KrakenResult<[String: KrakenOpenPosition]> = try await privatePost("OpenPositions", [("docalcs", "true")])
-        var positions: [ExchangeClientPosition<KrakenMarketName>] = []
-        for (_, held) in open.result.sorted(by: { $0.key < $1.key }) {
-            let market = try KrakenMarketName(validating: held.pair)
-            let pair = try await self.pair(market)
-            let units = try held.vol.amount(of: pair.base) - held.volClosed.amount(of: pair.base)
-            guard !units.isZero else { continue }
-            positions.append(ExchangeClientPosition(
-                market: market, side: held.type == "buy" ? .buy : .sell, units: units,
-                entryPrice: try Self.price(of: held.cost, per: held.vol, pair),
-                mark: try Self.price(of: held.value, per: WireDecimal(units), pair),
-                liquidationPrice: nil
-            ))
+        do {
+            let usd = try await asset(key: "ZUSD")
+            let balance: KrakenResult<KrakenTradeBalance> = try await privatePost("TradeBalance", [("asset", "ZUSD")])
+            let open: KrakenResult<[String: KrakenOpenPosition]> = try await privatePost("OpenPositions", [("docalcs", "true")])
+            var positions: [ExchangeClientPosition<KrakenMarketName>] = []
+            for (_, held) in open.result.sorted(by: { $0.key < $1.key }) {
+                let market = try KrakenMarketName(validating: held.pair)
+                let pair = try await self.pair(market)
+                let units = try held.vol.amount(of: pair.base) - held.volClosed.amount(of: pair.base)
+                guard !units.isZero else { continue }
+                positions.append(ExchangeClientPosition(
+                    market: market, side: held.type == "buy" ? .buy : .sell, units: units,
+                    entryPrice: try Self.price(of: held.cost, per: held.vol, pair),
+                    mark: try Self.price(of: held.value, per: WireDecimal(units), pair),
+                    liquidationPrice: nil
+                ))
+            }
+            return ExchangeClientAccountState(
+                balance: try balance.result.eb.amount(of: usd),
+                withdrawable: try balance.result.mf.amount(of: usd),
+                positions: positions,
+                mode: ExchangeClientAccountMode(name: "spot", allowsTransfer: false, allowsIsolatedMargin: false, alternatives: []),
+                readAt: now()
+            )
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        return ExchangeClientAccountState(
-            balance: try balance.result.eb.amount(of: usd),
-            withdrawable: try balance.result.mf.amount(of: usd),
-            positions: positions,
-            mode: ExchangeClientAccountMode(name: "spot", allowsTransfer: false, allowsIsolatedMargin: false, alternatives: []),
-            readAt: now()
-        )
     }
 
     public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>] {
-        let start = since.map { [("start", $0.seconds.text)] } ?? []
-        let trades: KrakenResult<KrakenTrades> = try await privatePost("TradesHistory", start)
-        let ledger: KrakenResult<KrakenLedger> = try await privatePost("Ledgers", start)
+        do {
+            let start = since.map { [("start", $0.seconds.text)] } ?? []
+            let trades: KrakenResult<KrakenTrades> = try await privatePost("TradesHistory", start)
+            let ledger: KrakenResult<KrakenLedger> = try await privatePost("Ledgers", start)
 
-        var items: [(WireDecimal, ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>)] = []
-        for trade in trades.result.trades.values {
-            let market = try KrakenMarketName(validating: trade.pair)
-            let pair = try await self.pair(market)
-            items.append((trade.time, .fill(
-                market: market, side: trade.type == "buy" ? .buy : .sell,
-                units: try trade.vol.amount(of: pair.base), price: try trade.price.price(of: pair.quote, per: pair.base),
-                fee: try trade.fee.amount(of: pair.quote), order: try KrakenOrderId(validating: trade.ordertxid), closedBy: nil,
-                time: KrakenLedgerCursor(seconds: trade.time).time, cursor: KrakenLedgerCursor(seconds: trade.time)
-            )))
-        }
-        for entry in ledger.result.ledger.values {
-            let cursor = KrakenLedgerCursor(seconds: entry.time)
-            switch entry.type {
-            case "deposit":
-                items.append((entry.time, .deposit(try entry.amount.amount(of: try await asset(key: entry.asset)), time: cursor.time, cursor: cursor)))
-            case "withdrawal":
-                items.append((entry.time, .withdrawal(try entry.amount.amount(of: try await asset(key: entry.asset)), time: cursor.time, cursor: cursor)))
-            case "transfer":
-                items.append((entry.time, .internalMove(try entry.amount.amount(of: try await asset(key: entry.asset)), from: entry.subtype, to: entry.asset, time: cursor.time, cursor: cursor)))
-            default:
-                // A trade's ledger entry is its fill, read from TradesHistory with its order; the other kinds (margin,
-                // rollover, staking…) have no case in C30 and are not handed up (a reading for the owner's pen).
-                continue
+            var items: [(WireDecimal, ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>)] = []
+            for trade in trades.result.trades.values {
+                let market = try KrakenMarketName(validating: trade.pair)
+                let pair = try await self.pair(market)
+                items.append((trade.time, .fill(
+                    market: market, side: trade.type == "buy" ? .buy : .sell,
+                    units: try trade.vol.amount(of: pair.base), price: try trade.price.price(of: pair.quote, per: pair.base),
+                    fee: try trade.fee.amount(of: pair.quote), order: try KrakenOrderId(validating: trade.ordertxid), closedBy: nil,
+                    time: KrakenLedgerCursor(seconds: trade.time).time, cursor: KrakenLedgerCursor(seconds: trade.time)
+                )))
             }
+            for entry in ledger.result.ledger.values {
+                let cursor = KrakenLedgerCursor(seconds: entry.time)
+                switch entry.type {
+                case "deposit":
+                    items.append((entry.time, .deposit(try entry.amount.amount(of: try await asset(key: entry.asset)), time: cursor.time, cursor: cursor)))
+                case "withdrawal":
+                    items.append((entry.time, .withdrawal(try entry.amount.amount(of: try await asset(key: entry.asset)), time: cursor.time, cursor: cursor)))
+                case "transfer":
+                    items.append((entry.time, .internalMove(try entry.amount.amount(of: try await asset(key: entry.asset)), from: entry.subtype, to: entry.asset, time: cursor.time, cursor: cursor)))
+                default:
+                    // A trade's ledger entry is its fill, read from TradesHistory with its order; the other kinds (margin,
+                    // rollover, staking…) have no case in C30 and are not handed up (a reading for the owner's pen).
+                    continue
+                }
+            }
+            return items.sorted { Self.seconds($0.0) < Self.seconds($1.0) }.map(\.1)
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
-        return items.sorted { Self.seconds($0.0) < Self.seconds($1.0) }.map(\.1)
     }
 
     // A cost over a volume, exactly: Kraken states a cost at the pair's cost decimals, which may be finer than the
@@ -243,15 +271,27 @@ public struct KrakenClient: ExchangeClient {
     }
 
     public func setLeverage(_ leverage: Int, market: KrakenMarketName, isolated: Bool, account: String) async throws {
-        throw KrakenClientError.leverageNotSettable
+        do {
+            throw ExchangeClientError.leverageNotSettable
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
     }
 
     public func transfer(_ amount: Amount, from: String, to: String) async throws {
-        throw KrakenClientError.transferNotOffered
+        do {
+            throw ExchangeClientError.transferNotOffered
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
     }
 
     public func keyFacts() async throws -> ExchangeClientKeyFacts {
-        throw KrakenClientError.keyFactsNotOffered
+        do {
+            throw ExchangeClientError.keyFactsNotOffered
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
     }
 
     /// Kraken's REST call counter, Starter tier, counted by this client: at most 15, decaying 0.33 a second, so a
@@ -266,21 +306,29 @@ public struct KrakenClient: ExchangeClient {
 
     /// The maintenance Kraken schedules on its status page, each from its start to its end; every kind it posts
     public func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow] {
-        let page: KrakenStatusPage = try await ClientFetch.send(statusURL, session: session, errorType: KrakenAPIError.self, errorForResponse: { _, _ in nil })
-        return page.scheduledMaintenances.compactMap { maintenance in
-            guard let start = maintenance.start, let end = maintenance.end, start <= end else { return nil }
-            return ExchangeClientMaintenanceWindow(subject: maintenance.subject, interval: DateInterval(start: start, end: end), text: maintenance.name ?? "")
+        do {
+            let page: KrakenStatusPage = try await ClientFetch.send(statusURL, session: session, errorType: KrakenAPIError.self, errorForResponse: { _, _ in nil })
+            return page.scheduledMaintenances.compactMap { maintenance in
+                guard let start = maintenance.start, let end = maintenance.end, start <= end else { return nil }
+                return ExchangeClientMaintenanceWindow(subject: maintenance.subject, interval: DateInterval(start: start, end: end), text: maintenance.name ?? "")
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
     }
 
     /// A notice for each pair Kraken lists in a state other than "online", effective when read: Kraken states no date
     public func notices() async throws -> [ExchangeClientNotice<KrakenMarketName>] {
-        let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [])
-        let read = now()
-        return try pairs.result.sorted(by: { $0.key < $1.key }).compactMap { key, info in
-            guard info.status != "online" else { return nil }
-            return ExchangeClientNotice(kind: info.status == "delisted" ? .delisting : .halt,
-                                        market: try KrakenMarketName(validating: key), effectiveAt: read, text: info.status)
+        do {
+            let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [])
+            let read = now()
+            return try pairs.result.sorted(by: { $0.key < $1.key }).compactMap { key, info in
+                guard info.status != "online" else { return nil }
+                return ExchangeClientNotice(kind: info.status == "delisted" ? .delisting : .halt,
+                                            market: try KrakenMarketName(validating: key), effectiveAt: read, text: info.status)
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
     }
 
@@ -293,7 +341,7 @@ public struct KrakenClient: ExchangeClient {
         }
         let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [URLQueryItem(name: "pair", value: market.text)])
         guard let entry = pairs.result.first(where: { $0.key == market.text || $0.value.altname == market.text }) else {
-            throw KrakenClientError.unknownMarket(market)
+            throw ExchangeClientError.unknownMarket(market)
         }
         return try await pair(key: entry.key, info: entry.value)
     }
@@ -316,7 +364,7 @@ public struct KrakenClient: ExchangeClient {
             }
         }
         guard let asset = await state.asset(key) else {
-            throw KrakenClientError.unknownAsset(key)
+            throw ExchangeClientError.unknownAsset(key)
         }
         return asset
     }
@@ -330,7 +378,7 @@ public struct KrakenClient: ExchangeClient {
     // A private request: the form body with its nonce first, signed (AR32).
     private func privatePost<Value: Decodable & Sendable>(_ method: String, _ fields: [(String, String)]) async throws -> Value {
         guard let credential else {
-            throw KrakenClientError.noCredential
+            throw ExchangeClientError.noCredential
         }
         let path = "/0/private/\(method)"
         let nonce = await state.nextNonce(at: now().wireMilliseconds)

@@ -9,9 +9,9 @@ import Foundation
 
 // C31. The declaration and its DocC are the protocols document's. Three conformers, one per plug-in library:
 // HyperliquidClient (CryptoHyperliquid), KrakenClient (CryptoKraken), CoinbaseClient (CryptoCoinbase), each on
-// FOSFoundation's fetch with the exchange's error decoded by `errorType` into a Swift Error (AR31), holding no file.
+// FOSFoundation's fetch with the exchange's error decoded by `errorType` and mapped into C30's ExchangeClientError (AR31), holding no file.
 
-/// The public contract of one exchange's client: its REST, its signing, its typed errors, its facts as values
+/// The public contract of one exchange's client: its REST, its signing, its errors as ``ExchangeClientError``, its facts as values
 ///
 /// A client decides nothing: it hands up what the exchange says, typed. A consumer's own layer decides.
 ///

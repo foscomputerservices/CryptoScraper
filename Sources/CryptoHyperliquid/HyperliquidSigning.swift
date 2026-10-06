@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoExchange
 import CryptoSwift
 import Foundation
 
@@ -224,7 +225,7 @@ package enum HyperliquidSigning {
         let hex = address.hasPrefix("0x") || address.hasPrefix("0X") ? String(address.dropFirst(2)) : address
         let bytes = [UInt8](hex: hex)
         guard hex.count == 40, bytes.count == 20, hex.allSatisfy(\.isHexDigit) else {
-            throw HyperliquidClientError.malformedAddress(address)
+            throw ExchangeClientError.malformedAddress(address)
         }
         return bytes
     }

@@ -23,10 +23,10 @@ public struct KrakenCredential: Sendable, CustomStringConvertible, CustomDebugSt
     let apiKey: String
     let secret: Data
 
-    /// - Throws: ``KrakenClientError/malformedCredential`` when either is empty or the secret is not base64
+    /// - Throws: ``ExchangeClientError/unauthorized(text:)`` when either is empty or the secret is not base64
     public init(apiKey: String, base64Secret: String) throws {
         guard !apiKey.isEmpty, let secret = Data(base64Encoded: base64Secret), !secret.isEmpty else {
-            throw KrakenClientError.malformedCredential
+            throw ExchangeClientError.malformedCredential
         }
         self.apiKey = apiKey
         self.secret = secret
@@ -41,10 +41,10 @@ public struct KrakenCredential: Sendable, CustomStringConvertible, CustomDebugSt
 public struct KrakenOrderId: Codable, Hashable, Sendable, Stubbable {
     package let text: String
 
-    /// - Throws: ``KrakenClientError/malformedOrderId(_:)`` when `candidate` is not ASCII letters, digits and dashes
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is not ASCII letters, digits and dashes
     public init(validating candidate: String) throws {
         guard Self.isWellFormed(candidate) else {
-            throw KrakenClientError.malformedOrderId(candidate)
+            throw ExchangeClientError.malformedOrderId(candidate)
         }
         self.text = candidate
     }
@@ -105,26 +105,3 @@ public struct KrakenLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     public static func stub() -> Self { .init(seconds: WireDecimal(digits: 42 * 86_400, fractionDigits: 0)) }
 }
 
-/// Why ``KrakenClient`` could not do what was asked
-public enum KrakenClientError: Error, Hashable, Sendable {
-    /// An API key or a secret that is empty, or a secret that is not base64
-    case malformedCredential
-    /// A transaction id that is not one Kraken could write
-    case malformedOrderId(String)
-    /// A member that signs was asked of a client made without a credential
-    case noCredential
-    /// A market Kraken's AssetPairs does not list
-    case unknownMarket(KrakenMarketName)
-    /// An asset Kraken's Assets does not list
-    case unknownAsset(String)
-    /// A size or a price in an asset other than the market's
-    case wrongAsset
-    /// Kraken spot sets leverage on each order, never on a market or an account
-    case leverageNotSettable
-    /// Kraken spot offers no transfer between an account's own wallets through this API
-    case transferNotOffered
-    /// Kraken states no key's permissions or approval through its API
-    case keyFactsNotOffered
-    /// Kraken answered and did not do it, in its own words
-    case refused(String)
-}

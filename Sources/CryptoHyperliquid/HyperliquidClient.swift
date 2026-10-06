@@ -13,7 +13,7 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// Hyperliquid's exchange client (C31): its info and exchange endpoints, its signing, its typed errors
+/// Hyperliquid's exchange client (C31): its info and exchange endpoints, its signing, its errors as ``ExchangeClientError``
 ///
 /// Every order, cancel, leverage change and sub-account transfer is an action signed by the agent key (AR33); the
 /// main wallet is found by asking Hyperliquid whose agent the key is. Reads go to the info endpoint and need no
@@ -69,125 +69,149 @@ public struct HyperliquidClient: ExchangeClient {
     // MARK: Markets and books
 
     public func markets() async throws -> [ExchangeClientMarket<HyperliquidMarketName>] {
-        let meta = try await perpMeta(refresh: true)
-        return try meta.universe.filter { $0.isDelisted != true }.map { coin in
-            let name = try HyperliquidMarketName(validating: coin.name)
-            let base = try Asset(symbol: coin.name, unitExponent: coin.szDecimals)
-            return ExchangeClientMarket(
-                name: name, base: base, quote: .usdc,
-                lotSize: Amount(baseUnits: 1, asset: base),
-                minimumOrder: Amount(whole: 10, of: .usdc),
-                maxLeverage: coin.maxLeverage, leverageSet: nil, isPerpetual: true
-            )
+        do {
+            let meta = try await perpMeta(refresh: true)
+            return try meta.universe.filter { $0.isDelisted != true }.map { coin in
+                let name = try HyperliquidMarketName(validating: coin.name)
+                let base = try Asset(symbol: coin.name, unitExponent: coin.szDecimals)
+                return ExchangeClientMarket(
+                    name: name, base: base, quote: .usdc,
+                    lotSize: Amount(baseUnits: 1, asset: base),
+                    minimumOrder: Amount(whole: 10, of: .usdc),
+                    maxLeverage: coin.maxLeverage, leverageSet: nil, isPerpetual: true
+                )
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
     }
 
     public func orderBook(market: HyperliquidMarketName) async throws -> ExchangeClientBook<HyperliquidMarketName> {
-        let coin = try await self.coin(market)
-        let book: HyperliquidL2Book = try await info(.map([("type", .string("l2Book")), ("coin", .string(market.text))]))
-        let contexts: HyperliquidMetaAndContexts = try await info(.map([("type", .string("metaAndAssetCtxs"))]))
-        guard let bid = book.levels.first?.first?.px, let ask = book.levels.last?.first?.px, book.levels.count == 2 else {
-            throw HyperliquidClientError.refused("The book of \(market.text) is empty on a side")
+        do {
+            let coin = try await self.coin(market)
+            let book: HyperliquidL2Book = try await info(.map([("type", .string("l2Book")), ("coin", .string(market.text))]))
+            let contexts: HyperliquidMetaAndContexts = try await info(.map([("type", .string("metaAndAssetCtxs"))]))
+            guard let bid = book.levels.first?.first?.px, let ask = book.levels.last?.first?.px, book.levels.count == 2 else {
+                throw ExchangeClientError.refused(code: nil, text: "The book of \(market.text) is empty on a side")
+            }
+            guard let context = contexts.context(of: market.text) else {
+                throw ExchangeClientError.unknownMarket(market)
+            }
+            let mid = context.midPx ?? WireDecimal.midpoint(bid, ask)
+            return ExchangeClientBook(
+                market: market,
+                mid: try mid.price(of: .usdc, per: coin.asset),
+                bestBid: try bid.price(of: .usdc, per: coin.asset),
+                bestAsk: try ask.price(of: .usdc, per: coin.asset),
+                volume: try context.dayBaseVlm.amount(of: coin.asset),
+                readAt: Date(wireMilliseconds: book.time)
+            )
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        guard let context = contexts.context(of: market.text) else {
-            throw HyperliquidClientError.unknownMarket(market)
-        }
-        let mid = context.midPx ?? WireDecimal.midpoint(bid, ask)
-        return ExchangeClientBook(
-            market: market,
-            mid: try mid.price(of: .usdc, per: coin.asset),
-            bestBid: try bid.price(of: .usdc, per: coin.asset),
-            bestAsk: try ask.price(of: .usdc, per: coin.asset),
-            volume: try context.dayBaseVlm.amount(of: coin.asset),
-            readAt: Date(wireMilliseconds: book.time)
-        )
     }
 
     // MARK: Orders
 
     public func placeOrder(market: HyperliquidMarketName, side: ExchangeClientSide, size: Amount, limit: Price,
                            immediateOrCancel: Bool, reduceOnly: Bool, account: String) async throws -> ExchangeClientOrderResult<HyperliquidOrderId> {
-        let coin = try await self.coin(market)
-        guard size.asset == coin.asset, limit.base == coin.asset, limit.quote == .usdc else {
-            throw HyperliquidClientError.wrongAsset
-        }
-        let action = HyperliquidActions.order(asset: coin.index, isBuy: side == .buy, limit: WireDecimal(limit).text,
-                                              size: WireDecimal(size).text, reduceOnly: reduceOnly,
-                                              timeInForce: immediateOrCancel ? "Ioc" : "Gtc")
-        let answer: HyperliquidExchangeAnswer<HyperliquidOrderStatuses> = try await exchange(action, vault: try await vault(for: account))
-        guard let status = answer.response.data?.statuses.first else {
-            throw HyperliquidClientError.refused("Hyperliquid answered the order with no status")
-        }
-        let time = now()
-        switch status {
-        case .filled(let totalSize, let averagePrice, let oid):
-            let units = try totalSize.amount(of: coin.asset)
-            let price = try averagePrice.price(of: .usdc, per: coin.asset)
-            return units == size
-                ? .filled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
-                : .partlyFilled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
-        case .resting(let oid):
-            return .resting(id: HyperliquidOrderId(oid), time: time)
-        case .error(let text) where immediateOrCancel && text.hasPrefix("Order could not immediately match"):
-            return .cancelledBeforeAccepted
-        case .error(let text):
-            return .refused(code: "order", text: text)
+        do {
+            let coin = try await self.coin(market)
+            guard size.asset == coin.asset, limit.base == coin.asset, limit.quote == .usdc else {
+                throw ExchangeClientError.wrongAsset
+            }
+            let action = HyperliquidActions.order(asset: coin.index, isBuy: side == .buy, limit: WireDecimal(limit).text,
+                                                  size: WireDecimal(size).text, reduceOnly: reduceOnly,
+                                                  timeInForce: immediateOrCancel ? "Ioc" : "Gtc")
+            let answer: HyperliquidExchangeAnswer<HyperliquidOrderStatuses> = try await exchange(action, vault: try await vault(for: account))
+            guard let status = answer.response.data?.statuses.first else {
+                throw ExchangeClientError.refused(code: nil, text: "Hyperliquid answered the order with no status")
+            }
+            let time = now()
+            switch status {
+            case .filled(let totalSize, let averagePrice, let oid):
+                let units = try totalSize.amount(of: coin.asset)
+                let price = try averagePrice.price(of: .usdc, per: coin.asset)
+                return units == size
+                    ? .filled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
+                    : .partlyFilled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
+            case .resting(let oid):
+                return .resting(id: HyperliquidOrderId(oid), time: time)
+            case .error(let text) where immediateOrCancel && text.hasPrefix("Order could not immediately match"):
+                return .cancelledBeforeAccepted
+            case .error(let text):
+                return .refused(code: "order", text: text)
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
     }
 
     public func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<HyperliquidMarketName, HyperliquidOrderId>] {
-        let address = try await self.address(of: account)
-        let orders: [HyperliquidOpenOrder] = try await info(.map([("type", .string("openOrders")), ("user", .string(address))]))
-        var open: [ExchangeClientOpenOrder<HyperliquidMarketName, HyperliquidOrderId>] = []
-        for order in orders {
-            let market = try HyperliquidMarketName(validating: order.coin)
-            let coin = try await self.coin(market)
-            open.append(ExchangeClientOpenOrder(id: HyperliquidOrderId(order.oid), market: market,
-                                                side: order.side == "B" ? .buy : .sell, units: try order.sz.amount(of: coin.asset)))
+        do {
+            let address = try await self.address(of: account)
+            let orders: [HyperliquidOpenOrder] = try await info(.map([("type", .string("openOrders")), ("user", .string(address))]))
+            var open: [ExchangeClientOpenOrder<HyperliquidMarketName, HyperliquidOrderId>] = []
+            for order in orders {
+                let market = try HyperliquidMarketName(validating: order.coin)
+                let coin = try await self.coin(market)
+                open.append(ExchangeClientOpenOrder(id: HyperliquidOrderId(order.oid), market: market,
+                                                    side: order.side == "B" ? .buy : .sell, units: try order.sz.amount(of: coin.asset)))
+            }
+            return open
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        return open
     }
 
     public func cancelOrder(_ id: HyperliquidOrderId, market: HyperliquidMarketName, account: String) async throws {
-        let coin = try await self.coin(market)
-        let answer: HyperliquidExchangeAnswer<HyperliquidCancelStatuses> = try await exchange(
-            HyperliquidActions.cancel(asset: coin.index, oid: id.oid), vault: try await vault(for: account)
-        )
-        if let refusal = answer.response.data?.refusal {
-            throw HyperliquidClientError.refused(refusal)
+        do {
+            let coin = try await self.coin(market)
+            let answer: HyperliquidExchangeAnswer<HyperliquidCancelStatuses> = try await exchange(
+                HyperliquidActions.cancel(asset: coin.index, oid: id.oid), vault: try await vault(for: account)
+            )
+            if let refusal = answer.response.data?.refusal {
+                throw ExchangeClientError.refused(code: nil, text: refusal)
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
     }
 
     // MARK: The account
 
     public func accountState(account: String) async throws -> ExchangeClientAccountState<HyperliquidMarketName> {
-        let address = try await self.address(of: account)
-        let clearing: HyperliquidClearinghouseState = try await info(.map([("type", .string("clearinghouseState")), ("user", .string(address))]))
-        let contexts: HyperliquidMetaAndContexts = try await info(.map([("type", .string("metaAndAssetCtxs"))]))
-        let abstraction: HyperliquidJSONText = try await info(.map([("type", .string("userAbstraction")), ("user", .string(try await mainWallet()))]))
+        do {
+            let address = try await self.address(of: account)
+            let clearing: HyperliquidClearinghouseState = try await info(.map([("type", .string("clearinghouseState")), ("user", .string(address))]))
+            let contexts: HyperliquidMetaAndContexts = try await info(.map([("type", .string("metaAndAssetCtxs"))]))
+            let abstraction: HyperliquidJSONText = try await info(.map([("type", .string("userAbstraction")), ("user", .string(try await mainWallet()))]))
 
-        var positions: [ExchangeClientPosition<HyperliquidMarketName>] = []
-        for held in clearing.assetPositions.map(\.position) where held.szi.digits != 0 {
-            let market = try HyperliquidMarketName(validating: held.coin)
-            let coin = try await self.coin(market)
-            guard let mark = contexts.context(of: held.coin)?.markPx, let entry = held.entryPx else {
-                throw HyperliquidClientError.unknownMarket(market)
+            var positions: [ExchangeClientPosition<HyperliquidMarketName>] = []
+            for held in clearing.assetPositions.map(\.position) where held.szi.digits != 0 {
+                let market = try HyperliquidMarketName(validating: held.coin)
+                let coin = try await self.coin(market)
+                guard let mark = contexts.context(of: held.coin)?.markPx, let entry = held.entryPx else {
+                    throw ExchangeClientError.unknownMarket(market)
+                }
+                let units = try WireDecimal(digits: held.szi.digits < 0 ? -held.szi.digits : held.szi.digits, fractionDigits: held.szi.fractionDigits).amount(of: coin.asset)
+                positions.append(ExchangeClientPosition(
+                    market: market, side: held.szi.digits > 0 ? .buy : .sell, units: units,
+                    entryPrice: try entry.price(of: .usdc, per: coin.asset),
+                    mark: try mark.price(of: .usdc, per: coin.asset),
+                    liquidationPrice: try held.liquidationPx.map { try $0.price(of: .usdc, per: coin.asset) }
+                ))
             }
-            let units = try WireDecimal(digits: held.szi.digits < 0 ? -held.szi.digits : held.szi.digits, fractionDigits: held.szi.fractionDigits).amount(of: coin.asset)
-            positions.append(ExchangeClientPosition(
-                market: market, side: held.szi.digits > 0 ? .buy : .sell, units: units,
-                entryPrice: try entry.price(of: .usdc, per: coin.asset),
-                mark: try mark.price(of: .usdc, per: coin.asset),
-                liquidationPrice: try held.liquidationPx.map { try $0.price(of: .usdc, per: coin.asset) }
-            ))
+            return ExchangeClientAccountState(
+                balance: try clearing.marginSummary.accountValue.amount(of: .usdc),
+                withdrawable: try clearing.withdrawable.amount(of: .usdc),
+                positions: positions,
+                mode: Self.mode(named: abstraction.text),
+                readAt: Date(wireMilliseconds: clearing.time)
+            )
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        return ExchangeClientAccountState(
-            balance: try clearing.marginSummary.accountValue.amount(of: .usdc),
-            withdrawable: try clearing.withdrawable.amount(of: .usdc),
-            positions: positions,
-            mode: Self.mode(named: abstraction.text),
-            readAt: Date(wireMilliseconds: clearing.time)
-        )
     }
 
     // Hyperliquid's account modes ("abstractions"), as its info endpoint names them. Under the unified account and
@@ -204,49 +228,53 @@ public struct HyperliquidClient: ExchangeClient {
     }
 
     public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>] {
-        let address = try await self.address(of: account)
-        let start = HyperliquidWireValue.integer(since?.milliseconds ?? 0)
-        let fills: [HyperliquidFill] = try await info(.map([("type", .string("userFillsByTime")), ("user", .string(address)), ("startTime", start)]))
-        let funding: [HyperliquidFunding] = try await info(.map([("type", .string("userFunding")), ("user", .string(address)), ("startTime", start)]))
-        let updates: [HyperliquidLedgerUpdate] = try await info(.map([("type", .string("userNonFundingLedgerUpdates")), ("user", .string(address)), ("startTime", start)]))
+        do {
+            let address = try await self.address(of: account)
+            let start = HyperliquidWireValue.integer(since?.milliseconds ?? 0)
+            let fills: [HyperliquidFill] = try await info(.map([("type", .string("userFillsByTime")), ("user", .string(address)), ("startTime", start)]))
+            let funding: [HyperliquidFunding] = try await info(.map([("type", .string("userFunding")), ("user", .string(address)), ("startTime", start)]))
+            let updates: [HyperliquidLedgerUpdate] = try await info(.map([("type", .string("userNonFundingLedgerUpdates")), ("user", .string(address)), ("startTime", start)]))
 
-        var items: [(Int64, ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>)] = []
-        for fill in fills {
-            let market = try HyperliquidMarketName(validating: fill.coin)
-            let coin = try await self.coin(market)
-            let closedBy: ExchangeClientCloseReason? = fill.liquidation ? .liquidation : fill.dir.contains("Auto-Deleveraging") ? .deleveraging : nil
-            items.append((fill.time, .fill(
-                market: market, side: fill.side == "B" ? .buy : .sell,
-                units: try fill.sz.amount(of: coin.asset), price: try fill.px.price(of: .usdc, per: coin.asset),
-                fee: try fill.fee.amount(of: .usdc), order: HyperliquidOrderId(fill.oid), closedBy: closedBy,
-                time: Date(wireMilliseconds: fill.time), cursor: HyperliquidLedgerCursor(milliseconds: fill.time)
-            )))
-        }
-        for payment in funding {
-            items.append((payment.time, .funding(
-                market: try HyperliquidMarketName(validating: payment.delta.coin),
-                amount: try payment.delta.usdc.amount(of: .usdc),
-                rate: try Self.rate(payment.delta.fundingRate),
-                time: Date(wireMilliseconds: payment.time), cursor: HyperliquidLedgerCursor(milliseconds: payment.time)
-            )))
-        }
-        for update in updates {
-            let time = Date(wireMilliseconds: update.time)
-            let cursor = HyperliquidLedgerCursor(milliseconds: update.time)
-            switch update.delta {
-            case .deposit(let amount):
-                items.append((update.time, .deposit(try amount.amount(of: .usdc), time: time, cursor: cursor)))
-            case .withdrawal(let amount):
-                items.append((update.time, .withdrawal(try amount.amount(of: .usdc), time: time, cursor: cursor)))
-            case .move(let amount, let from, let to):
-                items.append((update.time, .internalMove(try amount.amount(of: .usdc), from: from, to: to, time: time, cursor: cursor)))
-            case .other:
-                // A kind C30 has no case for (a vault's, a staking reward, a liquidation's own update, which the
-                // fills carry): not handed up (a reading for the owner's pen).
-                continue
+            var items: [(Int64, ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>)] = []
+            for fill in fills {
+                let market = try HyperliquidMarketName(validating: fill.coin)
+                let coin = try await self.coin(market)
+                let closedBy: ExchangeClientCloseReason? = fill.liquidation ? .liquidation : fill.dir.contains("Auto-Deleveraging") ? .deleveraging : nil
+                items.append((fill.time, .fill(
+                    market: market, side: fill.side == "B" ? .buy : .sell,
+                    units: try fill.sz.amount(of: coin.asset), price: try fill.px.price(of: .usdc, per: coin.asset),
+                    fee: try fill.fee.amount(of: .usdc), order: HyperliquidOrderId(fill.oid), closedBy: closedBy,
+                    time: Date(wireMilliseconds: fill.time), cursor: HyperliquidLedgerCursor(milliseconds: fill.time)
+                )))
             }
+            for payment in funding {
+                items.append((payment.time, .funding(
+                    market: try HyperliquidMarketName(validating: payment.delta.coin),
+                    amount: try payment.delta.usdc.amount(of: .usdc),
+                    rate: try Self.rate(payment.delta.fundingRate),
+                    time: Date(wireMilliseconds: payment.time), cursor: HyperliquidLedgerCursor(milliseconds: payment.time)
+                )))
+            }
+            for update in updates {
+                let time = Date(wireMilliseconds: update.time)
+                let cursor = HyperliquidLedgerCursor(milliseconds: update.time)
+                switch update.delta {
+                case .deposit(let amount):
+                    items.append((update.time, .deposit(try amount.amount(of: .usdc), time: time, cursor: cursor)))
+                case .withdrawal(let amount):
+                    items.append((update.time, .withdrawal(try amount.amount(of: .usdc), time: time, cursor: cursor)))
+                case .move(let amount, let from, let to):
+                    items.append((update.time, .internalMove(try amount.amount(of: .usdc), from: from, to: to, time: time, cursor: cursor)))
+                case .other:
+                    // A kind C30 has no case for (a vault's, a staking reward, a liquidation's own update, which the
+                    // fills carry): not handed up (a reading for the owner's pen).
+                    continue
+                }
+            }
+            return items.sorted { $0.0 < $1.0 }.map(\.1)
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        return items.sorted { $0.0 < $1.0 }.map(\.1)
     }
 
     // A funding rate exactly, or cut toward zero at a Fraction's nine digits: Hyperliquid states rates to ten.
@@ -259,60 +287,76 @@ public struct HyperliquidClient: ExchangeClient {
     }
 
     public func setLeverage(_ leverage: Int, market: HyperliquidMarketName, isolated: Bool, account: String) async throws {
-        let coin = try await self.coin(market)
-        let answer: HyperliquidExchangeAnswer<HyperliquidNoData> = try await exchange(
-            HyperliquidActions.updateLeverage(asset: coin.index, isCross: !isolated, leverage: leverage), vault: try await vault(for: account)
-        )
-        _ = answer
+        do {
+            let coin = try await self.coin(market)
+            let answer: HyperliquidExchangeAnswer<HyperliquidNoData> = try await exchange(
+                HyperliquidActions.updateLeverage(asset: coin.index, isCross: !isolated, leverage: leverage), vault: try await vault(for: account)
+            )
+            _ = answer
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
     }
 
     public func transfer(_ amount: Amount, from: String, to: String) async throws {
-        guard amount.asset == .usdc else {
-            throw HyperliquidClientError.wrongAsset
+        do {
+            guard amount.asset == .usdc else {
+                throw ExchangeClientError.wrongAsset
+            }
+            let main = try await mainWallet()
+            let source = try await address(of: from)
+            let destination = try await address(of: to)
+            let action: HyperliquidWireValue
+            switch (source == main, destination == main) {
+            case (true, false):
+                action = HyperliquidActions.subAccountTransfer(subAccount: destination, isDeposit: true, microUSD: Int64(amount.baseUnits))
+            case (false, true):
+                action = HyperliquidActions.subAccountTransfer(subAccount: source, isDeposit: false, microUSD: Int64(amount.baseUnits))
+            default:
+                throw ExchangeClientError.transferNeedsTheMainAccount
+            }
+            let answer: HyperliquidExchangeAnswer<HyperliquidNoData> = try await exchange(action, vault: nil)
+            _ = answer
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        let main = try await mainWallet()
-        let source = try await address(of: from)
-        let destination = try await address(of: to)
-        let action: HyperliquidWireValue
-        switch (source == main, destination == main) {
-        case (true, false):
-            action = HyperliquidActions.subAccountTransfer(subAccount: destination, isDeposit: true, microUSD: Int64(amount.baseUnits))
-        case (false, true):
-            action = HyperliquidActions.subAccountTransfer(subAccount: source, isDeposit: false, microUSD: Int64(amount.baseUnits))
-        default:
-            throw HyperliquidClientError.transferNeedsTheMainAccount
-        }
-        let answer: HyperliquidExchangeAnswer<HyperliquidNoData> = try await exchange(action, vault: nil)
-        _ = answer
     }
 
     // MARK: The key and the exchange's limits
 
     public func keyFacts() async throws -> ExchangeClientKeyFacts {
-        let key = try agentKey()
-        // A key that is itself a main wallet is handed up as one: it trades, moves and withdraws, and nobody approved
-        // it (T41, T53: the consumer refuses it; the client only says what it is).
-        let role: HyperliquidUserRole = try await info(.map([("type", .string("userRole")), ("user", .string(key.address))]))
-        if role.role == "user" {
-            return ExchangeClientKeyFacts(canTrade: true, canTransfer: true, canWithdraw: true, approvedBy: nil, validUntil: nil)
+        do {
+            let key = try agentKey()
+            // A key that is itself a main wallet is handed up as one: it trades, moves and withdraws, and nobody approved
+            // it (T41, T53: the consumer refuses it; the client only says what it is).
+            let role: HyperliquidUserRole = try await info(.map([("type", .string("userRole")), ("user", .string(key.address))]))
+            if role.role == "user" {
+                return ExchangeClientKeyFacts(canTrade: true, canTransfer: true, canWithdraw: true, approvedBy: nil, validUntil: nil)
+            }
+            let main = try await mainWallet()
+            let agents: [HyperliquidAgent] = try await info(.map([("type", .string("extraAgents")), ("user", .string(main))]))
+            guard let mine = agents.first(where: { $0.address.lowercased() == key.address }) else {
+                return ExchangeClientKeyFacts(canTrade: false, canTransfer: false, canWithdraw: false, approvedBy: nil, validUntil: nil)
+            }
+            // An agent places and cancels orders and moves money between the main account's own sub-accounts; it never
+            // withdraws (AR33). Hyperliquid states when the approval ends.
+            let validUntil = mine.validUntil.map { Date(wireMilliseconds: $0) }
+            let live = validUntil.map { $0 > now() } ?? true
+            return ExchangeClientKeyFacts(canTrade: live, canTransfer: live, canWithdraw: false, approvedBy: main, validUntil: validUntil)
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
-        let main = try await mainWallet()
-        let agents: [HyperliquidAgent] = try await info(.map([("type", .string("extraAgents")), ("user", .string(main))]))
-        guard let mine = agents.first(where: { $0.address.lowercased() == key.address }) else {
-            return ExchangeClientKeyFacts(canTrade: false, canTransfer: false, canWithdraw: false, approvedBy: nil, validUntil: nil)
-        }
-        // An agent places and cancels orders and moves money between the main account's own sub-accounts; it never
-        // withdraws (AR33). Hyperliquid states when the approval ends.
-        let validUntil = mine.validUntil.map { Date(wireMilliseconds: $0) }
-        let live = validUntil.map { $0 > now() } ?? true
-        return ExchangeClientKeyFacts(canTrade: live, canTransfer: live, canWithdraw: false, approvedBy: main, validUntil: validUntil)
     }
 
     /// Hyperliquid's address-based limit: the requests its main wallet has made against the cap its traded volume
     /// has earned; the cap grows with volume and resets at no time, so `resetsAt` is `Date.distantFuture`
     public func requestBudget() async throws -> ExchangeClientRequestBudget {
-        let limit: HyperliquidRateLimit = try await info(.map([("type", .string("userRateLimit")), ("user", .string(try await mainWallet()))]))
-        return ExchangeClientRequestBudget(limit: limit.nRequestsCap, remaining: max(0, limit.nRequestsCap - limit.nRequestsUsed), resetsAt: .distantFuture)
+        do {
+            let limit: HyperliquidRateLimit = try await info(.map([("type", .string("userRateLimit")), ("user", .string(try await mainWallet()))]))
+            return ExchangeClientRequestBudget(limit: limit.nRequestsCap, remaining: max(0, limit.nRequestsCap - limit.nRequestsUsed), resetsAt: .distantFuture)
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
     }
 
     /// Hyperliquid announces no maintenance window through its API: always empty
@@ -322,10 +366,14 @@ public struct HyperliquidClient: ExchangeClient {
 
     /// A delisting for each perpetual Hyperliquid's `meta` marks delisted, effective when read: Hyperliquid states no date
     public func notices() async throws -> [ExchangeClientNotice<HyperliquidMarketName>] {
-        let meta = try await perpMeta(refresh: true)
-        let read = now()
-        return try meta.universe.filter { $0.isDelisted == true }.map {
-            ExchangeClientNotice(kind: .delisting, market: try HyperliquidMarketName(validating: $0.name), effectiveAt: read, text: "isDelisted")
+        do {
+            let meta = try await perpMeta(refresh: true)
+            let read = now()
+            return try meta.universe.filter { $0.isDelisted == true }.map {
+                ExchangeClientNotice(kind: .delisting, market: try HyperliquidMarketName(validating: $0.name), effectiveAt: read, text: "isDelisted")
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
     }
 
@@ -333,7 +381,7 @@ public struct HyperliquidClient: ExchangeClient {
 
     private func agentKey() throws -> HyperliquidAgentKey {
         guard case .agentKey(let key) = credential else {
-            throw HyperliquidClientError.noCredential
+            throw ExchangeClientError.noCredential
         }
         return key
     }
@@ -346,7 +394,7 @@ public struct HyperliquidClient: ExchangeClient {
         let key = try agentKey()
         let role: HyperliquidUserRole = try await info(.map([("type", .string("userRole")), ("user", .string(key.address))]))
         guard role.role == "agent", let main = role.data?.user.lowercased() else {
-            throw HyperliquidClientError.notAnAgent
+            throw ExchangeClientError.notAnAgent
         }
         await state.keep(mainWallet: main)
         return main
@@ -365,7 +413,7 @@ public struct HyperliquidClient: ExchangeClient {
             await state.keep(subAccount: sub.name, address: sub.subAccountUser.lowercased())
         }
         guard let address = await state.subAccount(account) else {
-            throw HyperliquidClientError.unknownAccount(account)
+            throw ExchangeClientError.unknownAccount(account)
         }
         return address
     }
@@ -382,7 +430,7 @@ public struct HyperliquidClient: ExchangeClient {
         }
         _ = try await perpMeta(refresh: false)
         guard let coin = await state.coin(market.text) else {
-            throw HyperliquidClientError.unknownMarket(market)
+            throw ExchangeClientError.unknownMarket(market)
         }
         return coin
     }
@@ -431,9 +479,9 @@ public struct HyperliquidClient: ExchangeClient {
         case 200..<300:
             nil
         case 429:
-            HyperliquidLimitError(retryAfter: WireResponse.retryAfter(response))
+            ExchangeClientError.rateLimited(retryAfter: WireResponse.retryAfter(response))
         default:
-            HyperliquidClientError.rejected(status: response.statusCode, text: body.map { String(decoding: $0, as: UTF8.self) } ?? "")
+            ExchangeClientError.rejected(status: response.statusCode, text: body.map { String(decoding: $0, as: UTF8.self) } ?? "")
         }
     }
 }

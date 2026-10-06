@@ -57,16 +57,18 @@ struct BehavioralSessionBridge: URLSessionProtocol {
     private static let inert = URLSession(configuration: .ephemeral)
 }
 
-// MARK: The typed errors the projector invented: declared here so its files compile; each client throws its own
+// MARK: The shared error (the owner's ruling of 2026-10-06: one ExchangeClientError, declared in CryptoExchange)
 
-/// The projector's shared error; no client throws it (C31: each client its own typed errors), so a test expecting it
-/// is red and classified
-enum ExchangeClientError: Error, Equatable {
-    case rateLimited(retryAfter: Duration?)
-    case malformedResponse
-    case unreachable
-    case unauthorized
-    case exchange(code: String?, text: String)
+// The projector invented `ExchangeClientError` with payload-less cases and `.exchange(code:text:)`. The real one is
+// C30's: every case carries the exchange's own words. Its files name the invented forms, so each is a static member
+// here that makes the real case with no words (or the refusal, for `.exchange`). A client's thrown error carries
+// words, and the real type compares them, so a test expecting a payload-less form passes only where the words are
+// empty; a test expecting `.rateLimited(retryAfter:)` or `.exchange(code:text:)` passes where the client states the same.
+extension ExchangeClientError {
+    static var malformedResponse: ExchangeClientError { .malformedResponse(text: "") }
+    static var unreachable: ExchangeClientError { .unreachable(text: "") }
+    static var unauthorized: ExchangeClientError { .unauthorized(text: "") }
+    static func exchange(code: String?, text: String) -> ExchangeClientError { .refused(code: code, text: text) }
 }
 
 // MARK: The exact text constructors → the package's one parse (WireDecimal)

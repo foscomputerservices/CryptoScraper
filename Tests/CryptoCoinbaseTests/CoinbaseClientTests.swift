@@ -98,7 +98,7 @@ struct CoinbaseClientTests {
         for text in [Coinbase.credential.description, String(reflecting: Coinbase.credential), "\(Coinbase.credential)"] {
             #expect(!text.contains("barney") && !text.contains("PRIVATE KEY"))
         }
-        #expect(throws: CoinbaseClientError.malformedCredential) { try CoinbaseCredential(keyName: "k", privateKeyPEM: "not a key") }
+        #expect(throws: ExchangeClientError.unauthorized(text: "A Coinbase key name and its P-256 private key in PEM are both needed")) { try CoinbaseCredential(keyName: "k", privateKeyPEM: "not a key") }
     }
 
     @Test func theMarketsAreTheProductsAtTheirIncrementsDecimals() async throws {
@@ -156,18 +156,29 @@ struct CoinbaseClientTests {
         #expect(result == .refused(code: "UNKNOWN_FAILURE_REASON", text: "The order configuration was invalid"))
     }
 
-    @Test func anErrorBodyIsCoinbasesTypedError() async throws {
+    @Test func anErrorBodyIsRefusedWithCoinbasesCodeAndMessage() async throws {
         let session = ReplaySession(route: Coinbase.route(["/key_permissions": Reply(status: 403, body: Recording.body("Coinbase/private-error.json"), headers: [:])]))
-        await #expect(throws: CoinbaseAPIError(code: "PERMISSION_DENIED", message: "Target Account Not Tradable")) {
-            try await Coinbase.client(session).keyFacts()
-        }
+        #expect(await sharedError { try await Coinbase.client(session).keyFacts() } == .refused(code: "PERMISSION_DENIED", text: "Target Account Not Tradable"))
     }
 
-    @Test func a429IsTheTypedLimit() async throws {
+    @Test func aStatus401IsUnauthorizedWithCoinbasesWords() async throws {
+        let session = ReplaySession { _, _ in Reply(status: 401, body: Data(#"{"error":"unauthorized","message":"Unauthorized"}"#.utf8), headers: [:]) }
+        #expect(await sharedError { try await Coinbase.client(session).accountState(account: "") } == .unauthorized(text: "Unauthorized"))
+    }
+
+    @Test func a429WithRetryAfterIsRateLimitedWithItsWait() async throws {
         let session = ReplaySession { _, _ in Reply(status: 429, body: Data(), headers: ["Retry-After": "2"]) }
-        await #expect(throws: CoinbaseLimitError(retryAfter: .seconds(2), apiError: nil)) {
-            try await Coinbase.client(session).markets()
-        }
+        #expect(await sharedError { try await Coinbase.client(session).markets() } == .rateLimited(retryAfter: .seconds(2)))
+    }
+
+    @Test func aMalformedBodyIsMalformedResponseNeverAValue() async throws {
+        let session = ReplaySession { _, _ in .ok(Data(#"{"products":[{"product_id":"BTC-USD","price":"eighty"}]}"#.utf8)) }
+        #expect(await sharedError { try await Coinbase.client(session).markets() }?.meaning == "malformedResponse")
+    }
+
+    @Test func noAnswerIsUnreachableWithTheTransportsText() async throws {
+        let session = ReplaySession { _, _ in .failing(URLError(.notConnectedToInternet)) }
+        #expect(await sharedError { try await Coinbase.client(session).markets() } == .unreachable(text: URLError(.notConnectedToInternet).localizedDescription))
     }
 
     @Test func theOpenOrdersAreTheirRemainingUnits() async throws {
@@ -229,7 +240,7 @@ struct CoinbaseClientTests {
 
     @Test func leverageIsNotSettableAndThereIsNoTestMarket() async throws {
         let client = Coinbase.client(ReplaySession(route: Coinbase.route()))
-        await #expect(throws: CoinbaseClientError.leverageNotSettable) { try await client.setLeverage(2, market: Coinbase.btcusd, isolated: true, account: "") }
+        await #expect(throws: ExchangeClientError.notOffered(member: "setLeverage")) { try await client.setLeverage(2, market: Coinbase.btcusd, isolated: true, account: "") }
         #expect(!client.hasTestMarket)
     }
 

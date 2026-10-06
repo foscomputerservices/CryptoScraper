@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoExchange
 import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -17,8 +18,11 @@ struct Reply: Sendable {
     let status: Int
     let body: Data
     let headers: [String: String]
+    /// A transport failure instead of an answer: the session throws it
+    var failure: URLError? = nil
 
     static func ok(_ body: Data) -> Reply { .init(status: 200, body: body, headers: [:]) }
+    static func failing(_ failure: URLError) -> Reply { .init(status: 0, body: Data(), headers: [:], failure: failure) }
 }
 
 final class ReplaySession: URLSessionProtocol, @unchecked Sendable {
@@ -44,6 +48,10 @@ final class ReplaySession: URLSessionProtocol, @unchecked Sendable {
             return noted.count - 1
         }
         let reply = route(request, index)
+        if let failure = reply.failure {
+            completionHandler(nil, nil, failure)
+            return Self.inert.dataTask(with: URL(string: "data:,")!)
+        }
         var headers = ["Content-Type": "application/json;charset=UTF-8"]
         headers.merge(reply.headers) { _, new in new }
         let response = HTTPURLResponse(url: request.url!, statusCode: reply.status, httpVersion: "HTTP/1.1", headerFields: headers)
@@ -93,5 +101,29 @@ extension URLRequest {
 
     func query(_ name: String) -> String? {
         URLComponents(url: url!, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == name }?.value
+    }
+}
+
+/// The shared error a call threw (nil when it threw none or threw another type): what a client hands up is C30's
+func sharedError<Result>(_ call: () async throws -> Result) async -> ExchangeClientError? {
+    do {
+        _ = try await call()
+        return nil
+    } catch {
+        return error as? ExchangeClientError
+    }
+}
+
+extension ExchangeClientError {
+    /// The case alone, for a test that asserts the meaning and not the exchange's words
+    var meaning: String {
+        switch self {
+        case .refused: "refused"
+        case .rateLimited: "rateLimited"
+        case .unauthorized: "unauthorized"
+        case .unreachable: "unreachable"
+        case .malformedResponse: "malformedResponse"
+        case .notOffered: "notOffered"
+        }
     }
 }

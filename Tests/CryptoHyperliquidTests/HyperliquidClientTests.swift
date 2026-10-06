@@ -178,48 +178,65 @@ struct HyperliquidClientTests {
 
     @Test func aCancelTheExchangeRefusesThrowsItsWords() async throws {
         let session = ReplaySession(route: Hyperliquid.route(exchange: "exchange-cancel-error.json"))
-        await #expect(throws: HyperliquidClientError.refused("Order was never placed, already canceled, or filled.")) {
+        await #expect(throws: ExchangeClientError.refused(code: nil, text: "Order was never placed, already canceled, or filled.")) {
             try await Hyperliquid.client(session).cancelOrder(HyperliquidOrderId(1), market: Hyperliquid.btc, account: "four-hour-2x")
         }
     }
 
-    @Test func anErrStatusIsTheTypedAPIError() async throws {
+    @Test func anErrStatusNamingTheAgentIsUnauthorizedWithHyperliquidsWords() async throws {
         let session = ReplaySession(route: Hyperliquid.route(exchange: "exchange-err.json"))
-        await #expect(throws: HyperliquidAPIError(text: "User or API Wallet 0x00000000000000000000000000000000000000a1 does not exist.")) {
-            try await Hyperliquid.client(session).setLeverage(2, market: Hyperliquid.btc, isolated: true, account: "four-hour-2x")
-        }
+        #expect(await sharedError { try await Hyperliquid.client(session).setLeverage(2, market: Hyperliquid.btc, isolated: true, account: "four-hour-2x") }
+            == .unauthorized(text: "User or API Wallet 0x00000000000000000000000000000000000000a1 does not exist."))
     }
 
-    @Test func a429IsTheTypedLimitWithRetryAfter() async throws {
+    @Test func anErrStatusOtherwiseIsRefusedWithHyperliquidsWords() async throws {
+        let body = Data(#"{"status":"err","response":"Cannot modify leverage with open orders."}"#.utf8)
+        let session = ReplaySession { request, index in
+            request.url!.lastPathComponent == "exchange" ? .ok(body) : Hyperliquid.route()(request, index)
+        }
+        #expect(await sharedError { try await Hyperliquid.client(session).setLeverage(2, market: Hyperliquid.btc, isolated: true, account: "four-hour-2x") }
+            == .refused(code: nil, text: "Cannot modify leverage with open orders."))
+    }
+
+    @Test func aStatus500IsRefusedWithItsStatusAsTheCodeAndItsBodyAsTheText() async throws {
+        let session = ReplaySession { _, _ in Reply(status: 500, body: Data("null".utf8), headers: [:]) }
+        #expect(await sharedError { try await Hyperliquid.client(session).markets() } == .refused(code: "500", text: "null"))
+    }
+
+    @Test func aStatus401IsUnauthorized() async throws {
+        let session = ReplaySession { _, _ in Reply(status: 401, body: Data("Unauthorized".utf8), headers: [:]) }
+        #expect(await sharedError { try await Hyperliquid.client(session).markets() } == .unauthorized(text: "Unauthorized"))
+    }
+
+    @Test func a429WithRetryAfterIsRateLimitedWithItsWait() async throws {
         let session = ReplaySession { _, _ in Reply(status: 429, body: Data(), headers: ["Retry-After": "4"]) }
-        await #expect(throws: HyperliquidLimitError(retryAfter: .seconds(4))) {
-            try await Hyperliquid.client(session).markets()
-        }
+        #expect(await sharedError { try await Hyperliquid.client(session).markets() } == .rateLimited(retryAfter: .seconds(4)))
     }
 
-    @Test func aMalformedBodyIsADecodeErrorNeverAValue() async throws {
+    @Test func aMalformedBodyIsMalformedResponseNeverAValue() async throws {
         let session = ReplaySession { _, _ in .ok(Data(#"{"universe":[{"name":"BTC","szDecimals":"five"}]}"#.utf8)) }
-        await #expect(throws: DataFetchError.self) {
-            try await Hyperliquid.client(session).markets()
-        }
+        #expect(await sharedError { try await Hyperliquid.client(session).markets() }?.meaning == "malformedResponse")
     }
 
-    @Test func aNumberFinerThanTheAssetIsAnAmountErrorNeverRounded() async throws {
+    @Test func noAnswerIsUnreachableWithTheTransportsText() async throws {
+        let session = ReplaySession { _, _ in .failing(URLError(.timedOut)) }
+        #expect(await sharedError { try await Hyperliquid.client(session).markets() } == .unreachable(text: URLError(.timedOut).localizedDescription))
+    }
+
+    @Test func aNumberFinerThanTheAssetIsMalformedResponseNeverRounded() async throws {
         let session = ReplaySession { request, index in
             request.jsonBody["type"] as? String == "clearinghouseState"
                 ? .ok(Data(#"{"marginSummary":{"accountValue":"1.0000001"},"withdrawable":"0","assetPositions":[],"time":1}"#.utf8))
                 : Hyperliquid.route()(request, index)
         }
-        await #expect(throws: AmountError.belowBaseUnit("1.0000001", unitExponent: 6)) {
-            try await Hyperliquid.client(session).accountState(account: Hyperliquid.master)
-        }
+        #expect(await sharedError { try await Hyperliquid.client(session).accountState(account: Hyperliquid.master) }?.meaning == "malformedResponse")
     }
 
     @Test func aClientWithoutACredentialReadsTheMarketsAndSignsNothing() async throws {
         let session = ReplaySession(route: Hyperliquid.route())
         let client = HyperliquidClient(credential: nil, endpoint: .testMarket, session: session)
         #expect(try await client.markets().isEmpty == false)
-        await #expect(throws: HyperliquidClientError.noCredential) {
+        await #expect(throws: ExchangeClientError.unauthorized(text: "The client was made without a credential")) {
             try await client.keyFacts()
         }
     }
@@ -286,7 +303,7 @@ struct HyperliquidClientTests {
         #expect(action["subAccountUser"] as? String == Hyperliquid.sub)
         #expect(action["isDeposit"] as? Bool == true)
         #expect((action["usd"] as? NSNumber)?.int64Value == 500_250_000)
-        await #expect(throws: HyperliquidClientError.transferNeedsTheMainAccount) {
+        await #expect(throws: ExchangeClientError.refused(code: nil, text: "Hyperliquid moves funds only between the main account and one of its sub-accounts")) {
             try await Hyperliquid.client(session).transfer(Amount(whole: 1, of: .usdc), from: "four-hour-2x", to: "four-hour-1x")
         }
     }

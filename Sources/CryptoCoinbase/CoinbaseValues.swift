@@ -32,15 +32,15 @@ public struct CoinbaseCredential: Sendable, CustomStringConvertible, CustomDebug
     let keyName: String
     let key: P256.Signing.PrivateKey
 
-    /// - Throws: ``CoinbaseClientError/malformedCredential`` when the name is empty or the PEM is not a P-256 key
+    /// - Throws: ``ExchangeClientError/unauthorized(text:)`` when the name is empty or the PEM is not a P-256 key
     public init(keyName: String, privateKeyPEM: String) throws {
         guard !keyName.isEmpty else {
-            throw CoinbaseClientError.malformedCredential
+            throw ExchangeClientError.malformedCredential
         }
         do {
             self.key = try P256.Signing.PrivateKey(pemRepresentation: privateKeyPEM)
         } catch {
-            throw CoinbaseClientError.malformedCredential
+            throw ExchangeClientError.malformedCredential
         }
         self.keyName = keyName
     }
@@ -54,10 +54,10 @@ public struct CoinbaseCredential: Sendable, CustomStringConvertible, CustomDebug
 public struct CoinbaseOrderId: Codable, Hashable, Sendable, Stubbable {
     package let text: String
 
-    /// - Throws: ``CoinbaseClientError/malformedOrderId(_:)`` when `candidate` is not ASCII letters, digits and dashes
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is not ASCII letters, digits and dashes
     public init(validating candidate: String) throws {
         guard Self.isWellFormed(candidate) else {
-            throw CoinbaseClientError.malformedOrderId(candidate)
+            throw ExchangeClientError.malformedOrderId(candidate)
         }
         self.text = candidate
     }
@@ -100,10 +100,10 @@ public struct CoinbaseLedgerCursor: Codable, Hashable, Sendable, Stubbable {
         CoinbaseTime.date(sequenceTimestamp) ?? .distantPast
     }
 
-    /// - Throws: ``CoinbaseClientError/malformedCursor(_:)`` when the text is not an RFC 3339 time
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when the text is not an RFC 3339 time
     package init(sequenceTimestamp: String) throws {
         guard CoinbaseTime.date(sequenceTimestamp) != nil else {
-            throw CoinbaseClientError.malformedCursor(sequenceTimestamp)
+            throw ExchangeClientError.malformedCursor(sequenceTimestamp)
         }
         self.sequenceTimestamp = sequenceTimestamp
     }
@@ -129,24 +129,6 @@ public struct CoinbaseLedgerCursor: Codable, Hashable, Sendable, Stubbable {
             preconditionFailure("CoinbaseLedgerCursor.stub() is not well-formed: \(error)")
         }
     }
-}
-
-/// Why ``CoinbaseClient`` could not do what was asked
-public enum CoinbaseClientError: Error, Hashable, Sendable {
-    /// A key name that is empty, or a private key that is not a P-256 key in PEM
-    case malformedCredential
-    /// An order id that is not one Coinbase could write
-    case malformedOrderId(String)
-    /// A cursor that is not an RFC 3339 time
-    case malformedCursor(String)
-    /// A member that signs was asked of a client made without a credential
-    case noCredential
-    /// A size or a price in an asset other than the product's, or a transfer of an asset that is not one
-    case wrongAsset
-    /// Coinbase Advanced Trade sets no leverage on a market or an account
-    case leverageNotSettable
-    /// Coinbase answered and did not do it, in its own words
-    case refused(String)
 }
 
 // RFC 3339 times as Coinbase writes them, with or without fractional seconds.

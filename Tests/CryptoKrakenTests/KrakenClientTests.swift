@@ -80,7 +80,7 @@ struct KrakenClientTests {
         for text in [Kraken.credential.description, String(reflecting: Kraken.credential), "\(Kraken.credential)"] {
             #expect(!text.contains("FRED-KEY") && !text.contains("kQH5HW"))
         }
-        #expect(throws: KrakenClientError.malformedCredential) { try KrakenCredential(apiKey: "k", base64Secret: "not base64!") }
+        #expect(throws: ExchangeClientError.unauthorized(text: "A Kraken API key and its base64 secret are both needed")) { try KrakenCredential(apiKey: "k", base64Secret: "not base64!") }
     }
 
     @Test func theMarketsAreKrakensPairsWithTheirLotsMinimumsAndLeverage() async throws {
@@ -137,25 +137,46 @@ struct KrakenClientTests {
         #expect(result == .refused(code: "EOrder", text: "Insufficient funds"))
     }
 
-    @Test func anInvalidKeyIsKrakensTypedError() async throws {
+    @Test func anInvalidKeyIsUnauthorizedWithKrakensWords() async throws {
         let session = ReplaySession(route: Kraken.route(["OpenOrders": .ok(Recording.body("Kraken/private-error-invalid-key.json"))]))
-        await #expect(throws: KrakenAPIError(messages: ["EAPI:Invalid key"])) {
-            try await Kraken.client(session).openOrders(account: "")
-        }
+        #expect(await sharedError { try await Kraken.client(session).openOrders(account: "") } == .unauthorized(text: "EAPI:Invalid key"))
     }
 
-    @Test func aRateLimitIsTheTypedLimit() async throws {
+    @Test func aStatus401IsUnauthorized() async throws {
+        let session = ReplaySession { _, _ in Reply(status: 401, body: Data(#"{"error":"authenticationError"}"#.utf8), headers: [:]) }
+        #expect(await sharedError { try await Kraken.client(session).openOrders(account: "") }?.meaning == "unauthorized")
+    }
+
+    @Test func anErrorKrakenListsIsRefusedWithItsCodeAndItsText() async throws {
+        let body = Data(#"{"error":["EGeneral:Invalid arguments:ordertype"],"result":{}}"#.utf8)
+        let session = ReplaySession(route: Kraken.route(["OpenOrders": .ok(body)]))
+        #expect(await sharedError { try await Kraken.client(session).openOrders(account: "") }
+            == .refused(code: "EGeneral", text: "Invalid arguments:ordertype"))
+    }
+
+    @Test func aRateLimitInKrakensListIsRateLimitedWithNoWait() async throws {
         let session = ReplaySession(route: Kraken.route(["TradeBalance": .ok(Recording.body("Kraken/private-error-rate-limit.json"))]))
-        await #expect(throws: KrakenLimitError(retryAfter: nil, apiError: KrakenAPIError(messages: ["EAPI:Rate limit exceeded"]))) {
-            try await Kraken.client(session).accountState(account: "")
-        }
+        #expect(await sharedError { try await Kraken.client(session).accountState(account: "") } == .rateLimited(retryAfter: nil))
     }
 
-    @Test func aMalformedBodyIsADecodeErrorNeverAValue() async throws {
+    @Test func a429WithRetryAfterIsRateLimitedWithItsWait() async throws {
+        let session = ReplaySession { _, _ in Reply(status: 429, body: Data(), headers: ["Retry-After": "7"]) }
+        #expect(await sharedError { try await Kraken.client(session).orderBook(market: Kraken.xbtusd) } == .rateLimited(retryAfter: .seconds(7)))
+    }
+
+    @Test func aMalformedBodyIsMalformedResponseNeverAValue() async throws {
         let session = ReplaySession(route: Kraken.route(["Ticker": .ok(Data(#"{"error":[],"result":{"XXBTZUSD":{"a":["eighty"],"b":["1"],"v":["1"]}}}"#.utf8))]))
-        await #expect(throws: AmountError.malformedText("eighty")) {
-            try await Kraken.client(session).orderBook(market: Kraken.xbtusd)
-        }
+        #expect(await sharedError { try await Kraken.client(session).orderBook(market: Kraken.xbtusd) }?.meaning == "malformedResponse")
+    }
+
+    @Test func aNumberFinerThanItsAssetFromKrakenIsMalformedResponse() async throws {
+        let session = ReplaySession(route: Kraken.route(["TradeBalance": .ok(Data(#"{"error":[],"result":{"eb":"1.00000000000001","tb":"1","m":"0","n":"0","c":"0","v":"0","e":"0","mf":"0"}}"#.utf8))]))
+        #expect(await sharedError { try await Kraken.client(session).accountState(account: "") }?.meaning == "malformedResponse")
+    }
+
+    @Test func noAnswerIsUnreachableWithTheTransportsText() async throws {
+        let session = ReplaySession { _, _ in .failing(URLError(.timedOut)) }
+        #expect(await sharedError { try await Kraken.client(session).orderBook(market: Kraken.xbtusd) } == .unreachable(text: URLError(.timedOut).localizedDescription))
     }
 
     @Test func theOpenOrdersAreTheirRemainingUnits() async throws {
@@ -211,9 +232,9 @@ struct KrakenClientTests {
 
     @Test func leverageTransferAndKeyFactsAreNotOfferedByKrakenSpot() async throws {
         let client = Kraken.client(ReplaySession(route: Kraken.route()))
-        await #expect(throws: KrakenClientError.leverageNotSettable) { try await client.setLeverage(2, market: Kraken.xbtusd, isolated: true, account: "") }
-        await #expect(throws: KrakenClientError.transferNotOffered) { try await client.transfer(Amount(whole: 1, of: Kraken.usd), from: "a", to: "b") }
-        await #expect(throws: KrakenClientError.keyFactsNotOffered) { try await client.keyFacts() }
+        await #expect(throws: ExchangeClientError.notOffered(member: "setLeverage")) { try await client.setLeverage(2, market: Kraken.xbtusd, isolated: true, account: "") }
+        await #expect(throws: ExchangeClientError.notOffered(member: "transfer")) { try await client.transfer(Amount(whole: 1, of: Kraken.usd), from: "a", to: "b") }
+        await #expect(throws: ExchangeClientError.notOffered(member: "keyFacts")) { try await client.keyFacts() }
         #expect(!client.hasTestMarket)
     }
 

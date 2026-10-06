@@ -102,7 +102,7 @@ struct HyperliquidSigningVectorTests {
     }
 
     @Test func aKeyThatIsNotASecp256k1SecretIsRefused() {
-        #expect(throws: HyperliquidClientError.malformedAgentKey) { try HyperliquidAgentKey(privateKey: Data(repeating: 0, count: 32)) }
-        #expect(throws: HyperliquidClientError.malformedAgentKey) { try HyperliquidAgentKey(privateKey: Data(repeating: 1, count: 31)) }
+        #expect(throws: ExchangeClientError.unauthorized(text: "The agent key is not 32 bytes of a valid secp256k1 secret")) { try HyperliquidAgentKey(privateKey: Data(repeating: 0, count: 32)) }
+        #expect(throws: ExchangeClientError.unauthorized(text: "The agent key is not 32 bytes of a valid secp256k1 secret")) { try HyperliquidAgentKey(privateKey: Data(repeating: 1, count: 31)) }
     }
 }

@@ -207,6 +207,24 @@ public struct ExchangeClientRequestBudget: Hashable, Sendable {
     }
 }
 
+/// What an exchange client throws: one set of meanings over every exchange, the exchange's own code and text carried inside
+///
+/// A plug-in maps its wire errors into these once; the drivers above read one type (C24, C16).
+public enum ExchangeClientError: Error, Hashable, Sendable {
+    /// The exchange refused the request and said why; `code` is the exchange's own
+    case refused(code: String?, text: String)
+    /// A rate limit, with the time the exchange says to wait when it says one
+    case rateLimited(retryAfter: Duration?)
+    /// The credential was not accepted
+    case unauthorized(text: String)
+    /// No answer, or a transport failure; the text is the transport's
+    case unreachable(text: String)
+    /// An answer that did not decode as the exchange documents it
+    case malformedResponse(text: String)
+    /// A member this exchange does not offer (a spot market has no leverage)
+    case notOffered(member: String)
+}
+
 /// A maintenance window the exchange announced, with what it affects: trading, transfers (deposits and withdrawals), or something else
 ///
 /// The client classifies the exchange's announcement into the subject; the engine holds a stream on a trading window only (C16).

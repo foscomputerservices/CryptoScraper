@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoExchange
 import CryptoSwift
 import Foundation
 import secp256k1
@@ -25,12 +26,12 @@ public struct HyperliquidAgentKey: Sendable, CustomStringConvertible, CustomDebu
     /// The agent's address, lower-case hex with its "0x", derived from the key
     package let address: String
 
-    /// - Throws: ``HyperliquidClientError/malformedAgentKey`` when `privateKey` is not 32 bytes or is not a valid
+    /// - Throws: ``ExchangeClientError/unauthorized(text:)`` when `privateKey` is not 32 bytes or is not a valid
     ///   secp256k1 secret
     public init(privateKey: Data) throws {
         let bytes = [UInt8](privateKey)
         guard bytes.count == 32, let address = Self.address(of: bytes) else {
-            throw HyperliquidClientError.malformedAgentKey
+            throw ExchangeClientError.malformedAgentKey
         }
         self.secret = bytes
         self.address = address
