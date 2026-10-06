@@ -242,11 +242,34 @@ struct CoinbaseMovedFunds: Decodable, Sendable {
 // The status page's upcoming maintenance (Atlassian Statuspage's shape, as Coinbase publishes it).
 struct CoinbaseStatusPage: Decodable, Sendable {
     struct Maintenance: Decodable, Sendable {
+        struct Component: Decodable, Sendable { let name: String }
+        struct Update: Decodable, Sendable {
+            let affectedComponents: [Component]?
+            private enum CodingKeys: String, CodingKey { case affectedComponents = "affected_components" }
+        }
+
+        let name: String?
         let scheduledFor: String?
         let scheduledUntil: String?
+        let components: [Component]?
+        let incidentUpdates: [Update]?
 
         private enum CodingKeys: String, CodingKey {
+            case name, components
             case scheduledFor = "scheduled_for", scheduledUntil = "scheduled_until"
+            case incidentUpdates = "incident_updates"
+        }
+
+        /// Coinbase's own words, from the maintenance's name and every component it lists: trading wins over transfers,
+        /// a window naming neither is `.other`
+        ///   trading: "trading", "trade", "order", "matching engine", "exchange"
+        ///   transfers: "withdraw", "deposit", "send", "receive", "transfer", "payment method"
+        var subject: ExchangeClientMaintenanceWindow.Subject {
+            let listed = (components ?? []).map(\.name) + (incidentUpdates ?? []).flatMap { ($0.affectedComponents ?? []).map(\.name) }
+            let text = ([name ?? ""] + listed).joined(separator: " | ").lowercased()
+            if ["trading", "trade", "order", "matching engine", "exchange"].contains(where: text.contains) { return .trading }
+            if ["withdraw", "deposit", "send", "receive", "transfer", "payment method"].contains(where: text.contains) { return .transfers }
+            return .other
         }
     }
 

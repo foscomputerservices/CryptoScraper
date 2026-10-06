@@ -245,13 +245,13 @@ public struct CoinbaseClient: ExchangeClient {
     static let budgetWindow: Duration = .seconds(3_600)
 
     /// The maintenance Coinbase schedules on its status page, each from its start to its end
-    public func maintenanceWindows() async throws -> [DateInterval] {
+    public func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow] {
         let page: CoinbaseStatusPage = try await ClientFetch.send(statusURL, session: session, errorType: CoinbaseAPIError.self, errorForResponse: { _, _ in nil })
         return page.scheduledMaintenances.compactMap { maintenance in
             guard let start = maintenance.scheduledFor.flatMap(CoinbaseTime.date), let end = maintenance.scheduledUntil.flatMap(CoinbaseTime.date), start <= end else {
                 return nil
             }
-            return DateInterval(start: start, end: end)
+            return ExchangeClientMaintenanceWindow(subject: maintenance.subject, interval: DateInterval(start: start, end: end), text: maintenance.name ?? "")
         }
     }
 

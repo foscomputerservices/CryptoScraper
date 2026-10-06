@@ -265,11 +265,11 @@ public struct KrakenClient: ExchangeClient {
     static let counterWindow: Duration = .seconds(45)
 
     /// The maintenance Kraken schedules on its status page, each from its start to its end; every kind it posts
-    public func maintenanceWindows() async throws -> [DateInterval] {
+    public func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow] {
         let page: KrakenStatusPage = try await ClientFetch.send(statusURL, session: session, errorType: KrakenAPIError.self, errorForResponse: { _, _ in nil })
         return page.scheduledMaintenances.compactMap { maintenance in
             guard let start = maintenance.start, let end = maintenance.end, start <= end else { return nil }
-            return DateInterval(start: start, end: end)
+            return ExchangeClientMaintenanceWindow(subject: maintenance.subject, interval: DateInterval(start: start, end: end), text: maintenance.name ?? "")
         }
     }
 

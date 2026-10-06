@@ -316,7 +316,7 @@ public struct HyperliquidClient: ExchangeClient {
     }
 
     /// Hyperliquid announces no maintenance window through its API: always empty
-    public func maintenanceWindows() async throws -> [DateInterval] {
+    public func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow] {
         []
     }
 

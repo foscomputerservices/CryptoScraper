@@ -232,7 +232,28 @@ struct KrakenClientTests {
         let windows = try await client.maintenanceWindows()
         let raw = (Recording.json("Kraken/maintenances-upcoming.json") as! [String: Any])["scheduled_maintenances"] as! [Any]
         #expect(windows.count == raw.count)
+        // the recorded page: the VANRY withdrawal halt (to 10 December) and the Banking Circle funding maintenance
+        #expect(windows.map(\.subject) == [.transfers, .transfers])
+        #expect(windows[0].text == "VANRY withdrawals on Ethereum blockchain halted.")
+        #expect(windows[0].interval.end == (try iso("2026-12-10T15:05:00.000Z")))
         #expect(try await client.notices().isEmpty) // the three recorded pairs are online
+    }
+
+    @Test func aWindowIsClassifiedByItsNameAndComponentsAndAnythingUnrecognisedIsOther() async throws {
+        // constructed in the Statuspage shape of the recording; only the words differ
+        func page(_ name: String, _ components: [String]) -> String {
+            let parts = components.map { "{\"name\":\"\($0)\"}" }.joined(separator: ",")
+            return "{\"name\":\"\(name)\",\"scheduled_for\":\"2026-10-12T18:00:00.000Z\",\"scheduled_until\":\"2026-10-12T19:00:00.000Z\",\"components\":[\(parts)],\"incident_updates\":[]}"
+        }
+        let body = "{\"scheduled_maintenances\":[" + [
+            page("Scheduled maintenance", ["Spot Trading"]),
+            page("Deposits paused", []),
+            page("Funding and trading", ["Payment Methods - SEPA", "Trading"]),
+            page("Website update", ["Support Site"]),
+        ].joined(separator: ",") + "]}"
+        let session = ReplaySession(route: Kraken.route(["upcoming.json": .ok(Data(body.utf8))]))
+        let windows = try await Kraken.client(session).maintenanceWindows()
+        #expect(windows.map(\.subject) == [.trading, .transfers, .trading, .other])
     }
 
     @Test func anOrderIdAndACursorRoundTripThroughJSON() throws {

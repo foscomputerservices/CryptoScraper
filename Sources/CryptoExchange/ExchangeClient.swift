@@ -43,7 +43,7 @@ public protocol ExchangeClient: Sendable {
     func transfer(_ amount: Amount, from: String, to: String) async throws
     func keyFacts() async throws -> ExchangeClientKeyFacts
     func requestBudget() async throws -> ExchangeClientRequestBudget
-    func maintenanceWindows() async throws -> [DateInterval]
+    func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow]
     func notices() async throws -> [ExchangeClientNotice<MarketName>]
     var hasTestMarket: Bool { get }
 }

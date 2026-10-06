@@ -233,6 +233,24 @@ struct CoinbaseClientTests {
         #expect(!client.hasTestMarket)
     }
 
+    @Test func aWindowIsClassifiedByItsNameAndComponentsAndAnythingUnrecognisedIsOther() async throws {
+        // constructed in the Statuspage shape of the recording (none was scheduled on 2026-10-06); only the words differ
+        func page(_ name: String, _ components: [String]) -> String {
+            let parts = components.map { "{\"name\":\"\($0)\"}" }.joined(separator: ",")
+            return "{\"name\":\"\(name)\",\"scheduled_for\":\"2026-10-12T18:00:00.000Z\",\"scheduled_until\":\"2026-10-12T19:00:00.000Z\",\"components\":[\(parts)],\"incident_updates\":[]}"
+        }
+        let body = "{\"scheduled_maintenances\":[" + [
+            page("Advanced Trade maintenance", ["Advanced Trade"]),
+            page("Withdrawals delayed", ["Sends"]),
+            page("Wallet", ["Deposits & Withdrawals"]),
+            page("Coinbase.com update", ["Website"]),
+        ].joined(separator: ",") + "]}"
+        let client = Coinbase.client(ReplaySession(route: Coinbase.route(["upcoming.json": .ok(Data(body.utf8))])))
+        let windows = try await client.maintenanceWindows()
+        #expect(windows.map(\.subject) == [.trading, .transfers, .transfers, .other])
+        #expect(windows[0].text == "Advanced Trade maintenance")
+    }
+
     @Test func theBudgetMaintenanceAndNotices() async throws {
         let session = ReplaySession(route: Coinbase.route())
         let client = Coinbase.client(session)

@@ -207,6 +207,22 @@ public struct ExchangeClientRequestBudget: Hashable, Sendable {
     }
 }
 
+/// A maintenance window the exchange announced, with what it affects: trading, transfers (deposits and withdrawals), or something else
+///
+/// The client classifies the exchange's announcement into the subject; the engine holds a stream on a trading window only (C16).
+public struct ExchangeClientMaintenanceWindow: Hashable, Sendable {
+    public enum Subject: Codable, Hashable, Sendable { case trading, transfers, other }
+    public let subject: Subject
+    public let interval: DateInterval
+    public let text: String
+
+    public init(subject: Subject, interval: DateInterval, text: String) {
+        self.subject = subject
+        self.interval = interval
+        self.text = text
+    }
+}
+
 /// The exchange's notice that a market will be delisted, renamed or halted
 public struct ExchangeClientNotice<Name: Hashable & Sendable>: Hashable, Sendable {
     public enum Kind: Codable, Hashable, Sendable { case delisting, rename, halt }

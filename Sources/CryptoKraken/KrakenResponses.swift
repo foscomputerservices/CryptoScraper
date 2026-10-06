@@ -213,12 +213,39 @@ struct KrakenSeconds: Decodable, Sendable {
 // The status page's upcoming maintenance (Atlassian Statuspage's shape, as Kraken publishes it).
 struct KrakenStatusPage: Decodable, Sendable {
     struct Maintenance: Decodable, Sendable {
+        struct Component: Decodable, Sendable { let name: String }
+        struct Update: Decodable, Sendable {
+            let affectedComponents: [Component]?
+            private enum CodingKeys: String, CodingKey { case affectedComponents = "affected_components" }
+        }
+
+        let name: String?
         let scheduledFor: String?
         let scheduledUntil: String?
+        let components: [Component]?
+        let incidentUpdates: [Update]?
 
         private enum CodingKeys: String, CodingKey {
+            case name, components
             case scheduledFor = "scheduled_for"
             case scheduledUntil = "scheduled_until"
+            case incidentUpdates = "incident_updates"
+        }
+
+        /// What the maintenance says it touches: its name and every component it lists, lowercased
+        var words: String {
+            let listed = (components ?? []).map(\.name) + (incidentUpdates ?? []).flatMap { ($0.affectedComponents ?? []).map(\.name) }
+            return ([name ?? ""] + listed).joined(separator: " | ").lowercased()
+        }
+
+        /// Kraken's own words: trading wins over transfers, a window naming neither is `.other`
+        ///   trading: "trading", "trade", "order", "matching engine"
+        ///   transfers: "withdraw", "deposit", "payment method", "funding", "transfer"
+        var subject: ExchangeClientMaintenanceWindow.Subject {
+            let text = words
+            if ["trading", "trade", "order", "matching engine"].contains(where: text.contains) { return .trading }
+            if ["withdraw", "deposit", "payment method", "funding", "transfer"].contains(where: text.contains) { return .transfers }
+            return .other
         }
 
         var start: Date? { scheduledFor.flatMap(Self.date) }

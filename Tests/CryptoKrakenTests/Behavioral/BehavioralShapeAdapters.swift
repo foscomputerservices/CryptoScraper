@@ -137,3 +137,8 @@ extension KrakenClient {
         self.init(credential: credential, session: BehavioralSessionBridge(seam: session))
     }
 }
+// Wiring, 2026-10-06: C31's maintenanceWindows() now returns ExchangeClientMaintenanceWindow (subject, interval, text);
+// the projected assertion compares the windows with bare intervals, so it compares the intervals.
+func == (windows: [ExchangeClientMaintenanceWindow], intervals: [DateInterval]) -> Bool {
+    windows.map(\.interval) == intervals
+}
