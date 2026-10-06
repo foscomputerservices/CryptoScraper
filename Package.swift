@@ -26,6 +26,10 @@ let package = Package(
             targets: ["CryptoAsset"]
         ),
         .library(
+            name: "CryptoExchange",
+            targets: ["CryptoExchange"]
+        ),
+        .library(
             name: "CryptoOHLCV",
             targets: ["CryptoOHLCV"]
         ),
@@ -67,9 +71,28 @@ let package = Package(
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
+            name: "CryptoExchange",
+            dependencies: [
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoExchangeTests",
+            dependencies: [
+                .byName(name: "CryptoExchange"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
             name: "CryptoOHLCV",
             dependencies: [
                 .byName(name: "CryptoAsset"),
+                .byName(name: "CryptoExchange"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")
             ],
             swiftSettings: [.swiftLanguageMode(.v6)]

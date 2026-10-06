@@ -4,6 +4,7 @@
 //
 
 import CryptoAsset
+import CryptoExchange
 import FOSFoundation
 import Foundation
 #if canImport(FoundationNetworking)

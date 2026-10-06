@@ -6,28 +6,24 @@
 import Foundation
 import Testing
 
-// The platforms: CryptoOHLCV and CryptoReference build for macOS, iOS, watchOS and tvOS 26, verified by
-//   xcodebuild build -scheme CryptoOHLCV -destination 'generic/platform=watchOS'   (and iOS, tvOS; and CryptoReference)
-// and import CryptoAsset, Foundation, FoundationNetworking (Linux only) and FOSFoundation only; CryptoOHLCV also imports
-// CryptoExchange, the clients' base library, for the one parse of the wire's number text.
+// The platforms: CryptoExchange builds for macOS, iOS, watchOS and tvOS 26, verified by
+//   xcodebuild build -scheme CryptoExchange -destination 'generic/platform=watchOS'   (and iOS, tvOS)
+// and imports CryptoAsset, Foundation, FoundationNetworking (Linux only) and FOSFoundation only (OQ-S46: the base
+// library of the exchange protocols links nothing of any one exchange).
 
 @Suite("Platforms")
 struct PlatformsTests {
-    @Test(arguments: ["CryptoOHLCV", "CryptoReference"])
-    func theLibraryImportsOnlyItsDeclaredDependencies(library: String) throws {
+    @Test func theBaseLibraryImportsOnlyItsDeclaredDependencies() throws {
         let sources = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()      // CryptoOHLCVTests
+            .deletingLastPathComponent()      // CryptoExchangeTests
             .deletingLastPathComponent()      // Tests
             .deletingLastPathComponent()      // the package root
-            .appendingPathComponent("Sources/\(library)")
+            .appendingPathComponent("Sources/CryptoExchange")
         let files = try FileManager.default.contentsOfDirectory(at: sources, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "swift" }
         #expect(!files.isEmpty)
 
-        var allowed: Set<String> = ["CryptoAsset", "Foundation", "FoundationNetworking", "FOSFoundation"]
-        if library == "CryptoOHLCV" {
-            allowed.insert("CryptoExchange")
-        }
+        let allowed: Set<String> = ["CryptoAsset", "Foundation", "FoundationNetworking", "FOSFoundation"]
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
             for line in text.split(separator: "\n") {
