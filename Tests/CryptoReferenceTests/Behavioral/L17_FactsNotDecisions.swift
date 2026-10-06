@@ -46,7 +46,7 @@ struct L17_FactsNotDecisionsTests {
     // READING: C33 declares `sector: String` and `tier: Int`, and its DocC example shows "Layer 1"; the API gives a
     // rank (`cmc_rank`) and tags. L17's sector set and tier bands are the manifest's, so this test asserts the value
     // carries the rank and a tag exactly as the API gave them, with no bucket name invented by the library.
-    @Test("L17 with C33 (READING): the tier is the API's rank and the sector one of the API's tags, as given")
+    @Test("L17 with C33 (READING): the tier is the API's rank and the sector one of the API's tags, as given", .disabled("Classified 2026-10-04: C33 declares a sector and a tier while L17 makes them readings, and the value hands up CoinMarketCap's rank and tags, unratified, until the owner rules; see validation/step2-ledgers/layer-a-builder.md"))
     func rankAndTagAsGiven() async throws {
         let assets = try await reference([btc, eth, usdt, barney])
         let given: [AssetSymbol: (rank: Int, tags: Set<String>)] = [

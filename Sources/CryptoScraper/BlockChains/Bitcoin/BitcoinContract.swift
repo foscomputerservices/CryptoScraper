@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct BitcoinContract: CryptoContract, Codable, Stubbable {
+public struct BitcoinContract: CryptoContract, Codable, Stubbable, Sendable {
     public enum Units: CurrencyUnits {
         case satoshi
         case btc

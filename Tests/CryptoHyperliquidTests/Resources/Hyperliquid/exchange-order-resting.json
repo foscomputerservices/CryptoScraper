@@ -1,0 +1,16 @@
+// documentation-derived from https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/exchange-endpoint.md, fetched 2026-10-06; the 200 OK Successful Response (resting) tab of Place an order
+{
+   "status":"ok",
+   "response":{
+      "type":"order",
+      "data":{
+         "statuses":[
+            {
+               "resting":{
+                  "oid":77738308
+               }
+            }
+         ]
+      }
+   }
+}

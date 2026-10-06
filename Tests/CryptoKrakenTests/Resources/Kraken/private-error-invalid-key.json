@@ -1,0 +1,5 @@
+// documentation-derived from https://docs.kraken.com/api/docs/guides/spot-errors.md, fetched 2026-10-06; the envelope example shown verbatim on the page
+{
+  "error": ["EAPI:Invalid key"],
+  "result": {}
+}

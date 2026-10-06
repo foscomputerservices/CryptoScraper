@@ -1,0 +1,30 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/accounts/list-accounts.md, fetched 2026-10-06; the 200 response of List Accounts; schema-derived, no example given: built from the OpenAPI response schema in https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/advanced-trade-spec.yaml; values are the schema's own property examples where it has them, else the first enum value, else 0/false/"" (numeric-text fields "0"); order_configuration trimmed to its limit_limit_gtc member
+{
+  "accounts": [
+    {
+      "uuid": "8bfc20d7-f7c6-4422-bf07-8243ca4169fe",
+      "name": "BTC Wallet",
+      "currency": "BTC",
+      "available_balance": {
+        "value": "1.23",
+        "currency": "BTC"
+      },
+      "default": false,
+      "active": true,
+      "created_at": "2021-05-31T09:59:59Z",
+      "updated_at": "2021-05-31T09:59:59Z",
+      "deleted_at": "2021-05-31T09:59:59Z",
+      "type": "FIAT",
+      "ready": true,
+      "hold": {
+        "value": "1.23",
+        "currency": "BTC"
+      },
+      "retail_portfolio_id": "b87a2d3f-8a1e-49b3-a4ea-402d8c389aca",
+      "platform": "ACCOUNT_PLATFORM_CONSUMER"
+    }
+  ],
+  "has_next": true,
+  "cursor": "789100",
+  "size": 0
+}

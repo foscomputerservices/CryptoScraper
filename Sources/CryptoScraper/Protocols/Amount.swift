@@ -145,3 +145,6 @@ extension Amount: Stubbable {
         )
     }
 }
+
+// An amount is plain values; it crosses domains whenever its currency does.
+extension Amount: Sendable where C: Sendable {}

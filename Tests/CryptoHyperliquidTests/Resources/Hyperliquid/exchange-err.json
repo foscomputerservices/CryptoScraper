@@ -1,0 +1,2 @@
+// constructed 2026-10-06, no documented example: the {"status":"err","response":"…"} shape the POC's SDK reads as an API error, with a refusal text of the kind the exchange sends
+{"status":"err","response":"User or API Wallet 0x00000000000000000000000000000000000000a1 does not exist."}

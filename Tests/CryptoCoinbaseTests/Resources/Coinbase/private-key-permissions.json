@@ -1,0 +1,8 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/data-api/get-api-key-permissions.md, fetched 2026-10-06; the 200 response of Get API Key Permissions; schema-derived, no example given: built from the OpenAPI response schema in https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/advanced-trade-spec.yaml; values are the schema's own property examples where it has them, else the first enum value, else 0/false/"" (numeric-text fields "0"); order_configuration trimmed to its limit_limit_gtc member
+{
+  "can_view": false,
+  "can_trade": false,
+  "can_transfer": false,
+  "portfolio_uuid": "",
+  "portfolio_type": "UNDEFINED"
+}

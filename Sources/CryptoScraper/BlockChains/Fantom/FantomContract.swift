@@ -6,7 +6,7 @@
 import FOSFoundation
 import Foundation
 
-public struct FantomContract: CryptoContract, Codable, Stubbable {
+public struct FantomContract: CryptoContract, Codable, Stubbable, Sendable {
     public typealias Units = EthereumContract.Units
 
     // MARK: CryptoContract Protocol

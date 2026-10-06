@@ -1,0 +1,158 @@
+// BehavioralShapeAdapters.swift
+//
+// Copyright © 2026 FOS Services, LLC. All rights reserved.
+//
+// The builder's adapters for step 3's layer-A behavioral suite (AR14): each maps one signature the isolated projector
+// invented onto a real member of the libraries. No assertion of a projected file is edited; a test that stays red is
+// classified in the builder's ledger with its reason.
+
+import CryptoAsset
+import CryptoExchange
+import CryptoCoinbase
+import CryptoOHLCV
+#if canImport(CryptoKit)
+import CryptoKit
+#else
+import Crypto
+#endif
+import FOSFoundation
+import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// MARK: The session seam → FOSFoundation's mockable session (AR31)
+
+/// The projector's URLSession-shaped seam; its scripted double conforms to it, and BehavioralSessionBridge hands it
+/// to a client as the URLSessionProtocol FOSFoundation's fetch takes
+protocol ExchangeClientSession: Sendable {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse)
+}
+
+/// An ExchangeClientSession as FOSFoundation's URLSessionProtocol: each task answers from the seam, never the network
+struct BehavioralSessionBridge: URLSessionProtocol {
+    let seam: any ExchangeClientSession
+
+    func dataTask(with url: URL, completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+        dataTask(with: URLRequest(url: url), completionHandler: completionHandler)
+    }
+
+    func dataTask(with request: URLRequest, completionHandler: @escaping @Sendable (Data?, URLResponse?, (any Error)?) -> Void) -> URLSessionDataTask {
+        let seam = seam
+        Task {
+            do {
+                let (data, response) = try await seam.data(for: request)
+                completionHandler(data, response, nil)
+            } catch {
+                completionHandler(nil, nil, error)
+            }
+        }
+        return Self.inert.dataTask(with: URL(string: "data:,")!)
+    }
+
+    static func session(config: URLSessionConfiguration) -> Self {
+        fatalError("BehavioralSessionBridge is made over a seam")
+    }
+
+    private static let inert = URLSession(configuration: .ephemeral)
+}
+
+// MARK: The shared error (the owner's ruling of 2026-10-06: one ExchangeClientError, declared in CryptoExchange)
+
+// The projector invented `ExchangeClientError` with payload-less cases and `.exchange(code:text:)`. The real one is
+// C30's: every case carries the exchange's own words. Its files name the invented forms, so each is a static member
+// here that makes the real case with no words (or the refusal, for `.exchange`). A client's thrown error carries
+// words, and the real type compares them, so a test expecting a payload-less form passes only where the words are
+// empty; a test expecting `.rateLimited(retryAfter:)` or `.exchange(code:text:)` passes where the client states the same.
+extension ExchangeClientError {
+    static var malformedResponse: ExchangeClientError { .malformedResponse(text: "") }
+    static var unreachable: ExchangeClientError { .unreachable(text: "") }
+    static var unauthorized: ExchangeClientError { .unauthorized(text: "") }
+    static func exchange(code: String?, text: String) -> ExchangeClientError { .refused(code: code, text: text) }
+}
+
+// MARK: The exact text constructors → the package's one parse (WireDecimal)
+
+/// The exponent each symbol has on this target's exchange, from its recordings
+enum BehavioralAssets {
+    static let exponents: [String: Int] = ["BTC": 4, "USDC": 1, "USD": 2]
+    static let priceBase = "BTC"
+
+    static func asset(_ symbol: String) throws -> Asset {
+        try Asset(symbol: symbol, unitExponent: exponents[symbol] ?? 8)
+    }
+}
+
+extension Asset {
+    init(symbol: String) throws {
+        self = try BehavioralAssets.asset(symbol)
+    }
+}
+
+extension Amount {
+    init(parsing text: String, of asset: Asset) throws {
+        self = try WireDecimal(parsing: text).amount(of: asset)
+    }
+}
+
+extension Price {
+    /// The invented signature names no base asset: the base is this target's market's (BehavioralAssets/priceBase)
+    init(parsing text: String, in quote: Asset) throws {
+        self = try WireDecimal(parsing: text).price(of: quote, per: BehavioralAssets.asset(BehavioralAssets.priceBase))
+    }
+}
+
+extension Fraction {
+    init(parsing text: String) throws {
+        self = try WireDecimal(parsing: text).fraction()
+    }
+}
+
+// MARK: Coinbase's constructors
+
+extension CoinbaseMarketName: ExpressibleByStringLiteral {
+    /// The projector writes a market as a literal; it is validated as Coinbase spells it
+    public init(stringLiteral value: String) {
+        do {
+            try self.init(validating: value)
+        } catch {
+            preconditionFailure("A literal product Coinbase cannot spell: \(value)")
+        }
+    }
+}
+
+extension CoinbaseCredential {
+    /// The projector's `.apiKey(_:secret:)` is AR32's key and HMAC secret; Coinbase signs with a CDP key's ES256 JWT
+    /// instead, so the credential here is a fresh P-256 key named by the API key, and the HMAC secret is never used
+    /// (the reading on AR32 in the builder's ledger)
+    static func apiKey(_ key: String, secret: String) throws -> CoinbaseCredential {
+        try CoinbaseCredential(keyName: key, privateKeyPEM: P256.Signing.PrivateKey().pemRepresentation)
+    }
+}
+
+/// The projector's endpoint; Coinbase's sandbox answers fixed responses and is no test market, so either case is production
+enum CoinbaseEndpoint {
+    case testMarket
+    case production
+}
+
+extension CoinbaseClient {
+    /// `session:` through the bridge; `log:` has nothing to receive (the client writes no line)
+    init(credential: CoinbaseCredential, endpoint: CoinbaseEndpoint, session: any ExchangeClientSession,
+         log: @escaping @Sendable (String) -> Void = { _ in }) throws {
+        self.init(credential: credential, session: BehavioralSessionBridge(seam: session))
+    }
+}
+
+// MARK: The book's two volumes (the owner's ruling of 2026-10-06: C30's book carries baseVolume and quoteVolume)
+
+// The projector's files name one `volume` and build a book with it. Wiring only, no assertion changed: its one volume
+// reads as the quote turnover (the projector's own reading was the notional), and its one-volume book stands that
+// amount as both.
+extension ExchangeClientBook {
+    var volume: Amount { quoteVolume }
+
+    init(market: Name, mid: Price, bestBid: Price, bestAsk: Price, volume: Amount, readAt: Date) {
+        self.init(market: market, mid: mid, bestBid: bestBid, bestAsk: bestAsk, baseVolume: volume, quoteVolume: volume, readAt: readAt)
+    }
+}

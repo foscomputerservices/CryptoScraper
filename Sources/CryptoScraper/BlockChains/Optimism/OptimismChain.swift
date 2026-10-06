@@ -4,19 +4,22 @@
 //
 
 import Foundation
+import Synchronization
 
-public final class OptimismChain: CryptoChain {
+public final class OptimismChain: CryptoChain, Sendable {
     // MARK: CryptoChain
 
     public let userReadableName: String = "Optimism"
 
     public var chainTokenInfos: Set<SimpleTokenInfo<OptimismContract>> {
-        guard let result = tokens?.values else { return [] }
+        tokens.withLock { tokens in
+            guard let result = tokens?.values else { return [] }
 
-        return .init(result)
+            return .init(result)
+        }
     }
 
-    public private(set) var mainContract: OptimismContract!
+    public let mainContract: OptimismContract!
 
     public func contract(for address: String) throws -> OptimismContract {
         .init(address: address)
@@ -30,19 +33,23 @@ public final class OptimismChain: CryptoChain {
         )
     }
 
-    private var tokens: [String: SimpleTokenInfo<OptimismContract>]?
+    // The table is loaded after the singleton exists (``loadChainTokens(from:)``) and read from any
+    // concurrency domain, so it lives behind a `Mutex`; every other stored property is a `let`.
+    private let tokens = Mutex<[String: SimpleTokenInfo<OptimismContract>]?>(nil)
     private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<OptimismContract>>) {
-        tokens = tokens ?? [:]
+        tokens.withLock { tokens in
+            tokens = tokens ?? [:]
 
-        for token in newTokens {
-            tokens![token.contractAddress.address] = token
+            for token in newTokens {
+                tokens![token.contractAddress.address] = token
+            }
         }
     }
 
     public let scanner: OptimisticEtherscan? = .init()
 
     public func tokenInfo(for address: String) -> SimpleTokenInfo<OptimismContract>? {
-        tokens?[address]
+        tokens.withLock { $0?[address] }
     }
 
     static let opContractAddress = EthereumChain.ethContractAddress // ETH is the chain token

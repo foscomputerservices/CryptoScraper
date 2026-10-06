@@ -4,19 +4,22 @@
 //
 
 import Foundation
+import Synchronization
 
-public final class PolygonChain: CryptoChain {
+public final class PolygonChain: CryptoChain, Sendable {
     // MARK: CryptoChain
 
     public let userReadableName: String = "Matic"
 
     public var chainTokenInfos: Set<SimpleTokenInfo<MaticContract>> {
-        guard let result = tokens?.values else { return [] }
+        tokens.withLock { tokens in
+            guard let result = tokens?.values else { return [] }
 
-        return .init(result)
+            return .init(result)
+        }
     }
 
-    public private(set) var mainContract: MaticContract!
+    public let mainContract: MaticContract!
 
     public func contract(for address: String) throws -> MaticContract {
         .init(address: address)
@@ -30,17 +33,21 @@ public final class PolygonChain: CryptoChain {
         )
     }
 
-    private var tokens: [String: SimpleTokenInfo<MaticContract>]?
+    // The table is loaded after the singleton exists (``loadChainTokens(from:)``) and read from any
+    // concurrency domain, so it lives behind a `Mutex`; every other stored property is a `let`.
+    private let tokens = Mutex<[String: SimpleTokenInfo<MaticContract>]?>(nil)
     private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<MaticContract>>) {
-        tokens = tokens ?? [:]
+        tokens.withLock { tokens in
+            tokens = tokens ?? [:]
 
-        for token in newTokens {
-            tokens![token.contractAddress.address] = token
+            for token in newTokens {
+                tokens![token.contractAddress.address] = token
+            }
         }
     }
 
     public func tokenInfo(for address: String) -> SimpleTokenInfo<MaticContract>? {
-        tokens?[address]
+        tokens.withLock { $0?[address] }
     }
 
     public let scanner: PolygonScan? = .init()

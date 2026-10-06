@@ -1,0 +1,304 @@
+{"origin": "made 2026-10-06 by poc/harness/hyperliquid-signing-vectors.ts with @nktkas/hyperliquid 0.33.3 on viem; a THROWAWAY test-only key, bound to no account",
+ "agentPrivateKeyHex": "0xa9b15f8c0d2a91a04aa79b47a76a4d62165121cf1a0450f17546cdbb468a9efe",
+ "agentAddress": "0x5d0be0bae20aa51845a488e37c6af278e2d62ab2",
+ "vectors": [
+  {
+   "name": "order: limit IOC buy BTC on a sub-account (test market)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":3,\"b\":true,\"p\":\"64300.5\",\"s\":\"0.00123\",\"r\":false,\"t\":{\"limit\":{\"tif\":\"Ioc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16103a162c3a170a736343330302e35a173a7302e3030313233a172c2a17481a56c696d697481a3746966a3496f63a867726f7570696e67a26e61",
+   "nonce": 1791273600000,
+   "isMainnet": false,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xc07eda838e61003114ec8f95ba055290a15581c888b5e89ec058d31ec9e283fd",
+   "typedDataHashHex": "0x1f0b3435bc7140c25377816e5d2f897031b4df49c05ed852ed185b44b74f8801",
+   "r": "0xc35a8dfff056305d0b36c9c624db94f406c8a89f4dc603d7fc779a436c2a2d31",
+   "s": "0x441ac922ab871231c0846774e796657dee1f7bfcbb0e9fb8f24970b1a0becbcf",
+   "v": 28,
+   "call": {
+    "placeOrder": {
+     "market": "BTC",
+     "isBuy": true,
+     "size": "0.00123",
+     "limit": "64300.5",
+     "immediateOrCancel": true,
+     "reduceOnly": false,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "order: reduce-only IOC sell ETH on a sub-account (test market)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":4,\"b\":false,\"p\":\"2650.1\",\"s\":\"0.0088\",\"r\":true,\"t\":{\"limit\":{\"tif\":\"Ioc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16104a162c2a170a6323635302e31a173a6302e30303838a172c3a17481a56c696d697481a3746966a3496f63a867726f7570696e67a26e61",
+   "nonce": 1791273600001,
+   "isMainnet": false,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xf9d51d6730e0be992e26d0a109f0bf72e366b64cb196c6903691d503f006fab7",
+   "typedDataHashHex": "0x72333979424ec064ea45e1ff0b09f6e22e7fecce7b9c6ef1f52f4cc0ec27faed",
+   "r": "0xc052a1c5107eb9c5c87cd1acc6829acb5c60bef5615151f3b36d282792382866",
+   "s": "0x30bff4bd367565144e0511e6961e6ee6012136f78ad8013cb2d614f9c3643fc7",
+   "v": 27,
+   "call": {
+    "placeOrder": {
+     "market": "ETH",
+     "isBuy": false,
+     "size": "0.0088",
+     "limit": "2650.1",
+     "immediateOrCancel": true,
+     "reduceOnly": true,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "order: resting GTC buy BTC on the signer's own account (test market)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":3,\"b\":true,\"p\":\"60000\",\"s\":\"0.001\",\"r\":false,\"t\":{\"limit\":{\"tif\":\"Gtc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16103a162c3a170a53630303030a173a5302e303031a172c2a17481a56c696d697481a3746966a3477463a867726f7570696e67a26e61",
+   "nonce": 1791273600002,
+   "isMainnet": false,
+   "vaultAddress": null,
+   "actionHashHex": "0x3caade6bb09493e7ae66ddb63233afadf84cc2ba8f12270bb11b3d2f8b20688c",
+   "typedDataHashHex": "0x7e3083ae4fde03ee85f65230420a55b7c9400b80b629cb6e8ac6b3416abe29e4",
+   "r": "0xc8e1963f82bbabab4f3bd1b4f36d6d78a5c3e840e408cae89e6099f3760d4d6f",
+   "s": "0x64fb6e8eeac3d24eb22074c2b989dc9a6361210ddada054a5aa90b30c58dcc7c",
+   "v": 28
+  },
+  {
+   "name": "cancel: one BTC order on a sub-account (test market)",
+   "actionJSON": "{\"type\":\"cancel\",\"cancels\":[{\"a\":3,\"o\":77738310}]}",
+   "actionMsgpackHex": "0x82a474797065a663616e63656ca763616e63656c739182a16103a16fce04a23146",
+   "nonce": 1791273600003,
+   "isMainnet": false,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xa674abd41f0a7621eb63ecc89903c02622d3e111aef3cee084ec62504d0fc65b",
+   "typedDataHashHex": "0xe0fbf3d59a1c61f6db04f697fbb35217802d8f87602a591e93b7ecaa1320b1bf",
+   "r": "0x0c5b668ec640d5bc321758186de06546d4d9995a4251ed009fe2e18859bc42ed",
+   "s": "0x18620b35c0650aa12bc17f14734210765920523c12d7c791e5a9601306c01f5b",
+   "v": 28,
+   "call": {
+    "cancelOrder": {
+     "market": "BTC",
+     "orderId": 77738310,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "leverage: BTC isolated at 5x on a sub-account (test market)",
+   "actionJSON": "{\"type\":\"updateLeverage\",\"asset\":3,\"isCross\":false,\"leverage\":5}",
+   "actionMsgpackHex": "0x84a474797065ae7570646174654c65766572616765a5617373657403a7697343726f7373c2a86c6576657261676505",
+   "nonce": 1791273600004,
+   "isMainnet": false,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0x18296273a5603b6871e21436971ad14b0445077215c28ddca9a7b812bb67ab6e",
+   "typedDataHashHex": "0x6cda6f775211eadbe93e57664dad411ea793d1568b3b31d5f40b711c19e420c9",
+   "r": "0x339e3803b3ed41e7eee192bb5d56683de049377ab6b07036d5228a5fc9b8104f",
+   "s": "0x61eaecbaa0fd1e091ccf76f2fb63143d3c107337c57ac7a20c7702c0d4d982cf",
+   "v": 28,
+   "call": {
+    "setLeverage": {
+     "market": "BTC",
+     "leverage": 5,
+     "isolated": true,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "sub-account transfer: 500.25 USDC into a sub-account (test market)",
+   "actionJSON": "{\"type\":\"subAccountTransfer\",\"subAccountUser\":\"0x00000000000000000000000000000000000f00d2\",\"isDeposit\":true,\"usd\":500250000}",
+   "actionMsgpackHex": "0x84a474797065b27375624163636f756e745472616e73666572ae7375624163636f756e7455736572d92a307830303030303030303030303030303030303030303030303030303030303030303030306630306432a969734465706f736974c3a3757364ce1dd13590",
+   "nonce": 1791273600005,
+   "isMainnet": false,
+   "vaultAddress": null,
+   "actionHashHex": "0xabec4f98b59c282fc68c14e570dea40570ea4ed62511f96870200c07eac0d94b",
+   "typedDataHashHex": "0x923c28dc30099f0a1b4e8eeab4cde7028244dd0e75872e90f998d59cd593e704",
+   "r": "0x82b9cc0c7e217526702b8d32063eb5f203f114c57025ceebe7838d4fd8f9c49d",
+   "s": "0x0d9aa62932d4ad5133557beb96a5211952f48ece9aa94850b018972457d0e78e",
+   "v": 28
+  },
+  {
+   "name": "sub-account spot transfer: 12.5 USDC out of a sub-account (test market)",
+   "actionJSON": "{\"type\":\"subAccountSpotTransfer\",\"subAccountUser\":\"0x00000000000000000000000000000000000f00d2\",\"isDeposit\":false,\"token\":\"USDC:0xeb62eee3685fc4c43992febcd9e75443\",\"amount\":\"12.5\"}",
+   "actionMsgpackHex": "0x85a474797065b67375624163636f756e7453706f745472616e73666572ae7375624163636f756e7455736572d92a307830303030303030303030303030303030303030303030303030303030303030303030306630306432a969734465706f736974c2a5746f6b656ed927555344433a30786562363265656533363835666334633433393932666562636439653735343433a6616d6f756e74a431322e35",
+   "nonce": 1791273600006,
+   "isMainnet": false,
+   "vaultAddress": null,
+   "actionHashHex": "0xc5323dc52aa53989bb14c46f57d23d7ed143e36b015c42330e0472f09128e381",
+   "typedDataHashHex": "0x1054c7132335dd532d278ab9501bcf1c945db2d448b01503c1e381aeb012e6fb",
+   "r": "0x5c15c7e0cb7bc4a8bb7fcd8c1e818f8e7983470a19f0d9505b05c857229edc94",
+   "s": "0x45e02ae76e901bf977fb1e283e6e41fc7624e322404b7b80e6e8728d9b615aa5",
+   "v": 28
+  },
+  {
+   "name": "order: limit IOC buy BTC on a sub-account (production)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":3,\"b\":true,\"p\":\"64300.5\",\"s\":\"0.00123\",\"r\":false,\"t\":{\"limit\":{\"tif\":\"Ioc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16103a162c3a170a736343330302e35a173a7302e3030313233a172c2a17481a56c696d697481a3746966a3496f63a867726f7570696e67a26e61",
+   "nonce": 1791273600000,
+   "isMainnet": true,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xc07eda838e61003114ec8f95ba055290a15581c888b5e89ec058d31ec9e283fd",
+   "typedDataHashHex": "0x1cf8acf6b49fd960678b285a6c7ac056d4530e92492381ca3419a7b7184ffbd1",
+   "r": "0xfb2144413ba4b8625fd51eca3a2dccd1b3740af881f6e49c1681c2644e258a52",
+   "s": "0x017e5a3eb4f770c2d147e17763076b1267929399d177044e723207d03a85b899",
+   "v": 28,
+   "call": {
+    "placeOrder": {
+     "market": "BTC",
+     "isBuy": true,
+     "size": "0.00123",
+     "limit": "64300.5",
+     "immediateOrCancel": true,
+     "reduceOnly": false,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "order: reduce-only IOC sell ETH on a sub-account (production)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":4,\"b\":false,\"p\":\"2650.1\",\"s\":\"0.0088\",\"r\":true,\"t\":{\"limit\":{\"tif\":\"Ioc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16104a162c2a170a6323635302e31a173a6302e30303838a172c3a17481a56c696d697481a3746966a3496f63a867726f7570696e67a26e61",
+   "nonce": 1791273600001,
+   "isMainnet": true,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xf9d51d6730e0be992e26d0a109f0bf72e366b64cb196c6903691d503f006fab7",
+   "typedDataHashHex": "0x7349e17b7a15f62891e6fec8e0533785ff802248572f11f3fcf0ed78e9c2c4b7",
+   "r": "0x49326c30f60a837e4bd69cd2ca4cc6c6322678e6884391b600a742a56c1b23c9",
+   "s": "0x4d2d55c51a11070e2fa7d514e6a6be0d5847de8656c54229a538c8fd384123c3",
+   "v": 27,
+   "call": {
+    "placeOrder": {
+     "market": "ETH",
+     "isBuy": false,
+     "size": "0.0088",
+     "limit": "2650.1",
+     "immediateOrCancel": true,
+     "reduceOnly": true,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "order: resting GTC buy BTC on the signer's own account (production)",
+   "actionJSON": "{\"type\":\"order\",\"orders\":[{\"a\":3,\"b\":true,\"p\":\"60000\",\"s\":\"0.001\",\"r\":false,\"t\":{\"limit\":{\"tif\":\"Gtc\"}}}],\"grouping\":\"na\"}",
+   "actionMsgpackHex": "0x83a474797065a56f72646572a66f72646572739186a16103a162c3a170a53630303030a173a5302e303031a172c2a17481a56c696d697481a3746966a3477463a867726f7570696e67a26e61",
+   "nonce": 1791273600002,
+   "isMainnet": true,
+   "vaultAddress": null,
+   "actionHashHex": "0x3caade6bb09493e7ae66ddb63233afadf84cc2ba8f12270bb11b3d2f8b20688c",
+   "typedDataHashHex": "0xe189dfd7889f69b7da15f5e506400842fdf15295367bae493edbaa7aba58a2e3",
+   "r": "0x4adeef73afc3c31678c749faebbe391cdda0af5b5aa3b4d4840a0486751672ad",
+   "s": "0x6d285f9dffeb4833e42c2f2c2bcb3d744694f9c1af3c712d317c9c3cc30ec0b5",
+   "v": 27
+  },
+  {
+   "name": "cancel: one BTC order on a sub-account (production)",
+   "actionJSON": "{\"type\":\"cancel\",\"cancels\":[{\"a\":3,\"o\":77738310}]}",
+   "actionMsgpackHex": "0x82a474797065a663616e63656ca763616e63656c739182a16103a16fce04a23146",
+   "nonce": 1791273600003,
+   "isMainnet": true,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0xa674abd41f0a7621eb63ecc89903c02622d3e111aef3cee084ec62504d0fc65b",
+   "typedDataHashHex": "0xf596f27df01ab39a3194ef25b24675c599715c3db46dbb28fb30589c704b6e71",
+   "r": "0xe6aeec87a4c7bb1a3cf72a1fd42387108f14a287d2822a547fcac810165c5486",
+   "s": "0x5419ed53a771b9fafffe09772c4339c633dee3000ac9f7aceed814a9473e8c39",
+   "v": 27,
+   "call": {
+    "cancelOrder": {
+     "market": "BTC",
+     "orderId": 77738310,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "leverage: BTC isolated at 5x on a sub-account (production)",
+   "actionJSON": "{\"type\":\"updateLeverage\",\"asset\":3,\"isCross\":false,\"leverage\":5}",
+   "actionMsgpackHex": "0x84a474797065ae7570646174654c65766572616765a5617373657403a7697343726f7373c2a86c6576657261676505",
+   "nonce": 1791273600004,
+   "isMainnet": true,
+   "vaultAddress": "0x00000000000000000000000000000000000f00d2",
+   "actionHashHex": "0x18296273a5603b6871e21436971ad14b0445077215c28ddca9a7b812bb67ab6e",
+   "typedDataHashHex": "0x767d3720c7b04eb32590c906b5da50c59f1d7dd11da701ce203625c4cf4c3e58",
+   "r": "0xe499332dec7c8ca6eb646c395775cb57ea8f1fdfdf3e33e3bddf40c5a66c3d48",
+   "s": "0x49a158fc867c3874e5d84b6b01e3740ffe103b9e5d3cf1a3d3f744ba2a9829f1",
+   "v": 28,
+   "call": {
+    "setLeverage": {
+     "market": "BTC",
+     "leverage": 5,
+     "isolated": true,
+     "account": "0x00000000000000000000000000000000000f00d2"
+    }
+   }
+  },
+  {
+   "name": "sub-account transfer: 500.25 USDC into a sub-account (production)",
+   "actionJSON": "{\"type\":\"subAccountTransfer\",\"subAccountUser\":\"0x00000000000000000000000000000000000f00d2\",\"isDeposit\":true,\"usd\":500250000}",
+   "actionMsgpackHex": "0x84a474797065b27375624163636f756e745472616e73666572ae7375624163636f756e7455736572d92a307830303030303030303030303030303030303030303030303030303030303030303030306630306432a969734465706f736974c3a3757364ce1dd13590",
+   "nonce": 1791273600005,
+   "isMainnet": true,
+   "vaultAddress": null,
+   "actionHashHex": "0xabec4f98b59c282fc68c14e570dea40570ea4ed62511f96870200c07eac0d94b",
+   "typedDataHashHex": "0x4864b6bb30e3870de7cc63d0c31228cd5d64db0e2261d72f630e7f1c355164e6",
+   "r": "0xc28243c4413a1d0dd2808d727d2f7ecfc469310aced3343d3e4bdfb35d61d397",
+   "s": "0x5cf51b2cbce996c91f32eeead6cdda09d627895ee8e2dc5e331639fd8b008a1b",
+   "v": 27
+  },
+  {
+   "name": "sub-account spot transfer: 12.5 USDC out of a sub-account (production)",
+   "actionJSON": "{\"type\":\"subAccountSpotTransfer\",\"subAccountUser\":\"0x00000000000000000000000000000000000f00d2\",\"isDeposit\":false,\"token\":\"USDC:0xeb62eee3685fc4c43992febcd9e75443\",\"amount\":\"12.5\"}",
+   "actionMsgpackHex": "0x85a474797065b67375624163636f756e7453706f745472616e73666572ae7375624163636f756e7455736572d92a307830303030303030303030303030303030303030303030303030303030303030303030306630306432a969734465706f736974c2a5746f6b656ed927555344433a30786562363265656533363835666334633433393932666562636439653735343433a6616d6f756e74a431322e35",
+   "nonce": 1791273600006,
+   "isMainnet": true,
+   "vaultAddress": null,
+   "actionHashHex": "0xc5323dc52aa53989bb14c46f57d23d7ed143e36b015c42330e0472f09128e381",
+   "typedDataHashHex": "0xa76df8a37c6e67fd3f14fee90535750dd211594ffdd5731ce7b9594510679112",
+   "r": "0xae7538b7fc1b3e402ef38bfc8bb8d189e4f970d4392ff61e5db5d58cb8c8b64c",
+   "s": "0x4706041d0bfdc14d8b7d309b769c0fbc598f87789803f4dc1a658ee4908a8b94",
+   "v": 28
+  }
+ ],
+ "userSignedVectors": [
+  {
+   "name": "user-class transfer: 500.25 USDC spot to perpetual (test market)",
+   "actionJSON": "{\"type\":\"usdClassTransfer\",\"signatureChainId\":\"0x66eee\",\"hyperliquidChain\":\"Testnet\",\"amount\":\"500.25\",\"toPerp\":true,\"nonce\":1791273600100}",
+   "primaryType": "HyperliquidTransaction:UsdClassTransfer",
+   "isMainnet": false,
+   "typedDataHashHex": "0xdef253b1aa11197f68ed3e4153ba923844665193a324a9408b537e23ac894d64",
+   "r": "0x980debb57414f205083d1b228cab2e1ddbb0cf1456d49408587359eabf8c21e2",
+   "s": "0x2e6325f85bdeffa0f0f2230af49566a494e3ba66c50f323c695376b837d30fee",
+   "v": 28
+  },
+  {
+   "name": "agent approval: an agent named fosline-test (test market)",
+   "actionJSON": "{\"type\":\"approveAgent\",\"signatureChainId\":\"0x66eee\",\"hyperliquidChain\":\"Testnet\",\"agentAddress\":\"0x00000000000000000000000000000000000a9e17\",\"agentName\":\"fosline-test\",\"nonce\":1791273600101}",
+   "primaryType": "HyperliquidTransaction:ApproveAgent",
+   "isMainnet": false,
+   "typedDataHashHex": "0xc494209cd4d4d100eab5e1fcf03ae6599bf6909d8496f6670f48dac9768b1dc2",
+   "r": "0x991cddea6c09e83e420f964c9ee8a37be5b94dfb750613e400ad96dfbf8520cc",
+   "s": "0x3fa5adfd1ab7471b77ddf428eac05875c176919a90b93cf1424724294d4be73a",
+   "v": 28
+  },
+  {
+   "name": "user-class transfer: 500.25 USDC spot to perpetual (production)",
+   "actionJSON": "{\"type\":\"usdClassTransfer\",\"signatureChainId\":\"0xa4b1\",\"hyperliquidChain\":\"Mainnet\",\"amount\":\"500.25\",\"toPerp\":true,\"nonce\":1791273600100}",
+   "primaryType": "HyperliquidTransaction:UsdClassTransfer",
+   "isMainnet": true,
+   "typedDataHashHex": "0xb62b650b05147a1cd3f4d91c7dcf67f06654f887ab23d987ae6b4ea520d29168",
+   "r": "0xa1b3358649fe29fa8a80a264fbed521a5f7838a35213fa99f4994bb1c32ad71f",
+   "s": "0x45b83f60a73ef7eb88ef62649a84dcd5c8d246d10946fd826cb3d932c3d05bd3",
+   "v": 27
+  },
+  {
+   "name": "agent approval: an agent named fosline-test (production)",
+   "actionJSON": "{\"type\":\"approveAgent\",\"signatureChainId\":\"0xa4b1\",\"hyperliquidChain\":\"Mainnet\",\"agentAddress\":\"0x00000000000000000000000000000000000a9e17\",\"agentName\":\"fosline-test\",\"nonce\":1791273600101}",
+   "primaryType": "HyperliquidTransaction:ApproveAgent",
+   "isMainnet": true,
+   "typedDataHashHex": "0xa26195a8deb756c0ec372c9125d8b50f83dbf6dcae1e9e1762307e042f82ef46",
+   "r": "0x2e6e99afe45f9b8db8c5fde09214229c2d9f168405701c6e6779bb7296a90941",
+   "s": "0x47a0de8cba137404b7f6b57eb7ea55495543f755a5d2fe357405e51badc12dd1",
+   "v": 28
+  }
+ ]
+}

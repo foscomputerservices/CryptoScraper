@@ -4,8 +4,9 @@
 //
 
 import Foundation
+import Synchronization
 
-public final class TronChain: CryptoChain {
+public final class TronChain: CryptoChain, Sendable {
     // MARK: CryptoChain
 
     public typealias Contract = TronContract
@@ -13,12 +14,14 @@ public final class TronChain: CryptoChain {
     public let userReadableName: String = "Tron"
 
     public var chainTokenInfos: Set<SimpleTokenInfo<TronContract>> {
-        guard let result = tokens?.values else { return [] }
+        tokens.withLock { tokens in
+            guard let result = tokens?.values else { return [] }
 
-        return .init(result)
+            return .init(result)
+        }
     }
 
-    public private(set) var mainContract: TronContract!
+    public let mainContract: TronContract!
 
     public func contract(for address: String) throws -> TronContract {
         .init(address: address)
@@ -32,17 +35,21 @@ public final class TronChain: CryptoChain {
         )
     }
 
-    private var tokens: [String: SimpleTokenInfo<TronContract>]?
+    // The table is loaded after the singleton exists (``loadChainTokens(from:)``) and read from any
+    // concurrency domain, so it lives behind a `Mutex`; every other stored property is a `let`.
+    private let tokens = Mutex<[String: SimpleTokenInfo<TronContract>]?>(nil)
     private func loadChainTokens(from newTokens: some Collection<SimpleTokenInfo<TronContract>>) {
-        tokens = tokens ?? [:]
+        tokens.withLock { tokens in
+            tokens = tokens ?? [:]
 
-        for token in newTokens {
-            tokens![token.contractAddress.address] = token
+            for token in newTokens {
+                tokens![token.contractAddress.address] = token
+            }
         }
     }
 
     public func tokenInfo(for address: String) -> SimpleTokenInfo<TronContract>? {
-        tokens?[address]
+        tokens.withLock { $0?[address] }
     }
 
     public let scanner: TronScan? = .init()

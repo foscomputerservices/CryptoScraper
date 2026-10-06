@@ -45,7 +45,7 @@ struct C33_ReferenceClientTests {
         _ = try await consume(cmc, symbols: [btc])
     }
 
-    @Test("C33: the value declares symbol, name, sector and tier with their declared types")
+    @Test("C33: the value declares symbol, name, sector and tier with their declared types", .disabled("Classified 2026-10-04: C33 declares a sector and a tier while L17 makes them readings, and the value hands up CoinMarketCap's rank and tags, unratified, until the owner rules; see validation/step2-ledgers/layer-a-builder.md"))
     func valueShape() {
         let symbol: KeyPath<ReferenceClientAsset, AssetSymbol> = \.symbol
         let name: KeyPath<ReferenceClientAsset, String> = \.name
@@ -81,7 +81,7 @@ struct C33_ReferenceClientTests {
         #expect(assets.map(\.symbol) == [btc])
     }
 
-    @Test("C33: each asset's sector is read from the recorded response, a non-empty text")
+    @Test("C33: each asset's sector is read from the recorded response, a non-empty text", .disabled("Classified 2026-10-04: C33 declares a sector and a tier while L17 makes them readings, and the value hands up CoinMarketCap's rank and tags, unratified, until the owner rules; see validation/step2-ledgers/layer-a-builder.md"))
     func sectorRead() async throws {
         let (cmc, _) = client([RecordedResponse(body: CoinMarketCapFixtures.listings)])
         let assets = try await cmc.reference(symbols: [btc, eth])

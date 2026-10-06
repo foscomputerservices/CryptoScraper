@@ -4,22 +4,24 @@
 //
 
 import Foundation
+import Synchronization
 
 enum BlockChains {
-    private static var initialized: Bool = false
+    // Read and set by whichever domain initializes the library, so it is held behind a `Mutex`.
+    private static let initialized = Mutex<Bool>(false)
 
     /// Initializes all of the supported block chains
     ///
     /// All supported block chains are initialized and loaded with the crypto coin specifications
     /// that are known to the provided ``CryptoDataAggregator``
     static func initializeChains(dataAggregator: CryptoDataAggregator) async throws {
-        guard !initialized else { throw BlockChainError.alreadyInitialized }
+        guard !initialized.withLock({ $0 }) else { throw BlockChainError.alreadyInitialized }
 
         for chain in knownBlockChains {
             try await chain.loadChainTokens(from: dataAggregator)
         }
 
-        initialized = true
+        initialized.withLock { $0 = true }
     }
 
     /// Returns all of the block chains supported by the framework

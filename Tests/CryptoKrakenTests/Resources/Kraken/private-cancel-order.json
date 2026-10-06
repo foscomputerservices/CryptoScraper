@@ -1,0 +1,7 @@
+// documentation-derived from https://docs.kraken.com/api/docs/rest-api/cancel-order.md, fetched 2026-10-06; the 200 example of Cancel Order
+{
+  "error": [],
+  "result": {
+    "count": 1
+  }
+}

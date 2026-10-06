@@ -1,0 +1,2 @@
+// recorded 2026-10-06T07:52:40Z from POST https://api.hyperliquid.xyz/info {"type":"candleSnapshot","req":{"coin":"NOPE",…}}, read-only; HTTP 500
+null

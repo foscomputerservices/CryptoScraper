@@ -4,9 +4,10 @@
 //
 
 import Foundation
+import Synchronization
 
 /// A ``CryptoScanner`` implementation for the BscScan web service
-public struct BscScan: EthereumScanner {
+public struct BscScan: EthereumScanner, Sendable {
     // MARK: EthereumScanner Protocol
 
     public typealias Contract = BNBContract
@@ -16,10 +17,11 @@ public struct BscScan: EthereumScanner {
     public static let apiKeyName: String = "BSC_SCAN_KEY"
     public let userReadableName: String = "BscScan"
 
-    private static var _apiKey: String?
+    // Set from any concurrency domain and read from any, so it is held behind a `Mutex`.
+    private static let _apiKey = Mutex<String?>(nil)
     public static var apiKey: String? {
-        get { _apiKey ?? ProcessInfo.processInfo.environment[apiKeyName] }
-        set { _apiKey = newValue }
+        get { _apiKey.withLock { $0 } ?? ProcessInfo.processInfo.environment[apiKeyName] }
+        set { _apiKey.withLock { $0 = newValue } }
     }
 
     /// If ``serviceConfigured`` == *true* returns a new instance

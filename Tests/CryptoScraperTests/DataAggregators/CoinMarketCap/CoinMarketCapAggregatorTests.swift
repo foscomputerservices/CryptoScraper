@@ -34,7 +34,7 @@ final class CoinMarketCapAggregatorTests: XCTestCase {
 }
 
 extension CoinMarketCapAggregator {
-    func assertTokenCounts(for contractType: (some CryptoContract).Type, file: StaticString = #filePath, line: UInt = #line) async throws {
+    func assertTokenCounts(for contractType: (some CryptoContract & Sendable).Type, file: StaticString = #filePath, line: UInt = #line) async throws {
         let chainTokens = try await tokens(for: contractType)
         XCTAssertGreaterThan(
             chainTokens.count,

@@ -8,7 +8,8 @@ import Testing
 
 // The platforms: CryptoOHLCV and CryptoReference build for macOS, iOS, watchOS and tvOS 26, verified by
 //   xcodebuild build -scheme CryptoOHLCV -destination 'generic/platform=watchOS'   (and iOS, tvOS; and CryptoReference)
-// and import CryptoAsset, Foundation, FoundationNetworking (Linux only) and FOSFoundation only.
+// and import CryptoAsset, Foundation, FoundationNetworking (Linux only) and FOSFoundation only; CryptoOHLCV also imports
+// CryptoExchange, the clients' base library, for the one parse of the wire's number text.
 
 @Suite("Platforms")
 struct PlatformsTests {
@@ -23,7 +24,10 @@ struct PlatformsTests {
             .filter { $0.pathExtension == "swift" }
         #expect(!files.isEmpty)
 
-        let allowed: Set<String> = ["CryptoAsset", "Foundation", "FoundationNetworking", "FOSFoundation"]
+        var allowed: Set<String> = ["CryptoAsset", "Foundation", "FoundationNetworking", "FOSFoundation"]
+        if library == "CryptoOHLCV" {
+            allowed.insert("CryptoExchange")
+        }
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
             for line in text.split(separator: "\n") {

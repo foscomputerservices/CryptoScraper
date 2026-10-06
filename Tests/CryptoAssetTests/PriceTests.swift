@@ -58,9 +58,10 @@ struct PriceTests {
         let mid = Price(Amount(whole: 65_000, of: .usd), per: .btc)
         let ask = mid * (.one + Fraction(basisPoints: 5))
         #expect(ask.cost(of: Amount(whole: 1, of: .btc)) == Amount(baseUnits: 6_503_250, asset: .usd))
-        #expect(mid.spread(to: ask) == Fraction(basisPoints: 5))
+        // OQ-C12, the owner's reading of 2026-10-06: the ask's spread to the mid is how far the ask is above the mid
+        #expect(ask.spread(to: mid) == Fraction(basisPoints: 5))
         #expect(mid.spread(to: mid) == .zero)
-        #expect(ask.spread(to: mid).isNegative)
+        #expect(mid.spread(to: ask).isNegative)
     }
 
     @Test func aZeroSizeTraps() async {
@@ -80,7 +81,7 @@ struct PriceTests {
         #expect(price.cost(of: Amount(whole: 1, of: .btc)) == Amount(whole: 65_000, of: .usd))
         // ×2.6 × 10^22 of headroom: past what a Fraction(integer:) can say
         let widest = price * Fraction(integer: .max)
-        #expect(Fraction(integer: 1) < price.spread(to: widest))
+        #expect(Fraction(integer: 1) < widest.spread(to: price))
     }
 
     @Test func headroomBTCInUSDC() {

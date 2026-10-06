@@ -13,7 +13,7 @@ import Testing
 // no String on the bar, the error path by errorType, the limit as a typed case, the open bar only from openOHLCV.
 
 @Suite("Binance OHLCV client")
-struct BinanceOHLCVClientTests {
+struct BinanceOHLCVClientContractTests {
     // MARK: Exact decode
 
     @Test func everyNumberOfAThousandKlinesDecodesExactly() async throws {

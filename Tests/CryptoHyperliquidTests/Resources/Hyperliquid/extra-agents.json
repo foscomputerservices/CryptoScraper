@@ -1,0 +1,2 @@
+// recorded 2026-10-06T07:49:30Z from POST https://api.hyperliquid-testnet.xyz/info {"type":"extraAgents","user":MASTER}, read-only, the owner's test-market account; every address and hash replaced by a placeholder (master 0x…01, the sub-account four-hour-2x 0x…02, the agent 0x…a1)
+[{"name":"poc-fosline-test","address":"0x00000000000000000000000000000000000000a1","validUntil":1797413352720}]

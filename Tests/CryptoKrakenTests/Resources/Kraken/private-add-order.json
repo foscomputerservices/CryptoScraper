@@ -1,0 +1,13 @@
+// documentation-derived from https://docs.kraken.com/api/docs/rest-api/add-order.md, fetched 2026-10-06; the first named example of Add Order's 200 response (Limit with conditional stop-loss)
+{
+  "error": [],
+  "result": {
+    "descr": {
+      "order": "buy 2.12340000 XBTUSD @ limit 25000.1 with 2:1 leverage",
+      "close": "close position @ stop loss 22000.0 -> limit 21000.0"
+    },
+    "txid": [
+      "OUF4EM-FRGI2-MQMWZD"
+    ]
+  }
+}

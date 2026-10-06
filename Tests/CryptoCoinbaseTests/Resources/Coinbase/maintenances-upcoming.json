@@ -1,0 +1,2 @@
+// recorded 2026-10-06T07:50:35Z from GET https://status.coinbase.com/api/v2/scheduled-maintenances/upcoming.json, read-only
+{"page":{"id":"kr0djjh0jyy9","name":"Coinbase","url":"http://status.coinbase.com","time_zone":"America/Los_Angeles","updated_at":"2026-10-05T10:20:22.609-07:00"},"scheduled_maintenances":[]}

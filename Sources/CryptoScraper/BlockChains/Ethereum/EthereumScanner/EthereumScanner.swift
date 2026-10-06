@@ -5,7 +5,7 @@
 
 import Foundation
 
-public enum ERCTokenType: CaseIterable {
+public enum ERCTokenType: CaseIterable, Sendable {
     case erc20
     case erc721
     case erc1155

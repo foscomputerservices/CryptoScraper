@@ -4,6 +4,7 @@
 //
 
 import CryptoAsset
+import CryptoExchange
 import FOSFoundation
 import Foundation
 #if canImport(FoundationNetworking)
@@ -73,7 +74,9 @@ public struct BinanceOHLCVClient: OHLCVClient {
             URLQueryItem(name: "limit", value: String(Self.pageLimit))
         ])
         let clock = now().milliseconds
+        // Only the klines Binance was asked for: a row outside the range is never handed up.
         return try rows
+            .filter { $0.openTime >= start && $0.openTime <= end }
             .map { try $0.bar(of: assets, now: clock) }
             .filter(\.isClosed)
     }
@@ -129,7 +132,9 @@ public struct BinanceOHLCVClient: OHLCVClient {
         return interval.token
     }
 
-    // One GET through FOSFoundation's fetch with Binance's error type; a 429 or a 418 becomes BinanceLimitError.
+    // One GET through FOSFoundation's fetch with Binance's error type. The fetch's hook sees every response before
+    // the fetch reads it: a 429, or the 418 Binance sends once a caller kept asking after a 429, becomes
+    // BinanceLimitError with Binance's Retry-After and its own body; every other response is the fetch's (AR69).
     private func get<Value: Decodable & Sendable>(_ path: String, _ query: [URLQueryItem]) async throws -> Value {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         components.queryItems = query
@@ -137,15 +142,32 @@ public struct BinanceOHLCVClient: OHLCVClient {
             throw DataFetchError.badURL("\(path) \(query)")
         }
 
-        let capture = ResponseCapture()
-        let fetch = DataFetch(urlSession: CapturingSession(base: session, capture: capture))
+        return try await Self.fetch(url, on: session)
+    }
+
+    // The session opened to its concrete type, which DataFetch is generic over.
+    private static func fetch<Session: URLSessionProtocol, Value: Decodable & Sendable>(_ url: URL, on session: Session) async throws -> Value {
+        try await DataFetch(urlSession: session, errorForResponse: limitError(for:body:))
+            .fetch(url, errorType: BinanceAPIError.self)
+    }
+
+    // Binance's limit statuses as its typed error; nil for every other response. Binance sends Retry-After as whole
+    // seconds; a limit body that is not Binance's error shape is carried as none.
+    static func limitError(for response: HTTPURLResponse, body: Data?) -> (any Error)? {
+        guard response.statusCode == 429 || response.statusCode == 418 else {
+            return nil
+        }
+        let retryAfter = response.value(forHTTPHeaderField: "Retry-After")
+            .flatMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+            .map { Duration.seconds($0) }
+        return BinanceLimitError(status: response.statusCode, retryAfter: retryAfter, apiError: body.flatMap(Self.apiError(in:)))
+    }
+
+    private static func apiError(in body: Data) -> BinanceAPIError? {
         do {
-            return try await fetch.fetch(url, errorType: BinanceAPIError.self)
+            return try body.fromJSON()
         } catch {
-            if let status = capture.status, status == 429 || status == 418 {
-                throw BinanceLimitError(status: status, retryAfter: capture.retryAfter, apiError: error as? BinanceAPIError)
-            }
-            throw error
+            return nil // a limit response without Binance's body: the limit is still typed, with no body
         }
     }
 }

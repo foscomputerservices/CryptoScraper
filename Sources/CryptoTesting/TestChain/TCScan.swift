@@ -6,7 +6,7 @@
 import CryptoScraper
 import Foundation
 
-public struct TCScan: CryptoScanner {
+public struct TCScan: CryptoScanner, Sendable {
     // MARK: CryptoScanner Protocol
 
     public typealias Contract = TestCoinContract

@@ -1,5 +1,5 @@
 {
-  "originHash" : "9a322175a3feccf6e18c8a4104ecf6db1c686798a369eb81f92ed48b61856268",
+  "originHash" : "fb9eb0338291fe8b6ee6e5dc9ccb295cc0e412c36a74a7ce61341c53336fcd60",
   "pins" : [
     {
       "identity" : "aexml",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/foscomputerservices/FOSUtilities.git",
       "state" : {
-        "revision" : "e1a136bce649d7863b9e5a11ee18c607d8a517d5",
-        "version" : "0.19.1"
+        "revision" : "96486bef46ff92578654ccce309d598c8d55c4d3",
+        "version" : "0.20.0"
       }
     },
     {

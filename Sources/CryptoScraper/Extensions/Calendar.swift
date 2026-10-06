@@ -9,19 +9,19 @@ import Foundation
 
 public extension Calendar {
 
-    static var asia: Self = {
+    static let asia: Self = {
         var result = Calendar.current
         result.timeZone = .init(identifier: "Asia/Hong_Kong")!
         return result
     }()
 
-    static var london: Self = {
+    static let london: Self = {
         var result = Calendar.current
         result.timeZone = .init(identifier: "Europe/London")!
         return result
     }()
 
-    static var us: Self = {
+    static let us: Self = {
         var result = Calendar.current
         result.timeZone = .init(identifier: "America/New_York")!
         return result
