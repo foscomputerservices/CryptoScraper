@@ -1,0 +1,2 @@
+// recorded 2026-10-06T07:50:35Z from GET https://api.coinbase.com/api/v3/brokerage/market/product_book?product_id=BTC-USD&limit=1, read-only
+{"pricebook":{"product_id":"BTC-USD","bids":[{"price":"85559.66","size":"0.08339295"}],"asks":[{"price":"85559.67","size":"0.21177577"}],"time":"2026-10-06T07:50:36.589181Z"},"last":"85559.665","mid_market":"85559.665","spread_bps":"0.001168774961","spread_absolute":"0.01"}

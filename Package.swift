@@ -38,6 +38,10 @@ let package = Package(
             targets: ["CryptoKraken"]
         ),
         .library(
+            name: "CryptoCoinbase",
+            targets: ["CryptoCoinbase"]
+        ),
+        .library(
             name: "CryptoOHLCV",
             targets: ["CryptoOHLCV"]
         ),
@@ -52,7 +56,7 @@ let package = Package(
         // CryptoHyperliquid alone: secp256k1 and Keccak-256 for the agent's signature (AR33)
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.1"),
-        // CryptoKraken on Linux: SHA-256 and HMAC-SHA512 (CryptoKit's API) where CryptoKit is absent
+        // CryptoKraken and CryptoCoinbase on Linux: SHA-256, HMAC-SHA512 and P-256 (CryptoKit's API) where CryptoKit is absent
         .package(url: "https://github.com/apple/swift-crypto.git", "3.0.0"..<"5.0.0"),
         // Test-only: the two-driver encoding test of CryptoAssetTests
         .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.119.0")),
@@ -164,6 +168,30 @@ let package = Package(
             name: "CryptoKrakenTests",
             dependencies: [
                 .byName(name: "CryptoKraken"),
+                .byName(name: "CryptoExchange"),
+                .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .target(
+            name: "CryptoCoinbase",
+            dependencies: [
+                .byName(name: "CryptoExchange"),
+                .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux]))
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoCoinbaseTests",
+            dependencies: [
+                .byName(name: "CryptoCoinbase"),
                 .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),

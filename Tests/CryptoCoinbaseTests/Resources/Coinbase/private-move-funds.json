@@ -1,0 +1,5 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/portfolios/move-portfolios-funds.md, fetched 2026-10-06; the 200 response of Move Portfolio Funds; schema-derived, no example given: built from the OpenAPI response schema in https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/advanced-trade-spec.yaml; values are the schema's own property examples where it has them, else the first enum value, else 0/false/"" (numeric-text fields "0"); order_configuration trimmed to its limit_limit_gtc member
+{
+  "source_portfolio_uuid": "8bfc20d7-f7c6-4422-bf07-8243ca4169fe",
+  "target_portfolio_uuid": "8bfc20d7-f7c6-4422-bf07-8243ca4169fe"
+}

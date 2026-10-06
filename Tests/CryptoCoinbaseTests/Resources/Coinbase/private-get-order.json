@@ -1,0 +1,111 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/orders/get-order.md, fetched 2026-10-06; the 200 response of Get Order; schema-derived, no example given: built from the OpenAPI response schema in https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/advanced-trade-spec.yaml; values are the schema's own property examples where it has them, else the first enum value, else 0/false/"" (numeric-text fields "0"); order_configuration trimmed to its limit_limit_gtc member
+{
+  "order": {
+    "order_id": "0000-000000-000000",
+    "product_id": "BTC-USD",
+    "user_id": "2222-000000-000000",
+    "order_configuration": {
+      "limit_limit_gtc": {
+        "quote_size": "10.00",
+        "base_size": "0.001",
+        "limit_price": "10000.00",
+        "post_only": false,
+        "currency_size": {
+          "value": "1.23",
+          "currency": "BTC"
+        }
+      }
+    },
+    "side": "BUY",
+    "client_order_id": "11111-000000-000000",
+    "status": "PENDING",
+    "time_in_force": "UNKNOWN_TIME_IN_FORCE",
+    "created_time": "2021-05-31T09:59:59Z",
+    "completion_percentage": "50",
+    "filled_size": "0.001",
+    "average_filled_price": "50",
+    "fee": "0",
+    "number_of_fills": "2",
+    "filled_value": "10000",
+    "pending_cancel": true,
+    "size_in_quote": false,
+    "total_fees": "5.00",
+    "size_inclusive_of_fees": false,
+    "total_value_after_fees": "0",
+    "trigger_status": "UNKNOWN_TRIGGER_STATUS",
+    "order_type": "UNKNOWN_ORDER_TYPE",
+    "reject_reason": "REJECT_REASON_UNSPECIFIED",
+    "settled": false,
+    "product_type": "UNKNOWN_PRODUCT_TYPE",
+    "reject_message": "",
+    "cancel_message": "",
+    "order_placement_source": "UNKNOWN_PLACEMENT_SOURCE",
+    "outstanding_hold_amount": "0",
+    "is_liquidation": false,
+    "last_fill_time": "2021-05-31T09:59:59Z",
+    "edit_history": [
+      {
+        "price": "19000.00",
+        "size": "0.001",
+        "replace_accept_timestamp": ""
+      }
+    ],
+    "leverage": "0",
+    "margin_type": "CROSS",
+    "retail_portfolio_id": "b87a2d3f-8a1e-49b3-a4ea-402d8c389aca",
+    "originating_order_id": "b87a2d3f-8a1e-49b3-a4ea-402d8c389aca",
+    "attached_order_id": "b87a2d3f-8a1e-49b3-a4ea-402d8c389aca",
+    "attached_order_configuration": {
+      "limit_limit_gtc": {
+        "quote_size": "10.00",
+        "base_size": "0.001",
+        "limit_price": "10000.00",
+        "post_only": false,
+        "currency_size": {
+          "value": "1.23",
+          "currency": "BTC"
+        }
+      }
+    },
+    "current_pending_replace": {
+      "price": "19000.00",
+      "size": "0.001",
+      "replace_accept_timestamp": ""
+    },
+    "commission_detail_total": {
+      "total_commission": "",
+      "gst_commission": "",
+      "withholding_commission": "",
+      "client_commission": "",
+      "venue_commission": "",
+      "regulatory_commission": "",
+      "clearing_commission": ""
+    },
+    "workable_size": "3",
+    "workable_size_completion_pct": "50",
+    "product_details": {
+      "equity_details": {
+        "base_cbrn": "",
+        "ticker": "",
+        "quote_id": ""
+      }
+    },
+    "cost_basis_method": "COST_BASIS_METHOD_UNSPECIFIED",
+    "displayed_order_config": "UNKNOWN_DISPLAYED_ORDER_CONFIG",
+    "equity_trading_session": "UNKNOWN_EQUITY_TRADING_SESSION",
+    "prediction_side": "PREDICTION_SIDE_UNKNOWN",
+    "last_update_time": "2021-05-31T09:59:59Z",
+    "total_value_after_fees_native": {
+      "value": "1.23",
+      "currency": "BTC"
+    },
+    "outstanding_hold_amount_native": {
+      "value": "1.23",
+      "currency": "BTC"
+    },
+    "total_fees_native": {
+      "value": "1.23",
+      "currency": "BTC"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+// documentation-derived from https://docs.cdp.coinbase.com/coinbase-app/advanced-trade-apis/guides/oauth-access.md, fetched 2026-10-06; the "Example error response on Create Order API" (Target Account Not Tradable), shown verbatim; the generic error schema (grpc.gateway.runtime.Error: error, code, message, details) is in the OpenAPI spec
+{
+  "error": "PERMISSION_DENIED",
+  "error_details": "Target Account Not Tradable",
+  "message": "Target Account Not Tradable"
+}

@@ -1,0 +1,45 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/orders/list-fills.md, fetched 2026-10-06; the 200 response of List Fills; schema-derived, no example given: built from the OpenAPI response schema in https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/advanced-trade-spec.yaml; values are the schema's own property examples where it has them, else the first enum value, else 0/false/"" (numeric-text fields "0"); order_configuration trimmed to its limit_limit_gtc member
+{
+  "fills": [
+    {
+      "entry_id": "22222-2222222-22222222",
+      "trade_id": "1111-11111-111111",
+      "order_id": "0000-000000-000000",
+      "trade_time": "2021-05-31T09:59:59Z",
+      "trade_type": "FILL",
+      "price": "10000.00",
+      "size": "0.001",
+      "commission": "1.25",
+      "product_id": "BTC-USD",
+      "sequence_timestamp": "2021-05-31T09:58:59Z",
+      "liquidity_indicator": "UNKNOWN_LIQUIDITY_INDICATOR",
+      "size_in_quote": false,
+      "user_id": "3333-333333-3333333",
+      "side": "BUY",
+      "retail_portfolio_id": "4444-444444-4444444",
+      "fillSource": "FILL_SOURCE_UNKNOWN",
+      "commission_detail_total": {
+        "total_commission": "",
+        "gst_commission": "",
+        "withholding_commission": "",
+        "client_commission": "",
+        "venue_commission": "",
+        "regulatory_commission": "",
+        "clearing_commission": ""
+      },
+      "order_data_source": "ORDER_DATA_SOURCE_UNKNOWN",
+      "future_legs": [
+        {
+          "product_id": "",
+          "combo_id": "",
+          "trade_id": "",
+          "filled_price": "0",
+          "filled_size": "0",
+          "side": "BUY"
+        }
+      ]
+    }
+  ],
+  "cursor": "789100",
+  "proof_token_required": true
+}

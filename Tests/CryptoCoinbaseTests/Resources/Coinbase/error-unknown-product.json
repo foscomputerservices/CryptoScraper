@@ -1,0 +1,2 @@
+// recorded 2026-10-06T07:50:35Z from GET https://api.coinbase.com/api/v3/brokerage/market/products/NOPE-USD, read-only
+{"error":"NOT_FOUND","error_details":"Product NOPE-USD not supported","message":"Product NOPE-USD not supported"}
