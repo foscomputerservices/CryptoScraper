@@ -29,6 +29,36 @@ package enum ClientFetch {
         try await open(session, url, method, body, headers, errorType, errorForResponse)
     }
 
+    /// One request through DataFetch for a service whose error bodies are not JSON (Hyperliquid's info endpoint
+    /// answers a refusal in plain text): the hook types every refusal, and DataFetch's own error is the fallback
+    package static func send<Value: Decodable & Sendable>(
+        _ url: URL,
+        method: String = "GET",
+        body: Data? = nil,
+        headers: [(field: String, value: String)] = [],
+        session: any URLSessionProtocol,
+        errorForResponse: @escaping @Sendable (HTTPURLResponse, Data?) -> (any Error)?
+    ) async throws -> Value {
+        try await openWithoutErrorType(session, url, method, body, headers, errorForResponse)
+    }
+
+    private static func openWithoutErrorType<Session: URLSessionProtocol, Value: Decodable & Sendable>(
+        _ session: Session,
+        _ url: URL,
+        _ method: String,
+        _ body: Data?,
+        _ headers: [(field: String, value: String)],
+        _ errorForResponse: @escaping @Sendable (HTTPURLResponse, Data?) -> (any Error)?
+    ) async throws -> Value {
+        try await DataFetch(urlSession: session, errorForResponse: errorForResponse).send(
+            data: body,
+            to: url,
+            httpMethod: method,
+            headers: headers.isEmpty ? nil : headers,
+            locale: nil
+        )
+    }
+
     private static func open<Session: URLSessionProtocol, Value: Decodable & Sendable, Failure: Decodable & Error>(
         _ session: Session,
         _ url: URL,

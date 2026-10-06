@@ -102,6 +102,7 @@ let package = Package(
             dependencies: [
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
+                .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoReference"),
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
                 .product(name: "FOSTesting", package: "FOSUtilities")
