@@ -61,6 +61,8 @@ struct ExchangeClientValuesTests {
         #expect(ExchangeClientOrderResult<Int>.refused(code: "EOrder", text: "Insufficient funds")
             == .refused(code: "EOrder", text: "Insufficient funds"))
         #expect(ExchangeClientOrderResult<Int>.cancelledBeforeAccepted != .cancelled(id: 42))
+        #expect(ExchangeClientOrderResult<Int>.resting(id: 42, time: .distantPast) != .cancelled(id: 42))
+        #expect(ExchangeClientOrderResult<Int>.resting(id: 42, time: .distantPast) == .resting(id: 42, time: .distantPast))
     }
 
     @Test func aLedgerItemCarriesItsCursor() {

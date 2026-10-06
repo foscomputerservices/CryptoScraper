@@ -138,6 +138,17 @@ struct CoinbaseClientTests {
         #expect(created.jsonBody["side"] as? String == "BUY")
     }
 
+    @Test func anOpenOrderWithNothingFilledIsResting() async throws {
+        let read = String(decoding: Recording.body("Coinbase/private-get-order.json"), as: UTF8.self)
+            .replacingOccurrences(of: #""status": "PENDING""#, with: #""status": "OPEN""#)
+            .replacingOccurrences(of: #""filled_size": "0.001""#, with: #""filled_size": "0""#)
+        let session = ReplaySession(route: Coinbase.route(["/orders/historical/11111-00000-000000": .ok(Data(read.utf8))]))
+        let result = try await Coinbase.client(session).placeOrder(market: Coinbase.btcusd, side: .buy, size: Amount(baseUnits: 100_000, asset: .btc), limit: Coinbase.price("10000"),
+                                                                    immediateOrCancel: false, reduceOnly: false, account: "")
+        guard case let .resting(id, _) = result else { Issue.record("not resting: \(result)"); return }
+        #expect(id == (try CoinbaseOrderId(validating: "11111-00000-000000")))
+    }
+
     @Test func aRefusedOrderIsCoinbasesWords() async throws {
         let session = ReplaySession(route: Coinbase.route(["/orders": .ok(Recording.body("Coinbase/private-create-order-failure.json"))]))
         let result = try await Coinbase.client(session).placeOrder(market: Coinbase.btcusd, side: .sell, size: Amount(baseUnits: 1, asset: .btc), limit: Coinbase.price("1"),

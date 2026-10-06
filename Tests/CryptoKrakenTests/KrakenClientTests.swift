@@ -117,6 +117,19 @@ struct KrakenClientTests {
         #expect(added.bodyText == "nonce=1791272956000&ordertype=limit&type=buy&volume=1.25&pair=XBTUSD&price=27600&timeinforce=IOC")
     }
 
+    @Test func anOpenOrderWithNothingExecutedIsResting() async throws {
+        let queried = String(decoding: Recording.body("Kraken/private-query-orders.json"), as: UTF8.self)
+            .replacingOccurrences(of: "OBCMZD-JIEE7-77TH3F", with: "OUF4EM-FRGI2-MQMWZD")
+            .replacingOccurrences(of: #""status": "closed""#, with: #""status": "open""#)
+            .replacingOccurrences(of: #""vol_exec": "1.25000000""#, with: #""vol_exec": "0.00000000""#)
+        let session = ReplaySession(route: Kraken.route(["QueryOrders": .ok(Data(queried.utf8))]))
+        let size = try WireDecimal(parsing: "1.25").amount(of: Kraken.xbt)
+        let result = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .buy, size: size, limit: Kraken.price("27600"),
+                                                                  immediateOrCancel: false, reduceOnly: false, account: "")
+        let id = try KrakenOrderId(validating: "OUF4EM-FRGI2-MQMWZD")
+        #expect(result == .resting(id: id, time: Date(timeIntervalSince1970: 1_688_665_499.1922)))
+    }
+
     @Test func aRefusedOrderIsKrakensWords() async throws {
         let session = ReplaySession(route: Kraken.route(["AddOrder": .ok(Recording.body("Kraken/private-error-insufficient-funds.json"))]))
         let result = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .sell, size: .zero(of: Kraken.xbt), limit: Kraken.price("1"),

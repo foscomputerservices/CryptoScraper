@@ -136,8 +136,7 @@ public struct KrakenClient: ExchangeClient {
         if executed.isZero {
             switch order.status {
             case "canceled", "expired": return .cancelled(id: id)
-            // C30 has no case for an order resting on the book: filled for no units so far, with its id.
-            default: return .partlyFilled(units: executed, at: limit, id: id, time: time)
+            default: return .resting(id: id, time: time)
             }
         }
         let price = try order.price.price(of: pair.quote, per: pair.base)

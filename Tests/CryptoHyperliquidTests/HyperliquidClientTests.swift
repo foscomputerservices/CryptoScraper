@@ -143,14 +143,14 @@ struct HyperliquidClientTests {
         #expect(levering.requests.last!.bodyText.contains("\"r\":\"\(leverage.r)\",\"s\":\"\(leverage.s)\""))
     }
 
-    @Test func aRestingOrderIsHandedUpWithItsIdAndNoUnits() async throws {
+    @Test func aRestingOrderIsHandedUpAsRestingWithItsId() async throws {
         let session = ReplaySession(route: Hyperliquid.route(exchange: "exchange-order-resting.json"))
         let limit = Hyperliquid.price("60000")
         let result = try await Hyperliquid.client(session).placeOrder(
             market: Hyperliquid.btc, side: .buy, size: Amount(baseUnits: 100, asset: Hyperliquid.btcAsset), limit: limit,
             immediateOrCancel: false, reduceOnly: false, account: Hyperliquid.master
         )
-        #expect(result == .partlyFilled(units: .zero(of: Hyperliquid.btcAsset), at: limit, id: HyperliquidOrderId(77_738_308), time: Hyperliquid.recordedAt))
+        #expect(result == .resting(id: HyperliquidOrderId(77_738_308), time: Hyperliquid.recordedAt))
         // The main wallet's own account is signed for with no vault.
         #expect(!session.requests.last!.bodyText.contains("vaultAddress"))
     }

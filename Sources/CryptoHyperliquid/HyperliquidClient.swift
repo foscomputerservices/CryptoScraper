@@ -127,9 +127,7 @@ public struct HyperliquidClient: ExchangeClient {
                 ? .filled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
                 : .partlyFilled(units: units, at: price, id: HyperliquidOrderId(oid), time: time)
         case .resting(let oid):
-            // C30 has no case for an order resting on the book: it is handed up as filled for no units so far, with
-            // its id (a reading for the owner's pen).
-            return .partlyFilled(units: .zero(of: coin.asset), at: limit, id: HyperliquidOrderId(oid), time: time)
+            return .resting(id: HyperliquidOrderId(oid), time: time)
         case .error(let text) where immediateOrCancel && text.hasPrefix("Order could not immediately match"):
             return .cancelledBeforeAccepted
         case .error(let text):

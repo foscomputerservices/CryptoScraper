@@ -83,6 +83,8 @@ public struct ExchangeClientBook<Name: Hashable & Sendable>: Hashable, Sendable 
 public enum ExchangeClientOrderResult<OrderId: Hashable & Sendable>: Hashable, Sendable {
     case filled(units: Amount, at: Price, id: OrderId, time: Date)
     case partlyFilled(units: Amount, at: Price, id: OrderId, time: Date)
+    /// Accepted and resting on the book, nothing filled yet; the fills arrive as ledger items (AR40's sweep reads it)
+    case resting(id: OrderId, time: Date)
     case cancelledBeforeAccepted
     case cancelled(id: OrderId)
     case refused(code: String, text: String)

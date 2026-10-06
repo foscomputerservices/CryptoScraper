@@ -127,8 +127,7 @@ public struct CoinbaseClient: ExchangeClient {
             switch order.status {
             case "CANCELLED", "EXPIRED": return .cancelled(id: id)
             case "FAILED": return .refused(code: order.status, text: order.rejectMessage ?? "")
-            // C30 has no case for an order resting on the book: filled for no units so far, with its id.
-            default: return .partlyFilled(units: filled, at: limit, id: id, time: time)
+            default: return .resting(id: id, time: time)
             }
         }
         let price = try order.averageFilledPrice.price(of: assets.quote, per: assets.base)
