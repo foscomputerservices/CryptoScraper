@@ -45,13 +45,14 @@ jobs:
 
       # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
       # (their suite names carry a key and an underscore: C32_, L17_, Retrieval_), run in their own step and may carry
-      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md; they never gate the build.
+      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md and, for the exchange
+      # clients, step 3's layer-A ledger; they never gate the build.
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
 
       - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
         continue-on-error: true
-        run: swift test --filter "CryptoAssetTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
 
       - name: Test the old aggregators (network)
         continue-on-error: true
@@ -73,18 +74,20 @@ jobs:
       - name: Build
         run: swift build
 
-      # The three new libraries and their tests need no network: recorded responses only. The old CryptoScraper
+      # The libraries and their tests need no network: recorded responses only; the exchanges' live reads are opt-in
+      # (CRYPTO_EXCHANGE_LIVE=1) and never run here. The old CryptoScraper
       # target's tests reach the chains' APIs with the secrets above and are run separately so a network failure
       # there does not hide a library failure.
       # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
       # (their suite names carry a key and an underscore: C32_, L17_, Retrieval_), run in their own step and may carry
-      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md; they never gate the build.
+      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md and, for the exchange
+      # clients, step 3's layer-A ledger; they never gate the build.
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
 
       - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
         continue-on-error: true
-        run: swift test --filter "CryptoAssetTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
 
       - name: Test the old aggregators (network)
         continue-on-error: true
@@ -96,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scheme: ["CryptoAsset", "CryptoOHLCV", "CryptoReference"]
+        scheme: ["CryptoAsset", "CryptoExchange", "CryptoHyperliquid", "CryptoKraken", "CryptoCoinbase", "CryptoOHLCV", "CryptoReference"]
         platform: ["iOS", "tvOS", "watchOS"]
     steps:
       - uses: actions/checkout@v4
