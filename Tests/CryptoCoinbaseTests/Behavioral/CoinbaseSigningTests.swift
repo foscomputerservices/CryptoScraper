@@ -7,7 +7,11 @@
 
 import CryptoCoinbase
 import CryptoExchange
+#if canImport(CryptoKit)
 import CryptoKit
+#else
+import Crypto  // Linux: swift-crypto's module, the same API
+#endif
 import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking  // Linux: HTTPURLResponse, URLSession and friends live here

@@ -172,7 +172,8 @@ let package = Package(
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
-                .product(name: "FOSTesting", package: "FOSUtilities")
+                .product(name: "FOSTesting", package: "FOSUtilities"),
+                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux]))
             ],
             resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
@@ -196,7 +197,8 @@ let package = Package(
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
-                .product(name: "FOSTesting", package: "FOSUtilities")
+                .product(name: "FOSTesting", package: "FOSUtilities"),
+                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux]))
             ],
             resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]

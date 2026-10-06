@@ -7,7 +7,11 @@
 // the builder corrects the recomputation below to the documented one; the assertion (header == recomputation) stays.
 
 import CryptoExchange
+#if canImport(CryptoKit)
 import CryptoKit
+#else
+import Crypto  // Linux: swift-crypto's module, the same API
+#endif
 import CryptoKraken
 import Foundation
 #if canImport(FoundationNetworking)
