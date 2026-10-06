@@ -44,11 +44,12 @@ jobs:
         run: swift build
 
       # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
-      # (their suite names carry a key and an underscore: C32_, L17_, Retrieval_), run in their own step and may carry
-      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md and, for the exchange
-      # clients, step 3's layer-A ledger; they never gate the build.
+      # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
+      # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
+      # four OHLCV conformers' suites), run in their own step and may carry classified reds, each recorded in fosline's
+      # step-2 and step-3 layer-A ledgers; they never gate the build.
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
       - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
         continue-on-error: true
@@ -79,11 +80,12 @@ jobs:
       # target's tests reach the chains' APIs with the secrets above and are run separately so a network failure
       # there does not hide a library failure.
       # The contract tests gate the build. The behavioral suites, projected from the requirements in an isolated context
-      # (their suite names carry a key and an underscore: C32_, L17_, Retrieval_), run in their own step and may carry
-      # classified reds, each recorded in fosline's validation/step2-ledgers/layer-a-builder.md and, for the exchange
-      # clients, step 3's layer-A ledger; they never gate the build.
+      # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
+      # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
+      # four OHLCV conformers' suites), run in their own step and may carry classified reds, each recorded in fosline's
+      # step-2 and step-3 layer-A ledgers; they never gate the build.
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
       - name: Test the libraries' behavioral suites (classified reds expected, see the ledger)
         continue-on-error: true

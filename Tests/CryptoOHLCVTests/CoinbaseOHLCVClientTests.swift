@@ -13,7 +13,7 @@ import Testing
 // § 8.6 and C32 for Coinbase's OHLCV client, against recorded responses.
 
 @Suite("Coinbase OHLCV client")
-struct CoinbaseOHLCVClientTests {
+struct CoinbaseOHLCVClientContractTests {
     static let btcusd = try! CoinbaseMarketName(validating: "BTC-USD")
     // The 1d recording: ten days, 2026-09-22 through 2026-10-01 UTC, newest first.
     static let from = Date(timeIntervalSince1970: 1_790_000_000)

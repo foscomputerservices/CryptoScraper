@@ -13,7 +13,7 @@ import Testing
 // § 8.6 and C32 for Kraken's OHLCV client, against recorded responses.
 
 @Suite("Kraken OHLCV client")
-struct KrakenOHLCVClientTests {
+struct KrakenOHLCVClientContractTests {
     static let xbtusd = try! KrakenMarketName(validating: "XBTUSD")
     // The 1d recording: 38 rows from 2026-08-30, the last the open day of 2026-10-06.
     static let from = Date(timeIntervalSince1970: 1_788_048_000)

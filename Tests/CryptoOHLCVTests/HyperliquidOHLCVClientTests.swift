@@ -13,7 +13,7 @@ import Testing
 // § 8.6 and C32 for Hyperliquid's OHLCV client, against recorded responses.
 
 @Suite("Hyperliquid OHLCV client")
-struct HyperliquidOHLCVClientTests {
+struct HyperliquidOHLCVClientContractTests {
     static let btc = try! HyperliquidMarketName(validating: "BTC")
     // The 1d recording: 2025-10-01 through 2025-10-11 UTC.
     static let from = Date(timeIntervalSince1970: 1_759_276_800)
