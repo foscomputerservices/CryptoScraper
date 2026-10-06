@@ -134,15 +134,19 @@ public struct KrakenOHLCVClient: OHLCVClient {
         guard let url = components.url else {
             throw DataFetchError.badURL("\(path) \(query)")
         }
-        return try await ClientFetch.send(url, session: session, errorType: KrakenAPIError.self, errorForResponse: Self.limitError(for:body:))
+        return try await ClientFetch.send(url, session: session, errorType: KrakenAPIError.self, errorForResponse: Self.refusal(for:body:))
     }
 
-    // Kraken's limits as KrakenLimitError: HTTP 429, or a limit in its error list (which Kraken sends with HTTP 200);
-    // nil for every other response, which the fetch reads.
-    package static func limitError(for response: HTTPURLResponse, body: Data?) -> (any Error)? {
+    // Kraken's refusals, which it sends with HTTP 200 beside an empty `result`, so the fetch would otherwise read
+    // them as an empty answer: a limit as KrakenLimitError (HTTP 429 too), any other error it lists as KrakenAPIError;
+    // nil for every other response, which the fetch reads. Kraken's warnings ("W…") are not errors.
+    package static func refusal(for response: HTTPURLResponse, body: Data?) -> (any Error)? {
         let listed = WireResponse.decoded(body, as: KrakenAPIError.self)
         if response.statusCode == 429 || listed?.isLimit == true {
             return KrakenLimitError(retryAfter: WireResponse.retryAfter(response), apiError: listed)
+        }
+        if let listed, listed.messages.contains(where: { $0.hasPrefix("E") }) {
+            return listed
         }
         return nil
     }

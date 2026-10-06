@@ -1,0 +1,5 @@
+// documentation-derived from https://docs.kraken.com/api/docs/guides/spot-errors.md, fetched 2026-10-06; envelope from the page example; the string is quoted at https://docs.kraken.com/api/docs/guides/spot-rest-ratelimits.md ; the docs show no full body for this error (schema-derived, no example given)
+{
+  "error": ["EAPI:Rate limit exceeded"],
+  "result": {}
+}

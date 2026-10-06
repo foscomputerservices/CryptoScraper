@@ -1,0 +1,15 @@
+// documentation-derived from https://docs.kraken.com/api/docs/rest-api/get-trade-balance.md, fetched 2026-10-06; the 200 example of Get Trade Balance
+{
+  "error": [],
+  "result": {
+    "eb": "1101.3425",
+    "tb": "392.2264",
+    "m": "7.0354",
+    "n": "-10.0232",
+    "c": "21.1063",
+    "v": "31.1297",
+    "e": "382.2032",
+    "mf": "375.1678",
+    "ml": "5432.57"
+  }
+}
