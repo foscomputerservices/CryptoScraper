@@ -14,4 +14,11 @@ extension HEDERA.Hedera {
         decimals: 6,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// Chainlink, CoinGecko's `chainlink`, at 18 decimals
+    public static let chainlink: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "0x7ce6bb2cc2d3fd45a974da6a0f29236cb9513a98"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "LINK")
+    )
 }

@@ -21,4 +21,1460 @@ extension SOLANA.Solana {
         decimals: 6,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// USDS, CoinGecko's `usds`, at 6 decimals
+    public static let usds: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "USDSwr9ApdHk5bvJKMjzff41FfuX8bSxdKcR81vTwcA"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDS")
+    )
+
+    /// Chainlink, CoinGecko's `chainlink`, at 9 decimals
+    public static let chainlink: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "LINK")
+    )
+
+    /// Ethena USDe, CoinGecko's `ethena-usde`, at 9 decimals
+    public static let ethenaUsde: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DEkqHyPN7GMRJ5cArtQFAWefqbZb33Hyf6s5iCwjEonT"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "USDE")
+    )
+
+    /// USD1, CoinGecko's `usd1-wlfi`, at 6 decimals
+    public static let usd1Wlfi: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USD1")
+    )
+
+    /// Global Dollar, CoinGecko's `global-dollar`, at 6 decimals
+    public static let globalDollar: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDG")
+    )
+
+    /// Ethena, CoinGecko's `ethena`, at 9 decimals
+    public static let ethena: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "72QvBVwpxqmheEPfaCwWSWqEFsUy3rhWt6JhQBMNTwD1"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ENA")
+    )
+
+    /// Pump.fun, CoinGecko's `pump-fun`, at 6 decimals
+    public static let pumpFun: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PUMP")
+    )
+
+    /// PayPal USD, CoinGecko's `paypal-usd`, at 6 decimals
+    public static let paypalUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PYUSD")
+    )
+
+    /// Aave, CoinGecko's `aave`, at 8 decimals
+    public static let aave: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AavE1kKKnesPw4MuRJmJ9jZs9QzEE8CPxQ3ViczUDfc1"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "AAVE")
+    )
+
+    /// Circle USYC, CoinGecko's `hashnote-usyc`, at 6 decimals
+    public static let hashnoteUsyc: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7LWanZteUKtvFjv4MHYgKXXdAuCQYFPJysL9pxxdRQGn"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USYC")
+    )
+
+    /// Ondo US Dollar Yield, CoinGecko's `ondo-us-dollar-yield`, at 6 decimals
+    public static let ondoUsDollarYield: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "A1KLoBrKBde8Ty9qtNQUtq3C2ortoC3u7twggz7sEto6"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDY")
+    )
+
+    /// BlackRock USD Institutional Digital Liquidity Fund, CoinGecko's `blackrock-usd-institutional-digital-liquidity-fund`, at 6 decimals
+    public static let blackrockUsdInstitutionalDigitalLiquidityFund: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GyWgeqpy5GueU2YbkE8xqUeVEokCMMCEeUrfbtMw6phr"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BUIDL")
+    )
+
+    /// World Liberty Financial, CoinGecko's `world-liberty-financial`, at 6 decimals
+    public static let worldLibertyFinancial: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "WLFinEv6ypjkczcS83FZqFpgFZYwQXutRbxGe7oC16g"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WLFI")
+    )
+
+    /// USDGO, CoinGecko's `usdgo`, at 6 decimals
+    public static let usdgo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "72puLt71H93Z9CzHuBRTwFpL4TG3WZUhnoCC7p8gxigu"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDGO")
+    )
+
+    /// Jupiter, CoinGecko's `jupiter-exchange-solana`, at 6 decimals
+    public static let jupiterExchangeSolana: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "JUP")
+    )
+
+    /// Render, CoinGecko's `render-token`, at 8 decimals
+    public static let renderToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "RENDER")
+    )
+
+    /// Invesco Short Duration US Government Securities Fund, CoinGecko's `superstate-short-duration-us-government-securities-fund-ustb`, at 6 decimals
+    public static let superstateShortDurationUsGovernmentSecuritiesFundUstb: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CCz3SGVziFeLYk2xfEstkiqJfYkjaSWb2GCABYsVcjo2"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USTB")
+    )
+
+    /// Injective, CoinGecko's `injective-protocol`, at 9 decimals
+    public static let injectiveProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "1NJMqVM4PadjuzYmeB7zV7q7DV8oB3ExaQCd9x6KsLz"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "INJ")
+    )
+
+    /// Open USD, CoinGecko's `open-usd`, at 6 decimals
+    public static let openUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ousd2mJsPEckLHcSCDxyKD7NDGARZcfLbDZkKiatYHB"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "OUSD")
+    )
+
+    /// PancakeSwap, CoinGecko's `pancakeswap-token`, at 9 decimals
+    public static let pancakeswapToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4qQeZ5LwSz6HuupUu8jCtgXyW1mYQcNbFAW1sWZp89HL"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "CAKE")
+    )
+
+    /// Raydium, CoinGecko's `raydium`, at 6 decimals
+    public static let raydium: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "RAY")
+    )
+
+    /// Janus Henderson Anemoy AAA CLO Fund, CoinGecko's `janus-henderson-anemoy-aaa-clo-fund`, at 6 decimals
+    public static let janusHendersonAnemoyAaaCloFund: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AAAJXeGjpKu7W3X4QTSU4pm1Wbj4G2LPcdg7A6xJLLyG"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "JAAA")
+    )
+
+    /// Pyth Network, CoinGecko's `pyth-network`, at 6 decimals
+    public static let pythNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PYTH")
+    )
+
+    /// Pudgy Penguins, CoinGecko's `pudgy-penguins`, at 6 decimals
+    public static let pudgyPenguins: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PENGU")
+    )
+
+    /// Official Trump, CoinGecko's `official-trump`, at 6 decimals
+    public static let officialTrump: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "TRUMP")
+    )
+
+    /// Virtuals Protocol, CoinGecko's `virtual-protocol`, at 9 decimals
+    public static let virtualProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3iQL8BFS2vE7mww4ehAqQHAsbmRNCrPxizWAT2Zfyr9y"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "VIRTUAL")
+    )
+
+    /// USDtb, CoinGecko's `usdtb`, at 6 decimals
+    public static let usdtb: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "8yXrtJ54jZtE84xEBzTESKuegjcAkAuDrdAhRd8i8n3T"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDTB")
+    )
+
+    /// EURC, CoinGecko's `euro-coin`, at 6 decimals
+    public static let euroCoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "EURC")
+    )
+
+    /// Grass, CoinGecko's `grass`, at 9 decimals
+    public static let grass: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Grass7B4RdKfBCjTKgSqnXkqjwiGvQyFbuSCUJr3XXjs"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GRASS")
+    )
+
+    /// Starknet, CoinGecko's `starknet`, at 9 decimals
+    public static let starknet: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HsRpHQn6VbyMs5b5j5SV6xQ2VvpvvCCzu19GjytVSCoz"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "STRK")
+    )
+
+    /// SPX6900, CoinGecko's `spx6900`, at 8 decimals
+    public static let spx6900: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "SPX")
+    )
+
+    /// SoFiUSD, CoinGecko's `sofiusd`, at 6 decimals
+    public static let sofiusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "APhcqtzE73es3KAGiVksZFMLGwJDiAey5qZKUrQHEHfS"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "SOFID")
+    )
+
+    /// First Digital USD, CoinGecko's `first-digital-usd`, at 6 decimals
+    public static let firstDigitalUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9zNQRsGLjNKwCUU5Gq5LR8beUCPzQMVMqKAi3SSZh54u"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "FDUSD")
+    )
+
+    /// Ondo Short-Term U.S. Government Bond Fund, CoinGecko's `ousg`, at 6 decimals
+    public static let ousg: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "i7u4r16TcsJTgq1kAG8opmVZyVnAKBwLKu6ZPMwzxNc"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "OUSG")
+    )
+
+    /// apxUSD, CoinGecko's `apxusd`, at 6 decimals
+    public static let apxusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "APXUSD")
+    )
+
+    /// Bonk, CoinGecko's `bonk`, at 5 decimals
+    public static let bonk: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"),
+        decimals: 5,
+        symbol: AssetSymbol(validating: "BONK")
+    )
+
+    /// Re Protocol reUSD, CoinGecko's `re-protocol-reusd`, at 9 decimals
+    public static let reProtocolReusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2uxaYT1fVrp6Fg2BrxQcyKSW91hefM6dG9krpbeDiirT"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "REUSD")
+    )
+
+    /// Olympus, CoinGecko's `olympus`, at 9 decimals
+    public static let olympus: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2Xva1NeLRuBFdK41gEuXqgeWtnKKDve9PKeCnMEpNG6K"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "OHM")
+    )
+
+    /// Jito, CoinGecko's `jito-governance-token`, at 9 decimals
+    public static let jitoGovernanceToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "JTO")
+    )
+
+    /// Collector Crypt, CoinGecko's `collector-crypt`, at 6 decimals
+    public static let collectorCrypt: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "CARDS")
+    )
+
+    /// Zebec Network, CoinGecko's `zebec-network`, at 6 decimals
+    public static let zebecNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ZBCNpuD7YMXzTHB2fhGkGi78MNsHGLRXUhRewNRm9RU"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ZBCN")
+    )
+
+    /// Meteora, CoinGecko's `meteora`, at 6 decimals
+    public static let meteora: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MET")
+    )
+
+    /// dogwifhat, CoinGecko's `dogwifcoin`, at 6 decimals
+    public static let dogwifcoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WIF")
+    )
+
+    /// AUSD, CoinGecko's `agora-dollar`, at 6 decimals
+    public static let agoraDollar: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AUSD1jCcCyPLybk1YnvPWsHQSrZ46dxwoMniN4N2UEB9"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "AUSD")
+    )
+
+    /// Kamino, CoinGecko's `kamino`, at 6 decimals
+    public static let kamino: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "KMNO")
+    )
+
+    /// USX, CoinGecko's `usx`, at 6 decimals
+    public static let usx: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6FrrzDk5mQARGc1TDYoyVnSyRdds1t4PbtohCD6p3tgG"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USX")
+    )
+
+    /// Useless Coin, CoinGecko's `useless-3`, at 6 decimals
+    public static let useless3: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USELESS")
+    )
+
+    /// DoubleZero, CoinGecko's `doublezero`, at 8 decimals
+    public static let doublezero: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "J6pQQ3FAcJQeWPPGppWRb4nM8jU3wLyYbRrLh7feMfvd"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "2Z")
+    )
+
+    /// Zama, CoinGecko's `zama`, at 9 decimals
+    public static let zama: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4Zp52aF4hZi9fzH19xpbWKYKQvgLyCN67KFbrQDqeTKh"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ZAMA")
+    )
+
+    /// EUR CoinVertible, CoinGecko's `societe-generale-forge-eurcv`, at 2 decimals
+    public static let societeGeneraleForgeEurcv: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DghpMkatCiUsofbTmid3M3kAbDTPqDwKiYHnudXeGG52"),
+        decimals: 2,
+        symbol: AssetSymbol(validating: "EURCV")
+    )
+
+    /// Orca, CoinGecko's `orca`, at 6 decimals
+    public static let orca: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ORCA")
+    )
+
+    /// apyUSD, CoinGecko's `apyusd`, at 6 decimals
+    public static let apyusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Ex8hKasfFCfj3yGuN5TyYRUjHePgVs3uYUJRT8geT7rv"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "APYUSD")
+    )
+
+    /// Fluid, CoinGecko's `instadapp`, at 9 decimals
+    public static let instadapp: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DuEy8wWrzCUun5ZbbG9hkVqXqqicpTQw8gB7nEAzpCHQ"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "FLUID")
+    )
+
+    /// Non-Playable Coin, CoinGecko's `non-playable-coin`, at 8 decimals
+    public static let nonPlayableCoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BeGY8KqKxboEwRbJd1q9H2K829jS4Rc5dEyNMYXCbV5p"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "NPC")
+    )
+
+    /// SwissBorg, CoinGecko's `swissborg`, at 9 decimals
+    public static let swissborg: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3dQTr7ror2QPKQ3GbBCokJUmjErGg8kTJzdnYjNfvi3Z"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "BORG")
+    )
+
+    /// Chiliz, CoinGecko's `chiliz`, at 8 decimals
+    public static let chiliz: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6eftxVbSAunVEoxUWdGhPdxg5UdsJ8Wkwy5w5YFuxouw"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "CHZ")
+    )
+
+    /// Fartcoin, CoinGecko's `fartcoin`, at 6 decimals
+    public static let fartcoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "FARTCOIN")
+    )
+
+    /// Strategy PP Variable xStock, CoinGecko's `strategy-pp-variable-xstock`, at 8 decimals
+    public static let strategyPpVariableXstock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Xs78JED6PFZxWc2wCEPspZW9kL3Se5J7L5TChKgsidH"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "STRCX")
+    )
+
+    /// GoMining Token, CoinGecko's `gmt-token`, at 9 decimals
+    public static let gmtToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3KzAE8dPyJRgZ36Eh81v7WPwi6dm7bDhdMb8EAus2RAf"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GOMINING")
+    )
+
+    /// Basic Attention, CoinGecko's `basic-attention-token`, at 8 decimals
+    public static let basicAttentionToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EPeUFDgHRxs9xxEPVaL6kfGQvCon7jmAWKVUHuux1Tpz"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "BAT")
+    )
+
+    /// STONK, CoinGecko's `stonk-3`, at 9 decimals
+    public static let stonk3: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "STONK")
+    )
+
+    /// Geodnet, CoinGecko's `geodnet`, at 9 decimals
+    public static let geodnet: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7JA5eZdCzztSfQbJvS8aVVxMFfd81Rs9VvwnocV1mKHu"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GEOD")
+    )
+
+    /// MetaDAO, CoinGecko's `meta-2-2`, at 6 decimals
+    public static let meta22: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "METAwkXcqyXKy1AtsSgJ8JiUHwGCafnZL38n3vYmeta"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "META")
+    )
+
+    /// Aethir, CoinGecko's `aethir`, at 9 decimals
+    public static let aethir: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Dm5BxyMetG3Aq5PaG1BrG7rBYqEMtnkjvPNMExfacVk7"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ATH")
+    )
+
+    /// CASH, CoinGecko's `cash-4`, at 6 decimals
+    public static let cash4: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CASHx9KJUStyftLFWGvEVf59SGeG9sh5FfcnZMVPCASH"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "CASH")
+    )
+
+    /// BCGame Coin, CoinGecko's `bc-token`, at 6 decimals
+    public static let bcToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BCNT4t3rv5Hva8RnUtJUJLnxzeFAabcYp8CghC1SmWin"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BC")
+    )
+
+    /// GALA, CoinGecko's `gala`, at 8 decimals
+    public static let gala: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "eEUiUs4JWYZrp72djAGF1A8PhpR6rHphGeGN7GbVLp6"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "GALA")
+    )
+
+    /// Seeker, CoinGecko's `seeker`, at 6 decimals
+    public static let seeker: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "SKR")
+    )
+
+    /// Nest BlackOpal LiquidStone II Vault, CoinGecko's `nest-blackopal-liquidstone-ii-vault`, at 6 decimals
+    public static let nestBlackopalLiquidstoneIiVault: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GArhnnDj3GYhmQeApKVXaRv4TQFwhPcs3SNF6FXsTeXq"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "NOPAL")
+    )
+
+    /// SOON, CoinGecko's `soon-2`, at 9 decimals
+    public static let soon2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4eDf52YYzL6i6gbZ6FXqrLUPXbtP61f1gPSFM66M4XHe"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SOON")
+    )
+
+    /// deBridge, CoinGecko's `debridge`, at 6 decimals
+    public static let debridge: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DBRiDgJAMsM95moTzJs7M9LnkGErpbv9v6CUR1DXnUu5"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "DBR")
+    )
+
+    /// Frax USD, CoinGecko's `frax-usd`, at 9 decimals
+    public static let fraxUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GzX1ireZDU865FiMaKrdVB1H6AE8LAqWYCg6chrMrfBw"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "FRXUSD")
+    )
+
+    /// OnRe Tokenized Reinsurance, CoinGecko's `onyc`, at 9 decimals
+    public static let onyc: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5Y8NV33Vv7WbnLfq3zBcKSdYPrk7g2KoiQoe7M2tcxp5"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ONYC")
+    )
+
+    /// Helium, CoinGecko's `helium`, at 8 decimals
+    public static let helium: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "HNT")
+    )
+
+    /// Circle Internet Group (Ondo Tokenized Stock), CoinGecko's `circle-internet-group-ondo-tokenized-stock`, at 9 decimals
+    public static let circleInternetGroupOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6xHEyem9hmkGtVq6XGCiQUGpPsHBaoYuYdFNZa5ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "CRCLON")
+    )
+
+    /// Melania Meme, CoinGecko's `melania-meme`, at 6 decimals
+    public static let melaniaMeme: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FUAfBo2jgks6gB4Z4LfZkqSZgzNucisEHqnNebaRxM1P"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MELANIA")
+    )
+
+    /// Apollo Diversified Credit Securitize Fund, CoinGecko's `apollo-diversified-credit-securitize-fund`, at 6 decimals
+    public static let apolloDiversifiedCreditSecuritizeFund: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FubtUcvhSCr3VPXEcxouoQjKQ7NWTCzXyECe76B7L3f8"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ACRED")
+    )
+
+    /// Wormhole, CoinGecko's `wormhole`, at 6 decimals
+    public static let wormhole: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "W")
+    )
+
+    /// YZY, CoinGecko's `yzy`, at 6 decimals
+    public static let yzy: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DrZ26cKJDksVRWib3DVVsjo9eeXccc7hKhDJviiYEEZY"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "YZY")
+    )
+
+    /// Circle xStock, CoinGecko's `circle-xstock`, at 8 decimals
+    public static let circleXstock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "CRCLX")
+    )
+
+    /// ZIG Finance, CoinGecko's `zignaly`, at 8 decimals
+    public static let zignaly: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "26f12PmBk77wQV1TzLe8XKkNBvMFggbuypxdtMLzNLzz"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "ZIG")
+    )
+
+    /// Bending Spoons xStock, CoinGecko's `bending-spoons-xstock`, at 8 decimals
+    public static let bendingSpoonsXstock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "XsYMHtwJcWon5GkPHzdDbCCztKtKzEurJnbydxgjsqS"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "BSPX")
+    )
+
+    /// UnityWallet Token, CoinGecko's `unitywallet-token`, at 9 decimals
+    public static let unitywalletToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "UNTyTuyNPhLufn4K4SMsW6BxbvfYEMgQ4qUT9orPapp"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "UNT")
+    )
+
+    /// WrappedM by M0, CoinGecko's `wrappedm-by-m0`, at 6 decimals
+    public static let wrappedmByM0: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "mzeroXDoBpRVhnEXBra27qzAMdxgpWVY3DzQW7xMVJp"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WM")
+    )
+
+    /// Strategy Stretch Preferred (Ondo Tokenized), CoinGecko's `strategy-stretch-preferred-ondo-tokenized`, at 7 decimals
+    public static let strategyStretchPreferredOndoTokenized: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "y6kSRF4i9tfMMjZziPHtQE1PeUS6bWEHTzZMFgXondo"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "STRCON")
+    )
+
+    /// Prize Protocol, CoinGecko's `prize-protocol`, at 7 decimals
+    public static let prizeProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9DPToU6fkfE49vM7LqjjtK6BFfKKuAVrQDaKAnwXSDy9"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "PRIZE")
+    )
+
+    /// Baby Doge Coin, CoinGecko's `baby-doge-coin`, at 1 decimals
+    public static let babyDogeCoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7dUKUopcNWW6CcU4eRxCHh1uiMh32zDrmGf6ufqhxann"),
+        decimals: 1,
+        symbol: AssetSymbol(validating: "BABYDOGE")
+    )
+
+    /// Hastra AUTO, CoinGecko's `hastra-auto`, at 6 decimals
+    public static let hastraAuto: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GNE6oDS6jHrfaV3GQVVCCp37fDnT7PiPuewMKBj2bqNm"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "AUTO")
+    )
+
+    /// iShares Core S&P 500 ETF (Ondo Tokenized ETF), CoinGecko's `ishares-core-s-p-500-etf-ondo-tokenized-etf`, at 9 decimals
+    public static let isharesCoreSP500EtfOndoTokenizedEtf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CqW2pd6dCPG9xKZfAsTovzDsMmAGKJSDBNcwM96ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "IVVON")
+    )
+
+    /// Matrixdock Gold, CoinGecko's `matrixdock-gold`, at 9 decimals
+    public static let matrixdockGold: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5aLhp9VnUEKcsdtkfsf2DUgpJfomx7GmYVny24dHUZoB"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "XAUM")
+    )
+
+    /// Turbo, CoinGecko's `turbo`, at 8 decimals
+    public static let turbo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2Dyzu65QA9zdX1UeE7Gx71k7fiwyUK6sZdrvJ7auq5wm"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "TURBO")
+    )
+
+    /// Sushi, CoinGecko's `sushi`, at 8 decimals
+    public static let sushi: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ChVzxWRmrTeSgwd3Ui3UumcN8KX7VK3WaD4KGeSKpypj"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "SUSHI")
+    )
+
+    /// BOOK OF MEME, CoinGecko's `book-of-meme`, at 6 decimals
+    public static let bookOfMeme: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BOME")
+    )
+
+    /// Comedian, CoinGecko's `comedian`, at 6 decimals
+    public static let comedian: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9PR7nCP9DpcUotnDPVLUBUZKu5WAYkwrCUx9wDnSpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BAN")
+    )
+
+    /// AI Rig Complex, CoinGecko's `ai-rig-complex`, at 6 decimals
+    public static let aiRigComplex: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "61V8vBaqAGMpgDQi4JcAwo1dmBGHsyhzodcPqnEVpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ARC")
+    )
+
+    /// io.net, CoinGecko's `io`, at 8 decimals
+    public static let io: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BZLbGTNCSFfoth2GYDtwr7e4imWzpR5jqcUuGEwr646K"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "IO")
+    )
+
+    /// Bio Protocol, CoinGecko's `bio-protocol`, at 9 decimals
+    public static let bioProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "bioJ9JTqW62MLz7UKHU69gtKhPpGi1BQhccj2kmSvUJ"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "BIO")
+    )
+
+    /// Swop, CoinGecko's `swop-2`, at 9 decimals
+    public static let swop2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GAehkgN1ZDNvavX81FmzCcwRnzekKMkSyUNq8WkMsjX1"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SWOP")
+    )
+
+    /// The Black Bull, CoinGecko's `the-black-bull`, at 6 decimals
+    public static let theBlackBull: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ANSEM")
+    )
+
+    /// VanEck Treasury Fund, CoinGecko's `vaneck-treasury-fund`, at 6 decimals
+    public static let vaneckTreasuryFund: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "34mJztT9am2jybSukvjNqRjgJBZqHJsHnivArx1P4xy1"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "VBILL")
+    )
+
+    /// Nosana, CoinGecko's `nosana`, at 6 decimals
+    public static let nosana: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "nosXBVoaCTtYdLvKY6Csb4AC8JCdQKKAaWYtx2ZMoo7"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "NOS")
+    )
+
+    /// Threshold Network, CoinGecko's `threshold-network-token`, at 8 decimals
+    public static let thresholdNetworkToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4Njvi3928U3figEF5tf8xvjLC5GqUN33oe4XTJNe7xXC"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "T")
+    )
+
+    /// Brazilian Digital, CoinGecko's `brz`, at 6 decimals
+    public static let brz: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BRZbFNQDcWLfcdHmAkqEVnLHCAWKTRf6eHyEaWdZp3JN"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BRZ")
+    )
+
+    /// ORE, CoinGecko's `ore`, at 11 decimals
+    public static let ore: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp"),
+        decimals: 11,
+        symbol: AssetSymbol(validating: "ORE")
+    )
+
+    /// Arcium, CoinGecko's `arcium`, at 9 decimals
+    public static let arcium: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ARXwZkNAtzPfdcoqQiduJn8EPv9fKiDfGn2KyggyDrFs"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ARX")
+    )
+
+    /// Jelly-My-Jelly, CoinGecko's `jelly-my-jelly`, at 6 decimals
+    public static let jellyMyJelly: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "JELLYJELLY")
+    )
+
+    /// Anonymous Cat, CoinGecko's `anonymous-cat`, at 9 decimals
+    public static let anonymousCat: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ZCAT")
+    )
+
+    /// StandX DUSD, CoinGecko's `standx-dusd`, at 6 decimals
+    public static let standxDusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DUSDt4AeLZHWYmcXnVGYdgAzjtzU5mXUVnTMdnSzAttM"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "DUSD")
+    )
+
+    /// USDu, CoinGecko's `usdu`, at 6 decimals
+    public static let usdu: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9ckR7pPPvyPadACDTzLwK2ZAEeUJ3qGSnzPs8bVaHrSy"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDU")
+    )
+
+    /// Huma Finance, CoinGecko's `huma-finance`, at 6 decimals
+    public static let humaFinance: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HUMA1821qVDKta3u2ovmfDQeW2fSQouSKE8fkF44wvGw"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "HUMA")
+    )
+
+    /// Securitize, CoinGecko's `securitize-corp`, at 6 decimals
+    public static let securitizeCorp: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5VzwKkvynPJzcgwhBe7ESEyNgqMbo15yBu7Sehssd9ED"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "SECZ")
+    )
+
+    /// Cortex, CoinGecko's `cortex-2`, at 9 decimals
+    public static let cortex2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CortexFv3fRcLKTgACr7aLqckGh5eP7TP3z9JHoKqMc6"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "CX")
+    )
+
+    /// BlackRock Daily Reinvestment Stablecoin Reserve Vehicle, CoinGecko's `blackrock-daily-reinvestment-stablecoin-reserve-vehicle`, at 6 decimals
+    public static let blackrockDailyReinvestmentStablecoinReserveVehicle: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9rX4yuAirQkm5JC26v3oSfGencsxwjB8kkmgf2dwWe9N"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BRSRV")
+    )
+
+    /// Ozapay, CoinGecko's `ozapay`, at 2 decimals
+    public static let ozapay: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "67iVSrbgQKiPjttU9uXx9CXUoS1Si3XUhrXeiNAUUZSR"),
+        decimals: 2,
+        symbol: AssetSymbol(validating: "OZA")
+    )
+
+    /// Peanut the Squirrel, CoinGecko's `peanut-the-squirrel`, at 6 decimals
+    public static let peanutTheSquirrel: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PNUT")
+    )
+
+    /// Holoworld, CoinGecko's `holoworld`, at 9 decimals
+    public static let holoworld: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "69RX85eQoEsnZvXGmLNjYcWgVkp9r2JjahVm99KbJETU"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "HOLO")
+    )
+
+    /// Popcat, CoinGecko's `popcat`, at 9 decimals
+    public static let popcat: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "POPCAT")
+    )
+
+    /// Mantis, CoinGecko's `mantis`, at 9 decimals
+    public static let mantis: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Mant1sZcb8x2YMZe7RdqSfStCj4YxjmQByNKyHpLJK9"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "M")
+    )
+
+    /// SPDR S&P 500 ETF (Ondo Tokenized ETF), CoinGecko's `spdr-s-p-500-etf-ondo-tokenized-etf`, at 9 decimals
+    public static let spdrSP500EtfOndoTokenizedEtf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "k18WJUULWheRkSpSquYGdNNmtuE2Vbw1hpuUi92ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SPYON")
+    )
+
+    /// SpaceX xStock, CoinGecko's `spacex-xstocks`, at 8 decimals
+    public static let spacexXstocks: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "SPCXX")
+    )
+
+    /// Alchemist AI, CoinGecko's `alchemist-ai`, at 6 decimals
+    public static let alchemistAi: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ALCH")
+    )
+
+    /// Magic Eden, CoinGecko's `magic-eden`, at 6 decimals
+    public static let magicEden: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "MEFNBXixkEbait3xn9bkm8WsJzXtVsaJEn4c8Sam21u"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ME")
+    )
+
+    /// cat in a dogs world, CoinGecko's `cat-in-a-dogs-world`, at 5 decimals
+    public static let catInADogsWorld: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5"),
+        decimals: 5,
+        symbol: AssetSymbol(validating: "MEW")
+    )
+
+    /// Micron Technology (Ondo Tokenized Stock), CoinGecko's `micron-technology-ondo-tokenized-stock`, at 9 decimals
+    public static let micronTechnologyOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Fz9edBpaURPPzpKVRR1A8PENYDEgHqwx5D5th28ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "MUON")
+    )
+
+    /// GOHOME, CoinGecko's `gohome`, at 6 decimals
+    public static let gohome: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2Wu1g2ft7qZHfTpfzP3wLdfPeV1is4EwQ3CXBfRYAciD"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "GOHOME")
+    )
+
+    /// AllUnity CHF, CoinGecko's `allunity-chf`, at 6 decimals
+    public static let allunityChf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3GJfXJvPcjuAu6VQZmcs9pAXQau8nz3z88CCpBztgQSv"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "CHFAU")
+    )
+
+    /// Moo Deng, CoinGecko's `moo-deng`, at 6 decimals
+    public static let mooDeng: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MOODENG")
+    )
+
+    /// Unitas, CoinGecko's `unitas`, at 9 decimals
+    public static let unitas: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7Zhxshgt7Ft6pHFYMrHE1epWdWre7sJ1Af1GhEUnitas"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "UP")
+    )
+
+    /// StraitsX XUSD, CoinGecko's `straitsx-xusd`, at 6 decimals
+    public static let straitsxXusd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4UbvZiomFvXDnZSz6vdHiDNiHozH2ykTEqjhhbVHiv9z"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "XUSD")
+    )
+
+    /// TROLL, CoinGecko's `troll-2`, at 6 decimals
+    public static let troll2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "TROLL")
+    )
+
+    /// Rekt, CoinGecko's `rekt-4`, at 4 decimals
+    public static let rekt4: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "vQoYWru2pbUdcVkUrRH74ktQDJgVjRcDvsoDbUzM5n9"),
+        decimals: 4,
+        symbol: AssetSymbol(validating: "REKT")
+    )
+
+    /// Mango, CoinGecko's `mango-markets`, at 6 decimals
+    public static let mangoMarkets: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "MangoCzJ36AjZyKwVj3VnYU4GTonjfVEnJmvvWaxLac"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MNGO")
+    )
+
+    /// Degen, CoinGecko's `degen-base`, at 6 decimals
+    public static let degenBase: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "A7n89LqW67HJKzJkdWZa2xojuK4N5GBKHz3dfjATCZPz"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "DEGEN")
+    )
+
+    /// NVIDIA (Ondo Tokenized Stock), CoinGecko's `nvidia-ondo-tokenized-stock`, at 9 decimals
+    public static let nvidiaOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "gEGtLTPNQ7jcg25zTetkbmF7teoDLcrfTnQfmn2ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "NVDAON")
+    )
+
+    /// Not in Employment, Education, or Training, CoinGecko's `neet`, at 6 decimals
+    public static let neet: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "NEET")
+    )
+
+    /// Invesco QQQ ETF (Ondo Tokenized ETF), CoinGecko's `invesco-qqq-etf-ondo-tokenized-etf`, at 9 decimals
+    public static let invescoQqqEtfOndoTokenizedEtf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HrYNm6jTQ71LoFphjVKBTdAE4uja7WsmLG8VxB8ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "QQQON")
+    )
+
+    /// Renzo, CoinGecko's `renzo`, at 9 decimals
+    public static let renzo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3DK98MXPz8TRuim7rfQnebSLpA7VSoc79Bgiee1m4Zw5"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "REZ")
+    )
+
+    /// Sanctum, CoinGecko's `sanctum-2`, at 9 decimals
+    public static let sanctum2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CLoUDKc4Ane7HeQcPpE3YHnznRxhMimJ4MyaUqyHFzAu"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SANC")
+    )
+
+    /// Hims & Hers Health (Ondo Tokenized Stock), CoinGecko's `hims-hers-health-ondo-tokenized-stock`, at 9 decimals
+    public static let himsHersHealthOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "bdh3njeo19d2TBLAKTGvCWdSoArfVw8uZBAJHY4ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "HIMSON")
+    )
+
+    /// RHEA, CoinGecko's `rhea-2`, at 9 decimals
+    public static let rhea2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "8SMMso8Muv8d6i4WmMDthKt6TN1ysN6937sx3DKLXZqB"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "RHEA")
+    )
+
+    /// Dogelon Mars, CoinGecko's `dogelon-mars`, at 4 decimals
+    public static let dogelonMars: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7ZCm8WBN9aLa3o47SoYctU6iLdj7wkGG5SV2hE5CgtD5"),
+        decimals: 4,
+        symbol: AssetSymbol(validating: "ELON")
+    )
+
+    /// Clearpool, CoinGecko's `clearpool`, at 9 decimals
+    public static let clearpool: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AeXrLftu8chuY4ctc6oDeG4dUx6Yr4aqeakUMFNvACdg"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "CPOOL")
+    )
+
+    /// Nirvana ANA, CoinGecko's `nirvana-ana-2`, at 6 decimals
+    public static let nirvanaAna2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5DkzT65YJvCsZcot9L6qwkJnsBCPmKHjJz3QU7t7QeRW"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ANA")
+    )
+
+    /// CARV, CoinGecko's `carv`, at 6 decimals
+    public static let carv: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AFJtnuqGMaj5jAo6Pwxo28r1f7XAXXTSA8q3rG3q8b4A"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "CARV")
+    )
+
+    /// MicroStrategy (Ondo Tokenized Stock), CoinGecko's `microstrategy-ondo-tokenized-stock`, at 9 decimals
+    public static let microstrategyOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FSz4ouiqXpHuGPcpacZfTzbMjScoj5FfzHkiyu2ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "MSTRON")
+    )
+
+    /// Croatian Football Federation Token, CoinGecko's `croatian-ff-fan-token`, at 9 decimals
+    public static let croatianFfFanToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EWhqwYvieNsYCbn5Mb71ZopXYqiMvHmSfV2dUYNpdv2M"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "VATRENI")
+    )
+
+    /// Zerebro, CoinGecko's `zerebro`, at 6 decimals
+    public static let zerebro: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ZEREBRO")
+    )
+
+    /// DEAPCOIN, CoinGecko's `deapcoin`, at 6 decimals
+    public static let deapcoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BgwQjVNMWvt2d8CN51CsbniwRWyZ9H9HfHkEsvikeVuZ"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "DEP")
+    )
+
+    /// FLOCK, CoinGecko's `flock-2`, at 9 decimals
+    public static let flock2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FmysnoAQ7ifx3La6C7D9cM5tcpoTxEnakbnZPhrC2pJi"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "FLOCK")
+    )
+
+    /// Frax (prev. FXS), CoinGecko's `frax-share`, at 18 decimals
+    public static let fraxShare: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6LX8BhMQ4Sy2otmAWj7Y5sKd9YTVVUgfMsBzT6B9W7ct"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "FRAX")
+    )
+
+    /// iShares Bitcoin Trust (Ondo Tokenized), CoinGecko's `ishares-bitcoin-trust-ondo-tokenized`, at 9 decimals
+    public static let isharesBitcoinTrustOndoTokenized: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6JLG8iUkAuqiBhL3j2ckDMDf5oWAa6awmyaWezKondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "IBITON")
+    )
+
+    /// Tensor, CoinGecko's `tensor`, at 9 decimals
+    public static let tensor: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "TNSR")
+    )
+
+    /// Edel, CoinGecko's `edel`, at 9 decimals
+    public static let edel: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5g6wVay8NYQ5Tspo4irj9YqSFfQoPDW7apkX352N29PP"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "EDEL")
+    )
+
+    /// would, CoinGecko's `would`, at 6 decimals
+    public static let would: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "J1Wpmugrooj1yMyQKrdZ2vwRXG5rhfx3vTnYE39gpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WOULD")
+    )
+
+    /// OpenAI (Republic Pre-IPO), CoinGecko's `openai-republic-pre-ipo`, at 2 decimals
+    public static let openaiRepublicPreIpo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "8jo8yuaQj2t48rKKUy5V7txxVihDo1Ayb2HvuBwSisS3"),
+        decimals: 2,
+        symbol: AssetSymbol(validating: "PREOPAI")
+    )
+
+    /// Billions Network, CoinGecko's `billions-network`, at 8 decimals
+    public static let billionsNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Bi11Je4MH3PpyCNiuTAepRbsA5U6DK3DJy79ZFthddX"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "BILL")
+    )
+
+    /// Paradex, CoinGecko's `paradex`, at 9 decimals
+    public static let paradex: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3ywtR9qQH4BuA7LSfLvEuW1gh6ha7EK18XwLbHvhryPZ"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "DIME")
+    )
+
+    /// Super Inu, CoinGecko's `super-inu-2`, at 6 decimals
+    public static let superInu2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DEW9dSN6QpWyNthphCpMmAbZP1Q4cEKR9xQXAri98WDP"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "SI")
+    )
+
+    /// Hylo USD, CoinGecko's `hylo-usd`, at 6 decimals
+    public static let hyloUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "5YMkXAYccHSGnHn9nob9xEvv6Pvka9DZWH7nTbotTu9E"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "HYUSD")
+    )
+
+    /// Tokenised GBP, CoinGecko's `tokenised-gbp`, at 9 decimals
+    public static let tokenisedGbp: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2zMqyX4AYCk6mgy5UZ2S7zUaLxwERhK5WjqDzkPPbSpW"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "TGBP")
+    )
+
+    /// Obligate Trade Finance Yield, CoinGecko's `obligate-trade-finance-yield`, at 9 decimals
+    public static let obligateTradeFinanceYield: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BwB3tNH92jKw6naNGDYDbDwRo8bvYxZVvZjRZRcoWR2h"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "OTFY")
+    )
+
+    /// Pax Dollar, CoinGecko's `paxos-standard`, at 6 decimals
+    public static let paxosStandard: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HVbpJAQGNpkgBaYBZQBR1t7yFdvaYVp2vCQQfKKEN4tM"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "USDP")
+    )
+
+    /// NYC, CoinGecko's `nyc-token`, at 9 decimals
+    public static let nycToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Ho5fkxk9uqUuVN5kt7TUFacduWCpKPAuYkM9HD3KAXA2"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "NYC")
+    )
+
+    /// Metaplex, CoinGecko's `metaplex`, at 6 decimals
+    public static let metaplex: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "METAewgxyPbgwsseH8T16a39CQ5VyVxZi9zXiDPY18m"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MPLX")
+    )
+
+    /// GMT, CoinGecko's `stepn`, at 9 decimals
+    public static let stepn: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7i5KKsX2weiTkry7jA4ZwSuXGhs5eJBEjY8vVxR4pfRx"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GMT")
+    )
+
+    /// iShares Silver Trust (Ondo Tokenized Stock), CoinGecko's `ishares-silver-trust-ondo-tokenized-stock`, at 9 decimals
+    public static let isharesSilverTrustOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "iy11ytbSGcUnrjE6Lfv78TFqxKyUESfku1FugS9ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SLVON")
+    )
+
+    /// StrikeX, CoinGecko's `strikecoin`, at 9 decimals
+    public static let strikecoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9HCRyuqrFDt1kUrwuUF7xjb2eqCgFmC5433MjqJ3STRX"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "STRX")
+    )
+
+    /// HOME, CoinGecko's `home`, at 9 decimals
+    public static let home: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "J3umBWqhSjd13sag1E1aUojViWvPYA5dFNyqpKuX3WXj"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "HOME")
+    )
+
+    /// WOO, CoinGecko's `woo-network`, at 9 decimals
+    public static let wooNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Dz8VutERqbHR2aFL5A3s1Ky4dG1unJT1jUFXXPaY9ytX"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "WOO")
+    )
+
+    /// Audius, CoinGecko's `audius`, at 8 decimals
+    public static let audius: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "AUDIO")
+    )
+
+    /// AntFun, CoinGecko's `antfun`, at 6 decimals
+    public static let antfun: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CWZ6BsdnjkDVTGkmL6bGbJXXig6ceef12KvyGQW14cMt"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ANTFUN")
+    )
+
+    /// Verse World, CoinGecko's `verse-world`, at 6 decimals
+    public static let verseWorld: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "vRseBFqTy9QLmmo5qGiwo74AVpdqqMTnxPqWoWMpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "VERSE")
+    )
+
+    /// Doge Head Coin, CoinGecko's `doge-head-coin`, at 9 decimals
+    public static let dogeHeadCoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DCHLn5uLCDjPcmyxqeV3EFA1hAT518RR3u7gQe8iUiYQ"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "DHC")
+    )
+
+    /// Theros, CoinGecko's `theros`, at 5 decimals
+    public static let theros: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2UfBjNeDwzZsoUnr3hNKF4vkzAgiGmBNYCAxLq72cPa2"),
+        decimals: 5,
+        symbol: AssetSymbol(validating: "THEROS")
+    )
+
+    /// Stable Coin, CoinGecko's `stable-coin-2`, at 9 decimals
+    public static let stableCoin2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "DBAzBUXaLj1qANCseUPZz4sp9F8d2sc78C4vKjhbTGMA"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "SBC")
+    )
+
+    /// Zylo Ecosystem, CoinGecko's `zylo-ecosystem`, at 9 decimals
+    public static let zyloEcosystem: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HnGCbLLonRzNRAFHqv5AbvZ4FixMkUQztE2egh4sAmqZ"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "ZYLO")
+    )
+
+    /// World Mobile Token, CoinGecko's `world-mobile-token`, at 6 decimals
+    public static let worldMobileToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "WMTXyYKUMTG3VuZA5beXuHVRLpyTwwaoP7h2i8YpuRH"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WMTX")
+    )
+
+    /// aixbt, CoinGecko's `aixbt`, at 8 decimals
+    public static let aixbt: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "14zP2ToQ79XWvc7FQpm4bRnp9d6Mp1rFfsUW3gpLcRX"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "AIXBT")
+    )
+
+    /// Alphabet Class A (Ondo Tokenized Stock), CoinGecko's `alphabet-class-a-ondo-tokenized-stock`, at 9 decimals
+    public static let alphabetClassAOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "bbahNA5vT9WJeYft8tALrH1LXWffjwqVoUbqYa1ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GOOGLON")
+    )
+
+    /// Bonfida, CoinGecko's `bonfida`, at 6 decimals
+    public static let bonfida: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EchesyfXePKdLtoiZSL8pBe8Myagyy8ZRqsACNCFGnvp"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "FIDA")
+    )
+
+    /// Realio Network Token, CoinGecko's `realio-network`, at 11 decimals
+    public static let realioNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "HELn8rSM1rp8vAjNH4NYXzX6FvCbwWMGqLfaMgiBnZFV"),
+        decimals: 11,
+        symbol: AssetSymbol(validating: "RIO")
+    )
+
+    /// ChainGPT, CoinGecko's `chaingpt`, at 9 decimals
+    public static let chaingpt: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CCDfDXZxzZtkZLuhY48gyKdXc5KywqpR8xEVHHh8ck1G"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "CGPT")
+    )
+
+    /// Gigachad, CoinGecko's `gigachad-2`, at 5 decimals
+    public static let gigachad2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9"),
+        decimals: 5,
+        symbol: AssetSymbol(validating: "GIGA")
+    )
+
+    /// Perle, CoinGecko's `perle`, at 8 decimals
+    public static let perle: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "PERLEQKUNUp1dgFZ8EvyXHdN9d6ZQqfGxALDvfs6pDs"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "PRL")
+    )
+
+    /// inu wif sword, CoinGecko's `inu-wif-sword`, at 6 decimals
+    public static let inuWifSword: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2BVfJ4AHMvHdKtEZNHaBr48dQzTfZvYkjaaxbM6bpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "SWORDINU")
+    )
+
+    /// WalletConnect Token, CoinGecko's `connect-token-wct`, at 9 decimals
+    public static let connectTokenWct: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "WCTk5xWdn5SYg56twGj32sUF3W4WFQ48ogezLBuYTBY"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "WCT")
+    )
+
+    /// Graphite Protocol, CoinGecko's `graphite-protocol`, at 9 decimals
+    public static let graphiteProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "31k88G5Mq7ptbRDf3AM13HAq6wRQHXHikR8hik7wPygk"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "GP")
+    )
+
+    /// AI XOVIA, CoinGecko's `ai-xovia`, at 9 decimals
+    public static let aiXovia: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "AiXxRGmRc5oDiFXbEeRX9obPpr3Zir7rks1ef2NjddiF"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "AIX")
+    )
+
+    /// Neuberger Securitize High Income Tokenized Fund, CoinGecko's `neuberger-securitize-high-income-tokenized-fund`, at 6 decimals
+    public static let neubergerSecuritizeHighIncomeTokenizedFund: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EuTtCw35R3BJnTmXCREctjCU9XTkZXsQjqnoNg7NwdnZ"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "HINC")
+    )
+
+    /// Hivemapper, CoinGecko's `hivemapper`, at 9 decimals
+    public static let hivemapper: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4vMsoUT2BWatFweudnQM1xedRLfJgJ7hswhcpz4xgBTy"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "HONEY")
+    )
+
+    /// Intel (Ondo Tokenized Stock), CoinGecko's `intel-ondo-tokenized-stock`, at 9 decimals
+    public static let intelOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "cJpUMp5R7rZ6fGeLHbHhrRuJzK9mkyKDjZqNpT3ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "INTCON")
+    )
+
+    /// IdleMine, CoinGecko's `idlemine`, at 9 decimals
+    public static let idlemine: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BjcRmwm8e25RgjkyaFE56fc7bxRgGPw96JUkXRJFEroT"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "IDLE")
+    )
+
+    /// iShares 20+ Year Treasury Bond ETF (Ondo Tokenized ETF), CoinGecko's `ishares-20-year-treasury-bond-etf-ondo-tokenized-etf`, at 9 decimals
+    public static let ishares20YearTreasuryBondEtfOndoTokenizedEtf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "KaSLSWByKy6b9FrCYXPEJoHmLpuFZtTCJk1F1Z9ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "TLTON")
+    )
+
+    /// Qkacoin, CoinGecko's `qkacoin`, at 7 decimals
+    public static let qkacoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "mtQ5jWgCqrgBiSut29b4HV19RkMBGA6vidwTMqhNmyy"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "QKA")
+    )
+
+    /// Sandisk Corporation xStock, CoinGecko's `sandisk-corporation-xstock`, at 8 decimals
+    public static let sandiskCorporationXstock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Xswbpc8UqU6e1j9QZEWCjBMjyvz4twqD7PCy6j2e7jj"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "SNDKX")
+    )
+
+    /// GRIFFAIN, CoinGecko's `griffain`, at 6 decimals
+    public static let griffain: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "GRIFFAIN")
+    )
+
+    /// Credible Finance, CoinGecko's `credible-finance`, at 6 decimals
+    public static let credibleFinance: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CREDBHvVqREBCAxMihzr8D1nepHMr2gmQoZWpmgGmeta"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "CRED")
+    )
+
+    /// pippin, CoinGecko's `pippin`, at 6 decimals
+    public static let pippin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "PIPPIN")
+    )
+
+    /// Coin98, CoinGecko's `coin98`, at 6 decimals
+    public static let coin98: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "C98A4nkJXhpVZNAZdHUA95RpTF3T4whtQubL3YobiUX9"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "C98")
+    )
+
+    /// EURØP, CoinGecko's `schuman-europ`, at 6 decimals
+    public static let schumanEurop: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "euro5sNHrZC2wu2RoLvy6xxoVMc3Qnd1vjxoWf4MftA"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "EUROP")
+    )
+
+    /// Ninja Squad Token, CoinGecko's `ninja-squad`, at 8 decimals
+    public static let ninjaSquad: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "G7iK3prSzAA4vzcJWvsLUEsdCqzR7PnMzJV61vSdFSNW"),
+        decimals: 8,
+        symbol: AssetSymbol(validating: "NST")
+    )
+
+    /// MarsMi, CoinGecko's `marsmi`, at 6 decimals
+    public static let marsmi: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "GqXX9MfkURBZ5cFym9HDzqTL7uZkjtCSqLkUSe2xpump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "MARSMI")
+    )
+
+    /// Goatseus Maximus, CoinGecko's `goatseus-maximus`, at 6 decimals
+    public static let goatseusMaximus: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "GOAT")
+    )
+
+    /// TDCCP, CoinGecko's `tdccp`, at 9 decimals
+    public static let tdccp: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "Hg8bKz4mvs8KNj9zew1cEF9tDw1x2GViB4RFZjVEmfrD"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "TDCCP")
+    )
+
+    /// Tesla (Ondo Tokenized Stock), CoinGecko's `tesla-ondo-tokenized-stock`, at 9 decimals
+    public static let teslaOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "KeGv7bsfR4MheC1CkmnAVceoApjrkvBhHYjWb67ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "TSLAON")
+    )
+
+    /// Marvell Technology (Ondo Tokenized Stock), CoinGecko's `marvell-technology-ondo-tokenized-stock`, at 9 decimals
+    public static let marvellTechnologyOndoTokenizedStock: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "FovBwhoV5KQjZCdhoM6jgXYwXLX3F8vgAfvmLH7ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "MRVLON")
+    )
+
+    /// Moonbirds, CoinGecko's `moonbirds`, at 6 decimals
+    public static let moonbirds: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "G7vQWurMkMMm2dU3iZpXYFTHT9Biio4F4gZCrwFpKNwG"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "BIRB")
+    )
+
+    /// iShares Core MSCI EAFE ETF (Ondo Tokenized ETF), CoinGecko's `ishares-core-msci-eafe-etf-ondo-tokenized-etf`, at 9 decimals
+    public static let isharesCoreMsciEafeEtfOndoTokenizedEtf: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "C9J9vZ8N79GzzxFoRkPWCkGtMKU8akg4FhUk4r9ondo"),
+        decimals: 9,
+        symbol: AssetSymbol(validating: "IEFAON")
+    )
 }

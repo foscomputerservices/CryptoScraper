@@ -14,4 +14,25 @@ extension ALGORAND.Algorand {
         decimals: 6,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// Brazilian Digital, CoinGecko's `brz`, at 4 decimals
+    public static let brz: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "112866019"),
+        decimals: 4,
+        symbol: AssetSymbol(validating: "BRZ")
+    )
+
+    /// FOLKS, CoinGecko's `folks`, at 6 decimals
+    public static let folks: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "3203964481"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "FOLKS")
+    )
+
+    /// Realio Network Token, CoinGecko's `realio-network`, at 7 decimals
+    public static let realioNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "2751733"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "RIO")
+    )
 }

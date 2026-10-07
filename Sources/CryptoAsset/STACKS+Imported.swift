@@ -8,4 +8,10 @@ import FOSFoundation
 import Foundation
 
 extension STACKS.Stacks {
+    /// Zest Protocol, CoinGecko's `zest-protocol`, at 6 decimals
+    public static let zestProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "SP1A27KFY4XERQCCRCARCYD1CC5N7M6688BSYADJ7.zest-token"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "ZEST")
+    )
 }

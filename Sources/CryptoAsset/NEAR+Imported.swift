@@ -21,4 +21,109 @@ extension NEAR.Near {
         decimals: 6,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// Chainlink, CoinGecko's `chainlink`, at 18 decimals
+    public static let chainlink: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "514910771af9ca656af840dff83e8264ecf986ca.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "LINK")
+    )
+
+    /// Uniswap, CoinGecko's `uniswap`, at 18 decimals
+    public static let uniswap: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "1f9840a85d5af5bf1d1762f925bdaddc4201f984.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "UNI")
+    )
+
+    /// Aave, CoinGecko's `aave`, at 18 decimals
+    public static let aave: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "AAVE")
+    )
+
+    /// The Graph, CoinGecko's `the-graph`, at 18 decimals
+    public static let theGraph: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "c944e90c64b2c07662a292be6244bdf05cda44a7.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "GRT")
+    )
+
+    /// Compound, CoinGecko's `compound-governance-token`, at 18 decimals
+    public static let compoundGovernanceToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "c00e94cb662c3520282e6f5717214004a7f26888.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "COMP")
+    )
+
+    /// Basic Attention, CoinGecko's `basic-attention-token`, at 18 decimals
+    public static let basicAttentionToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "0d8775f648430679a709e98d2b0cb6250d2887ef.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "BAT")
+    )
+
+    /// Synthetix, CoinGecko's `havven`, at 18 decimals
+    public static let havven: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "c011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "SNX")
+    )
+
+    /// yearn.finance, CoinGecko's `yearn-finance`, at 18 decimals
+    public static let yearnFinance: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "0bc529c00c6401aef6d220be8c6ea1667f6ad93e.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "YFI")
+    )
+
+    /// Sushi, CoinGecko's `sushi`, at 18 decimals
+    public static let sushi: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "6b3595068778dd592e39a122f4f5a5cf09c90fe2.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "SUSHI")
+    )
+
+    /// Amp, CoinGecko's `amp-token`, at 18 decimals
+    public static let ampToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ff20817765cb7f73d4bde2e66e067e58d11095c2.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "AMP")
+    )
+
+    /// Aurora, CoinGecko's `aurora-near`, at 18 decimals
+    public static let auroraNear: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "AURORA")
+    )
+
+    /// Gemini Dollar, CoinGecko's `gemini-dollar`, at 2 decimals
+    public static let geminiDollar: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "056fd409e1d7a124bd7017459dfea2f387b6d5cd.factory.bridge.near"),
+        decimals: 2,
+        symbol: AssetSymbol(validating: "GUSD")
+    )
+
+    /// RHEA, CoinGecko's `rhea-2`, at 18 decimals
+    public static let rhea2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "token.rhealab.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "RHEA")
+    )
+
+    /// WOO, CoinGecko's `woo-network`, at 18 decimals
+    public static let wooNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4691937a7508860f876c9c0a2a617e7d9e945d4b.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "WOO")
+    )
+
+    /// DODO, CoinGecko's `dodo`, at 18 decimals
+    public static let dodo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "43dfc4159d86f3a37a5a4b3d4580b888ad7d4ddd.factory.bridge.near"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "DODO")
+    )
 }

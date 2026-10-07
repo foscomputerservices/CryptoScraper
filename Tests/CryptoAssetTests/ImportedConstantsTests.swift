@@ -52,7 +52,8 @@ struct ImportedConstantsTests {
     }
 
     @Test func theSharedRegistryHoldsEveryGeneratedDeclarationFromTheStart() throws {
-        #expect(Assets.all.map(\.aggregatorId) == ["tether", "usd-coin", "pepe"])
+        // The three of the keyless run lead the top-1000 run's (2026-10-07) in rank order
+        #expect(Array(Assets.all.map(\.aggregatorId).prefix(3)) == ["tether", "usd-coin", "pepe"])
         for declaration in Assets.all {
             let shared = try AssetRegistry.shared.declaration(of: declaration.asset)
             #expect(Array(shared.instances.prefix(declaration.instances.count)) == declaration.instances)

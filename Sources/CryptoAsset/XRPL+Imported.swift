@@ -14,4 +14,18 @@ extension XRPL.XRPLedger {
         decimals: 6,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// EUR CoinVertible, CoinGecko's `societe-generale-forge-eurcv`, at 0 decimals
+    public static let societeGeneraleForgeEurcv: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "4555524356000000000000000000000000000000.rUNaS5sqRuxZz6V7rBGhoSaZiVYA3ut4UL"),
+        decimals: 0,
+        symbol: AssetSymbol(validating: "EURCV")
+    )
+
+    /// EURØP, CoinGecko's `schuman-europ`, at 0 decimals
+    public static let schumanEurop: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EUROP.rMkEuRii9w9uBMQDnWV5AA43gvYZR9JxVK"),
+        decimals: 0,
+        symbol: AssetSymbol(validating: "EUROP")
+    )
 }

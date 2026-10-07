@@ -21,8 +21,9 @@
 //   --delay <s>    the wait between two of CoinGecko's coin details (default: CoinGeckoAggregator.pageDelay)
 //   --help         prints these flags and exits, asking nothing of the network
 //
-// With COIN_GECKO_KEY set, CoinGecko is asked at its pro endpoint with the key in its header; without it, at the
-// free endpoint. The key is never printed.
+// With COIN_GECKO_KEY set, CoinGecko is asked at its pro endpoint with the key in its header; with COIN_GECKO_DEMO_KEY
+// set, at the free endpoint with the demo key in its header (30 calls a minute: --delay 2); without either, at the
+// free endpoint keyless. No key is ever printed.
 
 import CryptoScraper // ../
 import Foundation
@@ -41,7 +42,8 @@ let usage = """
       --delay <s>    the wait between two of CoinGecko's coin details (default: \(CoinGeckoAggregator.pageDelay))
       --help         prints these flags and exits, asking nothing of the network
 
-    With COIN_GECKO_KEY set, CoinGecko is asked at its pro endpoint; without it, at the free endpoint.
+    With COIN_GECKO_KEY set, CoinGecko is asked at its pro endpoint; with COIN_GECKO_DEMO_KEY, at the free endpoint
+    with the demo key (30 calls a minute: --delay 2); without either, at the free endpoint keyless.
     """
 
 var arguments = CommandLine.arguments.dropFirst().makeIterator()
@@ -87,9 +89,11 @@ let namespaceFileNames = [
 ]
 
 print("import-assets: the top \(top), on \(date), into \(out)")
-print(ProcessInfo.processInfo.environment["COIN_GECKO_KEY"] == nil
-    ? "CoinGecko: the free endpoint, no key"
-    : "CoinGecko: the pro endpoint, a key set (not printed)")
+print(ProcessInfo.processInfo.environment["COIN_GECKO_KEY"] != nil
+    ? "CoinGecko: the pro endpoint, a key set (not printed)"
+    : ProcessInfo.processInfo.environment["COIN_GECKO_DEMO_KEY"] != nil
+    ? "CoinGecko: the free endpoint, a demo key set (not printed)"
+    : "CoinGecko: the free endpoint, no key")
 
 // MARK: Reading, paced, with one patient retry on a refusal
 
@@ -123,8 +127,9 @@ func printReport(_ title: String, _ report: AssetImporter.Report) {
     for (kind, count) in report.counts.sorted(by: { $0.key < $1.key }) {
         print("  \(kind): \(count)")
     }
-    // Every finding but the contracts on chains the library has no conformer for, which are many and only counted
-    for finding in report.findings where finding.kind != "chainNotAdmitted" {
+    // Every finding but the three that are many and only counted: the contracts on chains the library has no
+    // conformer for, and the exchanges' listed names with no coin id or no class
+    for finding in report.findings where finding.kind != "chainNotAdmitted" && finding.kind != "noClass" && finding.kind != "noCoinId" {
         print("    \(finding)")
     }
 }

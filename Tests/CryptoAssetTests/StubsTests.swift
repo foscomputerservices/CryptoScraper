@@ -10,7 +10,9 @@ import Testing
 struct StubsTests {
     // The symbols a real exchange lists that this library knows: none may be a stub's.
     private let realSymbols: Set<String> = Set(AssetRegistry.libraryDeclarations.map(\.symbol.text))
-    private let shippedDecimals: Set<Int> = Set(AssetRegistry.libraryDeclarations.flatMap { $0.instances.map(\.decimals) })
+    // Every decimals from 0 through 18 ships since the top-1000 run of 2026-10-07, so a stub marks itself by its
+    // instance id, never by its decimals
+    private let shippedInstanceIds: Set<String> = Set(AssetRegistry.libraryDeclarations.flatMap { $0.instances.map(\.instance.id) })
 
     @Test func theAssetStubIsSelfMarking() {
         let stub = Asset.stub()
@@ -25,7 +27,7 @@ struct StubsTests {
         #expect(stub.symbol.text == "FRED")
         #expect(stub.instances == [AssetDeclaration.Instance.stub()])
         #expect(!realSymbols.contains(stub.symbol.text))
-        #expect(!shippedDecimals.contains(AssetDeclaration.Instance.stub().decimals))
+        #expect(!shippedInstanceIds.contains(AssetDeclaration.Instance.stub().instance.id))
         #expect(AssetDeclaration.Instance.stub().instance == AssetInstance.stub())
     }
 

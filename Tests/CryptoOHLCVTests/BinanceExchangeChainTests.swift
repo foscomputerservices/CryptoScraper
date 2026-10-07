@@ -69,7 +69,8 @@ struct BinanceExchangeChainTests {
 
     @Test func theChainsTokensAreItsHoldings() throws {
         let symbols = Set(BinanceExchangeChain.default.chainTokenInfos.map(\.symbol))
-        #expect(symbols == ["BTC", "USDT"])
+        // The two the recording states, among the top-1000 run's (2026-10-07)
+        #expect(symbols.isSuperset(of: ["BTC", "USDT"]))
         let usdt = try #require(BinanceExchangeChain.default.tokenInfo(for: BinanceHolding.usdt.address))
         #expect(usdt.symbol == "USDT" && usdt.tokenName == "Tether")
     }
@@ -82,7 +83,8 @@ struct BinanceExchangeChainTests {
         #expect(try chain.contract(for: "USDT") == BinanceHolding.usdt)
     }
 
-    @Test(arguments: ["ETH", "BTCUSDT", "usdt", ""])
+    // "ETH" was the unlisted name until the top-1000 run of 2026-10-07 listed it; FRED is the reserved fake
+    @Test(arguments: ["FRED", "BTCUSDT", "usdt", ""])
     func aNameTheTableLacksThrows(name: String) {
         #expect(throws: AssetError.self) { try BinanceExchangeChain.default.contract(for: name) }
     }
@@ -205,14 +207,16 @@ struct BinanceExchangeChainTests {
     }
 
     @Test func anUndeclaredBaseGivesAMarketWithANilHoldingAndBinancesNamesAsFacts() async throws {
-        let pepe = Self.exchangeInfo(replacing: #""symbol":"BTCUSDT","status":"TRADING","baseAsset":"BTC""#,
-                                     with: #""symbol":"PEPEUSDT","status":"TRADING","baseAsset":"PEPE""#)
-        let session = ReplaySession { _, _ in .ok(pepe) }
+        // PEPE was the undeclared base until the top-1000 run of 2026-10-07 declared it (at Binance's 2); FRED is
+        // the reserved fake no table lists
+        let fred = Self.exchangeInfo(replacing: #""symbol":"BTCUSDT","status":"TRADING","baseAsset":"BTC""#,
+                                     with: #""symbol":"FREDUSDT","status":"TRADING","baseAsset":"FRED""#)
+        let session = ReplaySession { _, _ in .ok(fred) }
         let client = Self.client(session, registry: try Self.registry())
-        let name = try BinanceMarketName(validating: "PEPEUSDT")
+        let name = try BinanceMarketName(validating: "FREDUSDT")
         let market = try await client.market(name)
         #expect(market.base == nil)
-        #expect(market.baseSymbol.text == "PEPE" && market.baseDecimals == 8)
+        #expect(market.baseSymbol.text == "FRED" && market.baseDecimals == 8)
         #expect(market.quote == AssetInstance(BinanceHolding.usdt))
         await #expect(throws: BinanceOHLCVError.unknownMarket(name)) {
             try await client.ohlcv(market: name, interval: Binance.day, from: Recorded.rangeStart, through: Recorded.rangeEnd)

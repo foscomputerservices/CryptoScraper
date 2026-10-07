@@ -8,12 +8,38 @@ import FOSFoundation
 import Foundation
 
 extension COSMOS.CosmosHub {
+    /// Injective, CoinGecko's `injective-protocol`, at 18 decimals
+    public static let injectiveProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ibc/64BA6E31FE887D66C6F8F31C7B1A80C7CA179239677B4088BB55F5EA07DBE273"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "INJ")
+    )
+
+    /// dYdX, CoinGecko's `dydx-chain`, at 0 decimals
+    public static let dydxChain: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ibc/831F0B1BBB1D08A2B75311892876D71565478C532967545476DF4C2D7492E48C"),
+        decimals: 0,
+        symbol: AssetSymbol(validating: "DYDX")
+    )
 }
 
 extension COSMOS.THORChain {
 }
 
 extension COSMOS.Terra {
+    /// Injective, CoinGecko's `injective-protocol`, at 18 decimals
+    public static let injectiveProtocol: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ibc/25BC59386BB65725F735EFC0C369BB717AA8B5DAD846EAF9CBF5D0F18F207211"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "INJ")
+    )
+
+    /// Monerium EUR emoney, CoinGecko's `monerium-eur-money-2`, at 6 decimals
+    public static let moneriumEurMoney2: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "ibc/8D52B251B447B7160421ACFBD50F6B0ABE5F98D2C404B03701130F12044439A1"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "EURE")
+    )
 }
 
 extension COSMOS.FetchAI {
