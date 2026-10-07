@@ -55,11 +55,15 @@ struct KrakenOHLCVClientContractTests {
         }
     }
 
+    // Carried in step 4a of the identity PR: the market's assets are Kraken's declared holdings, no longer assets made
+    // from Kraken's symbol and decimals; Kraken's decimals are the declared holdings'.
     @Test func theAssetsAreKrakensOwnAtKrakensDecimals() async throws {
         let session = ReplaySession(route: Self.route)
         let first = try #require(try await Self.client(session).ohlcv(market: Self.xbtusd, interval: Feed.day, from: Self.from, through: Self.through).first)
-        #expect(first.open.base == (try Asset(symbol: "XBT", unitExponent: 10)))
-        #expect(first.open.quote == (try Asset(symbol: "USD", unitExponent: 4)))
+        #expect(first.open.base.id == EXCHANGE.Kraken.chainId + ":XBT")
+        #expect(first.open.quote.id == EXCHANGE.Kraken.chainId + ":USD")
+        #expect(try AssetRegistry.shared.decimals(of: first.open.base) == 10)
+        #expect(try AssetRegistry.shared.decimals(of: first.open.quote) == 4)
     }
 
     @Test func theRequestCarriesThePairTheMinutesAndTheSecondBeforeTheRange() async throws {

@@ -20,8 +20,10 @@ import Crypto
 /// Coinbase Advanced Trade's exchange client (C31): its public and private REST, its signing, its errors as ``ExchangeClientError``
 ///
 /// A private request carries a JWT made for it alone, signed ES256 with the CDP key: its subject and key id the key's
-/// name, its issuer "cdp", valid for two minutes from now, its `uri` the request's method, host and path. Every
-/// request is one call of FOSFoundation's fetch.
+/// name, its issuer "cdp", valid for two minutes from now, its `uri` the request's method, host and path, with a
+/// random nonce in the header. A signed call on a client made without a credential throws
+/// ``ExchangeClientError/unauthorized(text:)``. Every request is one call of FOSFoundation's fetch; every call to
+/// Coinbase's API, but not the status page, is counted against the request budget.
 ///
 /// ```swift
 /// let client = CoinbaseClient(credential: try CoinbaseCredential(keyName: name, privateKeyPEM: pem))
@@ -32,8 +34,15 @@ import Crypto
 /// **Accounts.** An account is a Coinbase portfolio's uuid. An order goes to the portfolio the key belongs to, so
 /// the `account` an order member takes is not sent; ``transfer(_:from:to:)`` moves money between two portfolios.
 ///
-/// **Numbers.** A product's assets are Coinbase's currencies at the decimals of the product's increments; every
-/// number Coinbase sends as text is decoded exactly. Coinbase's sandbox answers fixed responses and is no test market.
+/// **Holdings.** Every call works in Coinbase's declared holding constants (``CoinbaseHolding``); Coinbase's currency
+/// ids reach them only through ``CoinbaseExchangeChain``'s table. The client adds Coinbase's declarations to its
+/// registry at init, registers Coinbase's chain, and configures itself into the chain's scanner. A product's
+/// increments are checked against the declared holdings' decimals (AR45): an increment finer than a holding counts is
+/// refused, never read past. A currency the table lacks gives a market with a `nil` holding and refuses a money value.
+/// The table, the holding constants and the chain live in CryptoOHLCV, not in this plug-in.
+///
+/// **Numbers.** Every number Coinbase sends as text is decoded exactly, in the declared holding; `base_increment` is
+/// a market's `lotSize`, and `base_min_size` its `minimumOrder`. Coinbase's sandbox answers fixed responses and is no test market.
 public struct CoinbaseClient: ExchangeClient {
     public typealias Credential = CoinbaseCredential
     public typealias MarketName = CoinbaseMarketName
@@ -47,36 +56,58 @@ public struct CoinbaseClient: ExchangeClient {
     private let now: @Sendable () -> Date
     private let state: CoinbaseClientState
     private let tally: RequestTally
+    private let registry: AssetRegistry
+    // Coinbase's declarations added to the registry at init, or why they could not be: thrown by every read that needs them
+    private let declared: Result<Void, any Error>
 
     /// - Parameters:
     ///   - credential: The CDP key; `nil` for a client that only reads the markets and the books
     ///   - session: The session the requests go through; a test passes a recorded one
     ///   - now: The clock each JWT is made at
+    ///   - registry: The statement every amount and price is read against; Coinbase's holdings are added to it here
     public init(
         credential: CoinbaseCredential?,
         session: any URLSessionProtocol = URLSession.session(config: DataFetch<URLSession>.urlSessionConfiguration()),
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        registry: AssetRegistry = .shared
     ) {
         self.credential = credential
         self.session = session
         self.now = now
         self.state = CoinbaseClientState()
         self.tally = RequestTally(window: Self.budgetWindow)
+        self.registry = registry
+        self.declared = Result { try CoinbaseExchangeChain.declare(in: registry) }
+        CoinbaseExchangeChain.default.scanner.configure(client: self)
     }
 
     public var hasTestMarket: Bool { false }
 
     // MARK: Markets and books
 
+    /// Every product Coinbase lists, each with its holdings resolved through ``CoinbaseExchangeChain``'s table
+    ///
+    /// A product whose currency the table lacks, or the statement does not declare, comes with a `nil` base or quote
+    /// and a `nil` lot size and minimum order. A currency the table lacks is no error here.
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when an increment is finer than the declared holding's
+    ///   decimals
     public func markets() async throws -> [ExchangeClientMarket<CoinbaseMarketName>] {
         do {
+            try declared.get()
             let listed: CoinbaseProducts = try await send("GET", "/api/v3/brokerage/market/products", signed: false)
             return try listed.products.map { product in
-                let assets = try product.assets()
+                let pair = try product.holdings(in: registry)
+                // Coinbase states no decimals for a currency: the precision it states, each increment's places, is
+                // handed up as the fact. Its alias (BTC-USD's "BTC-USDC") settles in another holding, so it is not
+                // the market's second name.
                 return ExchangeClientMarket(
-                    name: try CoinbaseMarketName(validating: product.productId), base: assets.base, quote: assets.quote,
-                    lotSize: try product.baseIncrement.amount(of: assets.base),
-                    minimumOrder: try product.baseMinSize.amount(of: assets.base),
+                    name: try CoinbaseMarketName(validating: product.productId), alternateName: nil,
+                    baseSymbol: try AssetSymbol(validating: pair.baseName), baseDecimals: product.baseIncrement.fractionDigits,
+                    quoteSymbol: try AssetSymbol(validating: pair.quoteName), quoteDecimals: product.quoteIncrement.fractionDigits,
+                    base: pair.base, quote: pair.quote,
+                    lotSize: try pair.base.map { try product.baseIncrement.amount(of: $0, in: registry) },
+                    minimumOrder: try pair.base.map { try product.baseMinSize.amount(of: $0, in: registry) },
                     maxLeverage: product.maxLeverage, leverageSet: nil, isPerpetual: product.isPerpetual
                 )
             }
@@ -88,10 +119,14 @@ public struct CoinbaseClient: ExchangeClient {
     /// The book from Coinbase's product book and product: the best bid and ask, Coinbase's mid, `volume_24h` as the
     /// base volume, and `approximate_quote_24h_volume` as the quote volume, cut toward zero at the quote asset's base
     /// unit. Where Coinbase writes that turnover as "", it publishes no quote figure, and the quote volume is the base
-    /// volume priced at the mid.
+    /// volume priced at the mid. The read time is the book's own time, or now where Coinbase's time does not parse.
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when a side of the book is empty, when Coinbase states
+    ///   no day's volume, or when a currency of the product is no declared holding
     public func orderBook(market: CoinbaseMarketName) async throws -> ExchangeClientBook<CoinbaseMarketName> {
         do {
             let product = try await self.product(market)
+            let pair = try product.holdings(in: registry).declared()
             let book: CoinbaseProductBook = try await send("GET", "/api/v3/brokerage/market/product_book",
                                                            query: [URLQueryItem(name: "product_id", value: market.text), URLQueryItem(name: "limit", value: "1")], signed: false)
             guard let bid = book.pricebook.bids.first?.price, let ask = book.pricebook.asks.first?.price else {
@@ -105,11 +140,11 @@ public struct CoinbaseClient: ExchangeClient {
             let turnover = try product.quoteVolume24h ?? volume.times(book.midMarket)
             return ExchangeClientBook(
                 market: market,
-                mid: try book.midMarket.price(of: product.assets().quote, per: product.assets().base),
-                bestBid: try bid.price(of: product.assets().quote, per: product.assets().base),
-                bestAsk: try ask.price(of: product.assets().quote, per: product.assets().base),
-                baseVolume: try volume.amount(of: product.assets().base),
-                quoteVolume: try turnover.amountCutTowardZero(of: product.assets().quote),
+                mid: try book.midMarket.price(of: pair.quote, per: pair.base, in: registry),
+                bestBid: try bid.price(of: pair.quote, per: pair.base, in: registry),
+                bestAsk: try ask.price(of: pair.quote, per: pair.base, in: registry),
+                baseVolume: try volume.amount(of: pair.base, in: registry),
+                quoteVolume: try turnover.amountCutTowardZero(of: pair.quote, in: registry),
                 readAt: CoinbaseTime.date(book.pricebook.time) ?? now()
             )
         } catch {
@@ -119,18 +154,26 @@ public struct CoinbaseClient: ExchangeClient {
 
     // MARK: Orders
 
-    /// Reduce-only is not sent for a spot product, which holds no position to reduce
+    /// Reduce-only is not sent for a spot product, which holds no position to reduce. The client order id is sent as
+    /// `client_order_id` in a UUID's form; Coinbase requires one, so with none given the client sends a fresh UUID.
+    /// An immediate-or-cancel order is sent as Coinbase's `sor_limit_ioc`, any other as a `limit_limit_gtc` that is
+    /// not post-only. The order is read back once after it is created, and its status and fill give the result.
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when `size` or `limit` is in an asset other than the
+    ///   product's
     public func placeOrder(market: CoinbaseMarketName, side: ExchangeClientSide, size: Amount, limit: Price,
-                           immediateOrCancel: Bool, reduceOnly: Bool, account: String) async throws -> ExchangeClientOrderResult<CoinbaseOrderId> {
+                           immediateOrCancel: Bool, reduceOnly: Bool, clientOrderId: UInt128?, account: String) async throws -> ExchangeClientOrderResult<CoinbaseOrderId> {
         do {
-            let assets = try await self.product(market).assets()
-            guard size.asset == assets.base, limit.base == assets.base, limit.quote == assets.quote else {
+            let pair = try await self.product(market).holdings(in: registry).declared()
+            guard size.instance == pair.base, limit.base == pair.base, limit.quote == pair.quote else {
                 throw ExchangeClientError.wrongAsset
             }
+            let sizeText = try WireDecimal(size, in: registry).text
+            let limitText = try WireDecimal(limit, in: registry).text
             let configuration = immediateOrCancel
-                ? #"{"sor_limit_ioc":{"base_size":"\#(WireDecimal(size).text)","limit_price":"\#(WireDecimal(limit).text)"}}"#
-                : #"{"limit_limit_gtc":{"base_size":"\#(WireDecimal(size).text)","limit_price":"\#(WireDecimal(limit).text)","post_only":false}}"#
-            let body = #"{"client_order_id":"\#(UUID().uuidString.lowercased())","product_id":"\#(market.text)","side":"\#(side == .buy ? "BUY" : "SELL")","order_configuration":\#(configuration)}"#
+                ? #"{"sor_limit_ioc":{"base_size":"\#(sizeText)","limit_price":"\#(limitText)"}}"#
+                : #"{"limit_limit_gtc":{"base_size":"\#(sizeText)","limit_price":"\#(limitText)","post_only":false}}"#
+            let body = #"{"client_order_id":"\#(clientOrderId?.clientOrderIdUUIDText ?? UUID().uuidString.lowercased())","product_id":"\#(market.text)","side":"\#(side == .buy ? "BUY" : "SELL")","order_configuration":\#(configuration)}"#
             let created: CoinbaseCreatedOrder = try await send("POST", "/api/v3/brokerage/orders", body: body)
             guard created.success, let orderId = created.successResponse?.orderId else {
                 return .refused(code: created.errorResponse?.error ?? "", text: created.errorResponse?.message ?? "")
@@ -138,7 +181,7 @@ public struct CoinbaseClient: ExchangeClient {
             let id = try CoinbaseOrderId(validating: orderId)
             let read: CoinbaseOrderEnvelope = try await send("GET", "/api/v3/brokerage/orders/historical/\(orderId)")
             let order = read.order
-            let filled = try order.filledSize.amount(of: assets.base)
+            let filled = try order.filledSize.amount(of: pair.base, in: registry)
             let time = order.lastFillTime.flatMap(CoinbaseTime.date) ?? now()
             if filled.isZero {
                 switch order.status {
@@ -147,25 +190,29 @@ public struct CoinbaseClient: ExchangeClient {
                 default: return .resting(id: id, time: time)
                 }
             }
-            let price = try order.averageFilledPrice.price(of: assets.quote, per: assets.base)
+            let price = try order.averageFilledPrice.price(of: pair.quote, per: pair.base, in: registry)
             return filled == size ? .filled(units: filled, at: price, id: id, time: time) : .partlyFilled(units: filled, at: price, id: id, time: time)
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
         }
     }
 
+    /// The orders Coinbase lists as `OPEN`, each with its unfilled size; `account` is not sent
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when an order states no base size
     public func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<CoinbaseMarketName, CoinbaseOrderId>] {
         do {
             let listed: CoinbaseOrders = try await send("GET", "/api/v3/brokerage/orders/historical/batch", query: [URLQueryItem(name: "order_status", value: "OPEN")])
             var open: [ExchangeClientOpenOrder<CoinbaseMarketName, CoinbaseOrderId>] = []
             for order in listed.orders {
                 let market = try CoinbaseMarketName(validating: order.productId)
-                let assets = try await self.product(market).assets()
+                let pair = try await self.product(market).holdings(in: registry).declared()
                 guard let size = order.baseSize else {
                     throw ExchangeClientError.refused(code: nil, text: "Coinbase states no base size for order \(order.orderId)")
                 }
                 open.append(ExchangeClientOpenOrder(id: try CoinbaseOrderId(validating: order.orderId), market: market, side: order.side == "BUY" ? .buy : .sell,
-                                                    units: try size.amount(of: assets.base) - order.filledSize.amount(of: assets.base)))
+                                                    units: try size.amount(of: pair.base, in: registry) - order.filledSize.amount(of: pair.base, in: registry),
+                                                    clientOrderId: order.clientOrderId.flatMap(UInt128.init(clientOrderIdText:))))
             }
             return open
         } catch {
@@ -173,6 +220,9 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
+    /// Cancels one order by a batch cancel of its id; `market` and `account` are not sent
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` with Coinbase's failure reason when the cancel is not a success
     public func cancelOrder(_ id: CoinbaseOrderId, market: CoinbaseMarketName, account: String) async throws {
         do {
             let answer: CoinbaseCancelResults = try await send("POST", "/api/v3/brokerage/orders/batch_cancel", body: #"{"order_ids":["\#(id.text)"]}"#)
@@ -188,10 +238,16 @@ public struct CoinbaseClient: ExchangeClient {
     // MARK: The account
 
     /// The key's portfolio's USD wallet: its available and held money as the balance, its available money as what can
-    /// be withdrawn; a spot portfolio holds no positions. The mode is the key's portfolio type. The key reads its own
-    /// portfolio, so `account` is not sent.
+    /// be withdrawn; a spot portfolio holds no positions. The mode is the key's portfolio type. Coinbase's account
+    /// reads answer for the key's own portfolio alone, so `account` must be that portfolio's uuid, as Coinbase's
+    /// key permissions state it; another portfolio is refused, naming both, never answered with the key's own.
     public func accountState(account: String) async throws -> ExchangeClientAccountState<CoinbaseMarketName> {
         do {
+            try declared.get()
+            let permissions: CoinbaseKeyPermissions = try await send("GET", "/api/v3/brokerage/key_permissions")
+            guard account == permissions.portfolioUuid else {
+                throw ExchangeClientError.notTheKeysPortfolio(account, keys: permissions.portfolioUuid)
+            }
             var wallets: [CoinbaseAccount] = []
             var cursor: String?
             repeat {
@@ -202,12 +258,12 @@ public struct CoinbaseClient: ExchangeClient {
                 // The next page, until Coinbase says there is none or hands back the cursor it was just given.
                 cursor = page.hasNext && page.cursor != cursor ? page.cursor : nil
             } while cursor != nil
-            let permissions: CoinbaseKeyPermissions = try await send("GET", "/api/v3/brokerage/key_permissions")
 
-            let usd = Asset.usd
-            let wallet = wallets.first { $0.currency == "USD" }
-            let available = try wallet?.availableBalance.value.amount(of: usd) ?? .zero(of: usd)
-            let held = try wallet?.hold?.value.amount(of: usd) ?? .zero(of: usd)
+            // The dollar's wallet: the one whose currency the table names Coinbase's USD.
+            let usd = AssetInstance(CoinbaseHolding.usd)
+            let wallet = wallets.first { (try? CoinbaseExchangeChain.default.contract(for: $0.currency)) == CoinbaseHolding.usd }
+            let available = try wallet?.availableBalance.value.amount(of: usd, in: registry) ?? .zero(of: usd)
+            let held = try wallet?.hold?.value.amount(of: usd, in: registry) ?? .zero(of: usd)
             return ExchangeClientAccountState(
                 balance: available + held, withdrawable: available, positions: [],
                 mode: ExchangeClientAccountMode(name: permissions.portfolioType, allowsTransfer: permissions.canTransfer, allowsIsolatedMargin: false, alternatives: []),
@@ -219,9 +275,12 @@ public struct CoinbaseClient: ExchangeClient {
     }
 
     /// The portfolio's fills since the cursor, each with its commission; Advanced Trade states no deposit, withdrawal
-    /// or funding among them
+    /// or funding among them, oldest first by the cursor's time. A read is every page Coinbase hands back. `account`
+    /// is not sent. A fill's position effect is `nil`: List Fills states none (its side is buy or sell, nothing that
+    /// opens or closes a position).
     public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>] {
         do {
+            try declared.get()
             var fills: [CoinbaseFill] = []
             var cursor: String?
             repeat {
@@ -238,12 +297,12 @@ public struct CoinbaseClient: ExchangeClient {
             var items: [(Date, ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>)] = []
             for fill in fills {
                 let market = try CoinbaseMarketName(validating: fill.productId)
-                let assets = try await self.product(market).assets()
+                let pair = try await self.product(market).holdings(in: registry).declared()
                 let cursor = try CoinbaseLedgerCursor(sequenceTimestamp: fill.sequenceTimestamp)
                 let time = CoinbaseTime.date(fill.tradeTime) ?? cursor.time
                 items.append((cursor.time, .fill(
-                    market: market, side: fill.side == "BUY" ? .buy : .sell, units: try fill.size.amount(of: assets.base),
-                    price: try fill.price.price(of: assets.quote, per: assets.base), fee: try fill.commission.amount(of: assets.quote),
+                    market: market, side: fill.side == "BUY" ? .buy : .sell, units: try fill.size.amount(of: pair.base, in: registry),
+                    price: try fill.price.price(of: pair.quote, per: pair.base, in: registry), fee: try fill.commission.amount(of: pair.quote, in: registry),
                     order: try CoinbaseOrderId(validating: fill.orderId), closedBy: nil, time: time, cursor: cursor
                 )))
             }
@@ -253,6 +312,7 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
+    /// Always throws ``ExchangeClientError/notOffered(member:)``: Coinbase Advanced Trade sets no leverage
     public func setLeverage(_ leverage: Int, market: CoinbaseMarketName, isolated: Bool, account: String) async throws {
         do {
             throw ExchangeClientError.leverageNotSettable
@@ -261,10 +321,21 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
-    /// Moves `amount` from one portfolio to another, both named by their uuid
+    /// Moves `amount` from one portfolio to another, both named by their uuid; the currency is sent as the holding's
+    /// `wireName`
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when `amount` is not in a declared Coinbase holding
     public func transfer(_ amount: Amount, from: String, to: String) async throws {
         do {
-            let body = #"{"funds":{"value":"\#(WireDecimal(amount).text)","currency":"\#(amount.asset.symbol.text)"},"source_portfolio_uuid":"\#(Self.escaped(from))","target_portfolio_uuid":"\#(Self.escaped(to))"}"#
+            // The currency is the holding's wire name, the one Coinbase accepts: only a declared Coinbase holding moves.
+            try declared.get()
+            guard amount.instance.chainId == CoinbaseExchangeChain.default.id, let key = amount.instance.address,
+                  (try? registry.decimals(of: amount.instance)) != nil else {
+                throw ExchangeClientError.wrongAsset
+            }
+            let currency = CoinbaseHolding(address: key).wireName
+            let value = try WireDecimal(amount, in: registry).text
+            let body = #"{"funds":{"value":"\#(value)","currency":"\#(currency)"},"source_portfolio_uuid":"\#(Self.escaped(from))","target_portfolio_uuid":"\#(Self.escaped(to))"}"#
             let _: CoinbaseMovedFunds = try await send("POST", "/api/v3/brokerage/portfolios/move_funds", body: body)
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
@@ -284,7 +355,7 @@ public struct CoinbaseClient: ExchangeClient {
     }
 
     /// The limit Coinbase publishes for a key, 10,000 requests an hour, against this client's own count of its
-    /// requests in the hour
+    /// requests in the hour; every Coinbase API response is counted, the status page's is not
     public func requestBudget() async throws -> ExchangeClientRequestBudget {
         let reading = tally.reading(at: now())
         return ExchangeClientRequestBudget(limit: Self.budgetLimit, remaining: max(0, Self.budgetLimit - reading.count), resetsAt: reading.resetsAt)
@@ -293,7 +364,8 @@ public struct CoinbaseClient: ExchangeClient {
     static let budgetLimit = 10_000
     static let budgetWindow: Duration = .seconds(3_600)
 
-    /// The maintenance Coinbase schedules on its status page, each from its start to its end
+    /// The maintenance Coinbase schedules on its status page, each from its start to its end; a maintenance with a
+    /// missing or unparseable time, or an end before its start, is left out
     public func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow] {
         do {
             let page: CoinbaseStatusPage = try await ClientFetch.send(statusURL, session: session, errorType: CoinbaseAPIError.self, errorForResponse: { _, _ in nil })
@@ -308,7 +380,9 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
-    /// A notice for each product Coinbase lists as delisted, disabled or restricted, effective when read
+    /// A notice for each product Coinbase lists as delisted (a `.delisting`) or carrying a restriction flag
+    /// (`trading_disabled`, `is_disabled`, `cancel_only`, `limit_only` or `post_only`, a `.halt` naming the first),
+    /// effective when read
     public func notices() async throws -> [ExchangeClientNotice<CoinbaseMarketName>] {
         do {
             let listed: CoinbaseProducts = try await send("GET", "/api/v3/brokerage/market/products", signed: false)
@@ -329,6 +403,7 @@ public struct CoinbaseClient: ExchangeClient {
     // MARK: The wire
 
     private func product(_ market: CoinbaseMarketName) async throws -> CoinbaseProduct {
+        try declared.get()
         if let known = await state.product(market) {
             return known
         }
@@ -365,6 +440,11 @@ public struct CoinbaseClient: ExchangeClient {
     }
 
     /// The JWT for one request: ES256 over the base64url header and claims, as Coinbase's authentication guide makes it
+    ///
+    /// The header carries the key name as `kid` and a fresh random nonce; the claims are `sub`, `iss` ("cdp"), `nbf`
+    /// at `time` and `exp` 120 seconds after it, and `uri`.
+    ///
+    /// - Throws: what the P-256 signing throws
     package static func jwt(_ credential: CoinbaseCredential, uri: String, at time: Date) throws -> String {
         let seconds = Int64(time.timeIntervalSince1970)
         let nonce = (0..<16).map { _ in String(format: "%02x", UInt8.random(in: 0...255)) }.joined()

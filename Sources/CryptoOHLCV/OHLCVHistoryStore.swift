@@ -50,7 +50,15 @@ public struct OHLCVHistory: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
-/// A place where the feed's answer skipped bars: two kept bars further apart than one interval
+extension OHLCVHistory {
+    public static func stub() -> Self { .stub(gaps: []) }
+
+    public static func stub(bars: [OHLCVClientBar] = [.stub()], gaps: [OHLCVHistoryGap] = []) -> Self {
+        .init(bars: bars, gaps: gaps)
+    }
+}
+
+/// A place where the feed's answer skipped bars: two kept bars whose open times are not exactly one interval apart
 ///
 /// A gap is a fact of the feed, kept beside the bars and never filled. Whether a gap matters, and for how long, is
 /// the caller's to judge.
@@ -65,14 +73,27 @@ public struct OHLCVHistoryGap: Codable, Hashable, Sendable, Stubbable {
     public let lastBarOpenTime: Date
     /// The open time of the first bar after the gap
     public let nextBarOpenTime: Date
-    /// The whole intervals between the two bars' open times less one: the bars the feed did not give
+    /// The whole intervals between the two bars' open times, cut toward zero, less one: the bars the feed did not give
     ///
-    /// Zero when the next bar opened off the interval's step, less than one interval past the expected open.
+    /// Zero when the next bar opened off the interval's step, less than one interval past the expected open; -1 when
+    /// it opened less than one interval after the last.
     public let missingBarCount: Int
 
     public init(lastBarOpenTime: Date, nextBarOpenTime: Date, missingBarCount: Int) {
         self.lastBarOpenTime = lastBarOpenTime
         self.nextBarOpenTime = nextBarOpenTime
         self.missingBarCount = missingBarCount
+    }
+}
+
+extension OHLCVHistoryGap {
+    public static func stub() -> Self { .stub(missingBarCount: 42) }
+
+    public static func stub(
+        lastBarOpenTime: Date = Date(timeIntervalSince1970: 42 * 86_400),
+        nextBarOpenTime: Date = Date(timeIntervalSince1970: (42 + 43) * 86_400),
+        missingBarCount: Int = 42
+    ) -> Self {
+        .init(lastBarOpenTime: lastBarOpenTime, nextBarOpenTime: nextBarOpenTime, missingBarCount: missingBarCount)
     }
 }

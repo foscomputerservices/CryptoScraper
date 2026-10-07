@@ -18,8 +18,15 @@ final class BscScanTests: XCTestCase {
     // User account contract
     let accountContract = BNBContract(address: BscScanTests.bnbContractAddress)
 
-    private static let bscScan = BscScan()!
+    private static let bscScan = BscScan()
     private var bscScan: BscScan { BscScanTests.bscScan }
+
+    // Etherscan's API V2 serves this chain only to a paid plan, or not at all: each test is skipped in V2's words when
+    // it refuses the key or the chain.
+    override func setUp() async throws {
+        sleep(1) // One key, one rate: V2 answers a free key 3 calls a second across every chain
+        try await skipWhereEtherscanV2Refuses { _ = try await bscScan.getBalance(forAccount: accountContract) }
+    }
 
     // TODO: Restore when we figure out display
 //    func testGetAccountBalance() async throws {

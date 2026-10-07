@@ -3,29 +3,28 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
-import Synchronization
 
 /// A ``CryptoScanner`` implementation for the PolygonScan web service
+///
+/// PolygonScan's own API is no longer asked: the scanner is Polygon's configuration of Etherscan's API V2, asked at
+/// ``Etherscan/endPoint`` with ``Etherscan/apiKey`` for ``chainId`` (``EthereumScanner``).
 public struct PolygonScan: EthereumScanner, Sendable {
     // MARK: EthereumScanner Protocol
 
     public typealias Contract = MaticContract
 
+    /// The chain V2 is asked for, `EIP155.Polygon.chainId`
+    public static let chainId: String = EIP155.Polygon.chainId
+
     public static let supportedERCTokenTypes: Set<ERCTokenType> = [.erc20]
-    public static let endPoint: URL = .init(string: "https://api.polygonscan.com/api")!
-    public static let apiKeyName: String = "POLYGON_SCAN_KEY"
     public let userReadableName: String = "PolygonScan"
 
-    // Set from any concurrency domain and read from any, so it is held behind a `Mutex`.
-    private static let _apiKey = Mutex<String?>(nil)
-    public static var apiKey: String? {
-        get { _apiKey.withLock { $0 } ?? ProcessInfo.processInfo.environment[apiKeyName] }
-        set { _apiKey.withLock { $0 = newValue } }
-    }
-
-    /// If ``serviceConfigured`` == *true* returns a new instance
-    public init?() {
-        guard Self.serviceConfigured else { return nil }
-    }
+    /// A new instance, configured or not
+    ///
+    /// Never `nil`, so a chain always specifies its scanner (the owner's word, 2026-10-07). Until its key is set
+    /// (``serviceConfigured``), every call throws `EthereumScannerResponseError.missingApiKey`, never a zero. The key and
+    /// the endpoint are Etherscan's API V2's, shared with every chain's configuration (``Etherscan/apiKey``).
+    public init() {}
 }

@@ -8,13 +8,12 @@ import Foundation
 public extension EthereumScanner {
     /// Retrieves the ``CryptoTransaction``s for the given contract
     ///
-    /// - NOTE: This implementation includes ERC20 transactions as well as "normal" transactions.
+    /// - NOTE: This implementation includes "normal" and "internal" transactions, and ERC20 transactions when the
+    ///   scanner's ``EthereumScanner/supportedERCTokenTypes`` include ERC-20.
     ///
     /// - Parameter account: The contract from which to retrieve the transactions
     func getTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
-        let response: TransactionResponse = try await Self.endPoint.appending(
-            queryItems: TransactionResponse.httpQuery(address: account, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: TransactionResponse = try await Self.requestURL(TransactionResponse.httpQuery(address: account)).fetch()
 
         var result = [any CryptoTransaction]()
 
@@ -36,12 +35,9 @@ public extension EthereumScanner {
 
     /// Retrieves the 'Internal' ``CryptoTransaction``s for the account
     ///
-    /// - Parameter token: An optional token to filter the responses
     /// - Parameter account: The contract from which to retrieve the transactions
     func getInternalTransactions(forAccount account: Contract) async throws -> [any CryptoTransaction] {
-        let response: InternalTransactionResponse = try await Self.endPoint.appending(
-            queryItems: InternalTransactionResponse.httpQuery(address: account, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: InternalTransactionResponse = try await Self.requestURL(InternalTransactionResponse.httpQuery(address: account)).fetch()
 
         return try response.cryptoTransactions(
             ethContract: account.chain.mainContract
@@ -55,9 +51,7 @@ public extension EthereumScanner {
     func getERC20Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
-        let response: ERC20TokenTransactionResponse = try await Self.endPoint.appending(
-            queryItems: ERC20TokenTransactionResponse.httpQuery(address: account, token: token, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: ERC20TokenTransactionResponse = try await Self.requestURL(ERC20TokenTransactionResponse.httpQuery(address: account, token: token)).fetch()
 
         return try response.cryptoTransactions(
             ethContract: account.chain.mainContract
@@ -71,9 +65,7 @@ public extension EthereumScanner {
     func getERC721Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
-        let response: ERC721TokenTransactionResponse = try await Self.endPoint.appending(
-            queryItems: ERC721TokenTransactionResponse.httpQuery(address: account, token: token, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: ERC721TokenTransactionResponse = try await Self.requestURL(ERC721TokenTransactionResponse.httpQuery(address: account, token: token)).fetch()
 
         return try response.cryptoTransactions(
             ethContract: account.chain.mainContract
@@ -87,9 +79,7 @@ public extension EthereumScanner {
     func getERC1155Transactions(forToken token: Contract?, forAccount account: Contract) async throws -> [any CryptoTransaction] {
         guard token?.isChainToken != true else { return [] }
 
-        let response: ERC1155TokenTransactionResponse = try await Self.endPoint.appending(
-            queryItems: ERC1155TokenTransactionResponse.httpQuery(address: account, token: token, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: ERC1155TokenTransactionResponse = try await Self.requestURL(ERC1155TokenTransactionResponse.httpQuery(address: account, token: token)).fetch()
 
         return try response.cryptoTransactions(
             ethContract: account.chain.mainContract
@@ -161,24 +151,47 @@ public extension EthereumScanner {
 // MARK: "Normal" Transaction
 
 // https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
-private struct TransactionResponse: Decodable {
+struct TransactionResponse: Decodable {
     private let status: String
     private let message: String
     private let result: [Transaction]
+
+    // V2 refuses in the `result` itself, as text ("Free API access is not supported for this chain..."), where an
+    // answer holds the list; the text is kept so the refusal is thrown in V2's words.
+    private let refusal: String?
 
     var success: Bool {
         status == "1" || message == "OK"
     }
 
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.status = try container.decode(String.self, forKey: .status)
+        self.message = try container.decode(String.self, forKey: .message)
+        if let refusal = try? container.decode(String.self, forKey: .result) {
+            self.result = []
+            self.refusal = refusal
+        } else {
+            self.result = try container.decode([Transaction].self, forKey: .result)
+            self.refusal = nil
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case status
+        case message
+        case result
+    }
+
     func cryptoTransactions(ethContract: some CryptoContract) throws -> [any CryptoTransaction] {
         guard success else {
-            throw EthereumScannerResponseError.requestFailed(message)
+            throw EthereumScannerResponseError.requestFailed(refusal.map { message + " -- " + $0 } ?? message)
         }
 
         return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
     }
 
-    static func httpQuery(address: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(address: any CryptoContract) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "txlist"),
         .init(name: "address", value: address.address),
@@ -186,8 +199,7 @@ private struct TransactionResponse: Decodable {
         .init(name: "endblock", value: "99999999"),
         .init(name: "page", value: "1"),
         .init(name: "offset", value: "0"),
-        .init(name: "sort", value: "asc"),
-        .init(name: "apiKey", value: apiKey)
+        .init(name: "sort", value: "asc")
     ] }
 
     private struct Transaction: Decodable {
@@ -301,7 +313,7 @@ private struct InternalTransactionResponse: Decodable {
         return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
     }
 
-    static func httpQuery(address: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(address: any CryptoContract) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "txlistinternal"),
         .init(name: "address", value: address.address),
@@ -309,8 +321,7 @@ private struct InternalTransactionResponse: Decodable {
         .init(name: "endblock", value: "99999999"),
         .init(name: "page", value: "1"),
         .init(name: "offset", value: "0"),
-        .init(name: "sort", value: "asc"),
-        .init(name: "apiKey", value: apiKey)
+        .init(name: "sort", value: "asc")
     ] }
 
     private struct Transaction: Decodable {
@@ -438,7 +449,7 @@ private struct ERC20TokenTransactionResponse: Decodable {
         case result
     }
 
-    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?, apiKey: String) -> [URLQueryItem] {
+    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?) -> [URLQueryItem] {
         var result: [URLQueryItem] = [
             .init(name: "module", value: "account"),
             .init(name: "action", value: "tokentx"),
@@ -447,8 +458,7 @@ private struct ERC20TokenTransactionResponse: Decodable {
             .init(name: "endblock", value: "99999999"),
             .init(name: "page", value: "1"),
             .init(name: "offset", value: "0"),
-            .init(name: "sort", value: "asc"),
-            .init(name: "apiKey", value: apiKey)
+            .init(name: "sort", value: "asc")
         ]
 
         if let token {
@@ -564,7 +574,7 @@ private struct ERC721TokenTransactionResponse: Decodable {
         return try result.map { try $0.cryptoTransaction(ethContract: ethContract) }
     }
 
-    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?, apiKey: String) -> [URLQueryItem] {
+    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?) -> [URLQueryItem] {
         var result: [URLQueryItem] = [
             .init(name: "module", value: "account"),
             .init(name: "action", value: "tokennfttx"),
@@ -573,8 +583,7 @@ private struct ERC721TokenTransactionResponse: Decodable {
             .init(name: "endblock", value: "99999999"),
             .init(name: "page", value: "1"),
             .init(name: "offset", value: "0"),
-            .init(name: "sort", value: "asc"),
-            .init(name: "apiKey", value: apiKey)
+            .init(name: "sort", value: "asc")
         ]
 
         if let token {
@@ -744,7 +753,7 @@ private struct ERC1155TokenTransactionResponse: Decodable {
         case result
     }
 
-    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?, apiKey: String) -> [URLQueryItem] {
+    static func httpQuery(address: any CryptoContract, token: (any CryptoContract)?) -> [URLQueryItem] {
         var result: [URLQueryItem] = [
             .init(name: "module", value: "account"),
             .init(name: "action", value: "token1155tx"),
@@ -753,8 +762,7 @@ private struct ERC1155TokenTransactionResponse: Decodable {
             .init(name: "endblock", value: "99999999"),
             .init(name: "page", value: "1"),
             .init(name: "offset", value: "0"),
-            .init(name: "sort", value: "asc"),
-            .init(name: "apiKey", value: apiKey)
+            .init(name: "sort", value: "asc")
         ]
 
         if let token {

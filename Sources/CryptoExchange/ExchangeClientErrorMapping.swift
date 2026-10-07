@@ -12,7 +12,7 @@ import FoundationNetworking
 
 // The one place a failure of a request becomes C30's `ExchangeClientError` (the owner's ruling of 2026-10-06, "yes, one
 // shared error type"). A plug-in gives `mapping` its exchange's own translation first (its error body, its limit);
-// whatever that leaves is read here: the fetch's errors, the transport's, a decode's.
+// whatever that leaves is read here: the fetch's errors, the transport's, a decode's, the statement's refusal.
 
 extension ExchangeClientError {
     /// The shared error a failure of a request is, or `error` itself when it is a cancellation
@@ -34,6 +34,10 @@ extension ExchangeClientError {
             return ExchangeClientError.unreachable(text: transport.localizedDescription)
         case is DecodingError, is AmountError, is AssetError, is AssetSymbolError:
             return ExchangeClientError.malformedResponse(text: String(describing: error))
+        case let statement as AssetRegistryError:
+            // An answer the statement refuses (an undeclared instance, the units check's changed decimals) is the
+            // exchange's word refused, never the transport's failure
+            return ExchangeClientError.refused(code: nil, text: String(describing: statement))
         default:
             // Whatever else a request threw is the transport's (a session's own failure), never the exchange's word
             return ExchangeClientError.unreachable(text: String(describing: error))

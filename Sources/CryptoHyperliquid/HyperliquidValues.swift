@@ -61,32 +61,54 @@ public struct HyperliquidOrderId: Codable, Hashable, Sendable, Stubbable {
     public static func stub() -> Self { .init(42) }
 }
 
-/// Where a read of Hyperliquid's ledger resumes: the millisecond of the last item read
+/// Where a read of Hyperliquid's ledger resumes: the millisecond of the last item read, and that item's place among
+/// the items of its millisecond
 ///
-/// Hyperliquid's ledger reads take a start time, inclusive, so a read from a cursor hands up the item at the cursor's
-/// own millisecond again; an item is never lost between two reads, and one may come twice.
+/// Hyperliquid's ledger reads take a start time, inclusive, and two items can share a millisecond (two fills of one
+/// order, the funding of several coins in one hour). The client hands up the items of one millisecond in one order,
+/// the fills by Hyperliquid's trade id, then the funding by coin, then the other updates by hash, and the cursor
+/// after an item names its millisecond and its place in that order, 1 for the first; a read from the cursor asks from
+/// its millisecond and drops the items at or before its place, so an item is never lost and never comes twice while
+/// Hyperliquid's answer for that millisecond is the same.
+///
+/// It encodes as `{"milliseconds": …, "place": …}`; the earlier form, the millisecond alone, decodes as place 0, a
+/// read from the millisecond's first item.
 public struct HyperliquidLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     package let milliseconds: Int64
+    /// The item's place among the items of its millisecond, 1 for the first; 0 before the first
+    public let place: Int
 
     /// The instant the cursor names
     public var time: Date {
         Date(timeIntervalSince1970: Double(milliseconds) / 1000)
     }
 
-    package init(milliseconds: Int64) {
+    package init(milliseconds: Int64, place: Int) {
         self.milliseconds = milliseconds
+        self.place = place
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case milliseconds, place
     }
 
     public init(from decoder: any Decoder) throws {
-        self.milliseconds = try decoder.singleValueContainer().decode(Int64.self)
+        if let keyed = try? decoder.container(keyedBy: CodingKeys.self), keyed.contains(.milliseconds) {
+            self.milliseconds = try keyed.decode(Int64.self, forKey: .milliseconds)
+            self.place = try keyed.decode(Int.self, forKey: .place)
+        } else {
+            self.milliseconds = try decoder.singleValueContainer().decode(Int64.self)
+            self.place = 0
+        }
     }
 
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(milliseconds)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(milliseconds, forKey: .milliseconds)
+        try container.encode(place, forKey: .place)
     }
 
-    public static func stub() -> Self { .init(milliseconds: 42 * 86_400_000) }
+    public static func stub() -> Self { .init(milliseconds: 42 * 86_400_000, place: 1) }
 }
 
 /// Hyperliquid's own refusal of a request: `{"status":"err","response":"User or API Wallet 0x… does not exist."}`

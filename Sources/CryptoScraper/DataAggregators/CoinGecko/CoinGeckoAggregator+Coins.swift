@@ -3,11 +3,15 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
-import Synchronization
 
 public extension CoinGeckoAggregator {
     /// Returns the known tokens for a given ``CryptoContract`` type
+    ///
+    /// Reads `/coins/list` with each coin's platforms once per aggregator and keeps the answer for later calls. A
+    /// contract on a platform the reference table does not map to a known chain, or whose address its chain refuses,
+    /// is left out.
     func tokens<Contract: CryptoContract & Sendable>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
         let response: [CoinGeckoTokenResponse]
         if let cachedTokensResponse {
@@ -17,7 +21,7 @@ public extension CoinGeckoAggregator {
                 .appending(path: "coins/list")
                 .appending(
                     queryItems: TokensResponse.httpQuery()
-                ).fetch(errorType: CoinGeckoError.self)
+                ).fetch(headers: Self.headers(), errorType: CoinGeckoError.self)
             cachedTokensResponse = response
         }
 
@@ -109,8 +113,10 @@ struct CoinGeckoTokenResponse: Decodable {
         }
     }
 
+    // A contract whose address its chain refuses (`BlockChainError.malformedAddress`) is left out, as a platform the
+    // table lacks is: one listing the chain cannot read never fails the whole list.
     private func equivalentContracts() throws -> [any CryptoContract] {
-        try platforms.compactMap { platform, contractId in
+        platforms.compactMap { platform, contractId in
             guard
                 let chain = platform.chain,
                 let contractId,
@@ -119,7 +125,7 @@ struct CoinGeckoTokenResponse: Decodable {
                 return nil
             }
 
-            return try chain.contract(for: contractId) as (any CryptoContract)
+            return try? chain.contract(for: contractId) as (any CryptoContract)
         }
     }
 }
@@ -134,45 +140,14 @@ private extension Collection<CoinGeckoTokenResponse> {
     }
 }
 
-// Debug bookkeeping written from whichever domain decodes a response, so it is held behind a `Mutex`.
-private let unknownChain = Mutex<Set<String>>([])
-
 private extension String {
+    /// The chain CoinGecko calls `self`, through the one table of reference names,
+    /// `AssetRegistry.referenceChainIds` (design § 2.4); `nil` for a name the table lacks
     var chain: (any CryptoChain)? {
-        switch self {
-        case "ethereum": return .ethereum
-        case "fantom": return .fantom
-        case "binance-smart-chain": return .binance
-        case "polygon-pos": return .polygon
-        case "optimistic-ethereum": return .optimism
-        case "tron": return .tron
-
-        // TODO: Unsupported chains
-        case "arbitrum-one", "iotex", "wanchain", "avalanche", "algorand",
-             "tomochain", "cronos", "energi", "moonriver", "solana", "zilliqa", "icon",
-             "astar", "cube", "neo", "telos", "oasis", "tezos", "aurora", "yocoin", "bitgert", "dogechain",
-             "harmony-shard-0", "stellar", "huobi-token", "bitkub-chain", "sora", "xdai",
-             "smartbch", "near-protocol", "cardano", "kardiachain", "karura", "chiliz",
-             "boba", "Bitcichain", "metis-andromeda", "elrond", "osmosis", "syscoin", "klay-token",
-             "moonbeam", "celo", "secret", "terra", "evmos", "cosmos", "okex-chain", "proof-of-memes",
-             "velas", "ronin", "ethereumpow", "fuse", "elastos", "theta", "milkomeda-cardano",
-             "meter", "hedera-hashgraph", "binancecoin", "xdc-network", "aptos", "xrp",
-             "arbitrum-nova", "nuls", "rootstock", "mixin-network", "songbird", "canto",
-             "fusion-network", "hydra", "kucoin-community-chain", "kava", "step-network",
-             "defi-kingdoms-blockchain", "echelon", "ethereum-classic", "vechain", "bitcoin-cash",
-             "waves", "nem", "everscale", "exosama", "findora", "gochain", "godwoken", "coinex-smart-chain",
-             "conflux", "bittorrent", "shiden network", "sx-network", "ontology", "thundercore", "flare-network",
-             "hoo-smart-chain", "function-x", "qtum", "onus", "skale", "eos", "ShibChain", "factom",
-             "polkadot", "wemix-network", "oasys", "celer-network", "vite", "stacks", "tombchain", "super-zero", "hoo", "komodo", "ardor", "kusama", "polygon-zkevm", "acala", "core", "terra-2", "zksync", "empire", "stratis", "metaverse-etp", "enq-enecuum", "omni", "bitshares", "thorchain", "pulsechain", "sui", "base", "ordinals", "linea", "the-open-network", "kujira", "trustless-computer", "mantle", "eos-evm", "rollux", "callisto", "tenet", "neon-evm", "alephium", "archway", "orenium", "x-layer", "oraichain", "blast", "starknet", "akash", "sei-network", "degen", "lightlink", "mode", "opbnb", "bitrock", "shimmer_evm", "neutron", "migaloo", "manta-pacific", "radix", "injective", "fraxtal", "bsquared-network", "internet-computer", "juno", "beam", "bevm", "bitcanna", "bifrost-network", "scroll", "merlin-chain", "humanode", "immutable", "map-protocol", "shibarium", "lukso", "comdex", "ergo", "drc-20", "zora-network", "flow", "gravity-bridge", "crescent", "hypra-network", "xpla", "oasis-sapphire", "defichain", "kadena", "ki-chain", "astar-zkevm", "massa", "aura-network", "dymension", "zklink-nova", "omniflix", "octaspace", "clover", "quicksilver", "saga", "casper-network", "sge", "rails-network", "omax", "valobit", "filecoin", "zetachain", "zkfair", "wax":
-            return nil
-
-        default:
-            #if DEBUG
-            if !isEmpty, unknownChain.withLock({ $0.insert(self).inserted }) {
-//                print("CoinGeckoAggregator: Unknown chain \(self)")
-            }
-            #endif
+        guard let chainId = try? AssetRegistry.chainId(named: self, by: .coinGecko) else {
             return nil
         }
+
+        return BlockChains.knownBlockChains.first { $0.id == chainId }
     }
 }

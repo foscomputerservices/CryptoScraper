@@ -19,7 +19,14 @@ final class OptimisticEtherscanTests: XCTestCase {
     let accountContract = OptimismContract(address: OptimisticEtherscanTests.optContractAddress)
 
     private static let optimisticEtherscan = OptimisticEtherscan()
-    private var optimismScan: OptimisticEtherscan { OptimisticEtherscanTests.optimisticEtherscan! }
+    private var optimismScan: OptimisticEtherscan { OptimisticEtherscanTests.optimisticEtherscan }
+
+    // Etherscan's API V2 serves this chain only to a paid plan, or not at all: each test is skipped in V2's words when
+    // it refuses the key or the chain.
+    override func setUp() async throws {
+        sleep(1) // One key, one rate: V2 answers a free key 3 calls a second across every chain
+        try await skipWhereEtherscanV2Refuses { _ = try await optimismScan.getBalance(forAccount: accountContract) }
+    }
 
     func testGetAccountBalance() async throws {
         let balance = try await optimismScan.getBalance(forAccount: accountContract)

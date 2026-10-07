@@ -25,11 +25,16 @@ import FoundationNetworking
 /// let days = try await client.ohlcv(market: btcusd, interval: .init(count: 1, unit: .day), from: start, through: end)
 /// ```
 ///
-/// A product's two assets are asked of the public `market/products/{id}` once per product and kept for the client's
-/// life: each asset by Coinbase's currency id at the decimals of the product's increment for it ("0.00000001" is 8).
+/// A product's two holdings are Coinbase's declared constants (``CoinbaseHolding``), each of its currency ids in the
+/// public `market/products/{id}` resolved through ``CoinbaseExchangeChain``'s table, once per product and kept for
+/// the client's life. The product's increment for each is checked against the declared holding's decimals (AR45).
 ///
 /// A 429 throws ``CoinbaseLimitError``; any other body Coinbase states as an error throws ``CoinbaseAPIError``;
-/// number text that is not a number, or finer than an asset holds, throws ``AmountError``.
+/// number text that is not a number, or finer than a holding holds, throws ``AmountError``; a currency id the table
+/// lacks, or whose holding the registry does not declare, throws `AssetError.malformedIdentity`; an increment finer
+/// than the declared holding's decimals throws `AssetRegistryError.decimalsChanged` (a coarser one is accepted); an
+/// interval Coinbase has no granularity for throws ``CoinbaseOHLCVError/unsupportedInterval(_:)``. When the init could
+/// not add Coinbase's declarations to its registry, every read throws what `AssetRegistry.add(_:)` threw.
 public struct CoinbaseOHLCVClient: OHLCVClient {
     public typealias MarketName = CoinbaseMarketName
 
@@ -37,20 +42,27 @@ public struct CoinbaseOHLCVClient: OHLCVClient {
     private let session: any URLSessionProtocol
     private let now: @Sendable () -> Date
     private let products: CoinbaseProductBook
+    private let registry: AssetRegistry
+    // Coinbase's declarations added to the registry at init, or why they could not be: thrown by every read
+    private let declared: Result<Void, any Error>
 
     /// - Parameters:
     ///   - baseURL: Coinbase's REST root
     ///   - session: The session the requests go through; a test passes a recorded one
     ///   - now: The clock that says whether a candle has closed
+    ///   - registry: The statement every amount and price is read against; Coinbase's holdings are added to it here
     public init(
         baseURL: URL = URL(string: "https://api.coinbase.com")!,
         session: any URLSessionProtocol = URLSession.session(config: DataFetch<URLSession>.urlSessionConfiguration()),
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        registry: AssetRegistry = .shared
     ) {
         self.baseURL = baseURL
         self.session = session
         self.now = now
         self.products = CoinbaseProductBook()
+        self.registry = registry
+        self.declared = Result { try CoinbaseExchangeChain.declare(in: registry) }
     }
 
     public func ohlcv(market: CoinbaseMarketName, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar] {
@@ -67,7 +79,7 @@ public struct CoinbaseOHLCVClient: OHLCVClient {
         return try candles
             .filter { $0.start >= start && $0.start <= end }
             .sorted { $0.start < $1.start }
-            .map { try $0.bar(of: product, intervalSeconds: seconds, now: clock) }
+            .map { try $0.bar(of: product, intervalSeconds: seconds, now: clock, in: registry) }
             .filter(\.isClosed)
     }
 
@@ -80,7 +92,7 @@ public struct CoinbaseOHLCVClient: OHLCVClient {
         guard let newest = candles.max(by: { $0.start < $1.start }) else {
             return nil
         }
-        let bar = try newest.bar(of: product, intervalSeconds: seconds, now: clock)
+        let bar = try newest.bar(of: product, intervalSeconds: seconds, now: clock, in: registry)
         return bar.isClosed ? nil : bar
     }
 
@@ -104,12 +116,14 @@ public struct CoinbaseOHLCVClient: OHLCVClient {
         return token
     }
 
+    // The product's two declared holdings, through the table, each checked against the product's increment (AR45).
     private func product(_ market: CoinbaseMarketName) async throws -> CoinbaseProductAssets {
+        try declared.get()
         if let known = await products.product(market) {
             return known
         }
         let info: CoinbaseProductInfo = try await get("/api/v3/brokerage/market/products/\(market.text)", [])
-        let product = try info.assets()
+        let product = try info.holdings(in: registry)
         await products.keep(product, as: market)
         return product
     }
@@ -149,10 +163,10 @@ public enum CoinbaseOHLCVError: Error, Hashable, Sendable {
     case malformedMarketName(String)
 }
 
-// A product's two assets.
+// A product's two declared holdings.
 package struct CoinbaseProductAssets: Sendable {
-    package let base: Asset
-    package let quote: Asset
+    package let base: AssetInstance
+    package let quote: AssetInstance
 }
 
 private actor CoinbaseProductBook {
@@ -169,7 +183,8 @@ private actor CoinbaseProductBook {
 
 // MARK: Response models
 
-// The part of a product this client reads: its two currencies and the increments that give their decimals.
+// The part of a product this client reads: its two currencies and their increments, checked against the declared
+// holdings' decimals.
 package struct CoinbaseProductInfo: Decodable, Sendable {
     package let baseCurrencyId: String
     package let quoteCurrencyId: String
@@ -183,12 +198,17 @@ package struct CoinbaseProductInfo: Decodable, Sendable {
         case quoteIncrement = "quote_increment"
     }
 
-    // Each asset at the decimals of its increment: "0.00000001" is exponent 8, "0.01" exponent 2, "1" exponent 0.
-    package func assets() throws -> CoinbaseProductAssets {
-        CoinbaseProductAssets(
-            base: try Asset(symbol: baseCurrencyId, unitExponent: baseIncrement.fractionDigits),
-            quote: try Asset(symbol: quoteCurrencyId, unitExponent: quoteIncrement.fractionDigits)
-        )
+    // Each currency's declared holding through the table, its increment's places ("0.00000001" is 8) checked against
+    // the declared decimals, only a finer one refused; a currency id the table lacks, or a holding not declared, is a
+    // finding, thrown as AssetError.malformedIdentity.
+    package func holdings(in registry: AssetRegistry) throws -> CoinbaseProductAssets {
+        guard let base = try CoinbaseExchangeChain.declaredInstance(wireName: baseCurrencyId, decimals: baseIncrement.fractionDigits, in: registry) else {
+            throw AssetError.malformedIdentity(baseCurrencyId)
+        }
+        guard let quote = try CoinbaseExchangeChain.declaredInstance(wireName: quoteCurrencyId, decimals: quoteIncrement.fractionDigits, in: registry) else {
+            throw AssetError.malformedIdentity(quoteCurrencyId)
+        }
+        return CoinbaseProductAssets(base: base, quote: quote)
     }
 }
 
@@ -226,16 +246,16 @@ struct CoinbaseCandle: Decodable, Sendable {
 
     // The bar: Coinbase states no close time, so it is the start plus the interval less one millisecond; closed once
     // the clock has passed it. Coinbase states no count of trades.
-    func bar(of product: CoinbaseProductAssets, intervalSeconds: Int64, now: Int64) throws -> OHLCVClientBar {
+    func bar(of product: CoinbaseProductAssets, intervalSeconds: Int64, now: Int64, in registry: AssetRegistry) throws -> OHLCVClientBar {
         let closeTime = (start + intervalSeconds) * 1000 - 1
         return OHLCVClientBar(
             openTime: Date(wireMilliseconds: start * 1000),
             closeTime: Date(wireMilliseconds: closeTime),
-            open: try open.price(of: product.quote, per: product.base),
-            high: try high.price(of: product.quote, per: product.base),
-            low: try low.price(of: product.quote, per: product.base),
-            close: try close.price(of: product.quote, per: product.base),
-            volume: try volume.amount(of: product.base),
+            open: try open.price(of: product.quote, per: product.base, in: registry),
+            high: try high.price(of: product.quote, per: product.base, in: registry),
+            low: try low.price(of: product.quote, per: product.base, in: registry),
+            close: try close.price(of: product.quote, per: product.base, in: registry),
+            volume: try volume.amount(of: product.base, in: registry),
             trades: nil,
             isClosed: now > closeTime
         )

@@ -1,4 +1,4 @@
-// CoinGeckoAggregator+Coins.swift
+// CoinGeckoAggregator+Price.swift
 //
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
@@ -13,6 +13,12 @@ public extension CoinGeckoAggregator {
     ///   - currency: The ``Currency`` to price the ``CryptoContract`` in
     ///
     /// - Returns: The ``Amount`` of the ``CryptoContract`` in ``Currency``
+    ///
+    /// - Note: CoinGecko is always asked for, and answers, the price in US dollars; that figure is returned as an
+    ///   amount of `currency` in its default display units, whatever `currency` is.
+    ///
+    /// - Precondition: the contract's ``TokenInfo/aggregatorId`` is set, and CoinGecko's answer holds its price;
+    ///   either missing traps (`fatalError`).
     func price<Contract: CryptoContract, C: Currency>(for contract: Contract, in currency: C) async throws -> Amount<C> {
 
         // https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd
@@ -22,7 +28,7 @@ public extension CoinGeckoAggregator {
             .appending(
                 queryItems: PriceResponse.httpQuery(contract: contract, currency: currency)
             )
-            .fetch(errorType: CoinGeckoError.self)
+            .fetch(headers: Self.headers(), errorType: CoinGeckoError.self)
 
         return try response.price(of: contract, in: currency)
     }

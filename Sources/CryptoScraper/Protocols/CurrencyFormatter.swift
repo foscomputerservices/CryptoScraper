@@ -55,8 +55,8 @@ public protocol CurrencyFormatter {
 ///     public var divisorFromBase: UInt128 {
 ///       let exponent: Double
 ///       switch self {
-///       case .cents: exponent = 1
-///       case .dollars: exponent = 10
+///       case .cents: exponent = 0
+///       case .dollars: exponent = 2
 ///       }
 ///       return UInt128(pow(10, exponent))
 ///     }
@@ -66,6 +66,14 @@ public protocol CurrencyFormatter {
 ///       case .cents: return "¢"
 ///       case .dollars: return "$"
 ///       }
+///     }
+///
+///     public var displayFractionDigits: Int {
+///       switch self {
+///       case .cents: return 0
+///       case .dollars: return 2
+///       }
+///     }
 ///   }
 /// ```
 public protocol CurrencyUnits: Codable, Equatable, Stubbable {
@@ -75,8 +83,7 @@ public protocol CurrencyUnits: Codable, Equatable, Stubbable {
     /// The default unit to display values to the user
     static var defaultDisplayUnits: Self { get }
 
-    /// The value to divide a given number by to convert from this ``CurrencyUnits``
-    /// to *chainBaseUnit*
+    /// The value to divide a quantity in *chainBaseUnits* by to convert it to this ``CurrencyUnits``
     var divisorFromBase: UInt128 { get }
 
     /// A ``String`` to display to the user to identify a value of this ``CryptoChain``

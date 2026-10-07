@@ -76,11 +76,36 @@ struct CoinbaseProduct: Decodable, Sendable {
         self.rootUnit = future?.contractRootUnit
     }
 
-    // The product's two assets at the decimals of its increments; a perpetual names its base by its contract's unit.
-    func assets() throws -> (base: Asset, quote: Asset) {
+    // The product's two holdings through the table, each increment's places checked against the declared holding's
+    // decimals (AR45); a product with an empty base currency id names its base by its contract's root unit. A currency the table lacks, or a holding the
+    // statement does not declare, is nil.
+    func holdings(in registry: AssetRegistry) throws -> CoinbasePair {
         let base = baseCurrencyId.isEmpty ? (rootUnit ?? baseCurrencyId) : baseCurrencyId
-        return (try Asset(symbol: base, unitExponent: baseIncrement.fractionDigits),
-                try Asset(symbol: quoteCurrencyId, unitExponent: quoteIncrement.fractionDigits))
+        return CoinbasePair(
+            base: try CoinbaseExchangeChain.declaredInstance(wireName: base, decimals: baseIncrement.fractionDigits, in: registry),
+            quote: try CoinbaseExchangeChain.declaredInstance(wireName: quoteCurrencyId, decimals: quoteIncrement.fractionDigits, in: registry),
+            baseName: base, quoteName: quoteCurrencyId
+        )
+    }
+}
+
+// A product's two declared holdings, nil where undeclared, and Coinbase's names for them.
+struct CoinbasePair: Sendable {
+    let base: AssetInstance?
+    let quote: AssetInstance?
+    let baseName: String
+    let quoteName: String
+
+    // A pair both of whose holdings are declared: the only kind a money value is made in.
+    struct Declared: Sendable {
+        let base: AssetInstance
+        let quote: AssetInstance
+    }
+
+    func declared() throws -> Declared {
+        guard let base else { throw ExchangeClientError.unknownAsset(baseName) }
+        guard let quote else { throw ExchangeClientError.unknownAsset(quoteName) }
+        return Declared(base: base, quote: quote)
     }
 }
 
@@ -133,9 +158,11 @@ struct CoinbaseOrder: Decodable, Sendable {
     let lastFillTime: String?
     let rejectMessage: String?
     let baseSize: WireDecimal?
+    /// The client order id the order was created with, as Coinbase hands it back
+    let clientOrderId: String?
 
     private enum CodingKeys: String, CodingKey {
-        case orderId = "order_id", productId = "product_id", side, status, filledSize = "filled_size"
+        case orderId = "order_id", productId = "product_id", side, status, filledSize = "filled_size", clientOrderId = "client_order_id"
         case averageFilledPrice = "average_filled_price", lastFillTime = "last_fill_time", rejectMessage = "reject_message"
         case orderConfiguration = "order_configuration"
     }
@@ -155,6 +182,7 @@ struct CoinbaseOrder: Decodable, Sendable {
         self.averageFilledPrice = try container.decode(WireDecimal.self, forKey: .averageFilledPrice)
         self.lastFillTime = try container.decodeIfPresent(String.self, forKey: .lastFillTime)
         self.rejectMessage = try container.decodeIfPresent(String.self, forKey: .rejectMessage)
+        self.clientOrderId = try container.decodeIfPresent(String.self, forKey: .clientOrderId)
         // The order's configuration is one entry, keyed by the kind of order; its base size is the order's size.
         let configurations = try container.decodeIfPresent([String: Sized].self, forKey: .orderConfiguration) ?? [:]
         self.baseSize = configurations.values.compactMap(\.baseSize).first
@@ -206,10 +234,12 @@ struct CoinbaseAccounts: Decodable, Sendable {
 struct CoinbaseKeyPermissions: Decodable, Sendable {
     let canTrade: Bool
     let canTransfer: Bool
+    /// The uuid of the portfolio the key belongs to, the one its account reads answer for
+    let portfolioUuid: String
     let portfolioType: String
 
     private enum CodingKeys: String, CodingKey {
-        case canTrade = "can_trade", canTransfer = "can_transfer", portfolioType = "portfolio_type"
+        case canTrade = "can_trade", canTransfer = "can_transfer", portfolioUuid = "portfolio_uuid", portfolioType = "portfolio_type"
     }
 }
 

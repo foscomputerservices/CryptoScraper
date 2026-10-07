@@ -18,8 +18,15 @@ final class FTMScanTests: XCTestCase {
     // User account contract
     private let accountContract = FantomContract(address: FTMScanTests.ftmContractAddress)
 
-    private static let ftmScan = FTMScan()!
+    private static let ftmScan = FTMScan()
     private var ftmScan: FTMScan { FTMScanTests.ftmScan }
+
+    // Etherscan's API V2 serves this chain only to a paid plan, or not at all: each test is skipped in V2's words when
+    // it refuses the key or the chain.
+    override func setUp() async throws {
+        sleep(1) // One key, one rate: V2 answers a free key 3 calls a second across every chain
+        try await skipWhereEtherscanV2Refuses { _ = try await ftmScan.getBalance(forAccount: accountContract) }
+    }
 
     // TODO: Restore when we figure out display
 //    func testGetAccountBalance() async throws {

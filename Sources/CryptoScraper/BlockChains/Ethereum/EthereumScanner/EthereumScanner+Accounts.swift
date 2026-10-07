@@ -6,13 +6,15 @@
 import Foundation
 
 public extension EthereumScanner {
-    /// Returns the balance (in Ethereum) of the given account
+    /// Returns the balance of the given account in the chain's coin, counted in its base unit (wei on Ethereum)
     ///
-    /// - Parameter account: The Ethereum account to query the balance for
+    /// - Parameter account: The account to query the balance for
+    ///
+    /// - Throws: ``EthereumScannerResponseError/missingApiKey(_:)`` until the key is set,
+    ///   ``EthereumScannerResponseError/requestFailed(_:)`` when V2 refuses, and
+    ///   ``EthereumScannerResponseError/invalidAmount`` when the answer is not an integer
     func getBalance(forAccount account: Contract) async throws -> Amount<Contract> {
-        let response: AccountResponse = try await Self.endPoint.appending(
-            queryItems: AccountResponse.httpQuery(account: account, apiKey: Self.requireApiKey())
-        ).fetch()
+        let response: AccountResponse = try await Self.requestURL(AccountResponse.httpQuery(account: account)).fetch()
 
         return try response.amount(
             forAccount: account.chain.mainContract
@@ -20,7 +22,7 @@ public extension EthereumScanner {
     }
 }
 
-private struct AccountResponse: Decodable {
+struct AccountResponse: Decodable {
     let status: String
     let message: String
     let result: String
@@ -42,11 +44,10 @@ private struct AccountResponse: Decodable {
     }
 
     // https://docs.etherscan.io/api-endpoints/accounts#get-ether-balance-for-a-single-address
-    static func httpQuery(account: any CryptoContract, apiKey: String) -> [URLQueryItem] { [
+    static func httpQuery(account: any CryptoContract) -> [URLQueryItem] { [
         .init(name: "module", value: "account"),
         .init(name: "action", value: "balance"),
         .init(name: "address", value: account.address),
-        .init(name: "tag", value: "latest"),
-        .init(name: "apiKey", value: apiKey)
+        .init(name: "tag", value: "latest")
     ] }
 }

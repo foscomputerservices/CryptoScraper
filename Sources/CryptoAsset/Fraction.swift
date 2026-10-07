@@ -23,7 +23,7 @@ import Foundation
 /// toward zero at the scale.
 ///
 /// ```swift
-/// let gain     = Fraction(amountOut - amountIn, over: amountIn)   // the gain in percent of the amount in
+/// let gain     = Fraction(amountOut - amountIn, over: amountIn)   // the gain, as a fraction of the amount in
 /// let step     = Fraction(basisPoints: 25)                     // 0.25 %, a slippage step
 /// let distance = Fraction(percent: 2)                          // a stop distance
 /// let leverage = Fraction(integer: 2)                          // 2x
@@ -52,9 +52,9 @@ public struct Fraction: Codable, Hashable, Comparable, Sendable, Stubbable {
         self.init(scaledNumerator: Int128(integer) * .assetScale)
     }
 
-    /// - Precondition: both amounts are of one asset; `whole` is not zero
+    /// - Precondition: both amounts are of one instance; `whole` is not zero
     public init(_ part: Amount, over whole: Amount) {
-        requireOneAsset(part.asset, whole.asset, "Fraction(_:over:)")
+        requireOneInstance(part.instance, whole.instance, "Fraction(_:over:)")
         precondition(!whole.isZero, "Fraction(_:over:) with a zero whole")
         self.init(scaledNumerator: part.baseUnits.scaled(by: .assetScale, over: whole.baseUnits))
     }
@@ -111,5 +111,16 @@ public struct Fraction: Codable, Hashable, Comparable, Sendable, Stubbable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(Self.scaleExponent, forKey: .scaleExponent)
         try container.encode(scaledNumerator, forKey: .numerator)
+    }
+}
+
+// MARK: Stubs
+
+extension Fraction {
+    public static func stub() -> Self { .stub(percent: 42) }
+
+    // A fraction's numerator is sealed, so its stub takes the percent it is made from.
+    public static func stub(percent: Int = 42) -> Self {
+        .init(percent: percent)
     }
 }

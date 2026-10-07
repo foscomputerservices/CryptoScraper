@@ -43,7 +43,7 @@ public struct KrakenAPIError: Error, Decodable, Hashable, Sendable {
         self.messages = messages
     }
 
-    // Kraken's two ways of saying the caller asked too often.
+    // Kraken's three ways of saying the caller asked too often.
     package var isLimit: Bool {
         messages.contains { $0.hasPrefix("EAPI:Rate limit exceeded") || $0.hasPrefix("EGeneral:Too many requests") || $0.hasPrefix("EOrder:Rate limit exceeded") }
     }
@@ -81,8 +81,8 @@ public struct HyperliquidLimitError: OHLCVClientLimitError, Hashable {
     }
 }
 
-/// Kraken asked the caller to slow down: HTTP 429, or "EAPI:Rate limit exceeded" / "EGeneral:Too many requests" in
-/// its error list
+/// Kraken asked the caller to slow down: HTTP 429, or "EAPI:Rate limit exceeded", "EGeneral:Too many requests" or
+/// "EOrder:Rate limit exceeded" in its error list
 public struct KrakenLimitError: OHLCVClientLimitError, Hashable {
     /// How long Kraken asked the caller to wait, or `nil` when it did not say (Kraken's error list never does)
     public let retryAfter: Duration?

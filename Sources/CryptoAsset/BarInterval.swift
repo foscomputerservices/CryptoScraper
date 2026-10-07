@@ -20,3 +20,13 @@ public struct BarInterval: Codable, Hashable, Sendable, Stubbable {
         self.unit = unit
     }
 }
+
+// MARK: Stubs
+
+extension BarInterval {
+    public static func stub() -> Self { .stub(count: 42) }
+
+    public static func stub(count: Int = 42, unit: Unit = .minute) -> Self {
+        .init(count: count, unit: unit)
+    }
+}

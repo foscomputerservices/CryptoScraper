@@ -3,11 +3,15 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
 import Synchronization
 
 public final class BitcoinChain: CryptoChain, Sendable {
     // MARK: CryptoChain Protocol
+
+    /// The chain's CAIP-2 identifier, the first part of every identity on it
+    public let id: String = BIP122.Bitcoin.chainId
 
     public let userReadableName: String = "Bitcoin"
 
@@ -54,7 +58,7 @@ public final class BitcoinChain: CryptoChain, Sendable {
         tokens.withLock { $0?[address] }
     }
 
-    public let scanner: BlockChainInfo? = .init()
+    public let scanner: BlockChainInfo = .init()
 
     static let btcContractAddress: String = "btc"
 

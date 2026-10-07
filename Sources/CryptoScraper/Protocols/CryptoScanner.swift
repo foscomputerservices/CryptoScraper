@@ -21,7 +21,7 @@ public protocol CryptoScanner {
     ///
     /// - Parameters:
     ///   - contract: The ``CryptoContract`` of the token to query
-    ///   - address: The ``CryptoContract`` address that holds the token
+    ///   - account: The ``CryptoContract`` address that holds the token
     func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract>
 
     /// Retrieves the ``CryptoTransaction``s for the given account
@@ -37,6 +37,6 @@ public protocol CryptoScanner {
     /// - NOTE: The way that block chains work, there can be multiple ``CryptoTransaction``s
     ///   with the same ``hash`` value.
     ///
-    /// - Parameter account: The ``CryptoContract`` from which to retrieve the transactions
+    /// - Parameter data: The scanner's recorded answer to decode the transactions from
     func loadTransactions(from data: Data) throws -> [any CryptoTransaction]
 }

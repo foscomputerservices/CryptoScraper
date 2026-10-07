@@ -20,8 +20,10 @@ import Testing
 
 enum Kraken {
     static let xbtusd = try! KrakenMarketName(validating: "XBTUSD")
-    static let xbt = try! Asset(symbol: "XBT", unitExponent: 10)
-    static let usd = try! Asset(symbol: "USD", unitExponent: 4)
+    // Kraken's declared holdings (step 4a of the identity PR), declared in the shared registry before any amount is
+    // made in them, whichever test runs first
+    static let xbt: AssetInstance = declared(KrakenHolding.xbt)
+    static let usd: AssetInstance = declared(KrakenHolding.usd)
     static let credential = try! KrakenCredential(apiKey: "FRED-KEY", base64Secret: "kQH5HW/8p1uGOVjbgWA7FunAmGO8lsSUXNsu3eow76sz84Q18fWxnyRzBHCd3pd5nE9qa99HAZtuZuj6F1huXg==")
     static let now = Date(timeIntervalSince1970: 1_791_272_956)
 
@@ -50,6 +52,15 @@ enum Kraken {
 
     static func client(_ session: ReplaySession) -> KrakenClient {
         KrakenClient(credential: credential, session: session, now: { now })
+    }
+
+    static func declared(_ holding: KrakenHolding) -> AssetInstance {
+        do {
+            try KrakenExchangeChain.declare(in: .shared)
+        } catch {
+            preconditionFailure("Kraken's declarations conflict with the shared registry: \(error)")
+        }
+        return AssetInstance(holding)
     }
 
     static func price(_ text: String) -> Price {
@@ -92,10 +103,22 @@ struct KrakenClientTests {
         #expect(markets.count == 3)
         let xbt = try #require(markets.first { $0.name == (try! KrakenMarketName(validating: "XXBTZUSD")) })
         #expect(xbt.base == Kraken.xbt && xbt.quote == Kraken.usd)
-        #expect(xbt.lotSize == Amount(baseUnits: 100, asset: Kraken.xbt))           // lot_decimals 8 at decimals 10
-        #expect(xbt.minimumOrder == Amount(baseUnits: 500_000, asset: Kraken.xbt))  // ordermin "0.00005"
+        #expect(xbt.lotSize == Amount(baseUnits: 100, of: Kraken.xbt))           // lot_decimals 8 at decimals 10
+        #expect(xbt.minimumOrder == Amount(baseUnits: 500_000, of: Kraken.xbt))  // ordermin "0.00005"
         #expect(xbt.maxLeverage == 10)
         #expect(!xbt.isPerpetual)
+    }
+
+    // Step 4b of the identity PR: C30's market carries Kraken's second name for a pair, the one it accepts beside its key.
+    @Test func aRecordedPairCarriesBothOfKrakensNames() async throws {
+        let markets = try await Kraken.client(ReplaySession(route: Kraken.route())).markets()
+        let xbt = try #require(markets.first { $0.name == (try! KrakenMarketName(validating: "XXBTZUSD")) })
+        #expect(xbt.alternateName == (try KrakenMarketName(validating: "XBTUSD")))
+        let eth = try #require(markets.first { $0.name == (try! KrakenMarketName(validating: "XETHZUSD")) })
+        #expect(eth.alternateName == (try KrakenMarketName(validating: "ETHUSD")))
+        // Kraken writes SOLUSD's key and its alternative name alike: one name
+        let sol = try #require(markets.first { $0.name == (try! KrakenMarketName(validating: "SOLUSD")) })
+        #expect(sol.alternateName == nil)
     }
 
     @Test func theBookIsTheTickersBestBidAndAskTheirMidAndTheDaysVolume() async throws {
@@ -115,7 +138,7 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route(["QueryOrders": .ok(Data(queried.utf8))]))
         let size = try WireDecimal(parsing: "1.25").amount(of: Kraken.xbt)
         let result = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .buy, size: size, limit: Kraken.price("27600"),
-                                                                  immediateOrCancel: true, reduceOnly: false, account: "")
+                                                                  immediateOrCancel: true, reduceOnly: false, clientOrderId: nil, account: "")
         let id = try KrakenOrderId(validating: "OUF4EM-FRGI2-MQMWZD")
         #expect(result == .filled(units: size, at: Kraken.price("27500"), id: id, time: Date(timeIntervalSince1970: 1_688_665_499.1922)))
         let added = try #require(session.requests.first { $0.url!.lastPathComponent == "AddOrder" })
@@ -130,7 +153,7 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route(["QueryOrders": .ok(Data(queried.utf8))]))
         let size = try WireDecimal(parsing: "1.25").amount(of: Kraken.xbt)
         let result = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .buy, size: size, limit: Kraken.price("27600"),
-                                                                  immediateOrCancel: false, reduceOnly: false, account: "")
+                                                                  immediateOrCancel: false, reduceOnly: false, clientOrderId: nil, account: "")
         let id = try KrakenOrderId(validating: "OUF4EM-FRGI2-MQMWZD")
         #expect(result == .resting(id: id, time: Date(timeIntervalSince1970: 1_688_665_499.1922)))
     }
@@ -138,7 +161,7 @@ struct KrakenClientTests {
     @Test func aRefusedOrderIsKrakensWords() async throws {
         let session = ReplaySession(route: Kraken.route(["AddOrder": .ok(Recording.body("Kraken/private-error-insufficient-funds.json"))]))
         let result = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .sell, size: .zero(of: Kraken.xbt), limit: Kraken.price("1"),
-                                                                  immediateOrCancel: true, reduceOnly: true, account: "")
+                                                                  immediateOrCancel: true, reduceOnly: true, clientOrderId: nil, account: "")
         #expect(result == .refused(code: "EOrder", text: "Insufficient funds"))
     }
 
@@ -217,7 +240,7 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route())
         let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
         #expect(items.count == 2) // the two trades; the two ledger entries are those trades' and are not handed up twice
-        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, let cursor) = items[0] else {
+        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, let cursor, _) = items[0] else {
             Issue.record("Not a fill")
             return
         }
@@ -235,10 +258,40 @@ struct KrakenClientTests {
         }
     }
 
+    // TradesHistory's position words, as documented (https://docs.kraken.com/api/docs/rest-api/get-trade-history.md):
+    // misc "closing", "Trade closes all or part of a position"; posstatus, "Position status (open/closed) Only present
+    // if trade opened a position", so either word states the trade opened one. The recorded spot trades carry neither.
+    static func effects(trades edit: (String) -> String) async throws -> [ExchangeClientPositionEffect?] {
+        let trades = edit(String(decoding: Recording.body("Kraken/private-trades-history.json"), as: UTF8.self))
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(Data(trades.utf8))]))
+        return try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item in
+            guard case .fill(_, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
+            return effect
+        }
+    }
+
+    @Test func aSpotTradeStatesNoPositionEffect() async throws {
+        #expect(try await Self.effects { $0 } == [nil, nil])
+    }
+
+    @Test func aTradeMarkedClosingClosesAndATradeWithAPositionStatusOpened() async throws {
+        // The later trade (THVRQM…, 1688667796.8802) closes; the earlier (TCWJEG…) opened a position, still open.
+        let effects = try await Self.effects { text in
+            text.replacingOccurrences(of: #""misc": "",\#n        "trade_id": 40274859"#, with: #""misc": "closing",\#n        "trade_id": 40274859"#)
+                .replacingOccurrences(of: #""trade_id": 39482674,"#, with: #""trade_id": 39482674, "posstatus": "open","#)
+        }
+        #expect(effects == [.open, .close])
+    }
+
+    @Test func aTradeWhosePositionHasSinceClosedStillOpenedIt() async throws {
+        let effects = try await Self.effects { $0.replacingOccurrences(of: #""trade_id": 39482674,"#, with: #""trade_id": 39482674, "posstatus": "closed","#) }
+        #expect(effects == [.open, nil])
+    }
+
     @Test func leverageTransferAndKeyFactsAreNotOfferedByKrakenSpot() async throws {
         let client = Kraken.client(ReplaySession(route: Kraken.route()))
         await #expect(throws: ExchangeClientError.notOffered(member: "setLeverage")) { try await client.setLeverage(2, market: Kraken.xbtusd, isolated: true, account: "") }
-        await #expect(throws: ExchangeClientError.notOffered(member: "transfer")) { try await client.transfer(Amount(whole: 1, of: Kraken.usd), from: "a", to: "b") }
+        await #expect(throws: ExchangeClientError.notOffered(member: "transfer")) { try await client.transfer(try Amount(whole: 1, of: Kraken.usd), from: "a", to: "b") }
         await #expect(throws: ExchangeClientError.notOffered(member: "keyFacts")) { try await client.keyFacts() }
         #expect(!client.hasTestMarket)
     }
@@ -287,5 +340,43 @@ struct KrakenClientTests {
         #expect(try id.toJSON().fromJSON() == id)
         let cursor = KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667796.8802"))
         #expect(try cursor.toJSON().fromJSON() == cursor)
+    }
+}
+
+// The client gaps of the identity PR (fosline's layer B ledger § 6): the client order id, and the key's facts.
+@Suite("Kraken exchange client: the client gaps")
+struct KrakenClientGapsTests {
+    static let token: UInt128 = 0x6d1b_345e_2821_40e2_ad83_4ecb_18a0_6876
+
+    // Kraken's AddOrder takes cl_ord_id as a long UUID, a short UUID (32 hex digits) or free text of up to 18
+    // characters (docs.kraken.com, Add Order); the client writes the 128 bits as the short UUID.
+    @Test func theClientOrderIdIsSentAsClOrdIdInTheShortUUIDForm() async throws {
+        let queried = String(decoding: Recording.body("Kraken/private-query-orders.json"), as: UTF8.self)
+            .replacingOccurrences(of: "OBCMZD-JIEE7-77TH3F", with: "OUF4EM-FRGI2-MQMWZD")
+        let session = ReplaySession(route: Kraken.route(["QueryOrders": .ok(Data(queried.utf8))]))
+        _ = try await Kraken.client(session).placeOrder(market: Kraken.xbtusd, side: .buy, size: try WireDecimal(parsing: "1.25").amount(of: Kraken.xbt),
+                                                        limit: Kraken.price("27600"), immediateOrCancel: true, reduceOnly: false,
+                                                        clientOrderId: Self.token, account: "")
+        let added = try #require(session.requests.first { $0.url!.lastPathComponent == "AddOrder" })
+        #expect(added.bodyText == "nonce=1791272956000&ordertype=limit&type=buy&volume=1.25&pair=XBTUSD&price=27600&timeinforce=IOC&cl_ord_id=6d1b345e282140e2ad834ecb18a06876")
+    }
+
+    // The documented Get Open Orders example states userref and no cl_ord_id: both orders hand up none.
+    @Test func theRecordedOpenOrdersStateNoClientOrderId() async throws {
+        let open = try await Kraken.client(ReplaySession(route: Kraken.route())).openOrders(account: "")
+        #expect(open.count == 2)
+        #expect(open.allSatisfy { $0.clientOrderId == nil })
+    }
+
+    // Constructed on the documented example: Get Open Orders documents cl_ord_id on each order ("Optional
+    // alphanumeric, client identifier associated with the order"); a long UUID reads back, free text does not.
+    @Test func anOpenOrdersClOrdIdIsHandedBackAsTheClientOrderId() async throws {
+        let recorded = String(decoding: Recording.body("Kraken/private-open-orders.json"), as: UTF8.self)
+            .replacingOccurrences(of: #""userref": 0,"#, with: #""userref": 0, "cl_ord_id": "6d1b345e-2821-40e2-ad83-4ecb18a06876","#)
+            .replacingOccurrences(of: #""userref": 45326,"#, with: #""userref": 45326, "cl_ord_id": "arb-20240509-00010","#)
+        let session = ReplaySession(route: Kraken.route(["OpenOrders": .ok(Data(recorded.utf8))]))
+        let open = try await Kraken.client(session).openOrders(account: "")
+        #expect(open.first { $0.id == (try! KrakenOrderId(validating: "OQCLML-BW3P3-BUCMWZ")) }?.clientOrderId == Self.token)
+        #expect(open.first { $0.id == (try! KrakenOrderId(validating: "OB5VMB-B4U2U-DK2WRW")) }.map { $0.clientOrderId == nil } == true)
     }
 }

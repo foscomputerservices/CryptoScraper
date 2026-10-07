@@ -13,8 +13,9 @@ import Foundation
 /// the consumer's; this client has no calendar.
 ///
 /// ```swift
-/// let bars = try await client.ohlcv(market: "BTCUSDT", interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
-/// let open = try await client.openOHLCV(market: "BTCUSDT", interval: BarInterval(count: 1, unit: .day))
+/// let market = try BinanceMarketName(validating: "BTCUSDT")
+/// let bars = try await client.ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
+/// let open = try await client.openOHLCV(market: market, interval: BarInterval(count: 1, unit: .day))
 /// ```
 ///
 /// One call is one request to the feed, so it hands up at most the feed's page of bars: the earliest closed bars
@@ -23,7 +24,8 @@ import Foundation
 public protocol OHLCVClient: Sendable {
     associatedtype MarketName: Hashable & Sendable
     func ohlcv(market: MarketName, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar]
-    /// The still-open bar: its open time and its open price so far; never a closed bar's stand-in
+    /// The still-open bar: its open time and its open price so far; never a closed bar's stand-in, so `nil` when the
+    /// feed's newest bar has closed or the feed answers none
     func openOHLCV(market: MarketName, interval: BarInterval) async throws -> OHLCVClientBar?
 }
 
@@ -31,7 +33,7 @@ public protocol OHLCVClient: Sendable {
 ///
 /// ```swift
 /// let bar = bars.last!
-/// bar.close.cost(of: bar.volume)          // the bar's volume at its close, in the quote asset, exact
+/// try bar.close.cost(of: bar.volume)      // the bar's volume at its close, in the quote asset, exact
 /// bar.isClosed                            // true for every bar `ohlcv` hands up
 /// ```
 ///
@@ -63,6 +65,42 @@ public struct OHLCVClientBar: Codable, Hashable, Sendable, Stubbable {
         self.volume = volume
         self.trades = trades
         self.isClosed = isClosed
+    }
+}
+
+// The owner's nested two-stub form (C7): `stub()` delegates to `stub(…)`, whose every parameter defaults to its own
+// type's stub, or to the reserved fake where the type is a plain number, text or date. The fake times: 42 days after
+// 1970-01-01 UTC, the bar of that day, closing at its last millisecond.
+extension OHLCVClientBar {
+    public static func stub() -> Self { .stub(isClosed: true) }
+
+    /// A bar with any piece overridden, every other piece its own type's stub
+    ///
+    /// ```swift
+    /// let open = OHLCVClientBar.stub(isClosed: false)
+    /// ```
+    public static func stub(
+        openTime: Date = Date(timeIntervalSince1970: 42 * 86_400),
+        closeTime: Date = Date(timeIntervalSince1970: 43 * 86_400 - 0.001),
+        open: Price = .stub(),
+        high: Price = .stub(),
+        low: Price = .stub(),
+        close: Price = .stub(),
+        volume: Amount = .stub(of: Price.stub().base),
+        trades: Int? = 42,
+        isClosed: Bool = true
+    ) -> Self {
+        .init(
+            openTime: openTime,
+            closeTime: closeTime,
+            open: open,
+            high: high,
+            low: low,
+            close: close,
+            volume: volume,
+            trades: trades,
+            isClosed: isClosed
+        )
     }
 }
 

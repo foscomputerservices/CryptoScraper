@@ -7,7 +7,7 @@ import Foundation
 
 public final class ZeroAmountChain: CryptoChain {
     public let userReadableName: String = "Zero Amount Chain"
-    public let scanner: ZeroAmountScanner?
+    public let scanner: ZeroAmountScanner
     public var mainContract: ZeroAmountContract! { ZeroAmountContract(address: "") }
     public func contract(for address: String) throws -> ZeroAmountContract { .zero }
 

@@ -37,11 +37,11 @@ struct BinanceOHLCVClientContractTests {
         // [1502928000000,"4261.48000000","4485.39000000","4200.74000000","4285.08000000","795.15037700",1503014399999,…,3427,…]
         #expect(first.openTime == Date(milliseconds: 1_502_928_000_000))
         #expect(first.closeTime == Date(milliseconds: 1_503_014_399_999))
-        #expect(first.open == Price(Amount(baseUnits: 426_148_000_000, asset: Binance.usdt), per: Binance.btc))
-        #expect(first.high == Price(Amount(baseUnits: 448_539_000_000, asset: Binance.usdt), per: Binance.btc))
-        #expect(first.low == Price(Amount(baseUnits: 420_074_000_000, asset: Binance.usdt), per: Binance.btc))
-        #expect(first.close == Price(Amount(baseUnits: 428_508_000_000, asset: Binance.usdt), per: Binance.btc))
-        #expect(first.volume == Amount(baseUnits: 79_515_037_700, asset: Binance.btc))
+        #expect(first.open == (try Price(Amount(baseUnits: 426_148_000_000, of: Binance.usdt), per: Binance.btc)))
+        #expect(first.high == (try Price(Amount(baseUnits: 448_539_000_000, of: Binance.usdt), per: Binance.btc)))
+        #expect(first.low == (try Price(Amount(baseUnits: 420_074_000_000, of: Binance.usdt), per: Binance.btc)))
+        #expect(first.close == (try Price(Amount(baseUnits: 428_508_000_000, of: Binance.usdt), per: Binance.btc)))
+        #expect(first.volume == Amount(baseUnits: 79_515_037_700, of: Binance.btc))
         #expect(first.trades == 3427)
         #expect(first.isClosed)
     }
@@ -51,10 +51,13 @@ struct BinanceOHLCVClientContractTests {
         let binance = client(session, markets: [])
 
         let market = try await binance.market(Binance.btcusdt)
+        // Carried in step 4c of the identity PR: the market's holdings are Binance's declared BTC and USDT, no longer
+        // assets made from Binance's names and precision; the precision Binance states is the declared holdings'.
         #expect(market.base == Binance.btc)
         #expect(market.quote == Binance.usdt)
-        #expect(market.base.unitExponent == 8)
-        #expect(market.quote.unitExponent == 8)
+        #expect(market.baseDecimals == 8 && market.quoteDecimals == 8)
+        #expect(try AssetRegistry.shared.decimals(of: Binance.btc) == 8)
+        #expect(try AssetRegistry.shared.decimals(of: Binance.usdt) == 8)
 
         let bars = try await binance.ohlcv(market: Binance.btcusdt, interval: Binance.day, from: Recorded.rangeStart, through: Recorded.rangeEnd)
         #expect(bars.first?.open.quote == Binance.usdt)
@@ -147,8 +150,8 @@ struct BinanceOHLCVClientContractTests {
         let bar = try #require(try await client(session).ohlcv(market: Binance.btcusdt, interval: Binance.day, from: Recorded.rangeStart, through: Recorded.rangeEnd).first)
 
         // × 100 BTC = 0.00000123 USDT = 123 base units, exactly
-        #expect(bar.open.cost(of: Amount(whole: 100, of: Binance.btc)) == Amount(baseUnits: 123, asset: Binance.usdt))
-        #expect(bar.high == Price(Amount(baseUnits: 110_000_000, asset: Binance.usdt), per: Binance.btc))
+        #expect(bar.open.cost(of: try Amount(whole: 100, of: Binance.btc)) == Amount(baseUnits: 123, of: Binance.usdt))
+        #expect(bar.high == (try Price(Amount(baseUnits: 110_000_000, of: Binance.usdt), per: Binance.btc)))
     }
 
     @Test func aPriceBeyondTheScaleIsBelowBaseUnit() async throws {
@@ -164,7 +167,8 @@ struct BinanceOHLCVClientContractTests {
     @Test func anErrorBodyDecodesByErrorTypeIntoBinancesError() async throws {
         let session = ReplaySession { _, _ in Reply(status: 400, body: Recorded.invalidSymbol, headers: [:]) }
         let nope = try BinanceMarketName(validating: "NOPEUSDT")
-        let market = BinanceMarket(name: nope, base: Binance.btc, quote: Binance.usdt)
+        let market = try BinanceMarket(name: nope, baseSymbol: Binance.market.baseSymbol, baseDecimals: 8,
+                                       quoteSymbol: Binance.market.quoteSymbol, quoteDecimals: 8)
         await #expect(throws: BinanceAPIError(code: -1121, message: "Invalid symbol.")) {
             try await client(session, markets: [market]).ohlcv(market: nope, interval: Binance.day, from: Recorded.rangeStart, through: Recorded.rangeEnd)
         }
@@ -212,7 +216,7 @@ struct BinanceOHLCVClientContractTests {
 
         #expect(open.isClosed == false)
         #expect(open.openTime == Date(milliseconds: 1_791_072_000_000))
-        #expect(open.open == Price(Amount(baseUnits: 8_475_357_000_000, asset: Binance.usdt), per: Binance.btc))
+        #expect(open.open == (try Price(Amount(baseUnits: 8_475_357_000_000, of: Binance.usdt), per: Binance.btc)))
         #expect(session.requests.first?.query("limit") == "1")
         #expect(session.requests.first?.query("startTime") == nil)
     }

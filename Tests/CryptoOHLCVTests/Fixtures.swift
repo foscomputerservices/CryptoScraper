@@ -67,10 +67,14 @@ extension Date {
 }
 
 enum Binance {
-    static let btc = try! Asset(symbol: "BTC", unitExponent: 8)
-    static let usdt = try! Asset(symbol: "USDT", unitExponent: 8)
     static let btcusdt = try! BinanceMarketName(validating: "BTCUSDT")
-    static let market = BinanceMarket(name: btcusdt, base: btc, quote: usdt)
+    // Carried in step 4c of the identity PR: the market is Binance's recorded exchange information for BTCUSDT, its
+    // holdings Binance's declared BTC and USDT, both at 8, declared in the shared registry by the market's
+    // initializer, whichever test runs first
+    static let market = try! BinanceMarket(name: btcusdt, baseSymbol: AssetSymbol(validating: "BTC"), baseDecimals: 8,
+                                           quoteSymbol: AssetSymbol(validating: "USDT"), quoteDecimals: 8)
+    static let btc: AssetInstance = market.base!
+    static let usdt: AssetInstance = market.quote!
     static let day = BarInterval(count: 1, unit: .day)
     static let fourHours = BarInterval(count: 4, unit: .hour)
 }
@@ -167,7 +171,7 @@ func client(_ session: ReplaySession, now: Date = Recorded.recordedAt, markets: 
 // An amount as plain decimal text in whole units, trailing zeros and a bare point stripped: the form JavaScript's
 // JSON.stringify writes a number in, for the numbers the recordings carry.
 func decimalText(_ amount: Amount) -> String {
-    let exponent = amount.asset.unitExponent
+    let exponent = try! AssetRegistry.shared.decimals(of: amount.instance)
     let negative = amount.baseUnits < 0
     var digits = String(amount.baseUnits.magnitude)
     if digits.count <= exponent {
@@ -185,7 +189,7 @@ func decimalText(_ amount: Amount) -> String {
 
 // A price as the decimal text of the quote per one whole base unit.
 func decimalText(_ price: Price) -> String {
-    decimalText(price.cost(of: Amount(whole: 1, of: price.base)))
+    decimalText(price.cost(of: try! Amount(whole: 1, of: price.base)))
 }
 
 // A feed's number text with its trailing zeros stripped: "4261.48000000" → "4261.48", "3850.00000000" → "3850".

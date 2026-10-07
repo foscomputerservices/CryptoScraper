@@ -31,7 +31,11 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
     public let whitepaper: URL?
     public let aggregatorId: String?
 
-    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: Amount<Contract>? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil, aggregatorId: String? = nil) {
+    /// The token's decimals as its chain's scanner states them, the oracle (design § 2.5, § 4.1); `nil` where no
+    /// scanner was asked, as for a token a data aggregator listed
+    public let decimals: Int?
+
+    public init(contractAddress: Contract, equivalentContracts: Set<Contract>, tokenName: String, symbol: String, imageURL: URL? = nil, tokenType: String? = nil, totalSupply: Amount<Contract>? = nil, blueCheckmark: Bool? = nil, description: String? = nil, website: URL? = nil, email: String? = nil, blog: URL? = nil, reddit: URL? = nil, slack: String? = nil, facebook: URL? = nil, twitter: URL? = nil, gitHub: URL? = nil, telegram: URL? = nil, wechat: URL? = nil, linkedin: URL? = nil, discord: URL? = nil, whitepaper: URL? = nil, aggregatorId: String? = nil, decimals: Int? = nil) {
         self.contractAddress = contractAddress
         self.equivalentContracts = equivalentContracts
         self.tokenName = tokenName
@@ -55,6 +59,7 @@ public struct SimpleTokenInfo<Contract: CryptoContract>: TokenInfo {
         self.discord = discord
         self.whitepaper = whitepaper
         self.aggregatorId = aggregatorId
+        self.decimals = decimals
     }
 }
 

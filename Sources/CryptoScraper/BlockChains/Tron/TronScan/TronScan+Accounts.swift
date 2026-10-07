@@ -8,7 +8,12 @@ import Foundation
 public extension TronScan {
     /// Returns the balance (in TRX) of the given account
     ///
+    /// The quantity is the sum of every balance the answer lists in `trc721token_balances`, `trc20token_balances`
+    /// and `tokenBalances`, each in its own token's base units, TRX's among them; it is not TRX's balance alone.
+    ///
     /// - Parameter account: The Tron account to query the balance for
+    /// - Throws: ``TronScanResponseError/unknownContract(_:)``, naming the chain's main contract, when the answer
+    ///   lists no balance at all
     func getBalance(forAccount account: Contract) async throws -> Amount<Contract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
@@ -17,11 +22,15 @@ public extension TronScan {
         return try response.amount(forAccount: account.chain.mainContract)
     }
 
-    /// Returns the balance (in TRX) for a given token in the given account
+    /// Returns the balance for a given token in the given account, in the token's base units, its currency
+    /// `contract`: TRX's by the listed balances whose `tokenAbbr` is `trx` when `contract` is the chain's coin, else
+    /// those whose `tokenId` is `contract`'s address
     ///
     /// - Parameters:
     ///   - contract: The ``CryptoContract`` of the token to query
-    ///   - address: The ``CryptoContract`` address that holds the token
+    ///   - account: The ``CryptoContract`` address that holds the token
+    /// - Throws: ``TronScanResponseError/unknownContract(_:)``, naming the chain's main contract, when the answer
+    ///   lists no balance at all
     func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "account").appending(
             queryItems: BalanceResponse.httpQuery(account: account)

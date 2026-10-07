@@ -3,11 +3,15 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
 import Synchronization
 
 public final class OptimismChain: CryptoChain, Sendable {
     // MARK: CryptoChain
+
+    /// The chain's CAIP-2 identifier, the first part of every identity on it
+    public let id: String = EIP155.Optimism.chainId
 
     public let userReadableName: String = "Optimism"
 
@@ -46,7 +50,7 @@ public final class OptimismChain: CryptoChain, Sendable {
         }
     }
 
-    public let scanner: OptimisticEtherscan? = .init()
+    public let scanner: OptimisticEtherscan = .init()
 
     public func tokenInfo(for address: String) -> SimpleTokenInfo<OptimismContract>? {
         tokens.withLock { $0?[address] }

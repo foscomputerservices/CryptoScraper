@@ -24,12 +24,18 @@ import FoundationNetworking
 /// let bars = try await client.ohlcv(market: btc, interval: .init(count: 4, unit: .hour), from: start, through: end)
 /// ```
 ///
-/// A market's base asset is the perpetual's coin at its size decimals, asked of the info endpoint's `meta` once and
-/// kept for the client's life; its quote is USDC at six decimals, the exchange's unit of account (``Asset/usdc``).
+/// A market's base is Hyperliquid's declared holding constant for the perpetual's coin (``HyperliquidHolding``),
+/// resolved through ``HyperliquidExchangeChain``'s table; the size decimals Hyperliquid states in its info endpoint's
+/// `meta`, asked whenever the coin asked for is not yet kept and kept for the client's life, are checked against the
+/// declared holding's (AR45). Its quote is ``HyperliquidHolding/usdc``, the exchange's unit of account.
 ///
 /// A 429 throws ``HyperliquidLimitError``; any other refusal throws ``HyperliquidOHLCVError/refused(status:text:)``
-/// with Hyperliquid's own text; number text that is not a number, or finer than an asset holds, throws
-/// ``AmountError``.
+/// with Hyperliquid's own text; number text that is not a number, or finer than a holding holds, throws
+/// ``AmountError``; a coin `meta` does not list, or whose holding is not declared, throws
+/// ``HyperliquidOHLCVError/unknownMarket(_:)``; Hyperliquid stating other size decimals than the declared ones throws
+/// `AssetRegistryError.decimalsChanged`; an interval Hyperliquid has no candle for throws
+/// ``HyperliquidOHLCVError/unsupportedInterval(_:)``. When the init could not add Hyperliquid's declarations to its
+/// registry, every read throws what `AssetRegistry.add(_:)` threw.
 public struct HyperliquidOHLCVClient: OHLCVClient {
     public typealias MarketName = HyperliquidMarketName
 
@@ -37,20 +43,27 @@ public struct HyperliquidOHLCVClient: OHLCVClient {
     private let session: any URLSessionProtocol
     private let now: @Sendable () -> Date
     private let assets: HyperliquidAssetBook
+    private let registry: AssetRegistry
+    // Hyperliquid's declarations added to the registry at init, or why they could not be: thrown by every read
+    private let declared: Result<Void, any Error>
 
     /// - Parameters:
     ///   - baseURL: Hyperliquid's REST root: production by default, `https://api.hyperliquid-testnet.xyz` for its test market
     ///   - session: The session the requests go through; a test passes a recorded one
     ///   - now: The clock that says whether a candle has closed
+    ///   - registry: The statement every amount and price is read against; Hyperliquid's holdings are added to it here
     public init(
         baseURL: URL = URL(string: "https://api.hyperliquid.xyz")!,
         session: any URLSessionProtocol = URLSession.session(config: DataFetch<URLSession>.urlSessionConfiguration()),
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        registry: AssetRegistry = .shared
     ) {
         self.baseURL = baseURL
         self.session = session
         self.now = now
         self.assets = HyperliquidAssetBook()
+        self.registry = registry
+        self.declared = Result { try HyperliquidExchangeChain.declare(in: registry) }
     }
 
     public func ohlcv(market: HyperliquidMarketName, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar] {
@@ -65,7 +78,7 @@ public struct HyperliquidOHLCVClient: OHLCVClient {
         let clock = now().wireMilliseconds
         return try candles
             .filter { $0.openTime >= start && $0.openTime <= end }
-            .map { try $0.bar(base: base, now: clock) }
+            .map { try $0.bar(base: base, now: clock, in: registry) }
             .filter(\.isClosed)
     }
 
@@ -74,7 +87,7 @@ public struct HyperliquidOHLCVClient: OHLCVClient {
         let base = try await asset(of: market)
         let clock = now().wireMilliseconds
         let candles = try await candleSnapshot(market, token, clock - 2 * interval.milliseconds, clock)
-        guard let bar = try candles.last.map({ try $0.bar(base: base, now: clock) }), !bar.isClosed else {
+        guard let bar = try candles.last.map({ try $0.bar(base: base, now: clock, in: registry) }), !bar.isClosed else {
             return nil
         }
         return bar
@@ -94,16 +107,18 @@ public struct HyperliquidOHLCVClient: OHLCVClient {
         return interval.token
     }
 
-    private func asset(of market: HyperliquidMarketName) async throws -> Asset {
-        if let known = await assets.asset(market) {
-            return known
+    // The coin's declared holding through the table, checked against the size decimals Hyperliquid states (AR45).
+    private func asset(of market: HyperliquidMarketName) async throws -> AssetInstance {
+        try declared.get()
+        if await assets.szDecimals(market) == nil {
+            let meta: HyperliquidPerpMeta = try await info(Data(#"{"type":"meta"}"#.utf8))
+            await assets.keep(meta)
         }
-        let meta: HyperliquidPerpMeta = try await info(Data(#"{"type":"meta"}"#.utf8))
-        await assets.keep(meta)
-        guard let asset = await assets.asset(market) else {
+        guard let szDecimals = await assets.szDecimals(market),
+              let holding = try HyperliquidExchangeChain.declaredInstance(wireName: market.text, decimals: szDecimals, in: registry) else {
             throw HyperliquidOHLCVError.unknownMarket(market)
         }
-        return asset
+        return holding
     }
 
     private func candleSnapshot(_ market: HyperliquidMarketName, _ token: String, _ start: Int64, _ end: Int64) async throws -> [HyperliquidCandle] {
@@ -144,28 +159,24 @@ public struct HyperliquidOHLCVClient: OHLCVClient {
 /// catch HyperliquidOHLCVError.refused(let status, let text) { … }      // Hyperliquid's own words
 /// ```
 public enum HyperliquidOHLCVError: Error, Hashable, Sendable {
-    /// Hyperliquid has no candle interval of this length
+    /// Hyperliquid has no candle interval of this length: it lists 1, 3, 5, 15 and 30 minutes; 1, 2, 4, 8 and 12
+    /// hours; 1 and 3 days; 1 week
     case unsupportedInterval(BarInterval)
     /// A market's name that is not one Hyperliquid could spell
     case malformedMarketName(String)
-    /// Hyperliquid's `meta` does not list the market
+    /// Hyperliquid's `meta` does not list the market, or its holding is not declared
     case unknownMarket(HyperliquidMarketName)
     /// Hyperliquid refused the request, with its HTTP status and its body as it wrote it (a coin it does not list
     /// is HTTP 500 with the body `null`)
     case refused(status: Int, text: String)
 }
 
-// The perpetuals' size decimals, shared by every copy of the client.
+// The perpetuals' size decimals as Hyperliquid states them, shared by every copy of the client.
 private actor HyperliquidAssetBook {
     private var byName: [String: Int] = [:]
 
-    func asset(_ market: HyperliquidMarketName) -> Asset? {
-        guard let exponent = byName[market.text] else { return nil }
-        do {
-            return try Asset(symbol: market.text, unitExponent: exponent)
-        } catch {
-            return nil // a coin whose name is no asset symbol ("@107") is a market this client cannot price
-        }
+    func szDecimals(_ market: HyperliquidMarketName) -> Int? {
+        byName[market.text]
     }
 
     func keep(_ meta: HyperliquidPerpMeta) {
@@ -204,16 +215,18 @@ struct HyperliquidCandle: Decodable, Sendable {
         case openTime = "t", closeTime = "T", open = "o", high = "h", low = "l", close = "c", volume = "v", trades = "n"
     }
 
-    // The bar, with the coin's asset in hand; closed once the clock has passed Hyperliquid's close time.
-    func bar(base: Asset, now: Int64) throws -> OHLCVClientBar {
-        OHLCVClientBar(
+    // The bar, with the coin's holding in hand, priced in Hyperliquid's USDC; closed once the clock has passed
+    // Hyperliquid's close time.
+    func bar(base: AssetInstance, now: Int64, in registry: AssetRegistry) throws -> OHLCVClientBar {
+        let usdc = AssetInstance(HyperliquidHolding.usdc)
+        return OHLCVClientBar(
             openTime: Date(wireMilliseconds: openTime),
             closeTime: Date(wireMilliseconds: closeTime),
-            open: try open.price(of: .usdc, per: base),
-            high: try high.price(of: .usdc, per: base),
-            low: try low.price(of: .usdc, per: base),
-            close: try close.price(of: .usdc, per: base),
-            volume: try volume.amount(of: base),
+            open: try open.price(of: usdc, per: base, in: registry),
+            high: try high.price(of: usdc, per: base, in: registry),
+            low: try low.price(of: usdc, per: base, in: registry),
+            close: try close.price(of: usdc, per: base, in: registry),
+            volume: try volume.amount(of: base, in: registry),
             trades: trades,
             isClosed: now > closeTime
         )

@@ -6,106 +6,133 @@
 import FOSFoundation
 import Foundation
 
-// The encoded shape is the contract, on purpose (R5; § 9.7 of the protocols): a persisted column holds the value
-// and must decode by `JSONDecoder` from Postgres JSONB and from SQLite text. Stable within a major:
+// The encoded shape is the contract, on purpose (R5; design § 3.5): a persisted column holds the value and must
+// decode by `JSONDecoder` from Postgres JSONB and from SQLite text, with no registry. Stable within a major:
 //
-//     { "baseUnits": <a bare JSON number, the Int128 at full width>, "asset": <the Asset, with its units> }
+//     { "instance": <the instance's id, one JSON string>, "baseUnits": <a bare JSON number, the Int128 at full width> }
 //
 // The quantity is never a quoted string; a quoted digit string is refused at decode. Pinned at Int128.max and
-// Int128.min by the forward-compatibility test in CryptoAssetTests.
+// Int128.min by the forward-compatibility test in CryptoAssetTests. The instance's decimals are not written: they
+// are the statement's, and a declared instance's decimals never change (design § 2.1).
 //
-// The asset is written before the base units. A JSON object's order carries no meaning, but sqlite-kit (4.5.2)
-// binds a Codable value by first trying its own unwrapping encoder and falls back to JSON text only when that
-// encoder throws its SQLCodingError; that encoder does not implement Int128, so an Int128 written first throws the
-// standard library's EncodingError instead and the value cannot be stored. Written first, the asset meets the
-// unwrapping encoder's keyed refusal and the fallback stores the whole value as JSON text.
+// The instance is written before the base units. sqlite-kit (4.5.2) binds a Codable value by first trying its own
+// unwrapping encoder and falls back to JSON text only when that encoder throws its SQLCodingError; that encoder does
+// not implement Int128, so an Int128 written first throws the standard library's EncodingError instead and the value
+// cannot be stored. The two-driver test pins that the order stores.
 
-/// An exact quantity of one asset, counted in that asset's base units
+/// An exact quantity counted in one instance's base units: a holding on an exchange, a contract on a chain
 ///
-/// Every amount, size and balance is one of these. Arithmetic is on the integer and is exact; nothing here rounds
-/// for a reader. A view receives the amount and localizes it.
-///
-/// ```swift
-/// let stake = Amount(whole: 100, of: usdc)                  // 100 USDC, exactly
-/// let fee   = Amount(baseUnits: 2_500, asset: usdc)         // 0.0025 USDC, as the exchange counted it
-/// let after = stake - fee                                   // exact
-/// ```
-///
-/// A named unit converts exactly, both ways, as a count and never as text:
+/// Carries its instance and its count, nothing else; its decimals are the statement's. Two amounts add only within
+/// one instance. Across instances, a conversion goes through the equivalence map, exactly or not at all.
 ///
 /// ```swift
-/// let tip  = try Amount(count: 5, in: gwei, of: eth)         // 5 gwei, exactly
-/// tip.count(in: gwei)                                        // (count: 5, remainder: 0)
+/// let stake = try Amount(whole: 100, of: hyperliquidUSDC)                      // at the holding's 6
+/// let fee   = Amount(baseUnits: 2_500, of: hyperliquidUSDC)                     // 0.0025 USDC
+/// let after = stake - fee                                                      // exact, no lookup
+/// let onChain = try binanceDust.converted(to: ethereumUSDT)                     // 8 to 6: refuses lost digits
 /// ```
 ///
-/// What an exchange sends as text arrives as an `Amount` already: the client's response model decodes it.
-///
-/// Two values that have just arrived from different sources are combined with the throwing pair, which refuses
-/// two assets; inside a cycle the operators assume one asset and trap on two:
-///
-/// ```swift
-/// let total = try ledgerBalance.adding(exchangeBalance)
-/// ```
-///
-/// Encodes as its base units and its asset, so a stored value says what its own balance is.
+/// Two values that have just arrived from different sources are combined with the throwing pair, which refuses two
+/// instances; inside a cycle the operators assume one instance and trap on two.
 public struct Amount: Codable, Hashable, Comparable, Sendable, Stubbable {
-    /// The count of base units
+    /// The count of the instance's base units
     public let baseUnits: Int128
-    public let asset: Asset
+    /// The one instance the count is in
+    public let instance: AssetInstance
 
-    public init(baseUnits: Int128, asset: Asset) {
+    /// Pure: how a client's decode and a stored row make an amount; no lookup
+    public init(baseUnits: Int128, of instance: AssetInstance) {
         self.baseUnits = baseUnits
-        self.asset = asset
+        self.instance = instance
     }
 
-    /// A whole number of whole units, exactly
-    public init(whole: Int, of asset: Asset) {
-        self.init(baseUnits: Int128(whole).timesExactly(.powerOfTen(asset.unitExponent)), asset: asset)
-    }
-
-    /// A count of a named unit, exactly
+    /// A whole number of whole units, at the instance's decimals
     ///
-    /// - Throws: ``AssetError/unitOutOfRange`` when `unit` is not the asset's
-    public init(count: Int128, in unit: Asset.Unit, of asset: Asset) throws {
-        guard asset.units.contains(unit) else {
-            throw AssetError.unitOutOfRange(unit)
-        }
-        self.init(baseUnits: count.timesExactly(.powerOfTen(unit.exponent)), asset: asset)
+    /// - Precondition: `whole` times 10 ^ the instance's decimals fits an `Int128`
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)``
+    public init(whole: Int, of instance: AssetInstance, in registry: AssetRegistry = .shared) throws {
+        let decimals = try registry.decimals(of: instance)
+        self.init(baseUnits: Int128(whole).timesExactly(.powerOfTen(decimals)), of: instance)
     }
 
-    /// The quantity read in a named unit, exactly: the whole count of that unit and the base units left over
+    /// A count of a named unit of the instance's asset, exactly
     ///
-    /// - Precondition: `unit` is one of the asset's units
-    public func count(in unit: Asset.Unit) -> (count: Int128, remainder: Int128) {
-        precondition(asset.units.contains(unit), "\(unit.name) is not a unit of \(asset.symbol.text)")
-        let (count, remainder) = baseUnits.quotientAndRemainder(dividingBy: .powerOfTen(unit.exponent))
+    /// The units are the declaration's, at the home instance's decimals; on another instance a unit counts at its
+    /// place relative to that instance's own base unit.
+    ///
+    /// - Precondition: the count in the instance's base units fits an `Int128`
+    /// - Throws: ``AssetError/unitOutOfRange(_:)`` when `unit` is not the asset's, or is finer than the instance's base
+    ///   unit; ``AssetRegistryError/undeclaredInstance(_:)``
+    public init(count: Int128, in unit: Asset.Unit, of instance: AssetInstance,
+                in registry: AssetRegistry = .shared) throws {
+        let exponent = try Self.exponent(of: unit, on: instance, in: registry)
+        self.init(baseUnits: count.timesExactly(.powerOfTen(exponent)), of: instance)
+    }
+
+    /// The quantity read in a named unit, exactly: the whole count of that unit, toward zero, and the base units left
+    /// over, which carry the quantity's sign
+    ///
+    /// - Throws: ``AssetError/unitOutOfRange(_:)`` when `unit` is not the asset's, or is finer than the instance's base
+    ///   unit; ``AssetRegistryError/undeclaredInstance(_:)``
+    public func count(in unit: Asset.Unit, in registry: AssetRegistry = .shared) throws -> (count: Int128, remainder: Int128) {
+        let exponent = try Self.exponent(of: unit, on: instance, in: registry)
+        let (count, remainder) = baseUnits.quotientAndRemainder(dividingBy: .powerOfTen(exponent))
         return (count: count, remainder: remainder)
     }
 
-    /// `==` is total: two amounts of different assets are not equal and do not trap
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.asset == rhs.asset && lhs.baseUnits == rhs.baseUnits
+    /// The same quantity in another instance of the same asset, exactly: up is exact where it fits, down refuses lost
+    /// digits
+    ///
+    /// - Throws: ``AmountError/notEquivalent(_:_:)`` when the map does not put both in one asset;
+    ///   ``AmountError/notRepresentable(_:in:)`` when `instance` cannot hold it;
+    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when either is undeclared
+    public func converted(to instance: AssetInstance, in registry: AssetRegistry = .shared) throws -> Amount {
+        guard try registry.isEquivalent(self.instance, instance) else {
+            throw AmountError.notEquivalent(self.instance, instance)
+        }
+        let from = try registry.decimals(of: self.instance)
+        let to = try registry.decimals(of: instance)
+        if to >= from {
+            // Up is exact while it fits.
+            let (converted, overflow) = baseUnits.multipliedReportingOverflow(by: .powerOfTen(to - from))
+            guard !overflow else {
+                throw AmountError.notRepresentable(self, in: instance)
+            }
+            return Amount(baseUnits: converted, of: instance)
+        }
+        // Down refuses lost digits.
+        let (converted, remainder) = baseUnits.quotientAndRemainder(dividingBy: .powerOfTen(from - to))
+        guard remainder == 0 else {
+            throw AmountError.notRepresentable(self, in: instance)
+        }
+        return Amount(baseUnits: converted, of: instance)
     }
 
-    /// - Precondition: both amounts are of one asset
+    /// Total: two amounts of different instances are not equal and do not trap
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.instance == rhs.instance && lhs.baseUnits == rhs.baseUnits
+    }
+
+    /// - Precondition: both amounts are of one instance
     public static func < (lhs: Self, rhs: Self) -> Bool {
-        requireOneAsset(lhs.asset, rhs.asset, "Amount <")
+        requireOneInstance(lhs.instance, rhs.instance, "Amount <")
         return lhs.baseUnits < rhs.baseUnits
     }
 
-    /// - Precondition: both amounts are of one asset
+    /// - Precondition: both amounts are of one instance
     public static func + (lhs: Self, rhs: Self) -> Self {
-        requireOneAsset(lhs.asset, rhs.asset, "Amount +")
-        return Self(baseUnits: lhs.baseUnits + rhs.baseUnits, asset: lhs.asset)
+        requireOneInstance(lhs.instance, rhs.instance, "Amount +")
+        return Self(baseUnits: lhs.baseUnits + rhs.baseUnits, of: lhs.instance)
     }
 
+    /// - Precondition: both amounts are of one instance
     public static func - (lhs: Self, rhs: Self) -> Self {
-        requireOneAsset(lhs.asset, rhs.asset, "Amount -")
-        return Self(baseUnits: lhs.baseUnits - rhs.baseUnits, asset: lhs.asset)
+        requireOneInstance(lhs.instance, rhs.instance, "Amount -")
+        return Self(baseUnits: lhs.baseUnits - rhs.baseUnits, of: lhs.instance)
     }
 
     public static prefix func - (operand: Self) -> Self {
-        Self(baseUnits: -operand.baseUnits, asset: operand.asset)
+        Self(baseUnits: -operand.baseUnits, of: operand.instance)
     }
 
     /// Scales exactly and rounds toward zero, discarding what is below one base unit
@@ -115,18 +142,20 @@ public struct Amount: Codable, Hashable, Comparable, Sendable, Stubbable {
     /// let margin = notional / Fraction(integer: 2)
     /// ```
     ///
-    /// - Precondition: for `/`, `rhs` is not zero
     public static func * (lhs: Self, rhs: Fraction) -> Self {
-        Self(baseUnits: lhs.baseUnits.scaled(by: rhs.scaledNumerator, over: .assetScale), asset: lhs.asset)
+        Self(baseUnits: lhs.baseUnits.scaled(by: rhs.scaledNumerator, over: .assetScale), of: lhs.instance)
     }
 
+    /// Divides exactly and rounds toward zero, discarding what is below one base unit
+    ///
+    /// - Precondition: `rhs` is not zero
     public static func / (lhs: Self, rhs: Fraction) -> Self {
         precondition(!rhs.isZero, "Amount / Fraction.zero")
-        return Self(baseUnits: lhs.baseUnits.scaled(by: .assetScale, over: rhs.scaledNumerator), asset: lhs.asset)
+        return Self(baseUnits: lhs.baseUnits.scaled(by: .assetScale, over: rhs.scaledNumerator), of: lhs.instance)
     }
 
-    public static func zero(of asset: Asset) -> Self {
-        Self(baseUnits: 0, asset: asset)
+    public static func zero(of instance: AssetInstance) -> Self {
+        Self(baseUnits: 0, of: instance)
     }
 
     public var isZero: Bool {
@@ -137,17 +166,18 @@ public struct Amount: Codable, Hashable, Comparable, Sendable, Stubbable {
         baseUnits < 0
     }
 
-    /// - Throws: ``AmountError/assetConflict`` when the assets differ
+    /// - Throws: ``AmountError/instanceConflict(_:_:)`` when the instances differ
     public func adding(_ other: Self) throws -> Self {
-        guard asset == other.asset else {
-            throw AmountError.assetConflict(asset.symbol, other.asset.symbol)
+        guard instance == other.instance else {
+            throw AmountError.instanceConflict(instance, other.instance)
         }
         return self + other
     }
 
+    /// - Throws: ``AmountError/instanceConflict(_:_:)`` when the instances differ
     public func subtracting(_ other: Self) throws -> Self {
-        guard asset == other.asset else {
-            throw AmountError.assetConflict(asset.symbol, other.asset.symbol)
+        guard instance == other.instance else {
+            throw AmountError.instanceConflict(instance, other.instance)
         }
         return self - other
     }
@@ -155,19 +185,46 @@ public struct Amount: Codable, Hashable, Comparable, Sendable, Stubbable {
     // MARK: Codable
 
     private enum CodingKeys: CodingKey {
+        case instance
         case baseUnits
-        case asset
     }
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.asset = try container.decode(Asset.self, forKey: .asset)
+        self.instance = try container.decode(AssetInstance.self, forKey: .instance)
         self.baseUnits = try container.decode(Int128.self, forKey: .baseUnits)
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(asset, forKey: .asset)
+        try container.encode(instance, forKey: .instance)
         try container.encode(baseUnits, forKey: .baseUnits)
+    }
+}
+
+// MARK: Stubs
+
+extension Amount {
+    public static func stub() -> Self { .stub(baseUnits: 42) }
+
+    public static func stub(baseUnits: Int128 = 42, of instance: AssetInstance = .stub()) -> Self {
+        .init(baseUnits: baseUnits, of: instance)
+    }
+}
+
+private extension Amount {
+    // The power of ten of `instance`'s base units in one `unit`: the unit's exponent is at the home instance's
+    // decimals, so it moves by the difference between the two instances' decimals.
+    static func exponent(of unit: Asset.Unit, on instance: AssetInstance, in registry: AssetRegistry) throws -> Int {
+        let declaration = try registry.declaration(of: registry.asset(of: instance))
+        guard declaration.units.contains(unit) else {
+            throw AssetError.unitOutOfRange(unit)
+        }
+        let home = declaration.instances[0].decimals
+        let exponent = unit.exponent + (try registry.decimals(of: instance)) - home
+        guard exponent >= 0 else {
+            throw AssetError.unitOutOfRange(unit)
+        }
+        return exponent
     }
 }

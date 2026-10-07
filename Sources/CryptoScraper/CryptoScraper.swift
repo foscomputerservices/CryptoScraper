@@ -19,6 +19,9 @@ public enum CryptoScraper {
     /// This method may be called multiple times, but does nothing after the 1st call. The check is atomic, but a later call returns at once, without waiting for the 1st call to finish loading.
     ///
     /// - Note: The default ``CryptoDataAggregator`` is ``CoinGeckoAggregator``
+    ///
+    /// - Throws: the error of the first chain whose tokens `dataAggregator` fails to load; a later call does not
+    ///   retry, since the 1st call counts as made even when it threw
     public static func initialize(dataAggregator: CryptoDataAggregator? = nil) async throws {
         let alreadyInitialized = initialized.withLock { initialized in
             defer { initialized = true }

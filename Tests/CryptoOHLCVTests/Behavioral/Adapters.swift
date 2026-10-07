@@ -17,7 +17,7 @@
 //   ReferenceClientAsset.sector                                 → no surface member (UNRATIFIED: rank and tags); records an issue
 //   ReferenceClientAsset.stub(symbol:name:sector:tier:)         → ReferenceClientAsset.stub(symbol:name:rank:…)
 //   behavioralBinanceClient(session:now:)                       → BinanceOHLCVClient(session:now:)
-//   behavioralBinanceMarket(_:base:quote:)                      → BinanceMarket(name:base:quote:), answered as /api/v3/exchangeInfo
+//   behavioralBinanceMarket(_:base:quote:)                      → BinanceMarketName, its assets answered as /api/v3/exchangeInfo
 //   behavioralCoinMarketCapClient(session:)                     → CoinMarketCapClient(apiKey:session:)
 //   behavioralExchangeError(_:)                                 → BinanceAPIError / CoinMarketCapError
 //   behavioralLimit(_:)                                         → BinanceLimitError (OHLCVClientLimitError)
@@ -163,12 +163,21 @@ extension ReferenceClientAsset {
 // MARK: - The sessions and the clients
 
 // The markets the suite has named, with their assets, answered to the client as Binance's exchangeInfo would.
+// Step 4c of the identity PR: the client no longer takes a market's assets from its caller, so the suite's market is
+// its name and the assets' names, and the answer states each asset's precision as Binance does: a declared Binance
+// holding's decimals where Binance's table names the asset, else the exponent the suite declared it at.
 private final class MarketRegistry: @unchecked Sendable {
-    private let lock = NSLock()
-    private var markets: [String: BinanceMarket] = [:]
+    private struct Named {
+        let name: BinanceMarketName
+        let base: Asset
+        let quote: Asset
+    }
 
-    func keep(_ market: BinanceMarket) {
-        lock.withLock { markets[market.name.text] = market }
+    private let lock = NSLock()
+    private var markets: [String: Named] = [:]
+
+    func keep(_ name: BinanceMarketName, base: Asset, quote: Asset) {
+        lock.withLock { markets[name.text] = Named(name: name, base: base, quote: quote) }
     }
 
     func exchangeInfo(_ symbol: String?) -> Data {
@@ -176,8 +185,19 @@ private final class MarketRegistry: @unchecked Sendable {
         guard let known else {
             return Data(#"{"code":-1121,"msg":"Invalid symbol."}"#.utf8)
         }
-        let body = #"{"symbols":[{"symbol":"\#(known.name.text)","baseAsset":"\#(known.base.symbol.text)","baseAssetPrecision":\#(known.base.unitExponent),"quoteAsset":"\#(known.quote.symbol.text)","quoteAssetPrecision":\#(known.quote.unitExponent)}]}"#
+        let body = #"{"symbols":[{"symbol":"\#(known.name.text)","baseAsset":"\#(known.base.symbol.text)","baseAssetPrecision":\#(Self.precision(of: known.base)),"quoteAsset":"\#(known.quote.symbol.text)","quoteAssetPrecision":\#(Self.precision(of: known.quote))}]}"#
         return Data(body.utf8)
+    }
+
+    private static func precision(of asset: Asset) -> Int {
+        do {
+            _ = try BinanceExchangeChain.declaredInstance(wireName: asset.symbol.text, decimals: asset.unitExponent, in: .shared)
+            return asset.unitExponent
+        } catch AssetRegistryError.decimalsChanged(let holding) {
+            return (try? AssetRegistry.shared.decimals(of: holding)) ?? asset.unitExponent
+        } catch {
+            return asset.unitExponent
+        }
     }
 }
 
@@ -185,7 +205,7 @@ private let registry = MarketRegistry()
 
 func behavioralBinanceMarket(_ symbol: String, base: Asset, quote: Asset) -> BinanceOHLCVClient.MarketName {
     let name = try! BinanceMarketName(validating: symbol)
-    registry.keep(BinanceMarket(name: name, base: base, quote: quote))
+    registry.keep(name, base: base, quote: quote)
     return name
 }
 

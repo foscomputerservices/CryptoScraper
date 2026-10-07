@@ -107,7 +107,7 @@ struct TwoDriverEncodingTests {
     static func rows() -> [Values] {
         Fixtures.extremes.map { n in
             Values(
-                amount: Amount(baseUnits: n, asset: .eth),
+                amount: Amount(baseUnits: n, of: Fixtures.eth),
                 fraction: Fixtures.fraction(atScaled: n),
                 price: Fixtures.price(atScaled: n)
             )
@@ -132,10 +132,10 @@ struct TwoDriverEncodingTests {
         #expect(read == written)
         for (r, w) in zip(read, written) {
             #expect(r.amount.baseUnits == w.amount.baseUnits)
-            #expect(r.amount.asset.units == w.amount.asset.units)
-            #expect(r.amount.asset.displayUnit == w.amount.asset.displayUnit)
-            #expect(r.price.quote.units == w.price.quote.units)
-            #expect(r.price.base.units == w.price.base.units)
+            #expect(r.amount.instance == w.amount.instance)
+            #expect(r.price.quote == w.price.quote)
+            #expect(r.price.base == w.price.base)
+            #expect(r.price.scaled == w.price.scaled)
         }
     }
 }

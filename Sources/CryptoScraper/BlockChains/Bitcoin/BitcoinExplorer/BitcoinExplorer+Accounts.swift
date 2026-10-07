@@ -25,7 +25,9 @@ public extension BitcoinExplorer {
     ///
     /// - Parameters:
     ///   - contract: The contract of the token to query
-    ///   - address: The contract address that holds the token
+    ///   - account: The contract address that holds the token
+    ///
+    /// - Throws: ``BitcoinExplorerResponseError/unknownToken`` for any contract but BTC's
     func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<Contract> {
         if contract.isChainToken {
             return try await getBalance(forAccount: account)

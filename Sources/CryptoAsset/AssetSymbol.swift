@@ -19,8 +19,8 @@ public struct AssetSymbol: Codable, Hashable, Sendable, Stubbable {
     /// The symbol's text, upper-cased
     public let text: String
 
-    /// - Throws: ``AssetSymbolError`` when `candidate` is empty, longer than twelve characters, or carries a
-    ///   character other than a letter, a digit, a point or a dash
+    /// - Throws: ``AssetSymbolError/empty`` when `candidate` is empty; ``AssetSymbolError/malformed(_:)`` when it is
+    ///   longer than twelve characters or carries a character other than an ASCII letter, a digit, a point or a dash
     public init(validating candidate: String) throws {
         self.text = try Self.normalized(candidate)
     }
@@ -73,6 +73,20 @@ public struct AssetSymbol: Codable, Hashable, Sendable, Stubbable {
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(text)
+    }
+}
+
+// MARK: Stubs
+
+extension AssetSymbol {
+    public static func stub() -> Self { .stub(text: "FRED") }
+
+    public static func stub(text: String = "FRED") -> Self {
+        do {
+            return try AssetSymbol(validating: text)
+        } catch {
+            preconditionFailure("AssetSymbol.stub(text:) with a malformed symbol: \(error)")
+        }
     }
 }
 

@@ -50,12 +50,14 @@ struct HyperliquidOHLCVClientContractTests {
         #expect(bars.map(\.openTime) == bars.map(\.openTime).sorted())
     }
 
+    // Carried in step 4b of the identity PR: the coin is Hyperliquid's declared holding, no longer an asset made from its
+    // name and size decimals, and the quote is Hyperliquid's USDC holding; the size decimals are the declared holding's.
     @Test func thePricesAreInUSDCPerTheCoinAtItsSizeDecimals() async throws {
         let session = ReplaySession(route: Self.route(candles: "Hyperliquid/candles-btc-1d.json"))
         let first = try #require(try await Self.client(session).ohlcv(market: Self.btc, interval: Feed.day, from: Self.from, through: Self.through).first)
-        #expect(first.open.quote == .usdc)
-        #expect(first.open.base == (try Asset(symbol: "BTC", unitExponent: 5)))
-        #expect(first.volume.asset.unitExponent == 5)
+        #expect(first.open.quote.id == EXCHANGE.Hyperliquid.chainId + ":USDC")
+        #expect(first.open.base.id == EXCHANGE.Hyperliquid.chainId + ":BTC")
+        #expect(try AssetRegistry.shared.decimals(of: first.volume.instance) == 5)
     }
 
     @Test func theRequestIsOneCandleSnapshotWithTheRangeInWholeMilliseconds() async throws {

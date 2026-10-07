@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import CryptoExchange
 import CryptoOHLCV
 import Foundation
@@ -14,10 +15,14 @@ import Foundation
 // - HTTP 401 or 403                                           → unauthorized(text: the body)
 // - any other HTTP refusal (a coin not listed is 500, "null") → refused(code: the status, text: the body)
 // - an "err" status in a 200, naming a wallet that does not exist (the agent's approval is gone) → unauthorized(text:)
-// - any other "err" status, and an order or cancel status "error" in its words → refused(code: nil, text:)
+// - any other "err" status, and a cancel status "error" in its words → refused(code: nil, text:); an order status
+//   "error" is returned as the result .refused(code: "order", text:), not thrown (an immediate-or-cancel order that
+//   could not match is .cancelledBeforeAccepted)
 // - a transport failure → unreachable; a body or a number that does not decode → malformedResponse (CryptoExchange's reading)
 // - a client made without a credential, or with a key that is no secp256k1 secret, or not an agent → unauthorized(text:)
 // - what the client was asked that Hyperliquid lacks or does not list → refused(code: nil, text:), Hyperliquid's refusal being the nearest meaning
+// - a holding the table lacks or the statement does not declare, and the units check's finding (Hyperliquid stating
+//   other size decimals than the declared holding's, AR45) → refused(code: nil, text:), the nearest meaning
 
 extension ExchangeClientError {
     static let noCredential = ExchangeClientError.unauthorized(text: "The client was made without a credential")
@@ -38,6 +43,10 @@ extension ExchangeClientError {
         .refused(code: nil, text: "Hyperliquid lists no market \(market.text)")
     }
 
+    static func unknownAsset(_ name: String) -> ExchangeClientError {
+        .refused(code: nil, text: "Hyperliquid's \(name) is no declared holding")
+    }
+
     /// Hyperliquid's HTTP refusal, its body as it wrote it
     static func rejected(status: Int, text: String) -> ExchangeClientError {
         status == 401 || status == 403 ? .unauthorized(text: text) : .refused(code: String(status), text: text)
@@ -51,6 +60,8 @@ extension ExchangeClientError {
             api.text.hasPrefix("User or API Wallet") && api.text.hasSuffix("does not exist.")
                 ? .unauthorized(text: api.text)
                 : .refused(code: nil, text: api.text)
+        case let statement as AssetRegistryError:
+            .refused(code: nil, text: String(describing: statement))
         default:
             nil
         }

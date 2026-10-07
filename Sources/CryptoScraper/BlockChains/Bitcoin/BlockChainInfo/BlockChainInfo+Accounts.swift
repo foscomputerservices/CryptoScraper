@@ -9,6 +9,8 @@ public extension BlockChainInfo {
     /// Returns the balance (in BTC) of the given account
     ///
     /// - Parameter account: The Bitcoin account to query the balance for
+    ///
+    /// - Throws: ``BlockChainInfoResponseError/unknownContract(_:)`` when the answer does not hold the account
     func getBalance(forAccount account: Contract) async throws -> Amount<BitcoinContract> {
         let response: BalanceResponse = try await Self.endPoint.appending(path: "balance").appending(
             queryItems: BalanceResponse.httpQuery(account: account)
@@ -21,9 +23,11 @@ public extension BlockChainInfo {
     ///
     /// - Parameters:
     ///   - contract: The contract of the token to query
-    ///   - address: The contract address that holds the token
+    ///   - account: The contract address that holds the token
+    ///
+    /// - Throws: ``BlockChainInfoResponseError/unknownToken`` for any contract but BTC's
     func getBalance(forToken contract: Contract, forAccount account: Contract) async throws -> Amount<BitcoinContract> {
-        // Cannot retrieve ETH contract, but retrieve ETH balance
+        // Cannot retrieve BTC contract, but retrieve BTC balance
         if contract.isChainToken {
             return try await getBalance(forAccount: account)
         } else {

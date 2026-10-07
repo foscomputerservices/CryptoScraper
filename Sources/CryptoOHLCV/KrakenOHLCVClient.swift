@@ -24,11 +24,16 @@ import FoundationNetworking
 /// let days = try await client.ohlcv(market: xbtusd, interval: .init(count: 1, unit: .day), from: start, through: end)
 /// ```
 ///
-/// A market's two assets are Kraken's own, asked of `/0/public/AssetPairs` and `/0/public/Assets` once per market
-/// and kept for the client's life: each asset by Kraken's alternative name ("XBT", "USD") at Kraken's decimals.
+/// A market's two holdings are Kraken's declared constants (``KrakenHolding``), each of Kraken's names for them in
+/// `/0/public/AssetPairs` resolved through ``KrakenExchangeChain``'s table, once per market and kept for the client's
+/// life. The decimals Kraken states in `/0/public/Assets` are checked against the declared holding's (AR45).
 ///
 /// A limit in Kraken's error list, or HTTP 429, throws ``KrakenLimitError``; any other error Kraken lists throws
-/// ``KrakenAPIError``; number text that is not a number, or finer than an asset holds, throws ``AmountError``.
+/// ``KrakenAPIError``; number text that is not a number, or finer than a holding holds, throws ``AmountError``; a
+/// market whose holdings are not declared throws ``KrakenOHLCVError/unknownMarket(_:)``; Kraken stating other decimals
+/// than the declared ones throws `AssetRegistryError.decimalsChanged`; an interval Kraken has no OHLC for throws
+/// ``KrakenOHLCVError/unsupportedInterval(_:)``. When the init could not add Kraken's declarations to its registry,
+/// every read throws what `AssetRegistry.add(_:)` threw.
 public struct KrakenOHLCVClient: OHLCVClient {
     public typealias MarketName = KrakenMarketName
 
@@ -36,20 +41,27 @@ public struct KrakenOHLCVClient: OHLCVClient {
     private let session: any URLSessionProtocol
     private let now: @Sendable () -> Date
     private let markets: KrakenAssetPairBook
+    private let registry: AssetRegistry
+    // Kraken's declarations added to the registry at init, or why they could not be: thrown by every read
+    private let declared: Result<Void, any Error>
 
     /// - Parameters:
     ///   - baseURL: Kraken's REST root
     ///   - session: The session the requests go through; a test passes a recorded one
     ///   - now: The clock that says whether a bar has closed
+    ///   - registry: The statement every amount and price is read against; Kraken's holdings are added to it here
     public init(
         baseURL: URL = URL(string: "https://api.kraken.com")!,
         session: any URLSessionProtocol = URLSession.session(config: DataFetch<URLSession>.urlSessionConfiguration()),
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        registry: AssetRegistry = .shared
     ) {
         self.baseURL = baseURL
         self.session = session
         self.now = now
         self.markets = KrakenAssetPairBook()
+        self.registry = registry
+        self.declared = Result { try KrakenExchangeChain.declare(in: registry) }
     }
 
     public func ohlcv(market: KrakenMarketName, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar] {
@@ -65,7 +77,7 @@ public struct KrakenOHLCVClient: OHLCVClient {
         let clock = now().wireMilliseconds
         return try rows
             .filter { $0.openTime >= start && $0.openTime <= end }
-            .map { try $0.bar(of: pair, intervalSeconds: Int64(minutes) * 60, now: clock) }
+            .map { try $0.bar(of: pair, intervalSeconds: Int64(minutes) * 60, now: clock, in: registry) }
             .filter(\.isClosed)
     }
 
@@ -74,7 +86,7 @@ public struct KrakenOHLCVClient: OHLCVClient {
         let pair = try await self.pair(market)
         let clock = now().wireMilliseconds
         let rows = try await ohlc(market, minutes: minutes, since: clock / 1000 - 2 * Int64(minutes) * 60)
-        guard let bar = try rows.last.map({ try $0.bar(of: pair, intervalSeconds: Int64(minutes) * 60, now: clock) }), !bar.isClosed else {
+        guard let bar = try rows.last.map({ try $0.bar(of: pair, intervalSeconds: Int64(minutes) * 60, now: clock, in: registry) }), !bar.isClosed else {
             return nil
         }
         return bar
@@ -97,7 +109,9 @@ public struct KrakenOHLCVClient: OHLCVClient {
         return minutes
     }
 
+    // The market's two declared holdings, through the table, each checked against the decimals Kraken states (AR45).
     private func pair(_ market: KrakenMarketName) async throws -> KrakenAssetPair {
+        try declared.get()
         if let known = await markets.pair(market) {
             return known
         }
@@ -110,11 +124,11 @@ public struct KrakenOHLCVClient: OHLCVClient {
         guard let base = assets.result[info.base], let quote = assets.result[info.quote] else {
             throw KrakenOHLCVError.unknownMarket(market)
         }
-        let pair = KrakenAssetPair(
-            key: key,
-            base: try Asset(symbol: base.altname, unitExponent: base.decimals),
-            quote: try Asset(symbol: quote.altname, unitExponent: quote.decimals)
-        )
+        guard let baseHolding = try KrakenExchangeChain.declaredInstance(wireName: info.base, decimals: base.decimals, in: registry),
+              let quoteHolding = try KrakenExchangeChain.declaredInstance(wireName: info.quote, decimals: quote.decimals, in: registry) else {
+            throw KrakenOHLCVError.unknownMarket(market)
+        }
+        let pair = KrakenAssetPair(key: key, base: baseHolding, quote: quoteHolding)
         await markets.keep(pair, as: market)
         return pair
     }
@@ -158,15 +172,16 @@ public enum KrakenOHLCVError: Error, Hashable, Sendable {
     case unsupportedInterval(BarInterval)
     /// A market's name that is not one Kraken could spell
     case malformedMarketName(String)
-    /// Kraken's AssetPairs or Assets did not list the market or one of its assets
+    /// Kraken's AssetPairs or Assets did not list the market or one of its assets, or one of its holdings is not
+    /// declared
     case unknownMarket(KrakenMarketName)
 }
 
-// A Kraken pair with its two assets.
+// A Kraken pair with its two declared holdings.
 struct KrakenAssetPair: Sendable {
     let key: String
-    let base: Asset
-    let quote: Asset
+    let base: AssetInstance
+    let quote: AssetInstance
 }
 
 private actor KrakenAssetPairBook {
@@ -196,7 +211,8 @@ struct KrakenAssetPairInfo: Decodable, Sendable {
     let quote: String
 }
 
-// The part of an Assets entry this client reads: the alternative name and the decimals Kraken keeps.
+// The part of an Assets entry this client reads: the alternative name and the decimals Kraken keeps, the second
+// checked against the declared holding's.
 struct KrakenAssetInfo: Decodable, Sendable {
     let altname: String
     let decimals: Int
@@ -247,16 +263,16 @@ struct KrakenOHLCRow: Decodable, Sendable {
 
     // The bar: Kraken states no close time, so it is the open plus the interval less one millisecond, as Binance's
     // and Hyperliquid's are; closed once the clock has passed it.
-    func bar(of pair: KrakenAssetPair, intervalSeconds: Int64, now: Int64) throws -> OHLCVClientBar {
+    func bar(of pair: KrakenAssetPair, intervalSeconds: Int64, now: Int64, in registry: AssetRegistry) throws -> OHLCVClientBar {
         let closeTime = (openTime + intervalSeconds) * 1000 - 1
         return OHLCVClientBar(
             openTime: Date(wireMilliseconds: openTime * 1000),
             closeTime: Date(wireMilliseconds: closeTime),
-            open: try open.price(of: pair.quote, per: pair.base),
-            high: try high.price(of: pair.quote, per: pair.base),
-            low: try low.price(of: pair.quote, per: pair.base),
-            close: try close.price(of: pair.quote, per: pair.base),
-            volume: try volume.amount(of: pair.base),
+            open: try open.price(of: pair.quote, per: pair.base, in: registry),
+            high: try high.price(of: pair.quote, per: pair.base, in: registry),
+            low: try low.price(of: pair.quote, per: pair.base, in: registry),
+            close: try close.price(of: pair.quote, per: pair.base, in: registry),
+            volume: try volume.amount(of: pair.base, in: registry),
             trades: trades,
             isClosed: now > closeTime
         )

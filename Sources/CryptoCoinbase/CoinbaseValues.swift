@@ -54,7 +54,7 @@ public struct CoinbaseCredential: Sendable, CustomStringConvertible, CustomDebug
 public struct CoinbaseOrderId: Codable, Hashable, Sendable, Stubbable {
     package let text: String
 
-    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is not ASCII letters, digits and dashes
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 64 characters, or not ASCII letters, digits and dashes
     public init(validating candidate: String) throws {
         guard Self.isWellFormed(candidate) else {
             throw ExchangeClientError.malformedOrderId(candidate)
@@ -91,11 +91,13 @@ public struct CoinbaseOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
-/// Where a read of Coinbase's fills resumes: the sequence time of the last fill read, exactly as Coinbase wrote it
+/// Where a read of Coinbase's fills resumes: the sequence time of a fill, exactly as Coinbase wrote it
+///
+/// Decoding refuses text that is not an RFC 3339 time.
 public struct CoinbaseLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     package let sequenceTimestamp: String
 
-    /// The instant the cursor names, to the millisecond
+    /// The instant the cursor names, with the fractional seconds Coinbase wrote
     public var time: Date {
         CoinbaseTime.date(sequenceTimestamp) ?? .distantPast
     }
