@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for Nervos's public CKB Explorer API, `mainnet-api.explorer.nervos.org`,
 /// keyless, which answers in JSON:API (`application/vnd.api+json`)

@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for the Internet Computer's public Rosetta API,
 /// `rosetta-api.internetcomputer.org`, keyless

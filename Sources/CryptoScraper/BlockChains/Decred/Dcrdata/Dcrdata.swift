@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for dcrdata's public API, `dcrdata.decred.org`, keyless
 ///

@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension ArweaveGateway {
     /// Retrieves the ``CryptoTransaction``s for the given wallet: the latest transactions it sent and received, each

@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for NEAR's public JSON-RPC, `rpc.mainnet.near.org`, keyless, with NearBlocks'
 /// keyless API, `api.nearblocks.io`, for an account's transactions

@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension NearRPC {
     /// Retrieves the ``CryptoTransaction``s for the given account: the latest receipts NearBlocks lists for it, sent

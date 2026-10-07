@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension VeChainThor {
     /// Retrieves the ``CryptoTransaction``s for the given account: its latest VET transfers, sent and received,

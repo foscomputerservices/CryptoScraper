@@ -4,6 +4,9 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension ArweaveGateway {
     /// Returns the balance, in winston, of the given wallet

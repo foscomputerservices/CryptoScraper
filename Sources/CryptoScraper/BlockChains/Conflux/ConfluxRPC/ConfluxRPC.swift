@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for Conflux core space's public JSON-RPC, `main.confluxrpc.com`, keyless
 ///

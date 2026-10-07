@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// A ``CryptoScanner`` implementation for a public Neo N3 node's JSON-RPC, `mainnet1.neo.coz.io`, keyless
 ///

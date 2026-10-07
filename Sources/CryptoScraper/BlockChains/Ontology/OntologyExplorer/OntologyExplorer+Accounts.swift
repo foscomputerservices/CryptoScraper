@@ -6,6 +6,9 @@
 import CryptoAsset
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension OntologyExplorer {
     /// Returns the address's ONT, the chain's coin, in its base units

@@ -5,6 +5,9 @@
 
 import FOSFoundation
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 public extension Minascan {
     /// Returns the balance, in nanomina, of the given account; zero when the ledger holds no account for the key
