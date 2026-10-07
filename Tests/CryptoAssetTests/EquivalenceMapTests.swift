@@ -137,9 +137,18 @@ struct EquivalenceMapTests {
         }
     }
 
+    // "Holds" is a superset: an exchange's client adds its holdings to the shared registry when it is made, so in
+    // one test process (CI runs every target together) a library declaration there may carry more instances than
+    // the library wrote. The asset, its names and every library instance are what the shared registry must hold.
     @Test func theSharedRegistryHoldsTheLibrarysDeclarations() throws {
         for declaration in AssetRegistry.libraryDeclarations {
-            #expect(try AssetRegistry.shared.declaration(of: declaration.asset) == declaration)
+            let held = try AssetRegistry.shared.declaration(of: declaration.asset)
+            #expect(held.asset == declaration.asset)
+            #expect(held.tokenName == declaration.tokenName)
+            #expect(held.symbol == declaration.symbol)
+            for instance in declaration.instances {
+                #expect(held.instances.contains(instance), "\(instance.instance.id) is missing from the shared registry")
+            }
         }
         #expect(try AssetRegistry.shared.decimals(of: Fixtures.eth) == 18)
     }
