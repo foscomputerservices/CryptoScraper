@@ -21,7 +21,8 @@ To begin, api keys need to be set in order to access various services.  These ke
 | Service | Environment Variable | Required |
 |----------------- | ----------------- | -------- |
 | [Etherscan API V2](https://docs.etherscan.io/v2-migration), every EVM chain's scanner | ETHER_SCAN_KEY | No | 
-| [CoinGecko](https://www.coingecko.com/en/api) | COIN_GECKO_KEY| No |
+| [CoinGecko](https://www.coingecko.com/en/api), a pro key (the pro endpoint) | COIN_GECKO_KEY | No |
+| [CoinGecko](https://www.coingecko.com/en/api), a demo key (the free endpoint, 30 calls a minute) | COIN_GECKO_DEMO_KEY | No |
 | [CoinMarketCap](https://www.coingecko.com/en/api) | COIN_MARKETCAP_KEY| No | 
 
 Etherscan's API V2 serves every EVM chain's scanner with the one key, `ETHER_SCAN_KEY`, each scanner naming its chain by its chain id. A free key reads Ethereum, Polygon and Celo; BNB Smart Chain, Optimism, Avalanche C-Chain and Base need a paid plan, and token information (a token's decimals) needs a Standard plan. V2 does not serve Fantom, Ethereum Classic, Theta or COTI: Fantom's scanner is refused in V2's words, and the other three chains have no scanner (`NilScanner`).
