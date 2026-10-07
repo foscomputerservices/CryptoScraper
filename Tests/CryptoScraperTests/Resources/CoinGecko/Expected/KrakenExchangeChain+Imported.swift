@@ -14,7 +14,8 @@ import enum CryptoAsset.TRON
 
 extension KrakenExchangeChain {
     /// The rows generated from Kraken's Assets answer and CoinGecko's tickers: each holding keyed by the
-    /// first of its wire names, its class `nil` where the importer generated none
+    /// first of its wire names, each in a declared class; a listed name the run gave no class is a
+    /// `noClass` finding of the report, not a row
     static let importedRows: [Row] = [
         // SOL: CoinGecko's `solana`
         Row(holding: KrakenHolding(address: "SOL"), wireNames: ["SOL"], decimals: 10, symbol: "SOL", asset: try! Asset(validating: SOLANA.Solana.sol.instance.id)),

@@ -13,7 +13,8 @@ import enum CryptoAsset.TRON
 
 extension BinanceExchangeChain {
     /// The rows generated from Binance's exchange information and CoinGecko's tickers: each holding keyed by the
-    /// first of its wire names, its class `nil` where the importer generated none
+    /// first of its wire names, each in a declared class; a listed name the run gave no class is a
+    /// `noClass` finding of the report, not a row
     static let importedRows: [Row] = [
         // BTC: CoinGecko's `bitcoin`
         Row(holding: BinanceHolding(address: "BTC"), wireNames: ["BTC"], decimals: 8, symbol: "BTC", asset: try! Asset(validating: BIP122.Bitcoin.btc.instance.id)),

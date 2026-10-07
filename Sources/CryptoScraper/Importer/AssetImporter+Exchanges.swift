@@ -201,7 +201,15 @@ public extension AssetImporter {
             rows[index] = kept
         }
 
-        return (exchangeFile(exchange, rows: rows, date: date), Report(findings: findings))
+        // A row with no class is reported and not written (2026-10-07): the table holds declared holdings only, so a
+        // listed name the run gave no class is "a name the table lacks", a market with nil holdings, never a holding
+        // whose instance nothing declares.
+        let written = rows.filter { $0.assetClass != nil }
+        for row in rows where row.assetClass == nil {
+            findings.append(.noClass(exchange: exchange.rawValue, wireName: row.holding, coinId: row.coinId))
+        }
+
+        return (exchangeFile(exchange, rows: written, date: date), Report(findings: findings))
     }
 }
 
@@ -301,7 +309,8 @@ extension AssetImporter {
 
             extension \(exchange.chainType) {
                 /// The rows generated from \(exchange.listingName) and CoinGecko's tickers: each holding keyed by the
-                /// first of its wire names, its class `nil` where the importer generated none
+                /// first of its wire names, each in a declared class; a listed name the run gave no class is a
+                /// `noClass` finding of the report, not a row
                 static let importedRows: [Row] = [
 
             """

@@ -127,8 +127,9 @@ func printReport(_ title: String, _ report: AssetImporter.Report) {
     for (kind, count) in report.counts.sorted(by: { $0.key < $1.key }) {
         print("  \(kind): \(count)")
     }
-    // Every finding but the contracts on chains the library has no conformer for, which are many and only counted
-    for finding in report.findings where finding.kind != "chainNotAdmitted" {
+    // Every finding but the three that are many and only counted: the contracts on chains the library has no
+    // conformer for, and the exchanges' listed names with no coin id or no class
+    for finding in report.findings where finding.kind != "chainNotAdmitted" && finding.kind != "noClass" && finding.kind != "noCoinId" {
         print("    \(finding)")
     }
 }

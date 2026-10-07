@@ -76,6 +76,9 @@ public enum AssetImporter {
         case noCoinId(exchange: String, wireName: String)
         /// A generated row's class differs from the one generated before; the change is refused, the old class kept
         case classChanged(name: String, chainId: String, kept: String, refused: String)
+        /// An asset an exchange lists whose coin the run generated no class for (its chain not admitted, or the coin
+        /// left out above); not written: a holding nothing declares would be a value minted from a wire name
+        case noClass(exchange: String, wireName: String, coinId: String)
         /// One contract whose decimals its chain's scanner states otherwise than CoinGecko (design § 4.1, the chain's
         /// scanner the oracle): the chain's decimals kept, CoinGecko's refused
         case decimalsDisagree(coinId: String, platform: String, kept: Int, refused: Int)
@@ -95,6 +98,7 @@ public enum AssetImporter {
             case .decimalsChanged: "decimalsChanged"
             case .noCoinId: "noCoinId"
             case .classChanged: "classChanged"
+            case .noClass: "noClass"
             case .decimalsDisagree: "decimalsDisagree"
             }
         }
