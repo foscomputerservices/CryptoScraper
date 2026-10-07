@@ -4,17 +4,19 @@
 //
 
 import Foundation
-import Web3
-import Web3ContractABI
 
 public protocol EVMNormalTransaction: CryptoTransaction {
     /// The EVM MethodId
     var methodId: String { get }
 
-    /// The stringified version of ``methodId``
+    /// The function's name: the leading name of ``CryptoTransaction/functionName``, before its argument list; empty
+    /// when there is none
     var methodName: String { get }
 
-    /// A type-safe version of ``functionName``
+    /// The arguments of ``CryptoTransaction/functionName``, decoded from ``input`` by the types its signature names
+    ///
+    /// - Precondition: Every argument type is `uint256`, `address`, `bytes` or `bytes32`; any other is a
+    ///   `fatalError`
     var functionArguments: [EVMArgument] { get }
 
     /// The EVM function input
@@ -82,12 +84,6 @@ public extension EVMNormalTransaction {
 }
 
 private extension EVMNormalTransaction {
-    private var web3ArgTypes: [SolidityType] {
-        funcSignature.map { arg in
-            arg.type.solidityType
-        }
-    }
-
     private var funcSignatureBlock: String {
         guard let functionName else { return "" }
 
@@ -137,15 +133,6 @@ private enum EVMArgumentType {
     case address
     case bytes
     case bytes32
-
-    var solidityType: SolidityType {
-        switch self {
-        case .uint256: return .uint256
-        case .address: return .address
-        case .bytes: return .bytes(length: nil)
-        case .bytes32: return .bytes(length: 32)
-        }
-    }
 
     func evmArgument(name: String, value: String) -> EVMArgument {
         let typedValue: EVMArgumentValue

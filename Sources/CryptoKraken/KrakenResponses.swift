@@ -8,7 +8,8 @@ import Foundation
 
 // The parts of Kraken's answers the client reads, shaped as its JSON, each inside Kraken's `{"error":[],"result":…}`
 // envelope (KrakenResult, from CryptoOHLCV). Every number Kraken sends as text is decoded here into an exact
-// WireDecimal; a time Kraken sends as a JSON number of seconds is read as its text, exactly.
+// WireDecimal; a time Kraken sends as a JSON number of seconds is read as a Double and rounded to four places
+// (KrakenSeconds), a time sent as text is read exactly.
 
 struct KrakenPairInfo: Decodable, Sendable {
     let altname: String
@@ -103,10 +104,13 @@ struct KrakenOpenOrders: Decodable, Sendable {
         let descr: Description
         let vol: WireDecimal
         let volExec: WireDecimal
+        /// The client order id the order was placed with; absent where none was
+        let clOrdId: String?
 
         private enum CodingKeys: String, CodingKey {
             case descr, vol
             case volExec = "vol_exec"
+            case clOrdId = "cl_ord_id"
         }
     }
 
@@ -145,9 +149,13 @@ struct KrakenTrades: Decodable, Sendable {
         let price: WireDecimal
         let fee: WireDecimal
         let vol: WireDecimal
+        /// The trade's comma-delimited notes; "closing" where the trade closes all or part of a position
+        let misc: String?
+        /// The status of the position the trade opened ("open" or "closed"); present only if the trade opened one
+        let posstatus: String?
 
         private enum CodingKeys: String, CodingKey {
-            case ordertxid, pair, time, type, price, fee, vol
+            case ordertxid, pair, time, type, price, fee, vol, misc, posstatus
         }
 
         init(from decoder: any Decoder) throws {
@@ -159,6 +167,20 @@ struct KrakenTrades: Decodable, Sendable {
             self.price = try container.decode(WireDecimal.self, forKey: .price)
             self.fee = try container.decode(WireDecimal.self, forKey: .fee)
             self.vol = try container.decode(WireDecimal.self, forKey: .vol)
+            self.misc = try container.decodeIfPresent(String.self, forKey: .misc)
+            self.posstatus = try container.decodeIfPresent(String.self, forKey: .posstatus)
+        }
+
+        /// What the trade did to the position, as Kraken states it: "closing" among its notes closes; a position
+        /// status, either word, says the trade opened the position; neither (a spot trade), or both, states none
+        var positionEffect: ExchangeClientPositionEffect? {
+            let closing = misc?.split(separator: ",").contains { $0.trimmingCharacters(in: .whitespaces) == "closing" } ?? false
+            let opened = posstatus != nil
+            switch (opened, closing) {
+            case (true, false): return .open
+            case (false, true): return .close
+            default: return nil
+            }
         }
     }
 
@@ -232,7 +254,8 @@ struct KrakenStatusPage: Decodable, Sendable {
             case incidentUpdates = "incident_updates"
         }
 
-        /// What the maintenance says it touches: its name and every component it lists, lowercased
+        /// What the maintenance says it touches: its name, the components it lists and those its updates list as
+        /// affected, joined with " | " and lowercased
         var words: String {
             let listed = (components ?? []).map(\.name) + (incidentUpdates ?? []).flatMap { ($0.affectedComponents ?? []).map(\.name) }
             return ([name ?? ""] + listed).joined(separator: " | ").lowercased()

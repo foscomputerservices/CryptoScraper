@@ -1,0 +1,11 @@
+{
+	"address": "1654653399040a61",
+	"balance": "24964085160",
+	"_expandable": {
+		"keys": "keys",
+		"contracts": "contracts"
+	},
+	"_links": {
+		"_self": "/v1/accounts/1654653399040a61"
+	}
+}

@@ -7,7 +7,8 @@ import CryptoAsset
 import FOSFoundation
 import Foundation
 
-// C31. The declaration and its DocC are the protocols document's. Three conformers, one per plug-in library:
+// C31. The declaration and its DocC are the protocols document's, with `clientOrderId` on `placeOrder` added on
+// 2026-10-07, which that document's C31 does not yet carry. Three conformers, one per plug-in library:
 // HyperliquidClient (CryptoHyperliquid), KrakenClient (CryptoKraken), CoinbaseClient (CryptoCoinbase), each on
 // FOSFoundation's fetch with the exchange's error decoded by `errorType` and mapped into C30's ExchangeClientError (AR31), holding no file.
 
@@ -15,11 +16,14 @@ import Foundation
 ///
 /// A client decides nothing: it hands up what the exchange says, typed. A consumer's own layer decides.
 ///
+/// Every member throws ``ExchangeClientError``, except that a cancellation of the calling task is thrown as it is, a
+/// `CancellationError`.
+///
 /// ```swift
 /// let client = try HyperliquidClient(credential: .agentKey(key), endpoint: .testMarket, session: session)
 /// let book = try await client.orderBook(market: "BTC")
 /// let placed = try await client.placeOrder(market: "BTC", side: .buy, size: size, limit: limit,
-///                                          immediateOrCancel: true, reduceOnly: false, account: account)
+///                                          immediateOrCancel: true, reduceOnly: false, clientOrderId: id.token, account: account)
 /// ```
 ///
 /// Every text an exchange sends for a number is decoded into § 1's types inside the client's response models, exactly; nothing typed as a string leaves a client.
@@ -33,8 +37,12 @@ public protocol ExchangeClient: Sendable {
 
     func markets() async throws -> [ExchangeClientMarket<MarketName>]
     func orderBook(market: MarketName) async throws -> ExchangeClientBook<MarketName>
+    /// Places an order; `clientOrderId` is the consumer's own id for it, made before the send (T56, C22's 128-bit token),
+    /// written in the form the exchange takes (Hyperliquid's `cloid`, Kraken's `cl_ord_id`, Coinbase's
+    /// `client_order_id`), so an order that went unanswered can be found by it among the open orders; `nil` sends none,
+    /// except to Coinbase, which requires one: its client then sends a fresh random UUID
     func placeOrder(market: MarketName, side: ExchangeClientSide, size: Amount, limit: Price,
-                    immediateOrCancel: Bool, reduceOnly: Bool, account: String) async throws -> ExchangeClientOrderResult<OrderId>
+                    immediateOrCancel: Bool, reduceOnly: Bool, clientOrderId: UInt128?, account: String) async throws -> ExchangeClientOrderResult<OrderId>
     func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<MarketName, OrderId>]
     func cancelOrder(_ id: OrderId, market: MarketName, account: String) async throws
     func accountState(account: String) async throws -> ExchangeClientAccountState<MarketName>

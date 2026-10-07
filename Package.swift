@@ -48,10 +48,13 @@ let package = Package(
         .library(
             name: "CryptoReference",
             targets: ["CryptoReference"]
+        ),
+        .library(
+            name: "CryptoFearGreed",
+            targets: ["CryptoFearGreed"]
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/Boilertalk/Web3.swift.git", .upToNextMajor(from: "0.8.3")),
         .package(url: "https://github.com/foscomputerservices/FOSUtilities.git", from: "0.20.0"),
         // CryptoHyperliquid alone: secp256k1 and Keccak-256 for the agent's signature (AR33)
         .package(url: "https://github.com/Boilertalk/secp256k1.swift.git", from: "0.1.7"),
@@ -110,6 +113,8 @@ let package = Package(
             dependencies: [
                 .byName(name: "CryptoAsset"),
                 .byName(name: "CryptoExchange"),
+                // The exchange chains (design § 1.3): each exchange's chain, holdings and scanner conform to the 2023 protocols
+                .byName(name: "CryptoScraper"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")
             ],
             swiftSettings: [.swiftLanguageMode(.v6)]
@@ -118,6 +123,7 @@ let package = Package(
             name: "CryptoOHLCVTests",
             dependencies: [
                 .byName(name: "CryptoOHLCV"),
+                .byName(name: "CryptoScraper"),
                 .byName(name: "CryptoAsset"),
                 .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoReference"),
@@ -144,6 +150,7 @@ let package = Package(
             name: "CryptoHyperliquidTests",
             dependencies: [
                 .byName(name: "CryptoHyperliquid"),
+                .byName(name: "CryptoScraper"),
                 .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
@@ -168,6 +175,7 @@ let package = Package(
             name: "CryptoKrakenTests",
             dependencies: [
                 .byName(name: "CryptoKraken"),
+                .byName(name: "CryptoScraper"),
                 .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
@@ -193,6 +201,7 @@ let package = Package(
             name: "CryptoCoinbaseTests",
             dependencies: [
                 .byName(name: "CryptoCoinbase"),
+                .byName(name: "CryptoScraper"),
                 .byName(name: "CryptoExchange"),
                 .byName(name: "CryptoOHLCV"),
                 .byName(name: "CryptoAsset"),
@@ -224,20 +233,39 @@ let package = Package(
             resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
+        // The Fear and Greed index names no asset, so the library links FOSFoundation alone
+        .target(
+            name: "CryptoFearGreed",
+            dependencies: [
+                .product(name: "FOSFoundation", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoFearGreedTests",
+            dependencies: [
+                .byName(name: "CryptoFearGreed"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
         .testTarget(
             name: "CryptoScraperTests",
             dependencies: [
                 .byName(name: "CryptoScraper"),
+                .byName(name: "CryptoAsset"),
                 .product(name: "FOSFoundation", package: "FOSUtilities"),
                 .product(name: "FOSTesting", package: "FOSUtilities")
             ],
+            resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "CryptoScraper",
             dependencies: [
-                .product(name: "Web3", package: "Web3.swift"),
-                .product(name: "Web3ContractABI", package: "Web3.swift"),
+                .byName(name: "CryptoAsset"),
                 .product(name: "FOSFoundation", package: "FOSUtilities")
             ],
             swiftSettings: [.swiftLanguageMode(.v6)]

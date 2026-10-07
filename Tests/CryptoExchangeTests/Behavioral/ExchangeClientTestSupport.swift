@@ -128,7 +128,7 @@ enum LedgerLine<Name: Hashable & Sendable, OrderId: Hashable & Sendable>: Hashab
 
 func line<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, Cursor>) -> LedgerLine<Name, OrderId> {
     switch item {
-    case let .fill(market, side, units, price, fee, order, closedBy, time, _):
+    case let .fill(market, side, units, price, fee, order, closedBy, time, _, _):
         .fill(market: market, side: side, units: units, price: price, fee: fee, order: order, closedBy: closedBy, time: time)
     case let .funding(market, amount, rate, time, _):
         .funding(market: market, amount: amount, rate: rate, time: time)
@@ -143,7 +143,7 @@ func line<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId,
 
 func cursor<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, Cursor>) -> Cursor {
     switch item {
-    case let .fill(_, _, _, _, _, _, _, _, cursor): cursor
+    case let .fill(_, _, _, _, _, _, _, _, cursor, _): cursor
     case let .funding(_, _, _, _, cursor): cursor
     case let .deposit(_, _, cursor): cursor
     case let .withdrawal(_, _, cursor): cursor

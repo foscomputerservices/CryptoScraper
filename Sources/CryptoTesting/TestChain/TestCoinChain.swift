@@ -37,7 +37,7 @@ public final class TestCoinChain: CryptoChain, Sendable {
         )
     }
 
-    public let scanner: TCScan? = .init()
+    public let scanner: TCScan = .init()
 
     static let tcContractAddress = "TestCoin"
 

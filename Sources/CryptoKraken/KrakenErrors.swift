@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import CryptoExchange
 import CryptoOHLCV
 import Foundation
@@ -18,6 +19,8 @@ import Foundation
 // - the members Kraken spot lacks → notOffered(member:)
 // - a client made without a credential, or with a malformed one → unauthorized(text:)
 // - a market, an asset or a size Kraken does not list → refused(code: nil, text:), the nearest meaning
+// - a holding the table lacks or the statement does not declare, and the units check's finding (Kraken stating other
+//   decimals than the declared holding's, AR45) → refused(code: nil, text:), the nearest meaning
 
 extension ExchangeClientError {
     static let noCredential = ExchangeClientError.unauthorized(text: "The client was made without a credential")
@@ -39,16 +42,20 @@ extension ExchangeClientError {
     }
 
     static func unknownAsset(_ key: String) -> ExchangeClientError {
-        .refused(code: nil, text: "Kraken's Assets lists no asset \(key)")
+        .refused(code: nil, text: "Kraken's \(key) is no declared holding")
     }
 
-    /// Kraken's own errors, typed by its fetch hook or decoded by the fetch, as the shared cases; nil for every other error
+    /// Kraken's own errors, typed by its fetch hook or decoded by the fetch, as the shared cases, and an
+    /// `AssetRegistryError` (the units check, a statement that disagrees) as `refused(code: nil, text:)`; nil for every
+    /// other error
     static func kraken(_ error: any Error) -> ExchangeClientError? {
         switch error {
         case let limit as KrakenLimitError:
             .rateLimited(retryAfter: limit.retryAfter)
         case let api as KrakenAPIError:
             api.asExchangeClientError
+        case let statement as AssetRegistryError:
+            .refused(code: nil, text: String(describing: statement))
         default:
             nil
         }

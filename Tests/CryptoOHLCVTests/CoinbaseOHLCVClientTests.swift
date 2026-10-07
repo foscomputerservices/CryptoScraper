@@ -48,11 +48,15 @@ struct CoinbaseOHLCVClientContractTests {
         #expect(bars.map(\.openTime) == bars.map(\.openTime).sorted())
     }
 
+    // Carried in step 4b of the identity PR: the product's currencies are Coinbase's declared holdings, no longer the
+    // assets' home instances; their decimals are the declared holdings', which the product's increments do not exceed.
     @Test func theAssetsCarryTheDecimalsOfTheProductsIncrements() async throws {
         let session = ReplaySession(route: Self.route(candles: "Coinbase/candles-btc-usd-1d.json"))
         let first = try #require(try await Self.client(session).ohlcv(market: Self.btcusd, interval: Feed.day, from: Self.from, through: Self.through).first)
-        #expect(first.open.base == .btc)
-        #expect(first.open.quote == .usd)
+        #expect(first.open.base.id == EXCHANGE.Coinbase.chainId + ":BTC")
+        #expect(first.open.quote.id == EXCHANGE.Coinbase.chainId + ":USD")
+        #expect(try AssetRegistry.shared.decimals(of: first.open.base) == 8)
+        #expect(try AssetRegistry.shared.decimals(of: first.open.quote) == 2)
     }
 
     @Test func theRequestCarriesTheRangeInWholeSecondsAndTheGranularity() async throws {

@@ -3,11 +3,15 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
 import Synchronization
 
 public final class BinanceSmartChain: CryptoChain, Sendable {
     // MARK: CryptoChain
+
+    /// The chain's CAIP-2 identifier, the first part of every identity on it
+    public let id: String = EIP155.BinanceSmartChain.chainId
 
     public let userReadableName: String = "BNB"
 
@@ -50,7 +54,7 @@ public final class BinanceSmartChain: CryptoChain, Sendable {
         tokens.withLock { $0?[address] }
     }
 
-    public let scanner: BscScan? = .init()
+    public let scanner: BscScan = .init()
 
     static let bnbContractAddress = "bnb"
 

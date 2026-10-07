@@ -66,25 +66,90 @@ public struct BinanceMarketName: Codable, Hashable, Sendable, CustomStringConver
     }
 }
 
-/// A Binance spot market: its name and the two assets it trades, as Binance states them
+extension BinanceMarketName {
+    public static func stub() -> Self { .stub(text: "FREDBARNEY") }
+
+    public static func stub(text: String = "FREDBARNEY") -> Self {
+        do {
+            return try BinanceMarketName(validating: text)
+        } catch {
+            preconditionFailure("BinanceMarketName.stub(text:) with a malformed name: \(error)")
+        }
+    }
+}
+
+/// A Binance spot market: its name, what Binance calls its base and its quote with the precision it states for each,
+/// and Binance's declared holdings for them
 ///
-/// The base asset is what a bar's volume counts; the quote asset is what its prices are in. Binance states each
-/// asset's precision in `/api/v3/exchangeInfo`, and that precision is the asset's unit exponent here. A caller that
-/// declares its assets with their unit names passes the markets in; otherwise ``BinanceOHLCVClient`` asks Binance
-/// once per market.
+/// The holdings come through ``BinanceExchangeChain``'s table, never from Binance's names: a name the table lacks,
+/// or a holding the registry does not declare, gives `nil`, with Binance's names and precision kept as facts (design
+/// § 5.3). The precision Binance states in `/api/v3/exchangeInfo` is checked against the declared holding's decimals
+/// (AR45). The base holding is what a bar's volume counts; the quote holding is what its prices are in. A caller that
+/// holds Binance's exchange information passes the markets in; otherwise ``BinanceOHLCVClient`` asks Binance once
+/// per market.
 ///
 /// ```swift
-/// let btcusdt = BinanceMarket(name: try .init(validating: "BTCUSDT"), base: btc, quote: usdt)
+/// let btcusdt = try BinanceMarket(name: try .init(validating: "BTCUSDT"), baseSymbol: try .init(validating: "BTC"),
+///                                 baseDecimals: 8, quoteSymbol: try .init(validating: "USDT"), quoteDecimals: 8)
+/// btcusdt.quote                            // AssetInstance(BinanceHolding.usdt): "exchange:binance:USDT"
 /// let client = BinanceOHLCVClient(markets: [btcusdt])
 /// ```
 public struct BinanceMarket: Codable, Hashable, Sendable, Stubbable {
     public let name: BinanceMarketName
-    public let base: Asset
-    public let quote: Asset
+    /// What Binance calls the base, and the precision it states for it
+    public let baseSymbol: AssetSymbol
+    public let baseDecimals: Int
+    /// What Binance calls the quote, and the precision it states for it
+    public let quoteSymbol: AssetSymbol
+    public let quoteDecimals: Int
+    /// The declared holding on Binance's exchange chain; `nil` where nothing is declared
+    public let base: AssetInstance?
+    /// The declared holding on Binance's exchange chain; `nil` where nothing is declared
+    public let quote: AssetInstance?
 
-    public init(name: BinanceMarketName, base: Asset, quote: Asset) {
+    /// The market Binance's exchange information states: each of its two names resolved through
+    /// ``BinanceExchangeChain``'s table, Binance's declarations first added to `registry`
+    ///
+    /// - Throws: `AssetRegistryError.decimalsChanged` when Binance states another precision than a declared
+    ///   holding's decimals (the units check, AR45); what `AssetRegistry.add(_:)` throws when `registry` states a
+    ///   Binance holding otherwise
+    public init(name: BinanceMarketName, baseSymbol: AssetSymbol, baseDecimals: Int, quoteSymbol: AssetSymbol,
+                quoteDecimals: Int, in registry: AssetRegistry = .shared) throws {
+        try BinanceExchangeChain.declare(in: registry)
+        self.init(
+            name: name, baseSymbol: baseSymbol, baseDecimals: baseDecimals, quoteSymbol: quoteSymbol, quoteDecimals: quoteDecimals,
+            base: try BinanceExchangeChain.declaredInstance(wireName: baseSymbol.text, decimals: baseDecimals, in: registry),
+            quote: try BinanceExchangeChain.declaredInstance(wireName: quoteSymbol.text, decimals: quoteDecimals, in: registry)
+        )
+    }
+
+    // The resolved market as it is, for the stub; never made from a caller's instances.
+    private init(name: BinanceMarketName, baseSymbol: AssetSymbol, baseDecimals: Int, quoteSymbol: AssetSymbol,
+                 quoteDecimals: Int, base: AssetInstance?, quote: AssetInstance?) {
         self.name = name
+        self.baseSymbol = baseSymbol
+        self.baseDecimals = baseDecimals
+        self.quoteSymbol = quoteSymbol
+        self.quoteDecimals = quoteDecimals
         self.base = base
         self.quote = quote
+    }
+}
+
+extension BinanceMarket {
+    public static func stub() -> Self { .stub(name: .stub()) }
+
+    /// FREDBARNEY: BARNEY at 4 on FRED at 4, its holdings Price's stub base and quote, on the reserved fake chain
+    public static func stub(
+        name: BinanceMarketName = .stub(),
+        baseSymbol: AssetSymbol = .stub(text: "BARNEY"),
+        baseDecimals: Int = 4,
+        quoteSymbol: AssetSymbol = .stub(),
+        quoteDecimals: Int = 4,
+        base: AssetInstance? = Price.stub().base,
+        quote: AssetInstance? = Price.stub().quote
+    ) -> Self {
+        .init(name: name, baseSymbol: baseSymbol, baseDecimals: baseDecimals, quoteSymbol: quoteSymbol,
+              quoteDecimals: quoteDecimals, base: base, quote: quote)
     }
 }

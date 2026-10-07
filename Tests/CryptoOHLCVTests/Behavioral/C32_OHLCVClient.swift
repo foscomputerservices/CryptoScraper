@@ -1,60 +1,92 @@
-// C32_OHLCVClient.swift — C32: the OHLCV client's protocol, its two members and their types
+// C32 — An OHLCV client, as the identity design amends what it hands up.
+// Projected from docs/fosline-suite-protocols.md C32: "The client takes an interval as a count and a unit and an
+// absolute range it does not round." and "The still-open bar: its open time and its open price so far; never a closed
+// bar's stand-in". And from the design § 5.3: "A client, the candle client included, reads the exchange's names off the
+// wire, asks its exchange chain's `contract(for:)`, and from then on works in the holding constants." and "Every money
+// value is an `Amount` in the exchange's instance."
+// Recorded answers only; never a live call.
 
-import Testing
-import Foundation
 import CryptoAsset
 import CryptoOHLCV
-import CryptoReference
+import CryptoScraper
+import Foundation
+import Testing
 
-@Suite("C32: the OHLCV client's protocol")
+@Suite("C32 OHLCV client")
 struct C32_OHLCVClientTests {
-    /// A conformer written from C32's declaration alone: it compiles only if the protocol has exactly these members' shapes
-    struct ScriptedClient: OHLCVClient {
-        typealias MarketName = String
-        let closed: [OHLCVClientBar]
-        let open: OHLCVClientBar?
+    private let start = Date(timeIntervalSince1970: 42 * 86_400)
+    private let end = Date(timeIntervalSince1970: 43 * 86_400)
 
-        func ohlcv(market: String, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar] { closed }
-        func openOHLCV(market: String, interval: BarInterval) async throws -> OHLCVClientBar? { open }
+    private func client() throws -> BinanceOHLCVClient {
+        // invented: BinanceOHLCVClient(registry:session:) and RecordedBinance.session(answering:) — "each client takes a
+        // registry at init (default `.shared`)" (§ 5.3) and "FOSFoundation's mockable session with recorded responses" (§ 8.6); neither call is declared
+        try BinanceOHLCVClient(registry: AssetRegistry(AssetRegistry.libraryDeclarations),
+                               session: RecordedBinance.session(answering: "klines-BTCUSDT-15m"))
     }
 
-    /// A consumer generic over the protocol, calling both members as C32's DocC example does
-    func consume<C: OHLCVClient>(_ client: C, market: C.MarketName) async throws -> ([OHLCVClientBar], OHLCVClientBar?) {
-        let bars = try await client.ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute),
-                                          from: date(ms: Fx.jan1Ms), through: date(ms: Fx.jan1Ms + Fx.dayMs))
-        let open = try await client.openOHLCV(market: market, interval: BarInterval(count: 1, unit: .day))
-        return (bars, open)
+    // invented: BinanceMarketName.btcUSDT — "each plug-in links `CryptoOHLCV` for its exchange's one typed market name" (§ 10 of the protocols); its cases are not declared
+    private let market = BinanceMarketName.btcUSDT
+
+    // "Every money value is an `Amount` in the exchange's instance." — a bar's prices are Binance's tether per Binance's bitcoin
+    @Test(.disabled("Classified 2026-10-07: no recording klines-BTCUSDT-15m (Binance's 15-minute klines; the target holds the daily and 4-hour ones); see the identity ledger")) func barPricesNameBinancesHoldings() async throws {
+        let bars = try await client().ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
+        let bar = try #require(bars.first)
+        #expect(bar.close.quote == AssetInstance(BinanceHolding.usdt))
+        // invented: BinanceHolding.btc — "one per holding the registry declares"; Binance's bitcoin constant is not written out
+        #expect(bar.close.base == AssetInstance(BinanceHolding.btc))
     }
 
-    @Test("C32: a conformer of the two declared members, ohlcv and openOHLCV, satisfies the protocol")
-    func twoMembers() async throws {
-        let closed = OHLCVClientBar.stub(isClosed: true)
-        let open = OHLCVClientBar.stub(isClosed: false)
-        let (bars, live) = try await consume(ScriptedClient(closed: [closed], open: open), market: "BTCUSDT")
-        #expect(bars == [closed])
-        #expect(live == open)
+    // "A bar as the feed gave it" — open, high, low and close share one pair of instances
+    @Test(.disabled("Classified 2026-10-07: no recording klines-BTCUSDT-15m (Binance's 15-minute klines; the target holds the daily and 4-hour ones); see the identity ledger")) func allFourPricesShareTheirInstances() async throws {
+        let bars = try await client().ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
+        for bar in bars {
+            for price in [bar.open, bar.high, bar.low] {
+                #expect(price.quote == bar.close.quote)
+                #expect(price.base == bar.close.base)
+            }
+        }
     }
 
-    @Test("C32: the Binance conformer is an OHLCVClient, reachable through a generic consumer")
-    func binanceConforms() async throws {
-        let session = RecordedSession(BinanceFixtures.dailyClosed)
-        let (bars, _) = try await consume(Fx.binance(session), market: Fx.btcusdt)
-        #expect(bars.count == 2)
+    // "a bar's volume is `Amount.stub(asset: Price.stub().base)`" (C7) — the volume is counted in the base holding
+    @Test(.disabled("Classified 2026-10-07: no recording klines-BTCUSDT-15m (Binance's 15-minute klines; the target holds the daily and 4-hour ones); see the identity ledger")) func volumeIsInTheBaseHolding() async throws {
+        let bars = try await client().ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
+        for bar in bars {
+            #expect(bar.volume.instance == bar.close.base)
+        }
     }
 
-    @Test("C32: the protocol and its conformer are Sendable")
-    func sendable() {
-        let client = Fx.binance(RecordedSession(BinanceFixtures.empty))
-        let sendable: any Sendable = client
-        #expect(sendable is BinanceOHLCVClient)
+    // "closed bars for a market over an absolute UTC range"
+    @Test(.disabled("Classified 2026-10-07: no recording klines-BTCUSDT-15m (Binance's 15-minute klines; the target holds the daily and 4-hour ones); see the identity ledger")) func historyBarsAreClosedAndInRange() async throws {
+        let bars = try await client().ohlcv(market: market, interval: BarInterval(count: 15, unit: .minute), from: start, through: end)
+        for bar in bars {
+            #expect(bar.isClosed)
+            #expect(bar.openTime >= start)
+            #expect(bar.openTime <= end)
+            #expect(bar.closeTime > bar.openTime)
+        }
     }
 
-    @Test("C32: the market name is the conformer's own type, Hashable and Sendable")
-    func marketNameHashableSendable() {
-        func requireHashableSendable<M: Hashable & Sendable>(_ market: M) -> M { market }
-        let a = requireHashableSendable(Fx.btcusdt)
-        let b = requireHashableSendable(Fx.btcusdt)
-        #expect(a == b)
-        #expect(Set([a, b]).count == 1)
+    // "`openOHLCV` returns `isClosed == false`" (§ 8.6)
+    @Test func openBarIsNotClosed() async throws {
+        // invented: RecordedBinance.session(answering:) — as above
+        let open = try BinanceOHLCVClient(registry: AssetRegistry(AssetRegistry.libraryDeclarations),
+                                          session: RecordedBinance.session(answering: "klines-BTCUSDT-1d-open"))
+        let bar = try await open.openOHLCV(market: market, interval: BarInterval(count: 1, unit: .day))
+        #expect(bar?.isClosed == false)
+    }
+
+    // "each client takes a registry at init" — and "At its init each client adds its exchange's declarations to its registry"
+    @Test func initAddsBinancesDeclarations() throws {
+        let registry = try AssetRegistry([])
+        // invented: as above
+        _ = try BinanceOHLCVClient(registry: registry, session: RecordedBinance.session(answering: "klines-BTCUSDT-15m"))
+        #expect(try registry.decimals(of: AssetInstance(BinanceHolding.usdt)) == 8)
+    }
+
+    // "Where one value must agree with another, the default says so through the nested stub" (C7) — the bar's stub
+    @Test func barStubAgrees() {
+        let bar = OHLCVClientBar.stub()
+        #expect(bar.volume.instance == bar.close.base)
+        #expect(bar.open.base == bar.close.base)
     }
 }

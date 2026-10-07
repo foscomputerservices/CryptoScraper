@@ -41,7 +41,8 @@ public struct KrakenCredential: Sendable, CustomStringConvertible, CustomDebugSt
 public struct KrakenOrderId: Codable, Hashable, Sendable, Stubbable {
     package let text: String
 
-    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is not ASCII letters, digits and dashes
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 40
+    ///   characters, or not ASCII letters, digits and dashes. Decoding the same text throws a `DecodingError` instead.
     public init(validating candidate: String) throws {
         guard Self.isWellFormed(candidate) else {
             throw ExchangeClientError.malformedOrderId(candidate)
@@ -78,9 +79,11 @@ public struct KrakenOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
-/// Where a read of Kraken's ledger resumes: the time of the last item read, exactly as Kraken stated it
+/// Where a read of Kraken's ledger resumes: the time of the last item read, as seconds to the ten-thousandth
 ///
-/// Kraken's ledger and trade reads take a start time, exclusive, to the ten-thousandth of a second it states.
+/// Kraken's ledger and trade reads take a start time, exclusive, to the ten-thousandth of a second it states. Kraken
+/// sends most times as JSON numbers, which the client reads as a Double and rounds to four places; a time Kraken
+/// sends as text is kept as written. It is sent as `start` and encoded as its text.
 public struct KrakenLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     package let seconds: WireDecimal
 

@@ -61,6 +61,8 @@ struct HyperliquidOpenOrder: Decodable, Sendable {
     let side: String
     let sz: WireDecimal
     let oid: Int64
+    /// The client order id the order was placed with, 16 bytes as "0x" and 32 hex digits; absent where none was
+    let cloid: String?
 }
 
 struct HyperliquidClearinghouseState: Decodable, Sendable {
@@ -75,8 +77,14 @@ struct HyperliquidClearinghouseState: Decodable, Sendable {
     struct Position: Decodable, Sendable {
         let coin: String
         let szi: WireDecimal
+        let leverage: Leverage?
         let entryPx: WireDecimal?
         let liquidationPx: WireDecimal?
+    }
+
+    // A position's leverage: {"type": "isolated" or "cross", "value": 2, …}.
+    struct Leverage: Decodable, Sendable {
+        let value: Int
     }
 
     let marginSummary: Summary
@@ -93,11 +101,13 @@ struct HyperliquidFill: Decodable, Sendable {
     let time: Int64
     let dir: String
     let oid: Int64
+    /// Hyperliquid's trade id; read where present
+    let tid: Int64?
     let fee: WireDecimal
     let liquidation: Bool
 
     private enum CodingKeys: String, CodingKey {
-        case coin, px, sz, side, time, dir, oid, fee, liquidation
+        case coin, px, sz, side, time, dir, oid, tid, fee, liquidation
     }
 
     init(from decoder: any Decoder) throws {
@@ -109,6 +119,7 @@ struct HyperliquidFill: Decodable, Sendable {
         self.time = try container.decode(Int64.self, forKey: .time)
         self.dir = try container.decode(String.self, forKey: .dir)
         self.oid = try container.decode(Int64.self, forKey: .oid)
+        self.tid = try container.decodeIfPresent(Int64.self, forKey: .tid)
         self.fee = try container.decode(WireDecimal.self, forKey: .fee)
         // A fill that closed a position by liquidation carries a `liquidation` object; any other carries none.
         self.liquidation = try container.contains(.liquidation) && !container.decodeNil(forKey: .liquidation)
@@ -136,10 +147,11 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable {
     }
 
     let time: Int64
+    let hash: String?
     let delta: Delta
 
     private enum CodingKeys: String, CodingKey {
-        case time, delta
+        case time, hash, delta
     }
 
     private enum DeltaKeys: String, CodingKey {
@@ -149,6 +161,7 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.time = try container.decode(Int64.self, forKey: .time)
+        self.hash = try container.decodeIfPresent(String.self, forKey: .hash)
         let delta = try container.nestedContainer(keyedBy: DeltaKeys.self, forKey: .delta)
         switch try delta.decode(String.self, forKey: .type) {
         case "deposit":

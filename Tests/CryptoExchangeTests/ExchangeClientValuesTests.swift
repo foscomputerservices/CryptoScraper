@@ -73,11 +73,38 @@ struct ExchangeClientValuesTests {
             market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid, fee: fee,
             order: 42, closedBy: .liquidation, time: .distantPast, cursor: 7
         )
-        guard case .fill(_, _, _, _, let read, _, let reason, _, let cursor) = item else {
+        guard case .fill(_, _, _, _, let read, _, let reason, _, let cursor, _) = item else {
             Issue.record("Not a fill")
             return
         }
         #expect(read == fee && reason == .liquidation && cursor == 7)
+    }
+
+    // The owner's ruling (2026-10-07): a fill states what it did to the position, typed, FIX's name; nil where the
+    // exchange states none.
+    @Test func aFillsPositionEffectIsOpenOrCloseByItsCaseNameAndNilWhereNoneIsStated() throws {
+        #expect(ExchangeClientPositionEffect.allCases == [.open, .close])
+        #expect(try ExchangeClientPositionEffect.close.toJSON() == #""close""#)
+        #expect(try #""open""#.fromJSON() == ExchangeClientPositionEffect.open)
+        #expect(ExchangeClientPositionEffect.stub() == .open)
+        let unstated = ExchangeClientLedgerItem<String, Int, Int>.fill(
+            market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid,
+            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, closedBy: nil, time: .distantPast, cursor: 7
+        )
+        guard case .fill(_, _, _, _, _, _, _, _, _, let effect) = unstated else {
+            Issue.record("Not a fill")
+            return
+        }
+        #expect(effect == nil)
+        let closing = ExchangeClientLedgerItem<String, Int, Int>.fill(
+            market: "BTC", side: .sell, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid,
+            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, closedBy: nil, time: .distantPast, cursor: 7, positionEffect: .close
+        )
+        #expect(closing != unstated)
+        guard case .fill(_, _, _, _, _, _, _, _, _, .close) = closing else {
+            Issue.record("Not a closing fill")
+            return
+        }
     }
 
     @Test func theAccountsValuesAreComparedByValue() {
@@ -95,11 +122,45 @@ struct ExchangeClientValuesTests {
 
     @Test func noValueCarriesANumberAsText() {
         // § 8.6: every number is § 1's type; the text fields are the exchange's words, never a number.
-        let numeric: [Any.Type] = [Amount.self, Price.self, Fraction.self, Int.self, Int?.self, Date.self]
+        // Carried in step 4a of the identity PR: C30's market now hands up the exchange's symbols as facts beside its
+        // holdings (design § 5.3), words like its name, and its lot and minimum as optional amounts. Carried in step 4b:
+        // its second name is a name.
+        let numeric: [Any.Type] = [Amount.self, Amount?.self, Price.self, Fraction.self, Int.self, Int?.self, Date.self]
+        let words: Set<String> = ["name", "alternateName", "baseSymbol", "quoteSymbol", "base", "quote", "isPerpetual"]
         let market = ExchangeClientMarket(name: "BTC", base: Self.btc, quote: Self.usdc, lotSize: .zero(of: Self.btc),
                                           minimumOrder: .zero(of: Self.btc), maxLeverage: nil, leverageSet: nil, isPerpetual: false)
-        for child in Mirror(reflecting: market).children where child.label != "name" && child.label != "base" && child.label != "quote" && child.label != "isPerpetual" {
+        for child in Mirror(reflecting: market).children where !words.contains(child.label ?? "") {
             #expect(numeric.contains { $0 == type(of: child.value) }, "\(child.label ?? "?") is \(type(of: child.value))")
+        }
+    }
+}
+
+// The client gaps of the identity PR: C30's open order carries the consumer's own id back; the forms the plug-ins
+// write it in and read it back from.
+@Suite("C30: the client order id")
+struct ExchangeClientOrderIdTests {
+    static let token: UInt128 = 0x0123_4567_89ab_cdef_0011_2233_4455_6677
+
+    @Test func anOpenOrderCarriesTheClientOrderIdItWasPlacedWith() {
+        let units = Amount(baseUnits: 15, asset: ExchangeClientValuesTests.btc)
+        let placed = ExchangeClientOpenOrder(id: 42, market: "BTC", side: .buy, units: units, clientOrderId: Self.token)
+        #expect(placed.clientOrderId == Self.token)
+        #expect(placed != ExchangeClientOpenOrder(id: 42, market: "BTC", side: .buy, units: units, clientOrderId: nil))
+    }
+
+    @Test func theFormsAreThirtyTwoHexDigitsAndAUUIDsText() {
+        #expect(Self.token.clientOrderIdHex == "0123456789abcdef0011223344556677")
+        #expect(UInt128(1).clientOrderIdHex == "00000000000000000000000000000001")
+        #expect(Self.token.clientOrderIdUUIDText == "01234567-89ab-cdef-0011-223344556677")
+    }
+
+    @Test func eachFormReadsBackAndAnyOtherTextDoesNot() {
+        for text in ["0x0123456789abcdef0011223344556677", "0123456789ABCDEF0011223344556677", "01234567-89ab-cdef-0011-223344556677"] {
+            #expect(UInt128(clientOrderIdText: text) == Self.token, "\(text)")
+        }
+        for text in ["", "arb-20240509-00010", "11111-000000-000000", "0x0123", "0123456789abcdef00112233445566778", "g123456789abcdef0011223344556677",
+                     "0123456789abcdef-0011223344556677", "+123456789abcdef0011223344556677"] {
+            #expect(UInt128(clientOrderIdText: text) == nil, "\(text)")
         }
     }
 }

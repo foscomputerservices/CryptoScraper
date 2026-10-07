@@ -9,7 +9,7 @@ public extension CoinGeckoAggregator {
     /// Returns **true** if the site is responding
     func isAlive() async -> Bool {
         do {
-            let _: String = try await Self.endPoint.appending(path: "ping").fetch()
+            let _: String = try await Self.endPoint.appending(path: "ping").fetch(headers: Self.headers())
             return true
         } catch {
             return false

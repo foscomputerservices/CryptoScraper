@@ -9,15 +9,24 @@ import Testing
 @Suite("Stubs")
 struct StubsTests {
     // The symbols a real exchange lists that this library knows: none may be a stub's.
-    private let realSymbols: Set<String> = Set([Asset.usd, .usdc, .usdt, .btc, .eth].map(\.symbol.text))
-    private let shippedExponents: Set<Int> = Set([Asset.usd, .usdc, .usdt, .btc, .eth].map(\.unitExponent))
+    private let realSymbols: Set<String> = Set(AssetRegistry.libraryDeclarations.map(\.symbol.text))
+    private let shippedDecimals: Set<Int> = Set(AssetRegistry.libraryDeclarations.flatMap { $0.instances.map(\.decimals) })
 
     @Test func theAssetStubIsSelfMarking() {
         let stub = Asset.stub()
+        #expect(stub.id == "bedrock:42:quarry-42")
+        #expect(stub.id == AssetInstance.stub().id)
+        #expect(Asset.stub(home: .stub(address: "boulder-42")).id == "bedrock:42:boulder-42")
+    }
+
+    @Test func theDeclarationStubIsSelfMarking() {
+        let stub = AssetDeclaration.stub()
+        #expect(stub.asset == Asset.stub())
         #expect(stub.symbol.text == "FRED")
-        #expect(stub.unitExponent == 4)
+        #expect(stub.instances == [AssetDeclaration.Instance.stub()])
         #expect(!realSymbols.contains(stub.symbol.text))
-        #expect(!shippedExponents.contains(stub.unitExponent))
+        #expect(!shippedDecimals.contains(AssetDeclaration.Instance.stub().decimals))
+        #expect(AssetDeclaration.Instance.stub().instance == AssetInstance.stub())
     }
 
     @Test func theSymbolStubIsSelfMarking() {
@@ -28,19 +37,22 @@ struct StubsTests {
     @Test func theAmountStubIs42() {
         let stub = Amount.stub()
         #expect(stub.baseUnits == 42)
-        #expect(stub.asset == Asset.stub())
+        #expect(stub.instance == AssetInstance.stub())
     }
 
     @Test func theFractionStubIs42Percent() {
         #expect(Fraction.stub() == Fraction(percent: 42))
     }
 
-    @Test func thePriceStubIs42AndNeverOneAsset() {
+    @Test func thePriceStubIs42AndNeverOneInstance() throws {
         let stub = Price.stub()
-        #expect(stub.cost(of: Amount(whole: 1, of: stub.base)) == Amount(whole: 42, of: stub.quote))
+        let registry = try AssetRegistry([
+            .stub(),
+            .stub(asset: .stub(home: stub.base), instances: [.stub(instance: stub.base)])
+        ])
+        // 42 quote base units per whole base unit: one whole base at the stub's 4 decimals
+        #expect(try stub.cost(of: Amount(baseUnits: 10_000, of: stub.base), in: registry) == Amount(baseUnits: 42, of: stub.quote))
         #expect(stub.quote != stub.base)
-        #expect(!realSymbols.contains(stub.quote.symbol.text))
-        #expect(!realSymbols.contains(stub.base.symbol.text))
     }
 
     @Test func theBarIntervalStubIs42() {
@@ -48,11 +60,11 @@ struct StubsTests {
     }
 
     @Test func theUnitStubsExponentIsOneNoShippedAssetUses() {
-        let shipped = Set([Asset.usd, .usdc, .usdt, .btc, .eth].flatMap { asset in
-            [asset.unitExponent] + asset.units.map(\.exponent)
+        let shipped = Set(AssetRegistry.libraryDeclarations.flatMap { declaration in
+            declaration.instances.map(\.decimals) + declaration.units.map(\.exponent)
         })
         #expect(!shipped.contains(Asset.Unit.stub().exponent))
-        #expect(Asset.Unit.stub().exponent <= Asset.stub().unitExponent)
+        #expect(Asset.Unit.stub().exponent <= AssetDeclaration.Instance.stub().decimals)
     }
 
     @Test func theUnitStubsAreFakes() {
@@ -61,18 +73,17 @@ struct StubsTests {
     }
 
     @Test func oneOverrideKeepsEveryOtherPieceAtItsFake() {
-        let stub = Asset.stub()
-        let eightPlaces = Asset.stub(unitExponent: 8)
-        #expect(eightPlaces.unitExponent == 8)
+        let stub = AssetDeclaration.stub()
+        let eightPlaces = AssetDeclaration.stub(instances: [.stub(decimals: 8)])
+        #expect(eightPlaces.instances.map(\.decimals) == [8])
         #expect(eightPlaces.symbol == stub.symbol)
         #expect(eightPlaces.wholeUnit.name == stub.wholeUnit.name)
         #expect(eightPlaces.wholeUnit.exponent == 8)
         #expect(eightPlaces.baseUnit == stub.baseUnit)
         #expect(eightPlaces.between == stub.between)
         #expect(eightPlaces.displayUnit.name == stub.displayUnit.name)
-
         let other = Amount.stub(baseUnits: 7)
         #expect(other.baseUnits == 7)
-        #expect(other.asset == Amount.stub().asset)
+        #expect(other.instance == Amount.stub().instance)
     }
 }

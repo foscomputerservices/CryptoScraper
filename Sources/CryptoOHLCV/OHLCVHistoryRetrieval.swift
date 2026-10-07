@@ -10,10 +10,12 @@ import Foundation
 /// The OHLCV retrieval: fetches a market's history over an ``OHLCVClient`` and keeps it in an ``OHLCVHistoryStore``
 ///
 /// A range longer than one page is fetched page by page, each page asked from just after the last bar kept, so the
-/// bars are kept in order with nothing dropped or doubled. Each page is kept as it arrives, so a retrieval that
-/// stops part way resumes, on its next call, from the last bar kept. Two kept bars further apart than one interval
-/// are kept as an ``OHLCVHistoryGap``; the gap is never filled and never judged. A limit response is waited out,
-/// for the feed's `Retry-After` or else a doubling wait, and the same page asked again.
+/// bars are kept in order with nothing dropped or doubled. A page is put in open-time order before it is kept, so a
+/// feed that answers out of order loses nothing, and a bar it answers twice is kept once. Each page is kept as it
+/// arrives, so a retrieval that stops part way resumes, on its next call, from the last bar kept. Two kept bars whose
+/// open times are not exactly one interval apart are kept as an ``OHLCVHistoryGap``; the gap is never filled and
+/// never judged. A limit response is waited out, for the feed's `Retry-After` or else a doubling wait, and the same
+/// page asked again.
 ///
 /// ```swift
 /// let retrieval = OHLCVHistoryRetrieval(client: BinanceOHLCVClient(), store: OHLCVHistoryFileStore(directory: folder))
@@ -51,8 +53,10 @@ public struct OHLCVHistoryRetrieval<Client: OHLCVClient, Store: OHLCVHistoryStor
     /// them with the gaps found
     ///
     /// - Returns: What this call kept: the bars and the gaps, and the requests it made
-    /// - Throws: The client's error; a limit error once ``OHLCVHistoryBackoff/attempts`` limit responses in a row
-    ///   have been waited out; the store's error. Every page kept before the error stays kept.
+    /// - Throws: The client's error; the limit error of the ``OHLCVHistoryBackoff/attempts``-th limit response in a
+    ///   row on one page, the ones before it waited out; the store's error. Every page kept before the error stays
+    ///   kept.
+    /// - Precondition: `interval` has a length; an interval of no length traps
     @discardableResult
     public func retrieve(market: Client.MarketName, interval: BarInterval, from: Date, through: Date) async throws -> OHLCVHistoryRetrievalResult {
         let step = interval.milliseconds
@@ -73,11 +77,12 @@ public struct OHLCVHistoryRetrieval<Client: OHLCVClient, Store: OHLCVHistoryStor
             let (page, asked) = try await page(market: market, interval: interval, from: cursor, through: end)
             requests += asked
 
-            // Only closed bars, opening inside the range and after the last bar kept: never one kept twice.
+            // The page in open-time order, whatever order the feed answered it in; then only closed bars, opening
+            // inside the range and after the last bar kept: never one kept twice.
             var fresh: [OHLCVClientBar] = []
             var gaps: [OHLCVHistoryGap] = []
             var previous = last
-            for bar in page where bar.isClosed {
+            for bar in page.sorted(by: { $0.openTime < $1.openTime }) where bar.isClosed {
                 let open = bar.openTime.milliseconds
                 guard open >= cursor, open <= end else { continue }
                 if let previous {
@@ -131,8 +136,9 @@ public struct OHLCVHistoryRetrieval<Client: OHLCVClient, Store: OHLCVHistoryStor
 
 /// How ``OHLCVHistoryRetrieval`` waits out a limit response
 ///
-/// The wait is the feed's `Retry-After` when it sent one, else `firstWait` doubled for each limit in a row, never
-/// longer than `longestWait`. After `attempts` limit responses in a row on one page, the limit error is thrown.
+/// The wait is the feed's `Retry-After` when it sent one, taken as sent and never capped, else `firstWait` doubled
+/// for each limit in a row after the first, never longer than `longestWait`. The `attempts`-th limit response in a
+/// row on one page is thrown, not waited out.
 ///
 /// ```swift
 /// let patient = OHLCVHistoryBackoff(attempts: 10, firstWait: .seconds(2), longestWait: .seconds(300))
@@ -164,6 +170,14 @@ public struct OHLCVHistoryBackoff: Hashable, Sendable, Stubbable {
     }
 }
 
+extension OHLCVHistoryBackoff {
+    public static func stub() -> Self { .stub(attempts: 42) }
+
+    public static func stub(attempts: Int = 42, firstWait: Duration = .seconds(42), longestWait: Duration = .seconds(42 * 42)) -> Self {
+        .init(attempts: attempts, firstWait: firstWait, longestWait: longestWait)
+    }
+}
+
 /// What one call of ``OHLCVHistoryRetrieval/retrieve(market:interval:from:through:)`` kept
 ///
 /// ```swift
@@ -183,5 +197,13 @@ public struct OHLCVHistoryRetrievalResult: Hashable, Sendable, Stubbable {
         self.bars = bars
         self.gaps = gaps
         self.requestCount = requestCount
+    }
+}
+
+extension OHLCVHistoryRetrievalResult {
+    public static func stub() -> Self { .stub(requestCount: 42) }
+
+    public static func stub(bars: [OHLCVClientBar] = [.stub()], gaps: [OHLCVHistoryGap] = [], requestCount: Int = 42) -> Self {
+        .init(bars: bars, gaps: gaps, requestCount: requestCount)
     }
 }

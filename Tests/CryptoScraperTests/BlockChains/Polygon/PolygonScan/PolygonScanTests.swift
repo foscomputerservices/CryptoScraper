@@ -18,8 +18,12 @@ final class PolygonScanTests: XCTestCase {
     // User account contract
     private let accountContract = MaticContract(address: PolygonScanTests.maticContractAddress)
 
-    private static let polygonScan = PolygonScan()!
+    private static let polygonScan = PolygonScan()
     private var polygonScan: PolygonScan { PolygonScanTests.polygonScan }
+
+    override func setUp() async throws {
+        sleep(1) // One key, one rate: V2 answers a free key 3 calls a second across every chain
+    }
 
     func testGetAccountBalance() async throws {
         do {

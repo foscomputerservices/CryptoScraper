@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import CryptoExchange
 import CryptoOHLCV
 import Foundation
@@ -11,13 +12,16 @@ import Foundation
 // wire errors map into its cases here, once:
 //
 // - HTTP 429 (Retry-After as whole seconds, when sent) → rateLimited(retryAfter:)
-// - HTTP 401, or an error body whose code is "unauthorized" or "unauthenticated" → unauthorized(text: the message)
+// - an error body whose code is "unauthorized" or "unauthenticated" → unauthorized(text: the message)
 // - any other error body `{"error", "message"}` → refused(code: Coinbase's error, text: its message)
 // - a create or cancel answered `success: false` → refused(code: the failure reason, text: its message), as a result or thrown
 // - a transport failure → unreachable; a body or a number that does not decode → malformedResponse (CryptoExchange's reading)
 // - the member Coinbase lacks (leverage) → notOffered(member:)
 // - a client made without a credential, or with a malformed one → unauthorized(text:)
 // - a size or a price in an asset other than the product's → refused(code: nil, text:), the nearest meaning
+// - an account state asked of a portfolio other than the key's own → refused(code: nil, text:) naming both
+// - a currency the table lacks or the statement does not declare, and the units check's finding (an increment finer
+//   than the declared holding's decimals, AR45) → refused(code: nil, text:), the nearest meaning
 
 extension ExchangeClientError {
     static let noCredential = ExchangeClientError.unauthorized(text: "The client was made without a credential")
@@ -25,6 +29,14 @@ extension ExchangeClientError {
     static let wrongAsset = ExchangeClientError.refused(code: nil, text: "A size or a price in an asset other than the product's, or a transfer of an asset that is not one")
     /// Coinbase Advanced Trade sets no leverage on a market or an account
     static let leverageNotSettable = ExchangeClientError.notOffered(member: "setLeverage")
+
+    static func unknownAsset(_ name: String) -> ExchangeClientError {
+        .refused(code: nil, text: "Coinbase's \(name) is no declared holding")
+    }
+
+    static func notTheKeysPortfolio(_ account: String, keys portfolio: String) -> ExchangeClientError {
+        .refused(code: nil, text: "Coinbase reads only the key's own portfolio, \(portfolio), not \(account)")
+    }
 
     static func malformedOrderId(_ candidate: String) -> ExchangeClientError {
         .malformedResponse(text: "An order id that is not one Coinbase could write: \(candidate)")
@@ -43,6 +55,8 @@ extension ExchangeClientError {
             ["unauthorized", "unauthenticated"].contains(api.code.lowercased())
                 ? .unauthorized(text: api.message)
                 : .refused(code: api.code, text: api.message)
+        case let statement as AssetRegistryError:
+            .refused(code: nil, text: String(describing: statement))
         default:
             nil
         }

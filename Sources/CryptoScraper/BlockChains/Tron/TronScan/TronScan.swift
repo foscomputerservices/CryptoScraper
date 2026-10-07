@@ -7,7 +7,7 @@ import Foundation
 
 /// A ``CryptoScanner`` implementation for the TronScan web service
 public struct TronScan: CryptoScanner, Sendable {
-    // MARK: EthereumScanner Protocol
+    // MARK: CryptoScanner Protocol
 
     public typealias Contract = TronContract
 

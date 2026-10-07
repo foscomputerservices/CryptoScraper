@@ -3,6 +3,7 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
 
 public protocol CryptoContract: Currency, Identifiable, Hashable {
@@ -52,13 +53,22 @@ public extension CryptoContract {
         tokenInfo?.isEquivalent(to: other) ?? false
     }
 
-    func isEquivalent<OtherContract: CryptoContract>(to other: OtherContract) -> Bool {
-        if OtherContract.self == Self.self {
-            return isEquivalent(to: other as! Self)
-        }
-
-        // TODO: Implement isEquivalent for cross-chain comparisons
-        fatalError("isEquivalent is NYI cross-chain")
+    /// Whether `other` is an instance of the same asset, on this chain, another chain, or an exchange
+    ///
+    /// Replaces the `fatalError` of 2023; the one-chain ``isEquivalent(to:)`` through ``TokenInfo`` stays.
+    /// Answered by the statement: two contracts are one asset when `registry` puts their instances in one class.
+    ///
+    /// ```swift
+    /// try usdcOnEthereum.isEquivalent(to: usdcOnPolygon, in: registry)     // true
+    /// ```
+    ///
+    /// - Throws: `AssetRegistryError.undeclaredInstance` when either is an instance of no declared asset
+    ///
+    /// - Precondition: both contracts' `id`s are instance ids, as the bridge `AssetInstance(_:)` requires; a
+    ///   ``ZeroAmountChain`` contract's is not
+    func isEquivalent<OtherContract: CryptoContract>(to other: OtherContract,
+                                                     in registry: AssetRegistry = .shared) throws -> Bool {
+        try registry.isEquivalent(AssetInstance(self), AssetInstance(other))
     }
 
     // MARK: Identifiable Protocol
@@ -86,5 +96,28 @@ public extension CryptoContract {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.address == rhs.address && lhs.chain == rhs.chain
+    }
+}
+
+// MARK: The bridge (design § 1.5)
+
+public extension AssetInstance {
+    /// The instance `contract` names, by its ``CryptoContract/id``: `chain.id + ":" + address`
+    ///
+    /// One direction of authority: the instance reads the contract's `id`, so when the `id` changes the instance
+    /// follows.
+    ///
+    /// ```swift
+    /// AssetInstance(EthereumChain.default.mainContract).id       // "eip155:1:eth"
+    /// ```
+    ///
+    /// - Precondition: the contract's `id` is a CAIP-2-shaped chain id and an address; ``ZeroAmountChain``'s is not,
+    ///   and it is never bridged.
+    init(_ contract: some CryptoContract) {
+        do {
+            try self.init(validating: contract.id)
+        } catch {
+            preconditionFailure("A contract's id is not an instance id: \(contract.id)")
+        }
     }
 }

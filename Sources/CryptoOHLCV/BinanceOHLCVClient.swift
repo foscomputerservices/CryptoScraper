@@ -24,12 +24,18 @@ import FoundationNetworking
 /// let today = try await client.openOHLCV(market: market, interval: .init(count: 1, unit: .day))   // isClosed == false
 /// ```
 ///
-/// A market's two assets come from the markets passed in, or from `/api/v3/exchangeInfo`, asked once per market
-/// and kept for the client's life; Binance's precision for each asset is its unit exponent.
+/// A market's two holdings are Binance's declared constants (``BinanceHolding``), its names in the markets passed in
+/// or in `/api/v3/exchangeInfo`, asked once per market and kept for the client's life, resolved through
+/// ``BinanceExchangeChain``'s table; the precision Binance states for each is checked against the declared holding's
+/// decimals (AR45). A bar's prices are in the quote holding per whole base holding, its volume in the base holding.
 ///
 /// A limit response, HTTP 429 or 418, throws ``BinanceLimitError`` with Binance's `Retry-After`; any other body
-/// Binance states as an error throws ``BinanceAPIError``; number text that is not a number, or finer than an asset
-/// holds, throws ``AmountError``.
+/// Binance states as an error throws ``BinanceAPIError``; number text that is not a number, or finer than a holding
+/// holds, throws ``AmountError``; a market whose holdings are not declared throws
+/// ``BinanceOHLCVError/unknownMarket(_:)``; Binance stating another precision than the declared decimals throws
+/// `AssetRegistryError.decimalsChanged`; an interval Binance has no kline for throws
+/// ``BinanceOHLCVError/unsupportedInterval(_:)``. When the init could not add Binance's declarations to its
+/// registry, every read throws what `AssetRegistry.add(_:)` threw.
 public struct BinanceOHLCVClient: OHLCVClient {
     public typealias MarketName = BinanceMarketName
 
@@ -40,22 +46,29 @@ public struct BinanceOHLCVClient: OHLCVClient {
     private let session: any URLSessionProtocol
     private let now: @Sendable () -> Date
     private let markets: MarketBook
+    private let registry: AssetRegistry
+    // Binance's declarations added to the registry at init, or why they could not be: thrown by every read
+    private let declared: Result<Void, any Error>
 
     /// - Parameters:
     ///   - baseURL: Binance's REST root
     ///   - session: The session the requests go through; a test passes a recorded one
-    ///   - markets: Markets whose assets the caller declares, so they are never asked of Binance
+    ///   - markets: Markets whose exchange information the caller holds, so they are never asked of Binance
     ///   - now: The clock that says whether a kline has closed
+    ///   - registry: The statement every amount and price is read against; Binance's holdings are added to it here
     public init(
         baseURL: URL = URL(string: "https://api.binance.com")!,
         session: any URLSessionProtocol = URLSession.session(config: DataFetch<URLSession>.urlSessionConfiguration()),
         markets: [BinanceMarket] = [],
-        now: @escaping @Sendable () -> Date = { Date() }
+        now: @escaping @Sendable () -> Date = { Date() },
+        registry: AssetRegistry = .shared
     ) {
         self.baseURL = baseURL
         self.session = session
         self.now = now
         self.markets = MarketBook(markets)
+        self.registry = registry
+        self.declared = Result { try BinanceExchangeChain.declare(in: registry) }
     }
 
     public func ohlcv(market: BinanceMarketName, interval: BarInterval, from: Date, through: Date) async throws -> [OHLCVClientBar] {
@@ -65,7 +78,7 @@ public struct BinanceOHLCVClient: OHLCVClient {
         let end = Int64((through.timeIntervalSince1970 * 1000).rounded(.down))
         guard start <= end else { return [] }
 
-        let assets = try await self.market(market)
+        let holdings = try await self.holdings(market)
         let rows: [BinanceKlineRow] = try await get("/api/v3/klines", [
             URLQueryItem(name: "symbol", value: market.text),
             URLQueryItem(name: "interval", value: token),
@@ -77,29 +90,35 @@ public struct BinanceOHLCVClient: OHLCVClient {
         // Only the klines Binance was asked for: a row outside the range is never handed up.
         return try rows
             .filter { $0.openTime >= start && $0.openTime <= end }
-            .map { try $0.bar(of: assets, now: clock) }
+            .map { try $0.bar(base: holdings.base, quote: holdings.quote, now: clock, in: registry) }
             .filter(\.isClosed)
     }
 
     public func openOHLCV(market: BinanceMarketName, interval: BarInterval) async throws -> OHLCVClientBar? {
         let token = try Self.token(for: interval)
-        let assets = try await self.market(market)
+        let holdings = try await self.holdings(market)
         let rows: [BinanceKlineRow] = try await get("/api/v3/klines", [
             URLQueryItem(name: "symbol", value: market.text),
             URLQueryItem(name: "interval", value: token),
             URLQueryItem(name: "limit", value: "1")
         ])
         let clock = now().milliseconds
-        guard let bar = try rows.last.map({ try $0.bar(of: assets, now: clock) }), !bar.isClosed else {
+        guard let bar = try rows.last.map({ try $0.bar(base: holdings.base, quote: holdings.quote, now: clock, in: registry) }), !bar.isClosed else {
             return nil
         }
         return bar
     }
 
-    /// The market's name and its two assets: the ones passed in, else Binance's, asked once
+    /// The market: the one passed in, else Binance's exchange information for it, asked once; its holdings through
+    /// ``BinanceExchangeChain``'s table, `nil` where Binance names an asset the table lacks or the registry does not
+    /// declare, with Binance's names and precision as facts
     ///
-    /// - Throws: ``BinanceOHLCVError/unknownMarket(_:)`` when Binance does not list it
+    /// - Throws: ``BinanceOHLCVError/unknownMarket(_:)`` when Binance does not list it;
+    ///   `AssetRegistryError.decimalsChanged` when Binance states another precision than a declared holding's; what
+    ///   `AssetRegistry.add(_:)` threw at the init; the fetch's errors, ``BinanceLimitError`` and ``BinanceAPIError``
+    ///   among them
     public func market(_ name: BinanceMarketName) async throws -> BinanceMarket {
+        try declared.get()
         if let known = await markets.market(name) {
             return known
         }
@@ -109,13 +128,21 @@ public struct BinanceOHLCVClient: OHLCVClient {
         guard let symbol = info.symbols.first(where: { $0.symbol == name.text }) else {
             throw BinanceOHLCVError.unknownMarket(name)
         }
-        let market = BinanceMarket(
-            name: name,
-            base: try Asset(symbol: symbol.baseAsset, unitExponent: symbol.baseAssetPrecision),
-            quote: try Asset(symbol: symbol.quoteAsset, unitExponent: symbol.quoteAssetPrecision)
+        let market = try BinanceMarket(
+            name: name, baseSymbol: AssetSymbol(validating: symbol.baseAsset), baseDecimals: symbol.baseAssetPrecision,
+            quoteSymbol: AssetSymbol(validating: symbol.quoteAsset), quoteDecimals: symbol.quoteAssetPrecision, in: registry
         )
         await markets.keep(market)
         return market
+    }
+
+    // The market's two declared holdings; a market with either undeclared has no bar this client can price.
+    private func holdings(_ name: BinanceMarketName) async throws -> (base: AssetInstance, quote: AssetInstance) {
+        let market = try await self.market(name)
+        guard let base = market.base, let quote = market.quote else {
+            throw BinanceOHLCVError.unknownMarket(name)
+        }
+        return (base, quote)
     }
 
     // Binance's kline interval tokens.
@@ -218,24 +245,25 @@ struct BinanceKlineRow: Decodable, Sendable {
         self.trades = try row.decodeIfPresent(Int.self)
     }
 
-    // The bar, with the market's assets in hand; closed once the clock has passed Binance's close time, the bar's
-    // last millisecond.
-    func bar(of market: BinanceMarket, now: Int64) throws -> OHLCVClientBar {
+    // The bar, with the market's two holdings in hand, priced in the quote holding per whole base holding; closed
+    // once the clock has passed Binance's close time, the bar's last millisecond.
+    func bar(base: AssetInstance, quote: AssetInstance, now: Int64, in registry: AssetRegistry) throws -> OHLCVClientBar {
         OHLCVClientBar(
             openTime: Date(milliseconds: openTime),
             closeTime: Date(milliseconds: closeTime),
-            open: try open.price(of: market.quote, per: market.base),
-            high: try high.price(of: market.quote, per: market.base),
-            low: try low.price(of: market.quote, per: market.base),
-            close: try close.price(of: market.quote, per: market.base),
-            volume: try volume.amount(of: market.base),
+            open: try open.price(of: quote, per: base, in: registry),
+            high: try high.price(of: quote, per: base, in: registry),
+            low: try low.price(of: quote, per: base, in: registry),
+            close: try close.price(of: quote, per: base, in: registry),
+            volume: try volume.amount(of: base, in: registry),
             trades: trades,
             isClosed: now > closeTime
         )
     }
 }
 
-// The part of `/api/v3/exchangeInfo` this client reads: each market's two assets and their precision.
+// The part of `/api/v3/exchangeInfo` this client reads: each market's two asset names and the precision Binance
+// states for each.
 struct BinanceExchangeInfo: Decodable, Sendable {
     struct Symbol: Decodable, Sendable {
         let symbol: String

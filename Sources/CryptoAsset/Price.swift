@@ -6,106 +6,118 @@
 import FOSFoundation
 import Foundation
 
-// Sealed as Fraction is: `scaledQuote` is the quote's base units per one whole unit of the base asset, times the one
-// scale 10^9 (§ 9.5 of the protocols), so a price below one quote base unit is exact. No property vends it and no
-// initializer takes it; the encoded shape is synthesized, undocumented, and pinned by the round-trip test alone.
+// A price carries no decimals (design § 3.4, the owner's road B of 2026-10-07): the value is its two instances and
+// `scaled`, and that is the whole of the stored row, `{ "quote": …, "base": …, "scaled": … }`, decoded with no
+// registry. The base's decimals are read from the statement when the price meets an amount: at `init(_:per:)` over
+// a size, and at `cost(of:)`. The initializer that takes `scaled` is the decoder's and is not public.
 
-/// An amount of a quote asset per one whole unit of a base asset: 65,000 USD per BTC
+/// An amount of a quote instance per one whole unit of a base instance: 65,000 USD per BTC
 ///
-/// A price has two assets. The cost it produces is in the quote asset; the size it is applied to is in the base
-/// asset; an ``Amount`` has one asset and cannot say either. It is held at a scale, so a price below one quote
-/// base unit per whole base unit is exact.
+/// A price names two instances: Kraken's price is `exchange:kraken:USD` per `exchange:kraken:XBT`. The cost it
+/// produces is in the quote instance; the size it is applied to is in the base instance. It is held at a scale, so
+/// a price below one quote base unit per whole base unit is exact to nine fraction digits of a quote base unit.
 ///
 /// ```swift
-/// let mid  = Price(Amount(whole: 65_000, of: usd), per: btc)       // $65,000.00 / BTC
-/// let size = Amount(baseUnits: 15_000_000, asset: btc)              // 0.15 BTC
-/// let cost = mid.cost(of: size)                                    // $9,750.00, an Amount in usd, exact
+/// let mid  = try Price(try Amount(whole: 65_000, of: krakenUSD), per: krakenXBT)
+/// let cost = try mid.cost(of: size)                                // in krakenUSD, at the base's decimals
 /// let ask  = mid * (.one + Fraction(basisPoints: 5))               // one step up the ladder
 /// let gap  = ask.spread(to: mid)                                   // the spread, a Fraction
-///
-/// let fill = Price(Amount(baseUnits: 4_000, asset: btc),            // 4,000 satoshis
-///                  per: Amount(whole: 10_000, of: snek))           // for 10,000 SNEK: 0.4 satoshi each, exact
 /// ```
 public struct Price: Codable, Hashable, Comparable, Sendable, Stubbable {
-    public let quote: Asset
-    public let base: Asset
+    public let quote: AssetInstance
+    public let base: AssetInstance
+    /// Quote base units per whole base unit, times 10^9: the stored number, and the whole of the stored row with the
+    /// two instances
+    public let scaled: Int128
 
-    // Quote base units per whole base unit, times 10^9.
-    let scaledQuote: Int128
-
-    private init(quote: Asset, base: Asset, scaledQuote: Int128) {
+    // The decoder's and this library's; no public initializer takes `scaled` (2026-10-07).
+    init(quote: AssetInstance, base: AssetInstance, scaled: Int128) {
         self.quote = quote
         self.base = base
-        self.scaledQuote = scaledQuote
+        self.scaled = scaled
     }
 
     /// This much quote for one whole unit of `base`
-    public init(_ quote: Amount, per base: Asset) {
-        self.init(quote: quote.asset, base: base, scaledQuote: quote.baseUnits.timesExactly(.assetScale))
+    ///
+    /// - Precondition: the quote's base units times 10^9 fit an `Int128`
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when `base` is not in `registry`
+    public init(_ quote: Amount, per base: AssetInstance, in registry: AssetRegistry = .shared) throws {
+        // A price whose base the statement does not hold could never produce a cost, so it is refused here.
+        _ = try registry.decimals(of: base)
+        self.init(quote: quote.instance, base: base, scaled: quote.baseUnits.timesExactly(.assetScale))
     }
 
-    /// The price a fill states: this much quote for that much base
+    /// The price a fill states: this much quote for that much base, rounded toward zero at the scale
     ///
-    /// - Precondition: `size` is positive and of the base asset
-    public init(_ quote: Amount, per size: Amount) {
+    /// - Precondition: `size` is positive
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when the size's instance is not in `registry`
+    public init(_ quote: Amount, per size: Amount, in registry: AssetRegistry = .shared) throws {
         precondition(size.baseUnits > 0, "Price(_:per:) with a size that is not positive")
+        let decimals = try registry.decimals(of: size.instance)
 
-        // quote × 10^unitExponent × 10^9 ÷ size, toward zero. The product of the two powers can pass 10^38, so
-        // the division is taken once at full width with its remainder and the remainder carried at the scale:
+        // quote × 10^decimals × 10^9 ÷ size, toward zero. The product of the two powers can pass 10^38, so the
+        // division is taken once at full width with its remainder and the remainder carried at the scale:
         // q × 10^9 + (r × 10^9 ÷ size) truncates exactly as the whole would, since q and r share a sign.
-        let (whole, remainder) = quote.baseUnits.scaledWithRemainder(
-            by: .powerOfTen(size.asset.unitExponent),
-            over: size.baseUnits
-        )
+        let (whole, remainder) = quote.baseUnits.scaledWithRemainder(by: .powerOfTen(decimals), over: size.baseUnits)
         let fraction = remainder.scaled(by: .assetScale, over: size.baseUnits)
-        self.init(
-            quote: quote.asset,
-            base: size.asset,
-            scaledQuote: whole.timesExactly(.assetScale) + fraction
-        )
+        self.init(quote: quote.instance, base: size.instance, scaled: whole.timesExactly(.assetScale) + fraction)
     }
 
-    /// The cost of `size` at this price, in the quote asset, rounded toward zero
+    /// The cost of a size at this price, read against the statement's decimals for the base, rounded toward zero
     ///
-    /// - Precondition: `size.asset` is this price's base asset
-    public func cost(of size: Amount) -> Amount {
-        requireOneAsset(size.asset, base, "Price.cost(of:)")
-        // scaledQuote × size ÷ (10^9 × 10^unitExponent), at full width, toward zero.
-        let baseUnits = scaledQuote.scaled(by: size.baseUnits, overPowerOfTen: 9 + base.unitExponent)
-        return Amount(baseUnits: baseUnits, asset: quote)
+    /// - Precondition: `size.instance` is this price's base
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when the base is not in `registry`
+    public func cost(of size: Amount, in registry: AssetRegistry = .shared) throws -> Amount {
+        requireOneInstance(size.instance, base, "Price.cost(of:)")
+        let decimals = try registry.decimals(of: base)
+        // scaled × size ÷ (10^9 × 10^decimals), at full width, toward zero.
+        let baseUnits = scaled.scaled(by: size.baseUnits, overPowerOfTen: 9 + decimals)
+        return Amount(baseUnits: baseUnits, of: quote)
     }
 
     /// Walks a step of the ladder; rounds toward zero
     public static func * (lhs: Self, rhs: Fraction) -> Self {
-        Self(
-            quote: lhs.quote,
-            base: lhs.base,
-            scaledQuote: lhs.scaledQuote.scaled(by: rhs.scaledNumerator, over: .assetScale)
-        )
+        Self(quote: lhs.quote, base: lhs.base, scaled: lhs.scaled.scaled(by: rhs.scaledNumerator, over: .assetScale))
     }
 
     /// So `min` and `max` order a ladder of candidate prices
     ///
-    /// - Precondition: both prices share a base and a quote asset
+    /// - Precondition: both prices share a base and a quote instance
     public static func < (lhs: Self, rhs: Self) -> Bool {
-        requireOneAsset(lhs.base, rhs.base, "Price < (base)")
-        requireOneAsset(lhs.quote, rhs.quote, "Price < (quote)")
-        return lhs.scaledQuote < rhs.scaledQuote
+        requireOneInstance(lhs.base, rhs.base, "Price < (base)")
+        requireOneInstance(lhs.quote, rhs.quote, "Price < (quote)")
+        return lhs.scaled < rhs.scaled
     }
 
     /// How far this price is above `other`, as a fraction of `other`: (self − other) ÷ other; negative below it
     ///
-    /// - Precondition: both prices share a base and a quote asset; `other` is not zero
+    /// - Precondition: both prices share a base and a quote instance; `other` is not zero
     public func spread(to other: Self) -> Fraction {
-        requireOneAsset(base, other.base, "Price.spread(to:) (base)")
-        requireOneAsset(quote, other.quote, "Price.spread(to:) (quote)")
+        requireOneInstance(base, other.base, "Price.spread(to:) (base)")
+        requireOneInstance(quote, other.quote, "Price.spread(to:) (quote)")
         precondition(!other.isZero, "Price.spread(to:) against a zero price")
         // (self − other) ÷ other at the scale, toward zero: the owner's reading of 2026-10-06 (OQ-C12), C5's example
         // `ask.spread(to: mid)` read as how far the ask is above the mid, relative to the mid.
-        return .atScale((scaledQuote - other.scaledQuote).scaled(by: .assetScale, over: other.scaledQuote))
+        return .atScale((scaled - other.scaled).scaled(by: .assetScale, over: other.scaled))
     }
 
     public var isZero: Bool {
-        scaledQuote == 0
+        scaled == 0
+    }
+}
+
+// MARK: Stubs
+
+extension Price {
+    public static func stub() -> Self { .stub(scaled: 42 * 1_000_000_000) }
+
+    // 42 quote base units per whole base unit, at the scale 10^9; the quote and the base are two reserved-fake
+    // instances, so they are never one. Made by the decoder's initializer, so the stub needs no registry.
+    public static func stub(
+        quote: AssetInstance = .stub(),
+        base: AssetInstance = .stub(address: "boulder-42"),
+        scaled: Int128 = 42 * 1_000_000_000
+    ) -> Self {
+        .init(quote: quote, base: base, scaled: scaled)
     }
 }

@@ -55,6 +55,15 @@ struct ExchangeClientErrorTests {
         #expect(read(failure) == .unreachable(text: failure.localizedDescription))
     }
 
+    // An answer that disagrees with the statement (an undeclared instance, the units check's changed decimals) is the
+    // exchange's word refused, never a transport failure, whichever client met it
+    @Test func aStatementThatDisagreesIsRefusedNamingItNeverUnreachable() {
+        let instance = AssetInstance.stub()
+        for statement in [AssetRegistryError.decimalsChanged(instance), .undeclaredInstance(instance)] {
+            #expect(read(statement) == .refused(code: nil, text: String(describing: statement)))
+        }
+    }
+
     @Test func theExchangesOwnReadingComesFirstAndASharedErrorPassesThrough() {
         #expect(read(URLError(.timedOut), translating: { _ in .refused(code: "X", text: "y") }) == .refused(code: "X", text: "y"))
         #expect(read(ExchangeClientError.notOffered(member: "transfer")) == .notOffered(member: "transfer"))

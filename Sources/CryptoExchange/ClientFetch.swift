@@ -16,7 +16,7 @@ import FoundationNetworking
 // concrete type, so the session is opened here, once, for every client.
 
 package enum ClientFetch {
-    /// One request through DataFetch: GET when `body` is nil, else `method` with the body's exact bytes
+    /// One request through DataFetch: `method` (GET by default), with the body's exact bytes when `body` is given
     package static func send<Value: Decodable & Sendable, Failure: Decodable & Error>(
         _ url: URL,
         method: String = "GET",
@@ -83,8 +83,9 @@ package enum ClientFetch {
 
 /// How many requests a client has made in the exchange's current window, counted in its fetch hook (AR69)
 ///
-/// The exchanges in this package publish their limits rather than send them per response, so a client counts its
-/// own requests against the published limit; a response that states the exchange's own count replaces the tally.
+/// Kraken and Coinbase publish their limits rather than send them per response, so their clients count their own
+/// requests against the published limit; the tally starts a new window at the first response after the last one
+/// ended. Hyperliquid states its own count, so its client keeps none.
 package final class RequestTally: @unchecked Sendable {
     private let lock = NSLock()
     private let window: Duration

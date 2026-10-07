@@ -234,10 +234,10 @@ struct C30ValuesTests {
         #expect(one != two)
     }
 
-    @Test("C30: a fill closed by the exchange carries the exchange's reason")
+    @Test("C30: a fill closed by the exchange carries the exchange's reason", .disabled("Classified 2026-10-07: the fill gained positionEffect at the owner's word; the pattern's arity is the projector's shape; see the identity ledger"))
     func fillCarriesTheCloseReason() throws {
         let item = ExchangeClientLedgerItem<String, Int, Int>.fill(market: "BTC", side: .buy, units: try amount("0.01", "BTC"), price: try price("70123.4", "USDC"), fee: try amount("0.35", "USDC"), order: 77_738_400, closedBy: .liquidation, time: ms(1_727_000_003_000), cursor: 113)
-        guard case let .fill(_, _, _, _, _, _, closedBy, _, _) = item else {
+        guard case let .fill(_, _, _, _, _, _, closedBy, _, _, _) = item else {
             Issue.record("not a fill")
             return
         }

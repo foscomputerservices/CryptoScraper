@@ -6,20 +6,18 @@
 
 #### Scanner Configuration
 
-To initialize the library, first the scanners that you would like to use must be configured with your API keys.  You can specify the API keys via the Swift Environment, or directly through ``EthereumScanner``.apiKey
+To initialize the library, first the scanners that you would like to use must be configured with your API keys.  Every ``EthereumScanner`` asks Etherscan's API V2 with one key, Etherscan's: specify it via the environment variable `ETHER_SCAN_KEY`, or directly through ``Etherscan/apiKey``.  Setting another conformer's `apiKey`, such as `PolygonScan.apiKey`, sets that same key.
 
 ```swift
-Etherscan.apiKey = "<my Etherscan API key>"
-PolygonScan.apiKey = "<my PolygonScan API key>"
+Etherscan.apiKey = "<my Etherscan API key>"      // for every EthereumScanner's chain
 ```
 
 #### Crypto Data Aggregator Configuration
 
-Once all needed scanners have been configured, a ``CryptoDataAggregator``'s API key must be specified.  Again, this can be specified via the Swift Environment, or directly through the aggregator's properties:
+Once all needed scanners have been configured, a ``CryptoDataAggregator``'s API key can be specified, through the environment; the aggregators' key properties are internal to the package.
 
-```swift
-CoinGeckoAggregator.apiKey = "<my CoinGecko API key>"
-```
+- ``CoinGeckoAggregator``: `COIN_GECKO_KEY`, optional. Without it the free endpoint is asked; with it the pro endpoint, the key in the `x-cg-pro-api-key` header. A demo key is not supported.
+- ``CoinMarketCapAggregator``: `COIN_MARKETCAP_KEY`, required; without it its requests throw ``CoinMarketCapError``.
 
 #### Initialize the Library
 
@@ -40,7 +38,7 @@ let etherScan = Etherscan()
 let balance = try await etherScan.getBalance(forAccount: accountContract)
 ```
 
-The balance will be in ``Amount``.  See the documentation on that protocol for more information.
+The balance will be in ``Amount``.  See the documentation on that type for more information.
 
 #### Retrieving the balance of a particular coin for an account
 

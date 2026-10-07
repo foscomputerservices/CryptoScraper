@@ -30,10 +30,4 @@ struct SymbolsTests {
     func wellFormedIsAccepted(candidate: String) throws {
         #expect(try AssetSymbol(validating: candidate).text == candidate)
     }
-
-    @Test func anAssetFromAStringValidatesItsSymbol() {
-        #expect(throws: AssetSymbolError.malformed("B/TC")) {
-            try Asset(symbol: "B/TC", unitExponent: 8)
-        }
-    }
 }

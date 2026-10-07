@@ -66,6 +66,6 @@ public enum BinanceOHLCVError: Error, Hashable, Sendable {
     case unsupportedInterval(BarInterval)
     /// A market's name that is not one to twenty ASCII letters and digits
     case malformedMarketName(String)
-    /// `/api/v3/exchangeInfo` did not list the market
+    /// `/api/v3/exchangeInfo` did not list the market, or one of its holdings is not declared
     case unknownMarket(BinanceMarketName)
 }

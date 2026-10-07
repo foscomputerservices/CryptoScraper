@@ -136,6 +136,24 @@ struct OHLCVHistoryRetrievalTests {
     }
 
     @Test(arguments: ContractStoreKind.allCases)
+    func aPageAnsweredOutOfOrderAndTwiceIsKeptOldestFirstOnceEach(kind: ContractStoreKind) async throws {
+        // The first recorded page, its rows reversed and its middle row answered twice; then nothing more.
+        var rows = try #require(try JSONSerialization.jsonObject(with: Recorded.page1) as? [[Any]])
+        rows.reverse()
+        rows.insert(rows[rows.count / 2], at: 0)
+        let shuffled = try JSONSerialization.data(withJSONObject: rows)
+        let session = ReplaySession { _, index in index == 0 ? .ok(shuffled) : .emptyPage }
+        try await withRetrieval(kind, session: session) { retrieval in
+            let result = try await retrieval.retrieve(from: Recorded.rangeStart, through: Recorded.page1Last, interval: Binance.day)
+            let kept = try await retrieval.history(Binance.day)
+
+            #expect(kept.bars.map(\.openTime.milliseconds) == Recorded.rawRows(Recorded.page1).map(\.openTime))
+            #expect(result.bars == kept.bars)
+            #expect(kept.gaps.isEmpty)
+        }
+    }
+
+    @Test(arguments: ContractStoreKind.allCases)
     func aGapAcrossTwoCallsIsFoundBetweenTheKeptBarAndTheNextPage(kind: ContractStoreKind) async throws {
         // Keep the gap page's bars up to the outage, then fetch the rest: the gap lies between the two calls.
         let session = ReplaySession(route: binanceRoute)

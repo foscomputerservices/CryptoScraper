@@ -3,11 +3,18 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
-import Synchronization
 
 public extension CoinMarketCapAggregator {
     /// Returns the coins known to the aggregator
+    ///
+    /// Reads `/v1/cryptocurrency/map` once per aggregator and keeps the answer for later calls. A coin with no
+    /// platform, on a platform the reference table does not map to a known chain, or whose address its chain
+    /// refuses, is left out.
+    ///
+    /// - Throws: ``CoinMarketCapError`` when no key is set (the environment variable `COIN_MARKETCAP_KEY`), or
+    ///   ``CoinMarketCapResponseError`` when CoinMarketCap refuses
     ///
     /// - See also: https://coinmarketcap.com/api/documentation/v1/#operation/getV1CryptocurrencyMap
     func tokens<Contract: CryptoContract & Sendable>(for contract: Contract.Type) async throws -> Set<SimpleTokenInfo<Contract>> {
@@ -67,10 +74,12 @@ private struct CurrencyMapItem: Decodable, Sendable {
             return nil
         }
 
-        return try CoinMarketCapTokenInfo(
-            response: self,
-            contract: chain.contract(for: platform.tokenAddress) as! Contract
-        )
+        // A token whose address its chain refuses (`BlockChainError.malformedAddress`) is left out, as a platform the
+        // table lacks is: one listing the chain cannot read never fails the whole list.
+        guard let contract = try? chain.contract(for: platform.tokenAddress) as? Contract else {
+            return nil
+        }
+        return CoinMarketCapTokenInfo(response: self, contract: contract)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -128,30 +137,14 @@ private extension Collection<CurrencyMapItem> {
     }
 }
 
-// Debug bookkeeping written from whichever domain decodes a response, so it is held behind a `Mutex`.
-private let unknownChain = Mutex<Set<String>>([])
-
 private extension String {
+    /// The chain CoinMarketCap calls `self`, through the one table of reference names,
+    /// `AssetRegistry.referenceChainIds` (design § 2.4); `nil` for a name the table lacks
     var chain: (any CryptoChain)? {
-        switch self {
-        case "Ethereum": return .ethereum
-        case "Fantom": return .fantom
-        case "BNB", "BNB Smart Chain (BEP20)": return .binance
-        case "Polygon": return .polygon
-        case "Optimism": return .optimism
-        case "TRON", "Tron20": return .tron
-
-        // TODO: Unsupported chains
-        case "Bitcicoin", "Chiliz", "Telos", "Super Zero Protocol", "KardiaChain", "Waves", "Velas", "Cardano", "EthereumPoW", "EOS", "XRP", "Energi", "RSK Smart Bitcoin", "IoTeX", "Fuse Network", "Conflux", "SX Network", "Algorand", "Moonriver", "HTMLCOIN", "CANTO", "Ethereum Classic", "Step App", "Terra Classic", "Secret", "DeFi Kingdoms", "Astar", "Oasis Network", "Boba Network", "Celo", "Cosmos", "OKC Token", "SORA", "XDC Network", "Songbird", "Osmosis", "MultiversX", "Karura", "Ontology", "Tezos", "Klaytn", "Wanchain", "VeChain", "Polkadot", "Cronos", "TomoChain", "KuCoin Token", "Avalanche", "Aurora", "MetisDAO", "Aptos", "Solana", "Harmony", "Meter Governance", "Toncoin", "Hedera", "Huobi Token", "NEAR Protocol", "NEM", "Bitcoin Cash", "Zilliqa", "Evmos", "Stellar", "Stacks", "Elastos", "Everscale", "Bitgert", "Dogecoin", "Gnosis", "Fusion", "Neo", "Moonbeam", "Terra", "Rootstock Smart Bitcoin", "Core", "OKT Chain", "Arbitrum", "Kava", "Radix", "zkSync", "Fuse", "Sui", "WEMIX", "Klever", "NULS", "BNB Beacon Chain (BEP2)", "Avalanche C-Chain", "RSK RBTC", "Tron10", "ONT", "Xinfin Network", "Arbitrum Nova", "Gnosis Chain", "HECO", "Fusion Network", "zkSync Era", "OKExChain", "KCC", "Elrond", "Sora", "Hedera Hashgraph", "Bitcichain", "XRP Ledger", "IoTex", "Near", "Metis Andromeda", "Songbird Network", "Theta Network", "Avalanche DFK", "Flow", "SUI", "Dogechain", "Canto", "Step", "Wemix", "TON", "PulseChain", "EOS EVM", "Ordinals-BRC20", "Polygon zkEVM", "Mantle", "NEON EVM", "Linea", "Base":
-            return nil
-
-        default:
-            #if DEBUG
-            if !isEmpty, unknownChain.withLock({ $0.insert(self).inserted }) {
-                print("CoinMarketCapAggregator: Unknown chain \(self)")
-            }
-            #endif
+        guard let chainId = try? AssetRegistry.chainId(named: self, by: .coinMarketCap) else {
             return nil
         }
+
+        return BlockChains.knownBlockChains.first { $0.id == chainId }
     }
 }

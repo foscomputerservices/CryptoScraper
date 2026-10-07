@@ -152,7 +152,10 @@ package indirect enum HyperliquidWireValue: Hashable, Sendable {
 
 /// The hashes Hyperliquid's signatures are made over
 package enum HyperliquidSigning {
-    /// Keccak-256 of the action's bytes, the nonce as 8 bytes big-endian, and the sub-account marker
+    /// Keccak-256 of the action's bytes, the nonce as 8 bytes big-endian, and the sub-account marker: 0x00, or 0x01 and
+    /// the sub-account's 20 bytes
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when `vaultAddress` is not 20 bytes of hex
     package static func actionHash(_ action: HyperliquidWireValue, nonce: UInt64, vaultAddress: String?) throws -> [UInt8] {
         var bytes = action.messagePack
         for shift in stride(from: 56, through: 0, by: -8) {
@@ -205,7 +208,9 @@ package enum HyperliquidSigning {
     }
 
     /// The EIP-712 digest of a user-signed action of `primaryType` ("HyperliquidTransaction:UsdClassTransfer") at
-    /// the chain its signatureChainId names
+    /// the chain its signatureChainId names; ``HyperliquidClient`` signs only L1 actions and does not use it
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when an address field is not 20 bytes of hex
     package static func userSignedDigest(primaryType: String, fields: [TypedField], signatureChainId: UInt64) throws -> [UInt8] {
         let domain = domainSeparator(name: "HyperliquidSignTransaction", chainId: signatureChainId)
         let typeText = "\(primaryType)(\(fields.map(\.declaration).joined(separator: ",")))"
@@ -220,7 +225,9 @@ package enum HyperliquidSigning {
         SHA3(variant: .keccak256).calculate(for: bytes)
     }
 
-    /// An address's 20 bytes from its hex text, with or without "0x", in either case
+    /// An address's 20 bytes from its hex text, with or without "0x" ("0X" too), in either case
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when the text is not exactly 40 hex digits
     package static func addressBytes(_ address: String) throws -> [UInt8] {
         let hex = address.hasPrefix("0x") || address.hasPrefix("0X") ? String(address.dropFirst(2)) : address
         let bytes = [UInt8](hex: hex)

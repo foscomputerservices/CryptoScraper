@@ -10,18 +10,22 @@ on:
     tags: ["v*"]
   pull_request:
 
+# A new push supersedes the run in progress on the same ref, which is cancelled; a run the latest push needs is never
+# cancelled (the owner's rule of 2026-10-06).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Etherscan's API V2 serves every EVM scanner with one key, ETHER_SCAN_KEY; the four other scanners' keys are no longer
+# read.
 env:
   COIN_MARKETCAP_KEY: ${{ secrets.COIN_MARKETCAP_KEY }}
   BTC_TEST_CONTRACT_ADDRESS: ${{ secrets.BTC_TEST_CONTRACT_ADDRESS }}
   ETHER_SCAN_KEY: ${{ secrets.ETHER_SCAN_KEY }}
   ETH_TEST_CONTRACT_ADDRESS: ${{ secrets.ETH_TEST_CONTRACT_ADDRESS }}
-  FTM_SCAN_KEY: ${{ secrets.FTM_SCAN_KEY }}
   FTM_TEST_CONTRACT_ADDRESS: ${{ secrets.FTM_TEST_CONTRACT_ADDRESS }}
-  BSC_SCAN_KEY: ${{ secrets.BSC_SCAN_KEY }}
   BSC_TEST_CONTRACT_ADDRESS: ${{ secrets.BSC_TEST_CONTRACT_ADDRESS }}
-  POLYGON_SCAN_KEY: ${{ secrets.POLYGON_SCAN_KEY }}
   POLYGON_TEST_CONTRACT_ADDRESS: ${{ secrets.POLYGON_TEST_CONTRACT_ADDRESS }}
-  OPTIMISTIC_ETHER_SCAN_KEY: ${{ secrets.OPTIMISTIC_ETHER_SCAN_KEY }}
   OPTIMISTIC_TEST_CONTRACT_ADDRESS: ${{ secrets.OPTIMISTIC_TEST_CONTRACT_ADDRESS }}
   TRON_TEST_CONTRACT_ADDRESS: ${{ secrets.TRON_TEST_CONTRACT_ADDRESS }}
 
@@ -44,20 +48,34 @@ jobs:
         run: swift build
 
       # The contract tests run first. The behavioral suites, projected from the requirements in an isolated context
-      # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
+      # (step 2's suite names and files carry a key and an underscore, C32_, L17_, Retrieval_, skipped by a word that
+      # starts with a capital and runs to an underscore, so a test's unlabeled argument, "(_:)", is never skipped with
+      # them; a test's id carries its file's name, so DocCVectorTests, in C2_WellKnownAssets.swift, is skipped with its
+      # file; step 3's are the projector's own
       # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
       # four OHLCV conformers' suites), run in their own step second, and gate the build like the contract tests: each
       # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
       # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
+      # The identity PR's re-projection of the 2023 target (Tests/CryptoScraperTests/Behavioral/, its suites named
+      # D<n>_…Tests, recorded answers only) runs here and is skipped by the network step, so it runs once.
       - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
 
+      # The no-network suites of the 2023 CryptoScraper target, selected by suite name (every one ends NoNetworkTests),
+      # gate the build like the libraries' steps.
+      - name: Test the old target's no-network suites
+        run: swift test --filter "NoNetworkTests" --skip-build
+
+      # The network suites reach the chains' APIs with the secrets above and do not gate until the aggregators' token
+      # counts are done and the Bitcoin explorer's rate limit is met; the Etherscan V2 work is done, and a chain V2
+      # refuses to the key's plan, or does not serve, is skipped in V2's words. The no-network suites are skipped here,
+      # so they run once.
       - name: Test the old aggregators (network)
         continue-on-error: true
-        run: swift test --filter "CryptoScraperTests"
+        run: swift test --filter "CryptoScraperTests" --skip "NoNetworkTests|CryptoScraperTests\\.D[0-9]+_"
 
   test_macos:
     name: Test on macOS 26
@@ -80,28 +98,45 @@ jobs:
       # target's tests reach the chains' APIs with the secrets above and are run separately so a network failure
       # there does not hide a library failure.
       # The contract tests run first. The behavioral suites, projected from the requirements in an isolated context
-      # (step 2's suite names carry a key and an underscore: C32_, L17_, Retrieval_; step 3's are the projector's own
+      # (step 2's suite names and files carry a key and an underscore, C32_, L17_, Retrieval_, skipped by a word that
+      # starts with a capital and runs to an underscore, so a test's unlabeled argument, "(_:)", is never skipped with
+      # them; a test's id carries its file's name, so DocCVectorTests, in C2_WellKnownAssets.swift, is skipped with its
+      # file; step 3's are the projector's own
       # names, skipped by name: C30ValuesTests, the *ContractTests run by the plug-ins, the signing and key suites, and the
       # four OHLCV conformers' suites), run in their own step second, and gate the build like the contract tests: each
       # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
       # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip "_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
+      # The identity PR's re-projection of the 2023 target (Tests/CryptoScraperTests/Behavioral/, its suites named
+      # D<n>_…Tests, recorded answers only) runs here and is skipped by the network step, so it runs once.
       - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
 
+      # The no-network suites of the 2023 CryptoScraper target, selected by suite name (every one ends NoNetworkTests),
+      # gate the build like the libraries' steps.
+      - name: Test the old target's no-network suites
+        run: swift test --filter "NoNetworkTests" --skip-build
+
+      # The network suites reach the chains' APIs with the secrets above and do not gate until the aggregators' token
+      # counts are done and the Bitcoin explorer's rate limit is met; the Etherscan V2 work is done, and a chain V2
+      # refuses to the key's plan, or does not serve, is skipped in V2's words. The no-network suites are skipped here,
+      # so they run once.
       - name: Test the old aggregators (network)
         continue-on-error: true
-        run: swift test --filter "CryptoScraperTests"
+        run: swift test --filter "CryptoScraperTests" --skip "NoNetworkTests|CryptoScraperTests\\.D[0-9]+_"
 
+  # The device builds are CryptoAsset's alone: an app holds assets and amounts, but no app speaks to an exchange (AR49)
+  # and only the services and the lab read bars, so the exchange library, the three plug-ins, the OHLCV library and
+  # the reference library build and test on macOS and Linux only (the owner's word of 2026-10-06).
   build_apple_platforms:
     name: Build ${{ matrix.scheme }} for ${{ matrix.platform }}
     runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
-        scheme: ["CryptoAsset", "CryptoExchange", "CryptoHyperliquid", "CryptoKraken", "CryptoCoinbase", "CryptoOHLCV", "CryptoReference"]
+        scheme: ["CryptoAsset"]
         platform: ["iOS", "tvOS", "watchOS"]
     steps:
       - uses: actions/checkout@v4

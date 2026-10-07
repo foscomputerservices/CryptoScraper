@@ -45,8 +45,8 @@ func normalized(_ text: String) -> String {
 }
 
 // A price's or an amount's exact decimal text, through the package's one way out.
-func wireText(_ price: Price) -> String { WireDecimal(price).text }
-func wireText(_ amount: Amount) -> String { WireDecimal(amount).text }
+func wireText(_ price: Price) -> String { try! WireDecimal(price).text }
+func wireText(_ amount: Amount) -> String { try! WireDecimal(amount).text }
 
 extension URLRequest {
     // The request's JSON body, for a POST.

@@ -3,6 +3,7 @@
 // Copyright © 2023 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoAsset
 import Foundation
 
 /// A store of information describing a block chain token
@@ -46,7 +47,7 @@ public protocol TokenInfo: Codable, Hashable, Identifiable {
     /// Returns **true** if the contracts are equivalent
     ///
     /// Two ``CryptoContract``s are equivalent if they
-    /// match in the ``equivalentContracts`` set.
+    /// match in the ``equivalentContracts`` set, or if `other` is the token's own ``contractAddress``.
     ///
     /// - NOTE: There is a default implementation provided.
     func isEquivalent(to other: Contract) -> Bool
@@ -94,5 +95,28 @@ public extension TokenInfo {
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.contractAddress == rhs.contractAddress
+    }
+}
+
+// MARK: The bridge (design § 2.1)
+
+public extension AssetDeclaration.Instance {
+    /// An on-chain instance from what the reference loaded into its chain, with the decimals its scanner states
+    ///
+    /// The instance is the token's contract, by its ``CryptoContract/id``; the symbol is the token's
+    /// ``TokenInfo/symbol``, upper-cased. The decimals are never read from the reference.
+    ///
+    /// ```swift
+    /// let usdc = try AssetDeclaration.Instance(EthereumChain.default.tokenInfo(for: address)!, decimals: 6)
+    /// ```
+    ///
+    /// - Throws: `AssetError.malformedIdentity` when the contract's `id` is not an instance id;
+    ///   `AssetError.decimalsOutOfRange` outside 0 through 30; `AssetSymbolError` for a symbol that is not one
+    init<Info: TokenInfo>(_ info: Info, decimals: Int) throws {
+        try self.init(
+            instance: AssetInstance(validating: info.contractAddress.id),
+            decimals: decimals,
+            symbol: AssetSymbol(validating: info.symbol)
+        )
     }
 }

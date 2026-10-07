@@ -18,7 +18,8 @@ import Foundation
 // the decoder itself; this exact intermediate is how the response model stays exact until they join.
 //
 // The text accepted: an optional "-", one or more ASCII digits, and optionally a "." followed by one or more ASCII
-// digits. Anything else (a "+", an exponent, a separator, a space, two points, a bare point) is malformedText.
+// digits. Anything else (a "+", an exponent, a separator, a space, two points, a bare point), or more digits than
+// an Int128 holds, is malformedText.
 
 package struct WireDecimal: Hashable, Sendable {
     // The number with its point removed, and how many of its digits were after the point; trailing zeros after
@@ -83,8 +84,10 @@ package struct WireDecimal: Hashable, Sendable {
     }
 
     /// The amount as decimal text in whole units, exactly: the way an order's size goes out
-    package init(_ amount: Amount) {
-        self.init(digits: amount.baseUnits, fractionDigits: amount.asset.unitExponent)
+    ///
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when `registry` does not declare the amount's instance
+    package init(_ amount: Amount, in registry: AssetRegistry = .shared) throws {
+        self.init(digits: amount.baseUnits, fractionDigits: try registry.decimals(of: amount.instance))
     }
 
     /// The price as decimal text in whole quote units per whole base unit, exactly: the way an order's limit goes out
@@ -92,9 +95,12 @@ package struct WireDecimal: Hashable, Sendable {
     /// A price holds nine digits below the quote's base unit, so its exact decimal has at most the quote's exponent
     /// plus nine fraction digits. The cost of 10^9 whole base units is the price times 10^9 with no rounding, read
     /// back at that many fraction digits.
-    package init(_ price: Price) {
-        let size = Amount(baseUnits: Self.powerOfTen(9 + price.base.unitExponent), asset: price.base)
-        self.init(digits: price.cost(of: size).baseUnits, fractionDigits: price.quote.unitExponent + 9)
+    ///
+    /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when `registry` does not declare either instance
+    package init(_ price: Price, in registry: AssetRegistry = .shared) throws {
+        let size = Amount(baseUnits: Self.powerOfTen(9 + (try registry.decimals(of: price.base))), of: price.base)
+        self.init(digits: try price.cost(of: size, in: registry).baseUnits,
+                  fractionDigits: (try registry.decimals(of: price.quote)) + 9)
     }
 
     // The number as plain decimal text with no trailing fraction zeros: an error's message, an order's field, a
@@ -112,30 +118,36 @@ package struct WireDecimal: Hashable, Sendable {
     }
 
     /// Halfway between two numbers, exactly: one more fraction digit at most
+    ///
+    /// The sum, at the finer of the two scales, times five must fit an `Int128`; the arithmetic traps otherwise.
     package static func midpoint(_ lhs: Self, _ rhs: Self) -> Self {
         let digits = max(lhs.fractionDigits, rhs.fractionDigits)
         let sum = lhs.digits * powerOfTen(digits - lhs.fractionDigits) + rhs.digits * powerOfTen(digits - rhs.fractionDigits)
         return Self(digits: sum * 5, fractionDigits: digits + 1)
     }
 
-    /// This number of whole units of `asset`, exactly
+    /// This number of whole units of `instance`, exactly
     ///
-    /// - Throws: ``AmountError/belowBaseUnit`` when the number has more fraction digits than the asset's base unit
-    ///   holds; ``AmountError/malformedText`` when it does not fit an amount
-    package func amount(of asset: Asset) throws -> Amount {
-        Amount(baseUnits: try scaled(toExponent: asset.unitExponent), asset: asset)
+    /// - Throws: ``AmountError/belowBaseUnit`` when the number has more fraction digits than the instance's base unit
+    ///   holds; ``AmountError/malformedText`` when it does not fit an amount;
+    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when `registry` does not declare `instance`
+    package func amount(of instance: AssetInstance, in registry: AssetRegistry = .shared) throws -> Amount {
+        Amount(baseUnits: try scaled(toExponent: registry.decimals(of: instance)), of: instance)
     }
 
-    /// This number of whole units of `asset`, cut toward zero at the asset's base unit: an exchange's day turnover,
-    /// which it may state finer than its quote asset holds (Hyperliquid's to ten digits for USDC's six)
+    /// This number of whole units of `instance`, cut toward zero at the instance's base unit: an exchange's day turnover,
+    /// which it may state finer than its quote asset holds (Hyperliquid's to ten digits for USDC's six), or a base
+    /// volume priced at a mid
     ///
-    /// - Throws: ``AmountError/malformedText`` when it does not fit an amount
-    package func amountCutTowardZero(of asset: Asset) throws -> Amount {
-        guard fractionDigits > asset.unitExponent else {
-            return try amount(of: asset)
+    /// - Throws: ``AmountError/malformedText`` when it does not fit an amount;
+    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when `registry` does not declare `instance`
+    package func amountCutTowardZero(of instance: AssetInstance, in registry: AssetRegistry = .shared) throws -> Amount {
+        let decimals = try registry.decimals(of: instance)
+        guard fractionDigits > decimals else {
+            return try amount(of: instance, in: registry)
         }
-        let cut = digits / Self.powerOfTen(fractionDigits - asset.unitExponent)
-        return try Self(digits: cut, fractionDigits: asset.unitExponent).amount(of: asset)
+        let cut = digits / Self.powerOfTen(fractionDigits - decimals)
+        return try Self(digits: cut, fractionDigits: decimals).amount(of: instance, in: registry)
     }
 
     /// The product of two numbers, exactly: a base volume priced at a mid
@@ -153,19 +165,26 @@ package struct WireDecimal: Hashable, Sendable {
     ///
     /// A price holds nine fraction digits below the quote's base unit (the one scale of CryptoAsset), so text finer
     /// than that is ``AmountError/belowBaseUnit`` with the quote's exponent plus nine.
-    package func price(of quote: Asset, per base: Asset) throws -> Price {
-        if fractionDigits <= quote.unitExponent {
-            return Price(Amount(baseUnits: try scaled(toExponent: quote.unitExponent), asset: quote), per: base)
+    ///
+    /// - Throws: ``AmountError/belowBaseUnit`` as above, and when the excess digits and the base's exponent pass 38;
+    ///   ``AmountError/malformedText`` when it does not fit an amount; ``AssetRegistryError/undeclaredInstance(_:)``
+    ///   when `registry` does not declare either instance
+    package func price(of quote: AssetInstance, per base: AssetInstance,
+                       in registry: AssetRegistry = .shared) throws -> Price {
+        let quoteDecimals = try registry.decimals(of: quote)
+        let baseDecimals = try registry.decimals(of: base)
+        if fractionDigits <= quoteDecimals {
+            return try Price(Amount(baseUnits: try scaled(toExponent: quoteDecimals), of: quote), per: base, in: registry)
         }
         // digits × 10^−fractionDigits whole quote = digits quote base units per 10^(fractionDigits − exponent)
         // whole base units; Price(_:per:) divides that size back out at the scale, exactly while the excess is
         // at most nine digits.
-        let excess = fractionDigits - quote.unitExponent
-        guard excess <= 9, excess + base.unitExponent <= 38 else {
-            throw AmountError.belowBaseUnit(text, unitExponent: quote.unitExponent + 9)
+        let excess = fractionDigits - quoteDecimals
+        guard excess <= 9, excess + baseDecimals <= 38 else {
+            throw AmountError.belowBaseUnit(text, decimals: quoteDecimals + 9)
         }
-        let size = Amount(baseUnits: Self.powerOfTen(excess + base.unitExponent), asset: base)
-        return Price(Amount(baseUnits: digits, asset: quote), per: size)
+        let size = Amount(baseUnits: Self.powerOfTen(excess + baseDecimals), of: base)
+        return try Price(Amount(baseUnits: digits, of: quote), per: size, in: registry)
     }
 
     /// This number as a fraction, exactly: a funding rate "0.0000125" is 0.00125 %
@@ -174,12 +193,12 @@ package struct WireDecimal: Hashable, Sendable {
     /// ``AmountError/belowBaseUnit`` at exponent nine.
     package func fraction() throws -> Fraction {
         guard fractionDigits <= 9 else {
-            throw AmountError.belowBaseUnit(text, unitExponent: 9)
+            throw AmountError.belowBaseUnit(text, decimals: 9)
         }
         // digits ÷ 10^fractionDigits, which Fraction(_:over:) takes at its scale exactly while fractionDigits ≤ 9.
         return Fraction(
-            Amount(baseUnits: digits, asset: Self.ratioAsset),
-            over: Amount(baseUnits: Self.powerOfTen(fractionDigits), asset: Self.ratioAsset)
+            Amount(baseUnits: digits, of: Self.ratioInstance),
+            over: Amount(baseUnits: Self.powerOfTen(fractionDigits), of: Self.ratioInstance)
         )
     }
 
@@ -189,7 +208,7 @@ package struct WireDecimal: Hashable, Sendable {
     ///   when it does not fit an `Int`
     package func integer() throws -> Int {
         guard fractionDigits == 0 else {
-            throw AmountError.belowBaseUnit(text, unitExponent: 0)
+            throw AmountError.belowBaseUnit(text, decimals: 0)
         }
         guard let value = Int(exactly: digits) else {
             throw AmountError.malformedText(text)
@@ -199,7 +218,7 @@ package struct WireDecimal: Hashable, Sendable {
 
     private func scaled(toExponent exponent: Int) throws -> Int128 {
         guard fractionDigits <= exponent else {
-            throw AmountError.belowBaseUnit(text, unitExponent: exponent)
+            throw AmountError.belowBaseUnit(text, decimals: exponent)
         }
         let shift = exponent - fractionDigits
         guard shift <= 38 else {
@@ -220,12 +239,18 @@ package struct WireDecimal: Hashable, Sendable {
         return result
     }
 
-    // The unit-less asset a ratio's two counts are in, so Fraction(_:over:) can divide them.
-    private static let ratioAsset: Asset = {
+    // The instance a ratio's two counts are carried in. A ratio counts in no instance, and nothing names one at its
+    // call (a funding rate is a ratio of a position, whatever its holding); but Fraction is sealed (its scaled
+    // numerator is no initializer's), so Fraction(_:over:), which divides two amounts of one instance by their base
+    // units alone and reads no statement, is the one exact door. The carrier is the dollar's home, the library's own
+    // constant, never written here as an id (the strings rule); no registry is asked and it plays no part in the result. A reading for the
+    // owner's pen, 2026-10-07: a sealed fraction with no instance at all would need a Fraction initializer the
+    // design does not name.
+    private static let ratioInstance: AssetInstance = {
         do {
-            return try Asset(symbol: "RATIO", unitExponent: 0)
+            return try AssetInstance(validating: Asset.usd.id)
         } catch {
-            preconditionFailure("The ratio asset is not a valid declaration: \(error)")
+            preconditionFailure("The dollar's home is not a well-formed instance: \(error)")
         }
     }()
 }
