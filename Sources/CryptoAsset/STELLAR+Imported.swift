@@ -14,4 +14,74 @@ extension STELLAR.Stellar {
         decimals: 7,
         symbol: AssetSymbol(validating: "USDC")
     )
+
+    /// PayPal USD, CoinGecko's `paypal-usd`, at 7 decimals
+    public static let paypalUsd: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CCCRWH6Q3FNP3I2I57BDLM5AFAT7O6OF6GKQOC6SSJNDAVRZ57SPHGU2"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "PYUSD")
+    )
+
+    /// Ondo US Dollar Yield, CoinGecko's `ondo-us-dollar-yield`, at 7 decimals
+    public static let ondoUsDollarYield: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "USDY-GAJMPX5NBOG6TQFPQGRABJEEB2YE7RFRLUKJDZAZGAD5GFX4J7TADAZ6"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "USDY")
+    )
+
+    /// Spiko EU T-Bills Money Market Fund, CoinGecko's `eutbl`, at 5 decimals
+    public static let eutbl: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CBGV2QFQBBGEQRUKUMCPO3SZOHDDYO6SCP5CH6TW7EALKVHCXTMWDDOF"),
+        decimals: 5,
+        symbol: AssetSymbol(validating: "EUTBL")
+    )
+
+    /// EURC, CoinGecko's `euro-coin`, at 7 decimals
+    public static let euroCoin: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "EURC-GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "EURC")
+    )
+
+    /// EUR CoinVertible, CoinGecko's `societe-generale-forge-eurcv`, at 7 decimals
+    public static let societeGeneraleForgeEurcv: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CANKBYNNAYKEZXLB655F2UPNTAZFK5HILZUXL7ZTFR3NF6LKDSVY7KFH"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "EURCV")
+    )
+
+    /// Stronghold, CoinGecko's `stronghold-token`, at 7 decimals
+    public static let strongholdToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "SHX-GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "SHX")
+    )
+
+    /// Velo, CoinGecko's `velo`, at 7 decimals
+    public static let velo: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "VELO-GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "VELO")
+    )
+
+    /// Matrixdock Gold, CoinGecko's `matrixdock-gold`, at 7 decimals
+    public static let matrixdockGold: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "CC2RBGYNCFBCVENIDL5BFBWPH4OUZM2UA3OD2K2N54GLMWCC4KWPVAGO"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "XAUM")
+    )
+
+    /// Brazilian Digital, CoinGecko's `brz`, at 7 decimals
+    public static let brz: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "BRZ-GABMA6FPH3OJXNTGWO7PROF7I5WPQUZOB4BLTBTP4FK6QV7HWISLIEO2"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "BRZ")
+    )
+
+    /// Realio Network Token, CoinGecko's `realio-network`, at 7 decimals
+    public static let realioNetwork: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "RIO-GBNLJIYH34UWO5YZFA3A3HD3N76R6DOI33N4JONUOHEEYZYCAYTEJ5AK"),
+        decimals: 7,
+        symbol: AssetSymbol(validating: "RIO")
+    )
 }

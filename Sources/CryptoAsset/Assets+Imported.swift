@@ -60,10 +60,9264 @@ extension Assets {
         ]
     )
 
+    /// USDS, CoinGecko's `usds`: its home on EIP155.Ethereum, then its other instances
+    public static let usds: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usds.instance.id),
+        tokenName: "USDS",
+        symbol: AssetSymbol(validating: "USDS"),
+        aggregatorId: "usds",
+        instances: [
+            EIP155.Ethereum.usds,
+            EIP155.Base.usds,
+            SOLANA.Solana.usds
+        ]
+    )
+
+    /// Chainlink, CoinGecko's `chainlink`: its home on EIP155.Ethereum, then its other instances
+    public static let chainlink: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.chainlink.instance.id),
+        tokenName: "Chainlink",
+        symbol: AssetSymbol(validating: "LINK"),
+        aggregatorId: "chainlink",
+        instances: [
+            EIP155.Ethereum.chainlink,
+            EIP155.BinanceSmartChain.chainlink,
+            EIP155.Polygon.chainlink,
+            EIP155.Optimism.chainlink,
+            EIP155.Fantom.chainlink,
+            EIP155.Avalanche.chainlink,
+            EIP155.Celo.chainlink,
+            EIP155.Base.chainlink,
+            SOLANA.Solana.chainlink,
+            HEDERA.Hedera.chainlink,
+            NEO.Neo.chainlink,
+            NEAR.Near.chainlink
+        ]
+    )
+
+    /// WhiteBIT Coin, CoinGecko's `whitebit`: its home on EIP155.Ethereum, then its other instances
+    public static let whitebit: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.whitebit.instance.id),
+        tokenName: "WhiteBIT Coin",
+        symbol: AssetSymbol(validating: "WBT"),
+        aggregatorId: "whitebit",
+        instances: [
+            EIP155.Ethereum.whitebit,
+            TRON.Tron.whitebit
+        ]
+    )
+
+    /// LEO Token, CoinGecko's `leo-token`: its home on EIP155.Ethereum, then its other instances
+    public static let leoToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.leoToken.instance.id),
+        tokenName: "LEO Token",
+        symbol: AssetSymbol(validating: "LEO"),
+        aggregatorId: "leo-token",
+        instances: [
+            EIP155.Ethereum.leoToken
+        ]
+    )
+
+    /// Ethena USDe, CoinGecko's `ethena-usde`: its home on EIP155.Ethereum, then its other instances
+    public static let ethenaUsde: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ethenaUsde.instance.id),
+        tokenName: "Ethena USDe",
+        symbol: AssetSymbol(validating: "USDE"),
+        aggregatorId: "ethena-usde",
+        instances: [
+            EIP155.Ethereum.ethenaUsde,
+            EIP155.BinanceSmartChain.ethenaUsde,
+            EIP155.Optimism.ethenaUsde,
+            EIP155.Avalanche.ethenaUsde,
+            EIP155.Base.ethenaUsde,
+            SOLANA.Solana.ethenaUsde
+        ]
+    )
+
+    /// Uniswap, CoinGecko's `uniswap`: its home on EIP155.Ethereum, then its other instances
+    public static let uniswap: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.uniswap.instance.id),
+        tokenName: "Uniswap",
+        symbol: AssetSymbol(validating: "UNI"),
+        aggregatorId: "uniswap",
+        instances: [
+            EIP155.Ethereum.uniswap,
+            EIP155.BinanceSmartChain.uniswap,
+            EIP155.Polygon.uniswap,
+            EIP155.Optimism.uniswap,
+            EIP155.Avalanche.uniswap,
+            NEAR.Near.uniswap
+        ]
+    )
+
+    /// Dai, CoinGecko's `dai`: its home on EIP155.Ethereum, then its other instances
+    public static let dai: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dai.instance.id),
+        tokenName: "Dai",
+        symbol: AssetSymbol(validating: "DAI"),
+        aggregatorId: "dai",
+        instances: [
+            EIP155.Ethereum.dai
+        ]
+    )
+
+    /// USD1, CoinGecko's `usd1-wlfi`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let usd1Wlfi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.usd1Wlfi.instance.id),
+        tokenName: "USD1",
+        symbol: AssetSymbol(validating: "USD1"),
+        aggregatorId: "usd1-wlfi",
+        instances: [
+            EIP155.BinanceSmartChain.usd1Wlfi,
+            EIP155.Ethereum.usd1Wlfi,
+            TRON.Tron.usd1Wlfi,
+            SOLANA.Solana.usd1Wlfi
+        ]
+    )
+
+    /// Quant, CoinGecko's `quant-network`: its home on EIP155.Ethereum, then its other instances
+    public static let quantNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.quantNetwork.instance.id),
+        tokenName: "Quant",
+        symbol: AssetSymbol(validating: "QNT"),
+        aggregatorId: "quant-network",
+        instances: [
+            EIP155.Ethereum.quantNetwork
+        ]
+    )
+
+    /// Bitway, CoinGecko's `bitway`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bitway: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bitway.instance.id),
+        tokenName: "Bitway",
+        symbol: AssetSymbol(validating: "BTW"),
+        aggregatorId: "bitway",
+        instances: [
+            EIP155.BinanceSmartChain.bitway,
+            EIP155.Ethereum.bitway
+        ]
+    )
+
+    /// Tether Gold, CoinGecko's `tether-gold`: its home on EIP155.Ethereum, then its other instances
+    public static let tetherGold: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tetherGold.instance.id),
+        tokenName: "Tether Gold",
+        symbol: AssetSymbol(validating: "XAUT"),
+        aggregatorId: "tether-gold",
+        instances: [
+            EIP155.Ethereum.tetherGold
+        ]
+    )
+
+    /// Global Dollar, CoinGecko's `global-dollar`: its home on SOLANA.Solana, then its other instances
+    public static let globalDollar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.globalDollar.instance.id),
+        tokenName: "Global Dollar",
+        symbol: AssetSymbol(validating: "USDG"),
+        aggregatorId: "global-dollar",
+        instances: [
+            SOLANA.Solana.globalDollar,
+            EIP155.Ethereum.globalDollar
+        ]
+    )
+
+    /// Shiba Inu, CoinGecko's `shiba-inu`: its home on EIP155.Ethereum, then its other instances
+    public static let shibaInu: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.shibaInu.instance.id),
+        tokenName: "Shiba Inu",
+        symbol: AssetSymbol(validating: "SHIB"),
+        aggregatorId: "shiba-inu",
+        instances: [
+            EIP155.Ethereum.shibaInu
+        ]
+    )
+
+    /// Cronos, CoinGecko's `crypto-com-chain`: its home on EIP155.Ethereum, then its other instances
+    public static let cryptoComChain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cryptoComChain.instance.id),
+        tokenName: "Cronos",
+        symbol: AssetSymbol(validating: "CRO"),
+        aggregatorId: "crypto-com-chain",
+        instances: [
+            EIP155.Ethereum.cryptoComChain
+        ]
+    )
+
+    /// Ethena, CoinGecko's `ethena`: its home on EIP155.Ethereum, then its other instances
+    public static let ethena: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ethena.instance.id),
+        tokenName: "Ethena",
+        symbol: AssetSymbol(validating: "ENA"),
+        aggregatorId: "ethena",
+        instances: [
+            EIP155.Ethereum.ethena,
+            EIP155.Optimism.ethena,
+            EIP155.Avalanche.ethena,
+            EIP155.Base.ethena,
+            SOLANA.Solana.ethena
+        ]
+    )
+
+    /// Pump.fun, CoinGecko's `pump-fun`: its home on SOLANA.Solana, then its other instances
+    public static let pumpFun: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.pumpFun.instance.id),
+        tokenName: "Pump.fun",
+        symbol: AssetSymbol(validating: "PUMP"),
+        aggregatorId: "pump-fun",
+        instances: [
+            SOLANA.Solana.pumpFun
+        ]
+    )
+
+    /// PayPal USD, CoinGecko's `paypal-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let paypalUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.paypalUsd.instance.id),
+        tokenName: "PayPal USD",
+        symbol: AssetSymbol(validating: "PYUSD"),
+        aggregatorId: "paypal-usd",
+        instances: [
+            EIP155.Ethereum.paypalUsd,
+            EIP155.Polygon.paypalUsd,
+            SOLANA.Solana.paypalUsd,
+            STELLAR.Stellar.paypalUsd
+        ]
+    )
+
+    /// OKB, CoinGecko's `okb`: its home on EIP155.Ethereum, then its other instances
+    public static let okb: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.okb.instance.id),
+        tokenName: "OKB",
+        symbol: AssetSymbol(validating: "OKB"),
+        aggregatorId: "okb",
+        instances: [
+            EIP155.Ethereum.okb
+        ]
+    )
+
+    /// Aave, CoinGecko's `aave`: its home on EIP155.Ethereum, then its other instances
+    public static let aave: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aave.instance.id),
+        tokenName: "Aave",
+        symbol: AssetSymbol(validating: "AAVE"),
+        aggregatorId: "aave",
+        instances: [
+            EIP155.Ethereum.aave,
+            EIP155.BinanceSmartChain.aave,
+            EIP155.Polygon.aave,
+            EIP155.Optimism.aave,
+            EIP155.Fantom.aave,
+            EIP155.Avalanche.aave,
+            EIP155.Base.aave,
+            SOLANA.Solana.aave,
+            NEAR.Near.aave
+        ]
+    )
+
+    /// Circle USYC, CoinGecko's `hashnote-usyc`: its home on EIP155.Ethereum, then its other instances
+    public static let hashnoteUsyc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.hashnoteUsyc.instance.id),
+        tokenName: "Circle USYC",
+        symbol: AssetSymbol(validating: "USYC"),
+        aggregatorId: "hashnote-usyc",
+        instances: [
+            EIP155.Ethereum.hashnoteUsyc,
+            EIP155.BinanceSmartChain.hashnoteUsyc,
+            SOLANA.Solana.hashnoteUsyc
+        ]
+    )
+
+    /// Ondo US Dollar Yield, CoinGecko's `ondo-us-dollar-yield`: its home on EIP155.Ethereum, then its other instances
+    public static let ondoUsDollarYield: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ondoUsDollarYield.instance.id),
+        tokenName: "Ondo US Dollar Yield",
+        symbol: AssetSymbol(validating: "USDY"),
+        aggregatorId: "ondo-us-dollar-yield",
+        instances: [
+            EIP155.Ethereum.ondoUsDollarYield,
+            EIP155.BinanceSmartChain.ondoUsDollarYield,
+            SOLANA.Solana.ondoUsDollarYield,
+            STELLAR.Stellar.ondoUsDollarYield
+        ]
+    )
+
+    /// Ondo, CoinGecko's `ondo-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let ondoFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ondoFinance.instance.id),
+        tokenName: "Ondo",
+        symbol: AssetSymbol(validating: "ONDO"),
+        aggregatorId: "ondo-finance",
+        instances: [
+            EIP155.Ethereum.ondoFinance
+        ]
+    )
+
+    /// BlackRock USD Institutional Digital Liquidity Fund, CoinGecko's `blackrock-usd-institutional-digital-liquidity-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let blackrockUsdInstitutionalDigitalLiquidityFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.blackrockUsdInstitutionalDigitalLiquidityFund.instance.id),
+        tokenName: "BlackRock USD Institutional Digital Liquidity Fund",
+        symbol: AssetSymbol(validating: "BUIDL"),
+        aggregatorId: "blackrock-usd-institutional-digital-liquidity-fund",
+        instances: [
+            EIP155.Ethereum.blackrockUsdInstitutionalDigitalLiquidityFund,
+            EIP155.BinanceSmartChain.blackrockUsdInstitutionalDigitalLiquidityFund,
+            EIP155.Polygon.blackrockUsdInstitutionalDigitalLiquidityFund,
+            EIP155.Optimism.blackrockUsdInstitutionalDigitalLiquidityFund,
+            EIP155.Avalanche.blackrockUsdInstitutionalDigitalLiquidityFund,
+            SOLANA.Solana.blackrockUsdInstitutionalDigitalLiquidityFund
+        ]
+    )
+
+    /// Worldcoin, CoinGecko's `worldcoin-wld`: its home on EIP155.Ethereum, then its other instances
+    public static let worldcoinWld: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.worldcoinWld.instance.id),
+        tokenName: "Worldcoin",
+        symbol: AssetSymbol(validating: "WLD"),
+        aggregatorId: "worldcoin-wld",
+        instances: [
+            EIP155.Ethereum.worldcoinWld,
+            EIP155.Optimism.worldcoinWld
+        ]
+    )
+
+    /// Mantle, CoinGecko's `mantle`: its home on EIP155.Ethereum, then its other instances
+    public static let mantle: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mantle.instance.id),
+        tokenName: "Mantle",
+        symbol: AssetSymbol(validating: "MNT"),
+        aggregatorId: "mantle",
+        instances: [
+            EIP155.Ethereum.mantle
+        ]
+    )
+
+    /// Aster, CoinGecko's `aster-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let aster2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.aster2.instance.id),
+        tokenName: "Aster",
+        symbol: AssetSymbol(validating: "ASTER"),
+        aggregatorId: "aster-2",
+        instances: [
+            EIP155.BinanceSmartChain.aster2
+        ]
+    )
+
+    /// Sky, CoinGecko's `sky`: its home on EIP155.Ethereum, then its other instances
+    public static let sky: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sky.instance.id),
+        tokenName: "Sky",
+        symbol: AssetSymbol(validating: "SKY"),
+        aggregatorId: "sky",
+        instances: [
+            EIP155.Ethereum.sky
+        ]
+    )
+
+    /// Falcon USD, CoinGecko's `falcon-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let falconFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.falconFinance.instance.id),
+        tokenName: "Falcon USD",
+        symbol: AssetSymbol(validating: "USDF"),
+        aggregatorId: "falcon-finance",
+        instances: [
+            EIP155.Ethereum.falconFinance,
+            EIP155.BinanceSmartChain.falconFinance
+        ]
+    )
+
+    /// PAX Gold, CoinGecko's `pax-gold`: its home on EIP155.Ethereum, then its other instances
+    public static let paxGold: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.paxGold.instance.id),
+        tokenName: "PAX Gold",
+        symbol: AssetSymbol(validating: "PAXG"),
+        aggregatorId: "pax-gold",
+        instances: [
+            EIP155.Ethereum.paxGold
+        ]
+    )
+
+    /// Morpho, CoinGecko's `morpho`: its home on EIP155.Ethereum, then its other instances
+    public static let morpho: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.morpho.instance.id),
+        tokenName: "Morpho",
+        symbol: AssetSymbol(validating: "MORPHO"),
+        aggregatorId: "morpho",
+        instances: [
+            EIP155.Ethereum.morpho,
+            EIP155.Base.morpho
+        ]
+    )
+
+    /// World Liberty Financial, CoinGecko's `world-liberty-financial`: its home on EIP155.Ethereum, then its other instances
+    public static let worldLibertyFinancial: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.worldLibertyFinancial.instance.id),
+        tokenName: "World Liberty Financial",
+        symbol: AssetSymbol(validating: "WLFI"),
+        aggregatorId: "world-liberty-financial",
+        instances: [
+            EIP155.Ethereum.worldLibertyFinancial,
+            EIP155.BinanceSmartChain.worldLibertyFinancial,
+            SOLANA.Solana.worldLibertyFinancial
+        ]
+    )
+
+    /// USDD, CoinGecko's `usdd`: its home on TRON.Tron, then its other instances
+    public static let usdd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.usdd.instance.id),
+        tokenName: "USDD",
+        symbol: AssetSymbol(validating: "USDD"),
+        aggregatorId: "usdd",
+        instances: [
+            TRON.Tron.usdd,
+            EIP155.Ethereum.usdd,
+            EIP155.BinanceSmartChain.usdd
+        ]
+    )
+
+    /// United Stables, CoinGecko's `united-stables`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let unitedStables: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.unitedStables.instance.id),
+        tokenName: "United Stables",
+        symbol: AssetSymbol(validating: "U"),
+        aggregatorId: "united-stables",
+        instances: [
+            EIP155.BinanceSmartChain.unitedStables,
+            EIP155.Ethereum.unitedStables,
+            TRON.Tron.unitedStables
+        ]
+    )
+
+    /// HTX DAO, CoinGecko's `htx-dao`: its home on TRON.Tron, then its other instances
+    public static let htxDao: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.htxDao.instance.id),
+        tokenName: "HTX DAO",
+        symbol: AssetSymbol(validating: "HTX"),
+        aggregatorId: "htx-dao",
+        instances: [
+            TRON.Tron.htxDao,
+            EIP155.Ethereum.htxDao,
+            EIP155.BinanceSmartChain.htxDao
+        ]
+    )
+
+    /// Bitget Token, CoinGecko's `bitget-token`: its home on EIP155.Ethereum, then its other instances
+    public static let bitgetToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bitgetToken.instance.id),
+        tokenName: "Bitget Token",
+        symbol: AssetSymbol(validating: "BGB"),
+        aggregatorId: "bitget-token",
+        instances: [
+            EIP155.Ethereum.bitgetToken
+        ]
+    )
+
+    /// USDGO, CoinGecko's `usdgo`: its home on SOLANA.Solana, then its other instances
+    public static let usdgo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.usdgo.instance.id),
+        tokenName: "USDGO",
+        symbol: AssetSymbol(validating: "USDGO"),
+        aggregatorId: "usdgo",
+        instances: [
+            SOLANA.Solana.usdgo,
+            EIP155.Ethereum.usdgo
+        ]
+    )
+
+    /// Venice Token, CoinGecko's `venice-token`: its home on EIP155.Base, then its other instances
+    public static let veniceToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.veniceToken.instance.id),
+        tokenName: "Venice Token",
+        symbol: AssetSymbol(validating: "VVV"),
+        aggregatorId: "venice-token",
+        instances: [
+            EIP155.Base.veniceToken
+        ]
+    )
+
+    /// JUST, CoinGecko's `just`: its home on TRON.Tron, then its other instances
+    public static let just: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.just.instance.id),
+        tokenName: "JUST",
+        symbol: AssetSymbol(validating: "JST"),
+        aggregatorId: "just",
+        instances: [
+            TRON.Tron.just
+        ]
+    )
+
+    /// Gate, CoinGecko's `gatechain-token`: its home on EIP155.Ethereum, then its other instances
+    public static let gatechainToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gatechainToken.instance.id),
+        tokenName: "Gate",
+        symbol: AssetSymbol(validating: "GT"),
+        aggregatorId: "gatechain-token",
+        instances: [
+            EIP155.Ethereum.gatechainToken
+        ]
+    )
+
+    /// Jupiter, CoinGecko's `jupiter-exchange-solana`: its home on SOLANA.Solana, then its other instances
+    public static let jupiterExchangeSolana: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.jupiterExchangeSolana.instance.id),
+        tokenName: "Jupiter",
+        symbol: AssetSymbol(validating: "JUP"),
+        aggregatorId: "jupiter-exchange-solana",
+        instances: [
+            SOLANA.Solana.jupiterExchangeSolana
+        ]
+    )
+
+    /// Render, CoinGecko's `render-token`: its home on EIP155.Ethereum, then its other instances
+    public static let renderToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.renderToken.instance.id),
+        tokenName: "Render",
+        symbol: AssetSymbol(validating: "RENDER"),
+        aggregatorId: "render-token",
+        instances: [
+            EIP155.Ethereum.renderToken,
+            SOLANA.Solana.renderToken
+        ]
+    )
+
+    /// Blockchain Capital, CoinGecko's `blockchain-capital`: its home on EIP155.Ethereum, then its other instances
+    public static let blockchainCapital: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.blockchainCapital.instance.id),
+        tokenName: "Blockchain Capital",
+        symbol: AssetSymbol(validating: "BCAP"),
+        aggregatorId: "blockchain-capital",
+        instances: [
+            EIP155.Ethereum.blockchainCapital
+        ]
+    )
+
+    /// Lighter, CoinGecko's `lighter`: its home on EIP155.Ethereum, then its other instances
+    public static let lighter: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lighter.instance.id),
+        tokenName: "Lighter",
+        symbol: AssetSymbol(validating: "LIT"),
+        aggregatorId: "lighter",
+        instances: [
+            EIP155.Ethereum.lighter
+        ]
+    )
+
+    /// LayerZero, CoinGecko's `layerzero`: its home on EIP155.Ethereum, then its other instances
+    public static let layerzero: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.layerzero.instance.id),
+        tokenName: "LayerZero",
+        symbol: AssetSymbol(validating: "ZRO"),
+        aggregatorId: "layerzero",
+        instances: [
+            EIP155.Ethereum.layerzero,
+            EIP155.BinanceSmartChain.layerzero,
+            EIP155.Polygon.layerzero,
+            EIP155.Optimism.layerzero,
+            EIP155.Avalanche.layerzero,
+            EIP155.Base.layerzero
+        ]
+    )
+
+    /// NEXO, CoinGecko's `nexo`: its home on EIP155.Ethereum, then its other instances
+    public static let nexo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nexo.instance.id),
+        tokenName: "NEXO",
+        symbol: AssetSymbol(validating: "NEXO"),
+        aggregatorId: "nexo",
+        instances: [
+            EIP155.Ethereum.nexo,
+            EIP155.Polygon.nexo,
+            EIP155.Fantom.nexo
+        ]
+    )
+
+    /// Aerodrome Finance, CoinGecko's `aerodrome-finance`: its home on EIP155.Base, then its other instances
+    public static let aerodromeFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.aerodromeFinance.instance.id),
+        tokenName: "Aerodrome Finance",
+        symbol: AssetSymbol(validating: "AERO"),
+        aggregatorId: "aerodrome-finance",
+        instances: [
+            EIP155.Base.aerodromeFinance
+        ]
+    )
+
+    /// Invesco Short Duration US Government Securities Fund, CoinGecko's `superstate-short-duration-us-government-securities-fund-ustb`: its home on EIP155.Ethereum, then its other instances
+    public static let superstateShortDurationUsGovernmentSecuritiesFundUstb: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.superstateShortDurationUsGovernmentSecuritiesFundUstb.instance.id),
+        tokenName: "Invesco Short Duration US Government Securities Fund",
+        symbol: AssetSymbol(validating: "USTB"),
+        aggregatorId: "superstate-short-duration-us-government-securities-fund-ustb",
+        instances: [
+            EIP155.Ethereum.superstateShortDurationUsGovernmentSecuritiesFundUstb,
+            SOLANA.Solana.superstateShortDurationUsGovernmentSecuritiesFundUstb
+        ]
+    )
+
+    /// Midnight, CoinGecko's `midnight-3`: its home on CIP34.Cardano, then its other instances
+    public static let midnight3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: CIP34.Cardano.midnight3.instance.id),
+        tokenName: "Midnight",
+        symbol: AssetSymbol(validating: "NIGHT"),
+        aggregatorId: "midnight-3",
+        instances: [
+            CIP34.Cardano.midnight3,
+            EIP155.BinanceSmartChain.midnight3
+        ]
+    )
+
+    /// Injective, CoinGecko's `injective-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let injectiveProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.injectiveProtocol.instance.id),
+        tokenName: "Injective",
+        symbol: AssetSymbol(validating: "INJ"),
+        aggregatorId: "injective-protocol",
+        instances: [
+            EIP155.Ethereum.injectiveProtocol,
+            EIP155.BinanceSmartChain.injectiveProtocol,
+            SOLANA.Solana.injectiveProtocol,
+            COSMOS.CosmosHub.injectiveProtocol,
+            COSMOS.Terra.injectiveProtocol
+        ]
+    )
+
+    /// Open USD, CoinGecko's `open-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let openUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.openUsd.instance.id),
+        tokenName: "Open USD",
+        symbol: AssetSymbol(validating: "OUSD"),
+        aggregatorId: "open-usd",
+        instances: [
+            EIP155.Ethereum.openUsd,
+            EIP155.Base.openUsd,
+            SOLANA.Solana.openUsd
+        ]
+    )
+
+    /// PancakeSwap, CoinGecko's `pancakeswap-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let pancakeswapToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.pancakeswapToken.instance.id),
+        tokenName: "PancakeSwap",
+        symbol: AssetSymbol(validating: "CAKE"),
+        aggregatorId: "pancakeswap-token",
+        instances: [
+            EIP155.BinanceSmartChain.pancakeswapToken,
+            EIP155.Ethereum.pancakeswapToken,
+            EIP155.Base.pancakeswapToken,
+            SOLANA.Solana.pancakeswapToken
+        ]
+    )
+
+    /// GHO, CoinGecko's `gho`: its home on EIP155.Ethereum, then its other instances
+    public static let gho: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gho.instance.id),
+        tokenName: "GHO",
+        symbol: AssetSymbol(validating: "GHO"),
+        aggregatorId: "gho",
+        instances: [
+            EIP155.Ethereum.gho,
+            EIP155.Avalanche.gho,
+            EIP155.Base.gho
+        ]
+    )
+
+    /// Ether.fi, CoinGecko's `ether-fi`: its home on EIP155.Ethereum, then its other instances
+    public static let etherFi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.etherFi.instance.id),
+        tokenName: "Ether.fi",
+        symbol: AssetSymbol(validating: "ETHFI"),
+        aggregatorId: "ether-fi",
+        instances: [
+            EIP155.Ethereum.etherFi,
+            EIP155.Base.etherFi
+        ]
+    )
+
+    /// Raydium, CoinGecko's `raydium`: its home on SOLANA.Solana, then its other instances
+    public static let raydium: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.raydium.instance.id),
+        tokenName: "Raydium",
+        symbol: AssetSymbol(validating: "RAY"),
+        aggregatorId: "raydium",
+        instances: [
+            SOLANA.Solana.raydium
+        ]
+    )
+
+    /// Spiko EU T-Bills Money Market Fund, CoinGecko's `eutbl`: its home on EIP155.Ethereum, then its other instances
+    public static let eutbl: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.eutbl.instance.id),
+        tokenName: "Spiko EU T-Bills Money Market Fund",
+        symbol: AssetSymbol(validating: "EUTBL"),
+        aggregatorId: "eutbl",
+        instances: [
+            EIP155.Ethereum.eutbl,
+            EIP155.Polygon.eutbl,
+            EIP155.Base.eutbl,
+            STELLAR.Stellar.eutbl
+        ]
+    )
+
+    /// Akedo, CoinGecko's `akedo`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let akedo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.akedo.instance.id),
+        tokenName: "Akedo",
+        symbol: AssetSymbol(validating: "AKE"),
+        aggregatorId: "akedo",
+        instances: [
+            EIP155.BinanceSmartChain.akedo
+        ]
+    )
+
+    /// Janus Henderson Anemoy AAA CLO Fund, CoinGecko's `janus-henderson-anemoy-aaa-clo-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let janusHendersonAnemoyAaaCloFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.janusHendersonAnemoyAaaCloFund.instance.id),
+        tokenName: "Janus Henderson Anemoy AAA CLO Fund",
+        symbol: AssetSymbol(validating: "JAAA"),
+        aggregatorId: "janus-henderson-anemoy-aaa-clo-fund",
+        instances: [
+            EIP155.Ethereum.janusHendersonAnemoyAaaCloFund,
+            EIP155.BinanceSmartChain.janusHendersonAnemoyAaaCloFund,
+            EIP155.Avalanche.janusHendersonAnemoyAaaCloFund,
+            EIP155.Base.janusHendersonAnemoyAaaCloFund,
+            SOLANA.Solana.janusHendersonAnemoyAaaCloFund
+        ]
+    )
+
+    /// Beldex, CoinGecko's `beldex`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let beldex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.beldex.instance.id),
+        tokenName: "Beldex",
+        symbol: AssetSymbol(validating: "BDX"),
+        aggregatorId: "beldex",
+        instances: [
+            EIP155.BinanceSmartChain.beldex
+        ]
+    )
+
+    /// Pyth Network, CoinGecko's `pyth-network`: its home on SOLANA.Solana, then its other instances
+    public static let pythNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.pythNetwork.instance.id),
+        tokenName: "Pyth Network",
+        symbol: AssetSymbol(validating: "PYTH"),
+        aggregatorId: "pyth-network",
+        instances: [
+            SOLANA.Solana.pythNetwork
+        ]
+    )
+
+    /// Curve DAO, CoinGecko's `curve-dao-token`: its home on EIP155.Ethereum, then its other instances
+    public static let curveDaoToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.curveDaoToken.instance.id),
+        tokenName: "Curve DAO",
+        symbol: AssetSymbol(validating: "CRV"),
+        aggregatorId: "curve-dao-token",
+        instances: [
+            EIP155.Ethereum.curveDaoToken,
+            EIP155.Polygon.curveDaoToken,
+            EIP155.Optimism.curveDaoToken,
+            EIP155.Fantom.curveDaoToken,
+            EIP155.Base.curveDaoToken
+        ]
+    )
+
+    /// Usual USD, CoinGecko's `usual-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let usualUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usualUsd.instance.id),
+        tokenName: "Usual USD",
+        symbol: AssetSymbol(validating: "USD0"),
+        aggregatorId: "usual-usd",
+        instances: [
+            EIP155.Ethereum.usualUsd,
+            EIP155.BinanceSmartChain.usualUsd,
+            EIP155.Base.usualUsd
+        ]
+    )
+
+    /// Pudgy Penguins, CoinGecko's `pudgy-penguins`: its home on SOLANA.Solana, then its other instances
+    public static let pudgyPenguins: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.pudgyPenguins.instance.id),
+        tokenName: "Pudgy Penguins",
+        symbol: AssetSymbol(validating: "PENGU"),
+        aggregatorId: "pudgy-penguins",
+        instances: [
+            SOLANA.Solana.pudgyPenguins,
+            EIP155.Ethereum.pudgyPenguins,
+            EIP155.BinanceSmartChain.pudgyPenguins
+        ]
+    )
+
+    /// Official Trump, CoinGecko's `official-trump`: its home on SOLANA.Solana, then its other instances
+    public static let officialTrump: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.officialTrump.instance.id),
+        tokenName: "Official Trump",
+        symbol: AssetSymbol(validating: "TRUMP"),
+        aggregatorId: "official-trump",
+        instances: [
+            SOLANA.Solana.officialTrump
+        ]
+    )
+
+    /// Virtuals Protocol, CoinGecko's `virtual-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let virtualProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.virtualProtocol.instance.id),
+        tokenName: "Virtuals Protocol",
+        symbol: AssetSymbol(validating: "VIRTUAL"),
+        aggregatorId: "virtual-protocol",
+        instances: [
+            EIP155.Ethereum.virtualProtocol,
+            EIP155.Base.virtualProtocol,
+            SOLANA.Solana.virtualProtocol
+        ]
+    )
+
+    /// TrueUSD, CoinGecko's `true-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let trueUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.trueUsd.instance.id),
+        tokenName: "TrueUSD",
+        symbol: AssetSymbol(validating: "TUSD"),
+        aggregatorId: "true-usd",
+        instances: [
+            EIP155.Ethereum.trueUsd,
+            EIP155.BinanceSmartChain.trueUsd,
+            EIP155.Avalanche.trueUsd,
+            TRON.Tron.trueUsd
+        ]
+    )
+
+    /// USDtb, CoinGecko's `usdtb`: its home on EIP155.Ethereum, then its other instances
+    public static let usdtb: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usdtb.instance.id),
+        tokenName: "USDtb",
+        symbol: AssetSymbol(validating: "USDTB"),
+        aggregatorId: "usdtb",
+        instances: [
+            EIP155.Ethereum.usdtb,
+            SOLANA.Solana.usdtb
+        ]
+    )
+
+    /// EURC, CoinGecko's `euro-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let euroCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.euroCoin.instance.id),
+        tokenName: "EURC",
+        symbol: AssetSymbol(validating: "EURC"),
+        aggregatorId: "euro-coin",
+        instances: [
+            EIP155.Ethereum.euroCoin,
+            EIP155.Optimism.euroCoin,
+            EIP155.Avalanche.euroCoin,
+            EIP155.Base.euroCoin,
+            SOLANA.Solana.euroCoin,
+            STELLAR.Stellar.euroCoin
+        ]
+    )
+
+    /// A7A5, CoinGecko's `a7a5`: its home on EIP155.Ethereum, then its other instances
+    public static let a7a5: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.a7a5.instance.id),
+        tokenName: "A7A5",
+        symbol: AssetSymbol(validating: "A7A5"),
+        aggregatorId: "a7a5",
+        instances: [
+            EIP155.Ethereum.a7a5,
+            TRON.Tron.a7a5
+        ]
+    )
+
+    /// Grass, CoinGecko's `grass`: its home on SOLANA.Solana, then its other instances
+    public static let grass: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.grass.instance.id),
+        tokenName: "Grass",
+        symbol: AssetSymbol(validating: "GRASS"),
+        aggregatorId: "grass",
+        instances: [
+            SOLANA.Solana.grass
+        ]
+    )
+
+    /// Pendle, CoinGecko's `pendle`: its home on EIP155.Ethereum, then its other instances
+    public static let pendle: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.pendle.instance.id),
+        tokenName: "Pendle",
+        symbol: AssetSymbol(validating: "PENDLE"),
+        aggregatorId: "pendle",
+        instances: [
+            EIP155.Ethereum.pendle,
+            EIP155.BinanceSmartChain.pendle,
+            EIP155.Optimism.pendle,
+            EIP155.Base.pendle
+        ]
+    )
+
+    /// Falcon Finance, CoinGecko's `falcon-finance-ff`: its home on EIP155.Ethereum, then its other instances
+    public static let falconFinanceFf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.falconFinanceFf.instance.id),
+        tokenName: "Falcon Finance",
+        symbol: AssetSymbol(validating: "FF"),
+        aggregatorId: "falcon-finance-ff",
+        instances: [
+            EIP155.Ethereum.falconFinanceFf,
+            EIP155.BinanceSmartChain.falconFinanceFf
+        ]
+    )
+
+    /// Derive, CoinGecko's `derive`: its home on EIP155.Ethereum, then its other instances
+    public static let derive: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.derive.instance.id),
+        tokenName: "Derive",
+        symbol: AssetSymbol(validating: "DRV"),
+        aggregatorId: "derive",
+        instances: [
+            EIP155.Ethereum.derive,
+            EIP155.Optimism.derive,
+            EIP155.Base.derive
+        ]
+    )
+
+    /// Starknet, CoinGecko's `starknet`: its home on EIP155.Ethereum, then its other instances
+    public static let starknet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.starknet.instance.id),
+        tokenName: "Starknet",
+        symbol: AssetSymbol(validating: "STRK"),
+        aggregatorId: "starknet",
+        instances: [
+            EIP155.Ethereum.starknet,
+            SOLANA.Solana.starknet
+        ]
+    )
+
+    /// Lido DAO, CoinGecko's `lido-dao`: its home on EIP155.Ethereum, then its other instances
+    public static let lidoDao: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lidoDao.instance.id),
+        tokenName: "Lido DAO",
+        symbol: AssetSymbol(validating: "LDO"),
+        aggregatorId: "lido-dao",
+        instances: [
+            EIP155.Ethereum.lidoDao,
+            EIP155.Polygon.lidoDao,
+            EIP155.Optimism.lidoDao
+        ]
+    )
+
+    /// SPX6900, CoinGecko's `spx6900`: its home on EIP155.Ethereum, then its other instances
+    public static let spx6900: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spx6900.instance.id),
+        tokenName: "SPX6900",
+        symbol: AssetSymbol(validating: "SPX"),
+        aggregatorId: "spx6900",
+        instances: [
+            EIP155.Ethereum.spx6900,
+            EIP155.Avalanche.spx6900,
+            EIP155.Base.spx6900,
+            SOLANA.Solana.spx6900
+        ]
+    )
+
+    /// BitTorrent, CoinGecko's `bittorrent`: its home on TRON.Tron, then its other instances
+    public static let bittorrent: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.bittorrent.instance.id),
+        tokenName: "BitTorrent",
+        symbol: AssetSymbol(validating: "BTT"),
+        aggregatorId: "bittorrent",
+        instances: [
+            TRON.Tron.bittorrent,
+            EIP155.Ethereum.bittorrent,
+            EIP155.BinanceSmartChain.bittorrent
+        ]
+    )
+
+    /// Pieverse, CoinGecko's `pieverse`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let pieverse: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.pieverse.instance.id),
+        tokenName: "Pieverse",
+        symbol: AssetSymbol(validating: "PIEVERSE"),
+        aggregatorId: "pieverse",
+        instances: [
+            EIP155.BinanceSmartChain.pieverse,
+            EIP155.Ethereum.pieverse
+        ]
+    )
+
+    /// Unibase, CoinGecko's `unibase`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let unibase: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.unibase.instance.id),
+        tokenName: "Unibase",
+        symbol: AssetSymbol(validating: "UB"),
+        aggregatorId: "unibase",
+        instances: [
+            EIP155.BinanceSmartChain.unibase,
+            EIP155.Ethereum.unibase
+        ]
+    )
+
+    /// SoFiUSD, CoinGecko's `sofiusd`: its home on EIP155.Ethereum, then its other instances
+    public static let sofiusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sofiusd.instance.id),
+        tokenName: "SoFiUSD",
+        symbol: AssetSymbol(validating: "SOFID"),
+        aggregatorId: "sofiusd",
+        instances: [
+            EIP155.Ethereum.sofiusd,
+            SOLANA.Solana.sofiusd
+        ]
+    )
+
+    /// Janus Henderson Anemoy Treasury Fund, CoinGecko's `janus-henderson-anemoy-treasury-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let janusHendersonAnemoyTreasuryFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.janusHendersonAnemoyTreasuryFund.instance.id),
+        tokenName: "Janus Henderson Anemoy Treasury Fund",
+        symbol: AssetSymbol(validating: "JTRSY"),
+        aggregatorId: "janus-henderson-anemoy-treasury-fund",
+        instances: [
+            EIP155.Ethereum.janusHendersonAnemoyTreasuryFund,
+            EIP155.Avalanche.janusHendersonAnemoyTreasuryFund,
+            EIP155.Base.janusHendersonAnemoyTreasuryFund
+        ]
+    )
+
+    /// Sun Token, CoinGecko's `sun-token`: its home on TRON.Tron, then its other instances
+    public static let sunToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.sunToken.instance.id),
+        tokenName: "Sun Token",
+        symbol: AssetSymbol(validating: "SUN"),
+        aggregatorId: "sun-token",
+        instances: [
+            TRON.Tron.sunToken
+        ]
+    )
+
+    /// First Digital USD, CoinGecko's `first-digital-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let firstDigitalUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.firstDigitalUsd.instance.id),
+        tokenName: "First Digital USD",
+        symbol: AssetSymbol(validating: "FDUSD"),
+        aggregatorId: "first-digital-usd",
+        instances: [
+            EIP155.Ethereum.firstDigitalUsd,
+            EIP155.BinanceSmartChain.firstDigitalUsd,
+            SOLANA.Solana.firstDigitalUsd
+        ]
+    )
+
+    /// Ondo Short-Term U.S. Government Bond Fund, CoinGecko's `ousg`: its home on EIP155.Ethereum, then its other instances
+    public static let ousg: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ousg.instance.id),
+        tokenName: "Ondo Short-Term U.S. Government Bond Fund",
+        symbol: AssetSymbol(validating: "OUSG"),
+        aggregatorId: "ousg",
+        instances: [
+            EIP155.Ethereum.ousg,
+            EIP155.Polygon.ousg,
+            SOLANA.Solana.ousg
+        ]
+    )
+
+    /// Kite, CoinGecko's `kite-2`: its home on EIP155.Ethereum, then its other instances
+    public static let kite2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.kite2.instance.id),
+        tokenName: "Kite",
+        symbol: AssetSymbol(validating: "KITE"),
+        aggregatorId: "kite-2",
+        instances: [
+            EIP155.Ethereum.kite2,
+            EIP155.BinanceSmartChain.kite2,
+            EIP155.Avalanche.kite2
+        ]
+    )
+
+    /// apxUSD, CoinGecko's `apxusd`: its home on EIP155.Ethereum, then its other instances
+    public static let apxusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.apxusd.instance.id),
+        tokenName: "apxUSD",
+        symbol: AssetSymbol(validating: "APXUSD"),
+        aggregatorId: "apxusd",
+        instances: [
+            EIP155.Ethereum.apxusd,
+            EIP155.BinanceSmartChain.apxusd,
+            EIP155.Base.apxusd,
+            SOLANA.Solana.apxusd
+        ]
+    )
+
+    /// Gnosis, CoinGecko's `gnosis`: its home on EIP155.Ethereum, then its other instances
+    public static let gnosis: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gnosis.instance.id),
+        tokenName: "Gnosis",
+        symbol: AssetSymbol(validating: "GNO"),
+        aggregatorId: "gnosis",
+        instances: [
+            EIP155.Ethereum.gnosis
+        ]
+    )
+
+    /// Bonk, CoinGecko's `bonk`: its home on SOLANA.Solana, then its other instances
+    public static let bonk: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.bonk.instance.id),
+        tokenName: "Bonk",
+        symbol: AssetSymbol(validating: "BONK"),
+        aggregatorId: "bonk",
+        instances: [
+            SOLANA.Solana.bonk,
+            EIP155.Ethereum.bonk,
+            EIP155.BinanceSmartChain.bonk,
+            EIP155.Polygon.bonk
+        ]
+    )
+
+    /// Re Protocol reUSD, CoinGecko's `re-protocol-reusd`: its home on EIP155.Ethereum, then its other instances
+    public static let reProtocolReusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.reProtocolReusd.instance.id),
+        tokenName: "Re Protocol reUSD",
+        symbol: AssetSymbol(validating: "REUSD"),
+        aggregatorId: "re-protocol-reusd",
+        instances: [
+            EIP155.Ethereum.reProtocolReusd,
+            EIP155.BinanceSmartChain.reProtocolReusd,
+            EIP155.Avalanche.reProtocolReusd,
+            EIP155.Base.reProtocolReusd,
+            SOLANA.Solana.reProtocolReusd
+        ]
+    )
+
+    /// The Graph, CoinGecko's `the-graph`: its home on EIP155.Ethereum, then its other instances
+    public static let theGraph: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.theGraph.instance.id),
+        tokenName: "The Graph",
+        symbol: AssetSymbol(validating: "GRT"),
+        aggregatorId: "the-graph",
+        instances: [
+            EIP155.Ethereum.theGraph,
+            EIP155.Polygon.theGraph,
+            EIP155.Avalanche.theGraph,
+            NEAR.Near.theGraph
+        ]
+    )
+
+    /// Olympus, CoinGecko's `olympus`: its home on EIP155.Ethereum, then its other instances
+    public static let olympus: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.olympus.instance.id),
+        tokenName: "Olympus",
+        symbol: AssetSymbol(validating: "OHM"),
+        aggregatorId: "olympus",
+        instances: [
+            EIP155.Ethereum.olympus,
+            EIP155.Optimism.olympus,
+            EIP155.Base.olympus,
+            SOLANA.Solana.olympus
+        ]
+    )
+
+    /// Jito, CoinGecko's `jito-governance-token`: its home on SOLANA.Solana, then its other instances
+    public static let jitoGovernanceToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.jitoGovernanceToken.instance.id),
+        tokenName: "Jito",
+        symbol: AssetSymbol(validating: "JTO"),
+        aggregatorId: "jito-governance-token",
+        instances: [
+            SOLANA.Solana.jitoGovernanceToken
+        ]
+    )
+
+    /// Optimism, CoinGecko's `optimism`: its home on EIP155.Optimism, then its other instances
+    public static let optimism: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Optimism.optimism.instance.id),
+        tokenName: "Optimism",
+        symbol: AssetSymbol(validating: "OP"),
+        aggregatorId: "optimism",
+        instances: [
+            EIP155.Optimism.optimism
+        ]
+    )
+
+    /// Ethereum Name Service, CoinGecko's `ethereum-name-service`: its home on EIP155.Ethereum, then its other instances
+    public static let ethereumNameService: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ethereumNameService.instance.id),
+        tokenName: "Ethereum Name Service",
+        symbol: AssetSymbol(validating: "ENS"),
+        aggregatorId: "ethereum-name-service",
+        instances: [
+            EIP155.Ethereum.ethereumNameService
+        ]
+    )
+
+    /// Maple Finance, CoinGecko's `syrup`: its home on EIP155.Ethereum, then its other instances
+    public static let syrup: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.syrup.instance.id),
+        tokenName: "Maple Finance",
+        symbol: AssetSymbol(validating: "SYRUP"),
+        aggregatorId: "syrup",
+        instances: [
+            EIP155.Ethereum.syrup,
+            EIP155.Base.syrup
+        ]
+    )
+
+    /// Ape and Pepe, CoinGecko's `ape-and-pepe`: its home on EIP155.Polygon, then its other instances
+    public static let apeAndPepe: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.apeAndPepe.instance.id),
+        tokenName: "Ape and Pepe",
+        symbol: AssetSymbol(validating: "APEPE"),
+        aggregatorId: "ape-and-pepe",
+        instances: [
+            EIP155.Polygon.apeAndPepe
+        ]
+    )
+
+    /// FLOKI, CoinGecko's `floki`: its home on EIP155.Ethereum, then its other instances
+    public static let floki: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.floki.instance.id),
+        tokenName: "FLOKI",
+        symbol: AssetSymbol(validating: "FLOKI"),
+        aggregatorId: "floki",
+        instances: [
+            EIP155.Ethereum.floki,
+            EIP155.BinanceSmartChain.floki
+        ]
+    )
+
+    /// Collector Crypt, CoinGecko's `collector-crypt`: its home on SOLANA.Solana, then its other instances
+    public static let collectorCrypt: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.collectorCrypt.instance.id),
+        tokenName: "Collector Crypt",
+        symbol: AssetSymbol(validating: "CARDS"),
+        aggregatorId: "collector-crypt",
+        instances: [
+            SOLANA.Solana.collectorCrypt
+        ]
+    )
+
+    /// JasmyCoin, CoinGecko's `jasmycoin`: its home on EIP155.Ethereum, then its other instances
+    public static let jasmycoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.jasmycoin.instance.id),
+        tokenName: "JasmyCoin",
+        symbol: AssetSymbol(validating: "JASMY"),
+        aggregatorId: "jasmycoin",
+        instances: [
+            EIP155.Ethereum.jasmycoin
+        ]
+    )
+
+    /// Zebec Network, CoinGecko's `zebec-network`: its home on SOLANA.Solana, then its other instances
+    public static let zebecNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.zebecNetwork.instance.id),
+        tokenName: "Zebec Network",
+        symbol: AssetSymbol(validating: "ZBCN"),
+        aggregatorId: "zebec-network",
+        instances: [
+            SOLANA.Solana.zebecNetwork
+        ]
+    )
+
+    /// The Sandbox, CoinGecko's `the-sandbox`: its home on EIP155.Ethereum, then its other instances
+    public static let theSandbox: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.theSandbox.instance.id),
+        tokenName: "The Sandbox",
+        symbol: AssetSymbol(validating: "SAND"),
+        aggregatorId: "the-sandbox",
+        instances: [
+            EIP155.Ethereum.theSandbox,
+            EIP155.Polygon.theSandbox,
+            EIP155.Base.theSandbox
+        ]
+    )
+
+    /// Meteora, CoinGecko's `meteora`: its home on SOLANA.Solana, then its other instances
+    public static let meteora: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.meteora.instance.id),
+        tokenName: "Meteora",
+        symbol: AssetSymbol(validating: "MET"),
+        aggregatorId: "meteora",
+        instances: [
+            SOLANA.Solana.meteora
+        ]
+    )
+
+    /// Compound, CoinGecko's `compound-governance-token`: its home on EIP155.Ethereum, then its other instances
+    public static let compoundGovernanceToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.compoundGovernanceToken.instance.id),
+        tokenName: "Compound",
+        symbol: AssetSymbol(validating: "COMP"),
+        aggregatorId: "compound-governance-token",
+        instances: [
+            EIP155.Ethereum.compoundGovernanceToken,
+            EIP155.BinanceSmartChain.compoundGovernanceToken,
+            EIP155.Polygon.compoundGovernanceToken,
+            EIP155.Avalanche.compoundGovernanceToken,
+            EIP155.Base.compoundGovernanceToken,
+            NEAR.Near.compoundGovernanceToken
+        ]
+    )
+
+    /// AINFT, CoinGecko's `apenft`: its home on TRON.Tron, then its other instances
+    public static let apenft: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.apenft.instance.id),
+        tokenName: "AINFT",
+        symbol: AssetSymbol(validating: "NFT"),
+        aggregatorId: "apenft",
+        instances: [
+            TRON.Tron.apenft,
+            EIP155.Ethereum.apenft,
+            EIP155.BinanceSmartChain.apenft
+        ]
+    )
+
+    /// dogwifhat, CoinGecko's `dogwifcoin`: its home on SOLANA.Solana, then its other instances
+    public static let dogwifcoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.dogwifcoin.instance.id),
+        tokenName: "dogwifhat",
+        symbol: AssetSymbol(validating: "WIF"),
+        aggregatorId: "dogwifcoin",
+        instances: [
+            SOLANA.Solana.dogwifcoin
+        ]
+    )
+
+    /// EigenCloud (prev. EigenLayer), CoinGecko's `eigenlayer`: its home on EIP155.Ethereum, then its other instances
+    public static let eigenlayer: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.eigenlayer.instance.id),
+        tokenName: "EigenCloud (prev. EigenLayer)",
+        symbol: AssetSymbol(validating: "EIGEN"),
+        aggregatorId: "eigenlayer",
+        instances: [
+            EIP155.Ethereum.eigenlayer,
+            EIP155.Base.eigenlayer
+        ]
+    )
+
+    /// Trust Wallet, CoinGecko's `trust-wallet-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let trustWalletToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.trustWalletToken.instance.id),
+        tokenName: "Trust Wallet",
+        symbol: AssetSymbol(validating: "TWT"),
+        aggregatorId: "trust-wallet-token",
+        instances: [
+            EIP155.BinanceSmartChain.trustWalletToken
+        ]
+    )
+
+    /// AUSD, CoinGecko's `agora-dollar`: its home on EIP155.Ethereum, then its other instances
+    public static let agoraDollar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.agoraDollar.instance.id),
+        tokenName: "AUSD",
+        symbol: AssetSymbol(validating: "AUSD"),
+        aggregatorId: "agora-dollar",
+        instances: [
+            EIP155.Ethereum.agoraDollar,
+            EIP155.BinanceSmartChain.agoraDollar,
+            EIP155.Polygon.agoraDollar,
+            EIP155.Avalanche.agoraDollar,
+            EIP155.Base.agoraDollar,
+            SOLANA.Solana.agoraDollar
+        ]
+    )
+
+    /// KOGE, CoinGecko's `bnb48-club-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bnb48ClubToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bnb48ClubToken.instance.id),
+        tokenName: "KOGE",
+        symbol: AssetSymbol(validating: "KOGE"),
+        aggregatorId: "bnb48-club-token",
+        instances: [
+            EIP155.BinanceSmartChain.bnb48ClubToken
+        ]
+    )
+
+    /// Legacy Frax Dollar, CoinGecko's `frax`: its home on EIP155.Ethereum, then its other instances
+    public static let frax: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.frax.instance.id),
+        tokenName: "Legacy Frax Dollar",
+        symbol: AssetSymbol(validating: "FRAX"),
+        aggregatorId: "frax",
+        instances: [
+            EIP155.Ethereum.frax,
+            EIP155.BinanceSmartChain.frax,
+            EIP155.Polygon.frax,
+            EIP155.Optimism.frax,
+            EIP155.Fantom.frax,
+            EIP155.Avalanche.frax
+        ]
+    )
+
+    /// crvUSD, CoinGecko's `crvusd`: its home on EIP155.Ethereum, then its other instances
+    public static let crvusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.crvusd.instance.id),
+        tokenName: "crvUSD",
+        symbol: AssetSymbol(validating: "CRVUSD"),
+        aggregatorId: "crvusd",
+        instances: [
+            EIP155.Ethereum.crvusd,
+            EIP155.BinanceSmartChain.crvusd,
+            EIP155.Polygon.crvusd,
+            EIP155.Optimism.crvusd,
+            EIP155.Base.crvusd
+        ]
+    )
+
+    /// Kamino, CoinGecko's `kamino`: its home on SOLANA.Solana, then its other instances
+    public static let kamino: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.kamino.instance.id),
+        tokenName: "Kamino",
+        symbol: AssetSymbol(validating: "KMNO"),
+        aggregatorId: "kamino",
+        instances: [
+            SOLANA.Solana.kamino
+        ]
+    )
+
+    /// Axie Infinity, CoinGecko's `axie-infinity`: its home on EIP155.Ethereum, then its other instances
+    public static let axieInfinity: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.axieInfinity.instance.id),
+        tokenName: "Axie Infinity",
+        symbol: AssetSymbol(validating: "AXS"),
+        aggregatorId: "axie-infinity",
+        instances: [
+            EIP155.Ethereum.axieInfinity,
+            EIP155.BinanceSmartChain.axieInfinity
+        ]
+    )
+
+    /// USX, CoinGecko's `usx`: its home on SOLANA.Solana, then its other instances
+    public static let usx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.usx.instance.id),
+        tokenName: "USX",
+        symbol: AssetSymbol(validating: "USX"),
+        aggregatorId: "usx",
+        instances: [
+            SOLANA.Solana.usx
+        ]
+    )
+
+    /// Decentraland, CoinGecko's `decentraland`: its home on EIP155.Ethereum, then its other instances
+    public static let decentraland: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.decentraland.instance.id),
+        tokenName: "Decentraland",
+        symbol: AssetSymbol(validating: "MANA"),
+        aggregatorId: "decentraland",
+        instances: [
+            EIP155.Ethereum.decentraland,
+            EIP155.Polygon.decentraland
+        ]
+    )
+
+    /// Useless Coin, CoinGecko's `useless-3`: its home on SOLANA.Solana, then its other instances
+    public static let useless3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.useless3.instance.id),
+        tokenName: "Useless Coin",
+        symbol: AssetSymbol(validating: "USELESS"),
+        aggregatorId: "useless-3",
+        instances: [
+            SOLANA.Solana.useless3,
+            EIP155.BinanceSmartChain.useless3
+        ]
+    )
+
+    /// Shuffle, CoinGecko's `shuffle-2`: its home on EIP155.Ethereum, then its other instances
+    public static let shuffle2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.shuffle2.instance.id),
+        tokenName: "Shuffle",
+        symbol: AssetSymbol(validating: "SHFL"),
+        aggregatorId: "shuffle-2",
+        instances: [
+            EIP155.Ethereum.shuffle2
+        ]
+    )
+
+    /// Convex Finance, CoinGecko's `convex-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let convexFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.convexFinance.instance.id),
+        tokenName: "Convex Finance",
+        symbol: AssetSymbol(validating: "CVX"),
+        aggregatorId: "convex-finance",
+        instances: [
+            EIP155.Ethereum.convexFinance
+        ]
+    )
+
+    /// DoubleZero, CoinGecko's `doublezero`: its home on SOLANA.Solana, then its other instances
+    public static let doublezero: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.doublezero.instance.id),
+        tokenName: "DoubleZero",
+        symbol: AssetSymbol(validating: "2Z"),
+        aggregatorId: "doublezero",
+        instances: [
+            SOLANA.Solana.doublezero
+        ]
+    )
+
+    /// Zama, CoinGecko's `zama`: its home on EIP155.Ethereum, then its other instances
+    public static let zama: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.zama.instance.id),
+        tokenName: "Zama",
+        symbol: AssetSymbol(validating: "ZAMA"),
+        aggregatorId: "zama",
+        instances: [
+            EIP155.Ethereum.zama,
+            EIP155.BinanceSmartChain.zama,
+            SOLANA.Solana.zama
+        ]
+    )
+
+    /// EUR CoinVertible, CoinGecko's `societe-generale-forge-eurcv`: its home on EIP155.Ethereum, then its other instances
+    public static let societeGeneraleForgeEurcv: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.societeGeneraleForgeEurcv.instance.id),
+        tokenName: "EUR CoinVertible",
+        symbol: AssetSymbol(validating: "EURCV"),
+        aggregatorId: "societe-generale-forge-eurcv",
+        instances: [
+            EIP155.Ethereum.societeGeneraleForgeEurcv,
+            SOLANA.Solana.societeGeneraleForgeEurcv,
+            XRPL.XRPLedger.societeGeneraleForgeEurcv,
+            STELLAR.Stellar.societeGeneraleForgeEurcv
+        ]
+    )
+
+    /// OriginTrail, CoinGecko's `origintrail`: its home on EIP155.Ethereum, then its other instances
+    public static let origintrail: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.origintrail.instance.id),
+        tokenName: "OriginTrail",
+        symbol: AssetSymbol(validating: "TRAC"),
+        aggregatorId: "origintrail",
+        instances: [
+            EIP155.Ethereum.origintrail,
+            EIP155.Base.origintrail
+        ]
+    )
+
+    /// USAT, CoinGecko's `usa`: its home on EIP155.Ethereum, then its other instances
+    public static let usa: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usa.instance.id),
+        tokenName: "USAT",
+        symbol: AssetSymbol(validating: "USAT"),
+        aggregatorId: "usa",
+        instances: [
+            EIP155.Ethereum.usa,
+            EIP155.Celo.usa
+        ]
+    )
+
+    /// Sentient, CoinGecko's `sentient`: its home on EIP155.Ethereum, then its other instances
+    public static let sentient: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sentient.instance.id),
+        tokenName: "Sentient",
+        symbol: AssetSymbol(validating: "SENT"),
+        aggregatorId: "sentient",
+        instances: [
+            EIP155.Ethereum.sentient
+        ]
+    )
+
+    /// Onyxcoin, CoinGecko's `chain-2`: its home on EIP155.Ethereum, then its other instances
+    public static let chain2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.chain2.instance.id),
+        tokenName: "Onyxcoin",
+        symbol: AssetSymbol(validating: "XCN"),
+        aggregatorId: "chain-2",
+        instances: [
+            EIP155.Ethereum.chain2,
+            EIP155.BinanceSmartChain.chain2,
+            EIP155.Base.chain2
+        ]
+    )
+
+    /// MX, CoinGecko's `mx-token`: its home on EIP155.Ethereum, then its other instances
+    public static let mxToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mxToken.instance.id),
+        tokenName: "MX",
+        symbol: AssetSymbol(validating: "MX"),
+        aggregatorId: "mx-token",
+        instances: [
+            EIP155.Ethereum.mxToken
+        ]
+    )
+
+    /// Orca, CoinGecko's `orca`: its home on SOLANA.Solana, then its other instances
+    public static let orca: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.orca.instance.id),
+        tokenName: "Orca",
+        symbol: AssetSymbol(validating: "ORCA"),
+        aggregatorId: "orca",
+        instances: [
+            SOLANA.Solana.orca
+        ]
+    )
+
+    /// apyUSD, CoinGecko's `apyusd`: its home on EIP155.Ethereum, then its other instances
+    public static let apyusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.apyusd.instance.id),
+        tokenName: "apyUSD",
+        symbol: AssetSymbol(validating: "APYUSD"),
+        aggregatorId: "apyusd",
+        instances: [
+            EIP155.Ethereum.apyusd,
+            EIP155.BinanceSmartChain.apyusd,
+            EIP155.Base.apyusd,
+            SOLANA.Solana.apyusd
+        ]
+    )
+
+    /// Fluid, CoinGecko's `instadapp`: its home on EIP155.Ethereum, then its other instances
+    public static let instadapp: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.instadapp.instance.id),
+        tokenName: "Fluid",
+        symbol: AssetSymbol(validating: "FLUID"),
+        aggregatorId: "instadapp",
+        instances: [
+            EIP155.Ethereum.instadapp,
+            EIP155.Polygon.instadapp,
+            EIP155.Base.instadapp,
+            SOLANA.Solana.instadapp
+        ]
+    )
+
+    /// Non-Playable Coin, CoinGecko's `non-playable-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let nonPlayableCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nonPlayableCoin.instance.id),
+        tokenName: "Non-Playable Coin",
+        symbol: AssetSymbol(validating: "NPC"),
+        aggregatorId: "non-playable-coin",
+        instances: [
+            EIP155.Ethereum.nonPlayableCoin,
+            EIP155.BinanceSmartChain.nonPlayableCoin,
+            EIP155.Base.nonPlayableCoin,
+            SOLANA.Solana.nonPlayableCoin
+        ]
+    )
+
+    /// BUILDon, CoinGecko's `build-on`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let buildOn: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.buildOn.instance.id),
+        tokenName: "BUILDon",
+        symbol: AssetSymbol(validating: "B"),
+        aggregatorId: "build-on",
+        instances: [
+            EIP155.BinanceSmartChain.buildOn
+        ]
+    )
+
+    /// SwissBorg, CoinGecko's `swissborg`: its home on EIP155.Ethereum, then its other instances
+    public static let swissborg: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.swissborg.instance.id),
+        tokenName: "SwissBorg",
+        symbol: AssetSymbol(validating: "BORG"),
+        aggregatorId: "swissborg",
+        instances: [
+            EIP155.Ethereum.swissborg,
+            SOLANA.Solana.swissborg
+        ]
+    )
+
+    /// Spiko US T-Bills Money Market Fund, CoinGecko's `spiko-us-t-bills-money-market-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let spikoUsTBillsMoneyMarketFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spikoUsTBillsMoneyMarketFund.instance.id),
+        tokenName: "Spiko US T-Bills Money Market Fund",
+        symbol: AssetSymbol(validating: "USTBL"),
+        aggregatorId: "spiko-us-t-bills-money-market-fund",
+        instances: [
+            EIP155.Ethereum.spikoUsTBillsMoneyMarketFund,
+            EIP155.Polygon.spikoUsTBillsMoneyMarketFund,
+            EIP155.Base.spikoUsTBillsMoneyMarketFund
+        ]
+    )
+
+    /// Chiliz, CoinGecko's `chiliz`: its home on EIP155.Ethereum, then its other instances
+    public static let chiliz: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.chiliz.instance.id),
+        tokenName: "Chiliz",
+        symbol: AssetSymbol(validating: "CHZ"),
+        aggregatorId: "chiliz",
+        instances: [
+            EIP155.Ethereum.chiliz,
+            EIP155.Base.chiliz,
+            SOLANA.Solana.chiliz
+        ]
+    )
+
+    /// coco, CoinGecko's `coco-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let coco2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.coco2.instance.id),
+        tokenName: "coco",
+        symbol: AssetSymbol(validating: "COCO"),
+        aggregatorId: "coco-2",
+        instances: [
+            EIP155.BinanceSmartChain.coco2
+        ]
+    )
+
+    /// Vision, CoinGecko's `vision-3`: its home on EIP155.Ethereum, then its other instances
+    public static let vision3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.vision3.instance.id),
+        tokenName: "Vision",
+        symbol: AssetSymbol(validating: "VSN"),
+        aggregatorId: "vision-3",
+        instances: [
+            EIP155.Ethereum.vision3
+        ]
+    )
+
+    /// BTSE Token, CoinGecko's `btse-token`: its home on EIP155.Ethereum, then its other instances
+    public static let btseToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.btseToken.instance.id),
+        tokenName: "BTSE Token",
+        symbol: AssetSymbol(validating: "BTSE"),
+        aggregatorId: "btse-token",
+        instances: [
+            EIP155.Ethereum.btseToken
+        ]
+    )
+
+    /// Fartcoin, CoinGecko's `fartcoin`: its home on SOLANA.Solana, then its other instances
+    public static let fartcoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.fartcoin.instance.id),
+        tokenName: "Fartcoin",
+        symbol: AssetSymbol(validating: "FARTCOIN"),
+        aggregatorId: "fartcoin",
+        instances: [
+            SOLANA.Solana.fartcoin
+        ]
+    )
+
+    /// Strategy PP Variable xStock, CoinGecko's `strategy-pp-variable-xstock`: its home on EIP155.Ethereum, then its other instances
+    public static let strategyPpVariableXstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.strategyPpVariableXstock.instance.id),
+        tokenName: "Strategy PP Variable xStock",
+        symbol: AssetSymbol(validating: "STRCX"),
+        aggregatorId: "strategy-pp-variable-xstock",
+        instances: [
+            EIP155.Ethereum.strategyPpVariableXstock,
+            SOLANA.Solana.strategyPpVariableXstock
+        ]
+    )
+
+    /// GoMining Token, CoinGecko's `gmt-token`: its home on EIP155.Ethereum, then its other instances
+    public static let gmtToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gmtToken.instance.id),
+        tokenName: "GoMining Token",
+        symbol: AssetSymbol(validating: "GOMINING"),
+        aggregatorId: "gmt-token",
+        instances: [
+            EIP155.Ethereum.gmtToken,
+            EIP155.BinanceSmartChain.gmtToken,
+            SOLANA.Solana.gmtToken
+        ]
+    )
+
+    /// Immutable, CoinGecko's `immutable-x`: its home on EIP155.Ethereum, then its other instances
+    public static let immutableX: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.immutableX.instance.id),
+        tokenName: "Immutable",
+        symbol: AssetSymbol(validating: "IMX"),
+        aggregatorId: "immutable-x",
+        instances: [
+            EIP155.Ethereum.immutableX
+        ]
+    )
+
+    /// Bedrock, CoinGecko's `bedrock-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bedrockToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bedrockToken.instance.id),
+        tokenName: "Bedrock",
+        symbol: AssetSymbol(validating: "BR"),
+        aggregatorId: "bedrock-token",
+        instances: [
+            EIP155.BinanceSmartChain.bedrockToken,
+            EIP155.Ethereum.bedrockToken,
+            EIP155.Base.bedrockToken
+        ]
+    )
+
+    /// Basic Attention, CoinGecko's `basic-attention-token`: its home on EIP155.Ethereum, then its other instances
+    public static let basicAttentionToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.basicAttentionToken.instance.id),
+        tokenName: "Basic Attention",
+        symbol: AssetSymbol(validating: "BAT"),
+        aggregatorId: "basic-attention-token",
+        instances: [
+            EIP155.Ethereum.basicAttentionToken,
+            EIP155.Polygon.basicAttentionToken,
+            EIP155.Avalanche.basicAttentionToken,
+            SOLANA.Solana.basicAttentionToken,
+            NEAR.Near.basicAttentionToken
+        ]
+    )
+
+    /// AIOZ Network, CoinGecko's `aioz-network`: its home on EIP155.Ethereum, then its other instances
+    public static let aiozNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aiozNetwork.instance.id),
+        tokenName: "AIOZ Network",
+        symbol: AssetSymbol(validating: "AIOZ"),
+        aggregatorId: "aioz-network",
+        instances: [
+            EIP155.Ethereum.aiozNetwork,
+            EIP155.BinanceSmartChain.aiozNetwork
+        ]
+    )
+
+    /// DGrid AI, CoinGecko's `dgrid-ai`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let dgridAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.dgridAi.instance.id),
+        tokenName: "DGrid AI",
+        symbol: AssetSymbol(validating: "DGAI"),
+        aggregatorId: "dgrid-ai",
+        instances: [
+            EIP155.BinanceSmartChain.dgridAi
+        ]
+    )
+
+    /// SuperVerse, CoinGecko's `superfarm`: its home on EIP155.Ethereum, then its other instances
+    public static let superfarm: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.superfarm.instance.id),
+        tokenName: "SuperVerse",
+        symbol: AssetSymbol(validating: "SUPER"),
+        aggregatorId: "superfarm",
+        instances: [
+            EIP155.Ethereum.superfarm,
+            EIP155.Polygon.superfarm,
+            EIP155.Avalanche.superfarm,
+            EIP155.Base.superfarm
+        ]
+    )
+
+    /// Humanity, CoinGecko's `humanity`: its home on EIP155.Ethereum, then its other instances
+    public static let humanity: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.humanity.instance.id),
+        tokenName: "Humanity",
+        symbol: AssetSymbol(validating: "H"),
+        aggregatorId: "humanity",
+        instances: [
+            EIP155.Ethereum.humanity
+        ]
+    )
+
+    /// edgeX, CoinGecko's `edgex`: its home on EIP155.Ethereum, then its other instances
+    public static let edgex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.edgex.instance.id),
+        tokenName: "edgeX",
+        symbol: AssetSymbol(validating: "EDGE"),
+        aggregatorId: "edgex",
+        instances: [
+            EIP155.Ethereum.edgex
+        ]
+    )
+
+    /// Synthetix, CoinGecko's `havven`: its home on EIP155.Ethereum, then its other instances
+    public static let havven: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.havven.instance.id),
+        tokenName: "Synthetix",
+        symbol: AssetSymbol(validating: "SNX"),
+        aggregatorId: "havven",
+        instances: [
+            EIP155.Ethereum.havven,
+            EIP155.Polygon.havven,
+            EIP155.Optimism.havven,
+            EIP155.Fantom.havven,
+            EIP155.Avalanche.havven,
+            EIP155.Base.havven,
+            NEAR.Near.havven
+        ]
+    )
+
+    /// Railgun, CoinGecko's `railgun`: its home on EIP155.Ethereum, then its other instances
+    public static let railgun: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.railgun.instance.id),
+        tokenName: "Railgun",
+        symbol: AssetSymbol(validating: "RAIL"),
+        aggregatorId: "railgun",
+        instances: [
+            EIP155.Ethereum.railgun
+        ]
+    )
+
+    /// STONK, CoinGecko's `stonk-3`: its home on SOLANA.Solana, then its other instances
+    public static let stonk3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.stonk3.instance.id),
+        tokenName: "STONK",
+        symbol: AssetSymbol(validating: "STONK"),
+        aggregatorId: "stonk-3",
+        instances: [
+            SOLANA.Solana.stonk3
+        ]
+    )
+
+    /// SafePal, CoinGecko's `safepal`: its home on EIP155.Ethereum, then its other instances
+    public static let safepal: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.safepal.instance.id),
+        tokenName: "SafePal",
+        symbol: AssetSymbol(validating: "SFP"),
+        aggregatorId: "safepal",
+        instances: [
+            EIP155.Ethereum.safepal,
+            EIP155.BinanceSmartChain.safepal
+        ]
+    )
+
+    /// Circle Internet Group (bStocks Tokenized Stock), CoinGecko's `circle-internet-group-bstock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let circleInternetGroupBstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.circleInternetGroupBstock.instance.id),
+        tokenName: "Circle Internet Group (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "CRCLB"),
+        aggregatorId: "circle-internet-group-bstock",
+        instances: [
+            EIP155.BinanceSmartChain.circleInternetGroupBstock
+        ]
+    )
+
+    /// 1INCH, CoinGecko's `1inch`: its home on EIP155.Ethereum, then its other instances
+    public static let _1inch: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum._1inch.instance.id),
+        tokenName: "1INCH",
+        symbol: AssetSymbol(validating: "1INCH"),
+        aggregatorId: "1inch",
+        instances: [
+            EIP155.Ethereum._1inch,
+            EIP155.BinanceSmartChain._1inch,
+            EIP155.Optimism._1inch,
+            EIP155.Avalanche._1inch,
+            EIP155.Base._1inch
+        ]
+    )
+
+    /// Geodnet, CoinGecko's `geodnet`: its home on EIP155.Polygon, then its other instances
+    public static let geodnet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.geodnet.instance.id),
+        tokenName: "Geodnet",
+        symbol: AssetSymbol(validating: "GEOD"),
+        aggregatorId: "geodnet",
+        instances: [
+            EIP155.Polygon.geodnet,
+            SOLANA.Solana.geodnet
+        ]
+    )
+
+    /// MetaDAO, CoinGecko's `meta-2-2`: its home on SOLANA.Solana, then its other instances
+    public static let meta22: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.meta22.instance.id),
+        tokenName: "MetaDAO",
+        symbol: AssetSymbol(validating: "META"),
+        aggregatorId: "meta-2-2",
+        instances: [
+            SOLANA.Solana.meta22
+        ]
+    )
+
+    /// Aethir, CoinGecko's `aethir`: its home on EIP155.Ethereum, then its other instances
+    public static let aethir: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aethir.instance.id),
+        tokenName: "Aethir",
+        symbol: AssetSymbol(validating: "ATH"),
+        aggregatorId: "aethir",
+        instances: [
+            EIP155.Ethereum.aethir,
+            SOLANA.Solana.aethir
+        ]
+    )
+
+    /// JPY Coin, CoinGecko's `jpycoin`: its home on EIP155.Ethereum, then its other instances
+    public static let jpycoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.jpycoin.instance.id),
+        tokenName: "JPY Coin",
+        symbol: AssetSymbol(validating: "JPYC"),
+        aggregatorId: "jpycoin",
+        instances: [
+            EIP155.Ethereum.jpycoin,
+            EIP155.Polygon.jpycoin,
+            EIP155.Avalanche.jpycoin
+        ]
+    )
+
+    /// Beam, CoinGecko's `beam-2`: its home on EIP155.Ethereum, then its other instances
+    public static let beam2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.beam2.instance.id),
+        tokenName: "Beam",
+        symbol: AssetSymbol(validating: "BEAM"),
+        aggregatorId: "beam-2",
+        instances: [
+            EIP155.Ethereum.beam2,
+            EIP155.BinanceSmartChain.beam2,
+            EIP155.Avalanche.beam2,
+            EIP155.Base.beam2
+        ]
+    )
+
+    /// CASH, CoinGecko's `cash-4`: its home on SOLANA.Solana, then its other instances
+    public static let cash4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.cash4.instance.id),
+        tokenName: "CASH",
+        symbol: AssetSymbol(validating: "CASH"),
+        aggregatorId: "cash-4",
+        instances: [
+            SOLANA.Solana.cash4
+        ]
+    )
+
+    /// JPYSC, CoinGecko's `jpysc`: its home on EIP155.Ethereum, then its other instances
+    public static let jpysc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.jpysc.instance.id),
+        tokenName: "JPYSC",
+        symbol: AssetSymbol(validating: "JPYSC"),
+        aggregatorId: "jpysc",
+        instances: [
+            EIP155.Ethereum.jpysc
+        ]
+    )
+
+    /// Stronghold, CoinGecko's `stronghold-token`: its home on STELLAR.Stellar, then its other instances
+    public static let strongholdToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: STELLAR.Stellar.strongholdToken.instance.id),
+        tokenName: "Stronghold",
+        symbol: AssetSymbol(validating: "SHX"),
+        aggregatorId: "stronghold-token",
+        instances: [
+            STELLAR.Stellar.strongholdToken,
+            EIP155.Ethereum.strongholdToken
+        ]
+    )
+
+    /// Golem, CoinGecko's `golem`: its home on EIP155.Ethereum, then its other instances
+    public static let golem: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.golem.instance.id),
+        tokenName: "Golem",
+        symbol: AssetSymbol(validating: "GLM"),
+        aggregatorId: "golem",
+        instances: [
+            EIP155.Ethereum.golem
+        ]
+    )
+
+    /// Avant USD, CoinGecko's `avant-usd`: its home on EIP155.Avalanche, then its other instances
+    public static let avantUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.avantUsd.instance.id),
+        tokenName: "Avant USD",
+        symbol: AssetSymbol(validating: "AVUSD"),
+        aggregatorId: "avant-usd",
+        instances: [
+            EIP155.Avalanche.avantUsd
+        ]
+    )
+
+    /// AWE Network, CoinGecko's `stp-network`: its home on EIP155.Base, then its other instances
+    public static let stpNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.stpNetwork.instance.id),
+        tokenName: "AWE Network",
+        symbol: AssetSymbol(validating: "AWE"),
+        aggregatorId: "stp-network",
+        instances: [
+            EIP155.Base.stpNetwork
+        ]
+    )
+
+    /// BCGame Coin, CoinGecko's `bc-token`: its home on SOLANA.Solana, then its other instances
+    public static let bcToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.bcToken.instance.id),
+        tokenName: "BCGame Coin",
+        symbol: AssetSymbol(validating: "BC"),
+        aggregatorId: "bc-token",
+        instances: [
+            SOLANA.Solana.bcToken
+        ]
+    )
+
+    /// Horizen, CoinGecko's `zencash`: its home on EIP155.Base, then its other instances
+    public static let zencash: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.zencash.instance.id),
+        tokenName: "Horizen",
+        symbol: AssetSymbol(validating: "ZEN"),
+        aggregatorId: "zencash",
+        instances: [
+            EIP155.Base.zencash
+        ]
+    )
+
+    /// Plume, CoinGecko's `plume`: its home on EIP155.Ethereum, then its other instances
+    public static let plume: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.plume.instance.id),
+        tokenName: "Plume",
+        symbol: AssetSymbol(validating: "PLUME"),
+        aggregatorId: "plume",
+        instances: [
+            EIP155.Ethereum.plume,
+            EIP155.BinanceSmartChain.plume
+        ]
+    )
+
+    /// Midas Fasanara Global Open, CoinGecko's `midas-fasanara-global-open`: its home on EIP155.Ethereum, then its other instances
+    public static let midasFasanaraGlobalOpen: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasFasanaraGlobalOpen.instance.id),
+        tokenName: "Midas Fasanara Global Open",
+        symbol: AssetSymbol(validating: "MGLO"),
+        aggregatorId: "midas-fasanara-global-open",
+        instances: [
+            EIP155.Ethereum.midasFasanaraGlobalOpen,
+            EIP155.Optimism.midasFasanaraGlobalOpen,
+            EIP155.Base.midasFasanaraGlobalOpen
+        ]
+    )
+
+    /// GALA, CoinGecko's `gala`: its home on EIP155.Ethereum, then its other instances
+    public static let gala: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gala.instance.id),
+        tokenName: "GALA",
+        symbol: AssetSymbol(validating: "GALA"),
+        aggregatorId: "gala",
+        instances: [
+            EIP155.Ethereum.gala,
+            SOLANA.Solana.gala
+        ]
+    )
+
+    /// Rollbit Coin, CoinGecko's `rollbit-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let rollbitCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.rollbitCoin.instance.id),
+        tokenName: "Rollbit Coin",
+        symbol: AssetSymbol(validating: "RLB"),
+        aggregatorId: "rollbit-coin",
+        instances: [
+            EIP155.Ethereum.rollbitCoin
+        ]
+    )
+
+    /// Seeker, CoinGecko's `seeker`: its home on SOLANA.Solana, then its other instances
+    public static let seeker: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.seeker.instance.id),
+        tokenName: "Seeker",
+        symbol: AssetSymbol(validating: "SKR"),
+        aggregatorId: "seeker",
+        instances: [
+            SOLANA.Solana.seeker
+        ]
+    )
+
+    /// Cap, CoinGecko's `cap-4`: its home on EIP155.Ethereum, then its other instances
+    public static let cap4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cap4.instance.id),
+        tokenName: "Cap",
+        symbol: AssetSymbol(validating: "CAP"),
+        aggregatorId: "cap-4",
+        instances: [
+            EIP155.Ethereum.cap4,
+            EIP155.BinanceSmartChain.cap4
+        ]
+    )
+
+    /// Alpha Bulgaria Warrants, CoinGecko's `alpha-bulgaria-warrants`: its home on EIP155.Base, then its other instances
+    public static let alphaBulgariaWarrants: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.alphaBulgariaWarrants.instance.id),
+        tokenName: "Alpha Bulgaria Warrants",
+        symbol: AssetSymbol(validating: "ALFW"),
+        aggregatorId: "alpha-bulgaria-warrants",
+        instances: [
+            EIP155.Base.alphaBulgariaWarrants
+        ]
+    )
+
+    /// dYdX, CoinGecko's `dydx-chain`: its home on COSMOS.CosmosHub, then its other instances
+    public static let dydxChain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: COSMOS.CosmosHub.dydxChain.instance.id),
+        tokenName: "dYdX",
+        symbol: AssetSymbol(validating: "DYDX"),
+        aggregatorId: "dydx-chain",
+        instances: [
+            COSMOS.CosmosHub.dydxChain
+        ]
+    )
+
+    /// Nest BlackOpal LiquidStone II Vault, CoinGecko's `nest-blackopal-liquidstone-ii-vault`: its home on EIP155.Ethereum, then its other instances
+    public static let nestBlackopalLiquidstoneIiVault: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nestBlackopalLiquidstoneIiVault.instance.id),
+        tokenName: "Nest BlackOpal LiquidStone II Vault",
+        symbol: AssetSymbol(validating: "NOPAL"),
+        aggregatorId: "nest-blackopal-liquidstone-ii-vault",
+        instances: [
+            EIP155.Ethereum.nestBlackopalLiquidstoneIiVault,
+            SOLANA.Solana.nestBlackopalLiquidstoneIiVault
+        ]
+    )
+
+    /// SoSoValue, CoinGecko's `sosovalue`: its home on EIP155.Ethereum, then its other instances
+    public static let sosovalue: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sosovalue.instance.id),
+        tokenName: "SoSoValue",
+        symbol: AssetSymbol(validating: "SOSO"),
+        aggregatorId: "sosovalue",
+        instances: [
+            EIP155.Ethereum.sosovalue,
+            EIP155.Base.sosovalue
+        ]
+    )
+
+    /// Aster USDF, CoinGecko's `astherus-usdf`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let astherusUsdf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.astherusUsdf.instance.id),
+        tokenName: "Aster USDF",
+        symbol: AssetSymbol(validating: "USDF"),
+        aggregatorId: "astherus-usdf",
+        instances: [
+            EIP155.BinanceSmartChain.astherusUsdf
+        ]
+    )
+
+    /// SOON, CoinGecko's `soon-2`: its home on SOLANA.Solana, then its other instances
+    public static let soon2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.soon2.instance.id),
+        tokenName: "SOON",
+        symbol: AssetSymbol(validating: "SOON"),
+        aggregatorId: "soon-2",
+        instances: [
+            SOLANA.Solana.soon2,
+            EIP155.BinanceSmartChain.soon2,
+            EIP155.Base.soon2
+        ]
+    )
+
+    /// deBridge, CoinGecko's `debridge`: its home on SOLANA.Solana, then its other instances
+    public static let debridge: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.debridge.instance.id),
+        tokenName: "deBridge",
+        symbol: AssetSymbol(validating: "DBR"),
+        aggregatorId: "debridge",
+        instances: [
+            SOLANA.Solana.debridge
+        ]
+    )
+
+    /// Frax USD, CoinGecko's `frax-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let fraxUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fraxUsd.instance.id),
+        tokenName: "Frax USD",
+        symbol: AssetSymbol(validating: "FRXUSD"),
+        aggregatorId: "frax-usd",
+        instances: [
+            EIP155.Ethereum.fraxUsd,
+            EIP155.BinanceSmartChain.fraxUsd,
+            EIP155.Polygon.fraxUsd,
+            EIP155.Optimism.fraxUsd,
+            EIP155.Avalanche.fraxUsd,
+            EIP155.Base.fraxUsd,
+            SOLANA.Solana.fraxUsd
+        ]
+    )
+
+    /// Nexus Mutual, CoinGecko's `nxm`: its home on EIP155.Ethereum, then its other instances
+    public static let nxm: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nxm.instance.id),
+        tokenName: "Nexus Mutual",
+        symbol: AssetSymbol(validating: "NXM"),
+        aggregatorId: "nxm",
+        instances: [
+            EIP155.Ethereum.nxm
+        ]
+    )
+
+    /// Numeraire, CoinGecko's `numeraire`: its home on EIP155.Ethereum, then its other instances
+    public static let numeraire: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.numeraire.instance.id),
+        tokenName: "Numeraire",
+        symbol: AssetSymbol(validating: "NMR"),
+        aggregatorId: "numeraire",
+        instances: [
+            EIP155.Ethereum.numeraire
+        ]
+    )
+
+    /// Genius, CoinGecko's `genius-3`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let genius3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.genius3.instance.id),
+        tokenName: "Genius",
+        symbol: AssetSymbol(validating: "GENIUS"),
+        aggregatorId: "genius-3",
+        instances: [
+            EIP155.BinanceSmartChain.genius3
+        ]
+    )
+
+    /// Anvil, CoinGecko's `anvil`: its home on EIP155.Ethereum, then its other instances
+    public static let anvil: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.anvil.instance.id),
+        tokenName: "Anvil",
+        symbol: AssetSymbol(validating: "ANVL"),
+        aggregatorId: "anvil",
+        instances: [
+            EIP155.Ethereum.anvil
+        ]
+    )
+
+    /// OnRe Tokenized Reinsurance, CoinGecko's `onyc`: its home on SOLANA.Solana, then its other instances
+    public static let onyc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.onyc.instance.id),
+        tokenName: "OnRe Tokenized Reinsurance",
+        symbol: AssetSymbol(validating: "ONYC"),
+        aggregatorId: "onyc",
+        instances: [
+            SOLANA.Solana.onyc
+        ]
+    )
+
+    /// Cheems Token, CoinGecko's `cheems-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let cheemsToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.cheemsToken.instance.id),
+        tokenName: "Cheems Token",
+        symbol: AssetSymbol(validating: "CHEEMS"),
+        aggregatorId: "cheems-token",
+        instances: [
+            EIP155.BinanceSmartChain.cheemsToken
+        ]
+    )
+
+    /// Securitize Tokenized AAA CLO Fund, CoinGecko's `securitize-tokenized-aaa-clo-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let securitizeTokenizedAaaCloFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.securitizeTokenizedAaaCloFund.instance.id),
+        tokenName: "Securitize Tokenized AAA CLO Fund",
+        symbol: AssetSymbol(validating: "STAC"),
+        aggregatorId: "securitize-tokenized-aaa-clo-fund",
+        instances: [
+            EIP155.Ethereum.securitizeTokenizedAaaCloFund
+        ]
+    )
+
+    /// Helium, CoinGecko's `helium`: its home on SOLANA.Solana, then its other instances
+    public static let helium: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.helium.instance.id),
+        tokenName: "Helium",
+        symbol: AssetSymbol(validating: "HNT"),
+        aggregatorId: "helium",
+        instances: [
+            SOLANA.Solana.helium
+        ]
+    )
+
+    /// Reserve Rights, CoinGecko's `reserve-rights-token`: its home on EIP155.Ethereum, then its other instances
+    public static let reserveRightsToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.reserveRightsToken.instance.id),
+        tokenName: "Reserve Rights",
+        symbol: AssetSymbol(validating: "RSR"),
+        aggregatorId: "reserve-rights-token",
+        instances: [
+            EIP155.Ethereum.reserveRightsToken,
+            EIP155.Base.reserveRightsToken
+        ]
+    )
+
+    /// 3Jane USD3, CoinGecko's `3jane-usd3`: its home on EIP155.Ethereum, then its other instances
+    public static let _3janeUsd3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum._3janeUsd3.instance.id),
+        tokenName: "3Jane USD3",
+        symbol: AssetSymbol(validating: "USD3"),
+        aggregatorId: "3jane-usd3",
+        instances: [
+            EIP155.Ethereum._3janeUsd3
+        ]
+    )
+
+    /// 0x Protocol, CoinGecko's `0x`: its home on EIP155.Ethereum, then its other instances
+    public static let _0x: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum._0x.instance.id),
+        tokenName: "0x Protocol",
+        symbol: AssetSymbol(validating: "ZRX"),
+        aggregatorId: "0x",
+        instances: [
+            EIP155.Ethereum._0x
+        ]
+    )
+
+    /// Four, CoinGecko's `four`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let four: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.four.instance.id),
+        tokenName: "Four",
+        symbol: AssetSymbol(validating: "FORM"),
+        aggregatorId: "four",
+        instances: [
+            EIP155.BinanceSmartChain.four
+        ]
+    )
+
+    /// Quack AI, CoinGecko's `quack-ai`: its home on EIP155.Ethereum, then its other instances
+    public static let quackAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.quackAi.instance.id),
+        tokenName: "Quack AI",
+        symbol: AssetSymbol(validating: "Q"),
+        aggregatorId: "quack-ai",
+        instances: [
+            EIP155.Ethereum.quackAi,
+            EIP155.BinanceSmartChain.quackAi
+        ]
+    )
+
+    /// Unity USD, CoinGecko's `unity-usd`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let unityUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.unityUsd.instance.id),
+        tokenName: "Unity USD",
+        symbol: AssetSymbol(validating: "UUSD"),
+        aggregatorId: "unity-usd",
+        instances: [
+            EIP155.BinanceSmartChain.unityUsd,
+            EIP155.Ethereum.unityUsd,
+            EIP155.Base.unityUsd
+        ]
+    )
+
+    /// Bitget Wrapped BTC, CoinGecko's `bitget-wrapped-btc`: its home on EIP155.Ethereum, then its other instances
+    public static let bitgetWrappedBtc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bitgetWrappedBtc.instance.id),
+        tokenName: "Bitget Wrapped BTC",
+        symbol: AssetSymbol(validating: "BGBTC"),
+        aggregatorId: "bitget-wrapped-btc",
+        instances: [
+            EIP155.Ethereum.bitgetWrappedBtc
+        ]
+    )
+
+    /// MarsCoin, CoinGecko's `marscoin-4`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let marscoin4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.marscoin4.instance.id),
+        tokenName: "MarsCoin",
+        symbol: AssetSymbol(validating: "MARSCOIN"),
+        aggregatorId: "marscoin-4",
+        instances: [
+            EIP155.BinanceSmartChain.marscoin4
+        ]
+    )
+
+    /// Circle Internet Group (Ondo Tokenized Stock), CoinGecko's `circle-internet-group-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let circleInternetGroupOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.circleInternetGroupOndoTokenizedStock.instance.id),
+        tokenName: "Circle Internet Group (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "CRCLON"),
+        aggregatorId: "circle-internet-group-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.circleInternetGroupOndoTokenizedStock,
+            EIP155.BinanceSmartChain.circleInternetGroupOndoTokenizedStock,
+            SOLANA.Solana.circleInternetGroupOndoTokenizedStock
+        ]
+    )
+
+    /// Prom, CoinGecko's `prometeus`: its home on EIP155.Ethereum, then its other instances
+    public static let prometeus: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.prometeus.instance.id),
+        tokenName: "Prom",
+        symbol: AssetSymbol(validating: "PROM"),
+        aggregatorId: "prometeus",
+        instances: [
+            EIP155.Ethereum.prometeus,
+            EIP155.BinanceSmartChain.prometeus
+        ]
+    )
+
+    /// Melania Meme, CoinGecko's `melania-meme`: its home on SOLANA.Solana, then its other instances
+    public static let melaniaMeme: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.melaniaMeme.instance.id),
+        tokenName: "Melania Meme",
+        symbol: AssetSymbol(validating: "MELANIA"),
+        aggregatorId: "melania-meme",
+        instances: [
+            SOLANA.Solana.melaniaMeme
+        ]
+    )
+
+    /// Apollo Diversified Credit Securitize Fund, CoinGecko's `apollo-diversified-credit-securitize-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let apolloDiversifiedCreditSecuritizeFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.apolloDiversifiedCreditSecuritizeFund.instance.id),
+        tokenName: "Apollo Diversified Credit Securitize Fund",
+        symbol: AssetSymbol(validating: "ACRED"),
+        aggregatorId: "apollo-diversified-credit-securitize-fund",
+        instances: [
+            EIP155.Ethereum.apolloDiversifiedCreditSecuritizeFund,
+            EIP155.Polygon.apolloDiversifiedCreditSecuritizeFund,
+            EIP155.Avalanche.apolloDiversifiedCreditSecuritizeFund,
+            SOLANA.Solana.apolloDiversifiedCreditSecuritizeFund
+        ]
+    )
+
+    /// Wormhole, CoinGecko's `wormhole`: its home on SOLANA.Solana, then its other instances
+    public static let wormhole: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.wormhole.instance.id),
+        tokenName: "Wormhole",
+        symbol: AssetSymbol(validating: "W"),
+        aggregatorId: "wormhole",
+        instances: [
+            SOLANA.Solana.wormhole,
+            EIP155.Ethereum.wormhole,
+            EIP155.Base.wormhole
+        ]
+    )
+
+    /// USDa, CoinGecko's `usda-2`: its home on EIP155.Ethereum, then its other instances
+    public static let usda2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usda2.instance.id),
+        tokenName: "USDa",
+        symbol: AssetSymbol(validating: "USDA"),
+        aggregatorId: "usda-2",
+        instances: [
+            EIP155.Ethereum.usda2,
+            EIP155.BinanceSmartChain.usda2
+        ]
+    )
+
+    /// Saturn Dollar, CoinGecko's `saturn-dollar`: its home on EIP155.Ethereum, then its other instances
+    public static let saturnDollar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.saturnDollar.instance.id),
+        tokenName: "Saturn Dollar",
+        symbol: AssetSymbol(validating: "USDAT"),
+        aggregatorId: "saturn-dollar",
+        instances: [
+            EIP155.Ethereum.saturnDollar,
+            EIP155.BinanceSmartChain.saturnDollar
+        ]
+    )
+
+    /// Velo, CoinGecko's `velo`: its home on STELLAR.Stellar, then its other instances
+    public static let velo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: STELLAR.Stellar.velo.instance.id),
+        tokenName: "Velo",
+        symbol: AssetSymbol(validating: "VELO"),
+        aggregatorId: "velo",
+        instances: [
+            STELLAR.Stellar.velo,
+            EIP155.BinanceSmartChain.velo
+        ]
+    )
+
+    /// MAG7.ssi, CoinGecko's `mag7-ssi`: its home on EIP155.Base, then its other instances
+    public static let mag7Ssi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.mag7Ssi.instance.id),
+        tokenName: "MAG7.ssi",
+        symbol: AssetSymbol(validating: "MAG7.SSI"),
+        aggregatorId: "mag7-ssi",
+        instances: [
+            EIP155.Base.mag7Ssi
+        ]
+    )
+
+    /// FUNToken, CoinGecko's `funfair`: its home on EIP155.Ethereum, then its other instances
+    public static let funfair: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.funfair.instance.id),
+        tokenName: "FUNToken",
+        symbol: AssetSymbol(validating: "FUN"),
+        aggregatorId: "funfair",
+        instances: [
+            EIP155.Ethereum.funfair
+        ]
+    )
+
+    /// Baby Claw, CoinGecko's `baby-claw`: its home on EIP155.Base, then its other instances
+    public static let babyClaw: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.babyClaw.instance.id),
+        tokenName: "Baby Claw",
+        symbol: AssetSymbol(validating: "BABYCLAW"),
+        aggregatorId: "baby-claw",
+        instances: [
+            EIP155.Base.babyClaw
+        ]
+    )
+
+    /// f(x) Protocol fxUSD, CoinGecko's `f-x-protocol-fxusd`: its home on EIP155.Ethereum, then its other instances
+    public static let fXProtocolFxusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fXProtocolFxusd.instance.id),
+        tokenName: "f(x) Protocol fxUSD",
+        symbol: AssetSymbol(validating: "FXUSD"),
+        aggregatorId: "f-x-protocol-fxusd",
+        instances: [
+            EIP155.Ethereum.fXProtocolFxusd,
+            EIP155.Base.fXProtocolFxusd
+        ]
+    )
+
+    /// Arkham, CoinGecko's `arkham`: its home on EIP155.Ethereum, then its other instances
+    public static let arkham: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.arkham.instance.id),
+        tokenName: "Arkham",
+        symbol: AssetSymbol(validating: "ARKM"),
+        aggregatorId: "arkham",
+        instances: [
+            EIP155.Ethereum.arkham
+        ]
+    )
+
+    /// yearn.finance, CoinGecko's `yearn-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let yearnFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.yearnFinance.instance.id),
+        tokenName: "yearn.finance",
+        symbol: AssetSymbol(validating: "YFI"),
+        aggregatorId: "yearn-finance",
+        instances: [
+            EIP155.Ethereum.yearnFinance,
+            EIP155.Polygon.yearnFinance,
+            EIP155.Optimism.yearnFinance,
+            EIP155.Fantom.yearnFinance,
+            EIP155.Avalanche.yearnFinance,
+            EIP155.Base.yearnFinance,
+            NEAR.Near.yearnFinance
+        ]
+    )
+
+    /// YZY, CoinGecko's `yzy`: its home on SOLANA.Solana, then its other instances
+    public static let yzy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.yzy.instance.id),
+        tokenName: "YZY",
+        symbol: AssetSymbol(validating: "YZY"),
+        aggregatorId: "yzy",
+        instances: [
+            SOLANA.Solana.yzy
+        ]
+    )
+
+    /// Circle xStock, CoinGecko's `circle-xstock`: its home on SOLANA.Solana, then its other instances
+    public static let circleXstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.circleXstock.instance.id),
+        tokenName: "Circle xStock",
+        symbol: AssetSymbol(validating: "CRCLX"),
+        aggregatorId: "circle-xstock",
+        instances: [
+            SOLANA.Solana.circleXstock,
+            EIP155.Ethereum.circleXstock,
+            EIP155.BinanceSmartChain.circleXstock
+        ]
+    )
+
+    /// Safe, CoinGecko's `safe`: its home on EIP155.Ethereum, then its other instances
+    public static let safe: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.safe.instance.id),
+        tokenName: "Safe",
+        symbol: AssetSymbol(validating: "SAFE"),
+        aggregatorId: "safe",
+        instances: [
+            EIP155.Ethereum.safe
+        ]
+    )
+
+    /// ZIG Finance, CoinGecko's `zignaly`: its home on EIP155.Ethereum, then its other instances
+    public static let zignaly: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.zignaly.instance.id),
+        tokenName: "ZIG Finance",
+        symbol: AssetSymbol(validating: "ZIG"),
+        aggregatorId: "zignaly",
+        instances: [
+            EIP155.Ethereum.zignaly,
+            EIP155.BinanceSmartChain.zignaly,
+            EIP155.Polygon.zignaly,
+            SOLANA.Solana.zignaly
+        ]
+    )
+
+    /// Livepeer, CoinGecko's `livepeer`: its home on EIP155.Ethereum, then its other instances
+    public static let livepeer: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.livepeer.instance.id),
+        tokenName: "Livepeer",
+        symbol: AssetSymbol(validating: "LPT"),
+        aggregatorId: "livepeer",
+        instances: [
+            EIP155.Ethereum.livepeer
+        ]
+    )
+
+    /// Bending Spoons xStock, CoinGecko's `bending-spoons-xstock`: its home on EIP155.Ethereum, then its other instances
+    public static let bendingSpoonsXstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bendingSpoonsXstock.instance.id),
+        tokenName: "Bending Spoons xStock",
+        symbol: AssetSymbol(validating: "BSPX"),
+        aggregatorId: "bending-spoons-xstock",
+        instances: [
+            EIP155.Ethereum.bendingSpoonsXstock,
+            EIP155.BinanceSmartChain.bendingSpoonsXstock,
+            SOLANA.Solana.bendingSpoonsXstock
+        ]
+    )
+
+    /// f(x) USD Saving, CoinGecko's `fx-usd-saving`: its home on EIP155.Ethereum, then its other instances
+    public static let fxUsdSaving: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fxUsdSaving.instance.id),
+        tokenName: "f(x) USD Saving",
+        symbol: AssetSymbol(validating: "FXSAVE"),
+        aggregatorId: "fx-usd-saving",
+        instances: [
+            EIP155.Ethereum.fxUsdSaving
+        ]
+    )
+
+    /// CoW Protocol, CoinGecko's `cow-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let cowProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cowProtocol.instance.id),
+        tokenName: "CoW Protocol",
+        symbol: AssetSymbol(validating: "COW"),
+        aggregatorId: "cow-protocol",
+        instances: [
+            EIP155.Ethereum.cowProtocol,
+            EIP155.BinanceSmartChain.cowProtocol,
+            EIP155.Polygon.cowProtocol,
+            EIP155.Base.cowProtocol
+        ]
+    )
+
+    /// Goldfish Gold, CoinGecko's `goldfish-gold`: its home on EIP155.Ethereum, then its other instances
+    public static let goldfishGold: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.goldfishGold.instance.id),
+        tokenName: "Goldfish Gold",
+        symbol: AssetSymbol(validating: "GGBR"),
+        aggregatorId: "goldfish-gold",
+        instances: [
+            EIP155.Ethereum.goldfishGold
+        ]
+    )
+
+    /// UnityWallet Token, CoinGecko's `unitywallet-token`: its home on SOLANA.Solana, then its other instances
+    public static let unitywalletToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.unitywalletToken.instance.id),
+        tokenName: "UnityWallet Token",
+        symbol: AssetSymbol(validating: "UNT"),
+        aggregatorId: "unitywallet-token",
+        instances: [
+            SOLANA.Solana.unitywalletToken
+        ]
+    )
+
+    /// WrappedM by M0, CoinGecko's `wrappedm-by-m0`: its home on EIP155.Ethereum, then its other instances
+    public static let wrappedmByM0: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.wrappedmByM0.instance.id),
+        tokenName: "WrappedM by M0",
+        symbol: AssetSymbol(validating: "WM"),
+        aggregatorId: "wrappedm-by-m0",
+        instances: [
+            EIP155.Ethereum.wrappedmByM0,
+            SOLANA.Solana.wrappedmByM0
+        ]
+    )
+
+    /// SpaceX (bStocks Tokenized Stock), CoinGecko's `spacex-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let spacexBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.spacexBstocksTokenizedStock.instance.id),
+        tokenName: "SpaceX (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "SPCXB"),
+        aggregatorId: "spacex-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.spacexBstocksTokenizedStock
+        ]
+    )
+
+    /// RedStone, CoinGecko's `redstone-oracles`: its home on EIP155.Ethereum, then its other instances
+    public static let redstoneOracles: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.redstoneOracles.instance.id),
+        tokenName: "RedStone",
+        symbol: AssetSymbol(validating: "RED"),
+        aggregatorId: "redstone-oracles",
+        instances: [
+            EIP155.Ethereum.redstoneOracles,
+            EIP155.Base.redstoneOracles
+        ]
+    )
+
+    /// USDA, CoinGecko's `usda-3`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let usda3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.usda3.instance.id),
+        tokenName: "USDA",
+        symbol: AssetSymbol(validating: "USDA"),
+        aggregatorId: "usda-3",
+        instances: [
+            EIP155.BinanceSmartChain.usda3
+        ]
+    )
+
+    /// Cap USD, CoinGecko's `cap-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let capUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.capUsd.instance.id),
+        tokenName: "Cap USD",
+        symbol: AssetSymbol(validating: "CUSD"),
+        aggregatorId: "cap-usd",
+        instances: [
+            EIP155.Ethereum.capUsd
+        ]
+    )
+
+    /// Espresso, CoinGecko's `espresso`: its home on EIP155.Ethereum, then its other instances
+    public static let espresso: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.espresso.instance.id),
+        tokenName: "Espresso",
+        symbol: AssetSymbol(validating: "ESP"),
+        aggregatorId: "espresso",
+        instances: [
+            EIP155.Ethereum.espresso
+        ]
+    )
+
+    /// TAGGER, CoinGecko's `tagger`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let tagger: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.tagger.instance.id),
+        tokenName: "TAGGER",
+        symbol: AssetSymbol(validating: "TAG"),
+        aggregatorId: "tagger",
+        instances: [
+            EIP155.BinanceSmartChain.tagger
+        ]
+    )
+
+    /// ZetaChain, CoinGecko's `zetachain`: its home on EIP155.Ethereum, then its other instances
+    public static let zetachain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.zetachain.instance.id),
+        tokenName: "ZetaChain",
+        symbol: AssetSymbol(validating: "ZETA"),
+        aggregatorId: "zetachain",
+        instances: [
+            EIP155.Ethereum.zetachain,
+            EIP155.BinanceSmartChain.zetachain
+        ]
+    )
+
+    /// ADI, CoinGecko's `adi-token`: its home on EIP155.Ethereum, then its other instances
+    public static let adiToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.adiToken.instance.id),
+        tokenName: "ADI",
+        symbol: AssetSymbol(validating: "ADI"),
+        aggregatorId: "adi-token",
+        instances: [
+            EIP155.Ethereum.adiToken
+        ]
+    )
+
+    /// Midas mTBILL, CoinGecko's `midas-mtbill`: its home on EIP155.Ethereum, then its other instances
+    public static let midasMtbill: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasMtbill.instance.id),
+        tokenName: "Midas mTBILL",
+        symbol: AssetSymbol(validating: "MTBILL"),
+        aggregatorId: "midas-mtbill",
+        instances: [
+            EIP155.Ethereum.midasMtbill,
+            EIP155.Base.midasMtbill
+        ]
+    )
+
+    /// KAITO, CoinGecko's `kaito`: its home on EIP155.Base, then its other instances
+    public static let kaito: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.kaito.instance.id),
+        tokenName: "KAITO",
+        symbol: AssetSymbol(validating: "KAITO"),
+        aggregatorId: "kaito",
+        instances: [
+            EIP155.Base.kaito
+        ]
+    )
+
+    /// APES, CoinGecko's `apes-2-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let apes22: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.apes22.instance.id),
+        tokenName: "APES",
+        symbol: AssetSymbol(validating: "APES"),
+        aggregatorId: "apes-2-2",
+        instances: [
+            EIP155.BinanceSmartChain.apes22
+        ]
+    )
+
+    /// Spark, CoinGecko's `spark-2`: its home on EIP155.Ethereum, then its other instances
+    public static let spark2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spark2.instance.id),
+        tokenName: "Spark",
+        symbol: AssetSymbol(validating: "SPK"),
+        aggregatorId: "spark-2",
+        instances: [
+            EIP155.Ethereum.spark2
+        ]
+    )
+
+    /// DOLA, CoinGecko's `dola-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let dolaUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dolaUsd.instance.id),
+        tokenName: "DOLA",
+        symbol: AssetSymbol(validating: "DOLA"),
+        aggregatorId: "dola-usd",
+        instances: [
+            EIP155.Ethereum.dolaUsd,
+            EIP155.BinanceSmartChain.dolaUsd,
+            EIP155.Optimism.dolaUsd,
+            EIP155.Fantom.dolaUsd,
+            EIP155.Base.dolaUsd
+        ]
+    )
+
+    /// Holo, CoinGecko's `holotoken`: its home on EIP155.Ethereum, then its other instances
+    public static let holotoken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.holotoken.instance.id),
+        tokenName: "Holo",
+        symbol: AssetSymbol(validating: "HOT"),
+        aggregatorId: "holotoken",
+        instances: [
+            EIP155.Ethereum.holotoken,
+            EIP155.Base.holotoken
+        ]
+    )
+
+    /// Lista USD, CoinGecko's `helio-protocol-hay`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let helioProtocolHay: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.helioProtocolHay.instance.id),
+        tokenName: "Lista USD",
+        symbol: AssetSymbol(validating: "LISUSD"),
+        aggregatorId: "helio-protocol-hay",
+        instances: [
+            EIP155.BinanceSmartChain.helioProtocolHay
+        ]
+    )
+
+    /// Cygnus Finance Global USD, CoinGecko's `cygnus-finance-global-usd`: its home on EIP155.Base, then its other instances
+    public static let cygnusFinanceGlobalUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.cygnusFinanceGlobalUsd.instance.id),
+        tokenName: "Cygnus Finance Global USD",
+        symbol: AssetSymbol(validating: "CGUSD"),
+        aggregatorId: "cygnus-finance-global-usd",
+        instances: [
+            EIP155.Base.cygnusFinanceGlobalUsd
+        ]
+    )
+
+    /// o1.exchange, CoinGecko's `o1-exchange`: its home on EIP155.Base, then its other instances
+    public static let o1Exchange: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.o1Exchange.instance.id),
+        tokenName: "o1.exchange",
+        symbol: AssetSymbol(validating: "O"),
+        aggregatorId: "o1-exchange",
+        instances: [
+            EIP155.Base.o1Exchange,
+            EIP155.BinanceSmartChain.o1Exchange
+        ]
+    )
+
+    /// Strategy Stretch Preferred (Ondo Tokenized), CoinGecko's `strategy-stretch-preferred-ondo-tokenized`: its home on EIP155.Ethereum, then its other instances
+    public static let strategyStretchPreferredOndoTokenized: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.strategyStretchPreferredOndoTokenized.instance.id),
+        tokenName: "Strategy Stretch Preferred (Ondo Tokenized)",
+        symbol: AssetSymbol(validating: "STRCON"),
+        aggregatorId: "strategy-stretch-preferred-ondo-tokenized",
+        instances: [
+            EIP155.Ethereum.strategyStretchPreferredOndoTokenized,
+            EIP155.BinanceSmartChain.strategyStretchPreferredOndoTokenized,
+            SOLANA.Solana.strategyStretchPreferredOndoTokenized
+        ]
+    )
+
+    /// Tori trUSD, CoinGecko's `tori-trusd`: its home on EIP155.Ethereum, then its other instances
+    public static let toriTrusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.toriTrusd.instance.id),
+        tokenName: "Tori trUSD",
+        symbol: AssetSymbol(validating: "TRUSD"),
+        aggregatorId: "tori-trusd",
+        instances: [
+            EIP155.Ethereum.toriTrusd
+        ]
+    )
+
+    /// RE, CoinGecko's `re`: its home on EIP155.Ethereum, then its other instances
+    public static let re: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.re.instance.id),
+        tokenName: "RE",
+        symbol: AssetSymbol(validating: "RE"),
+        aggregatorId: "re",
+        instances: [
+            EIP155.Ethereum.re
+        ]
+    )
+
+    /// Crown BRLV, CoinGecko's `crown-brlv`: its home on EIP155.Base, then its other instances
+    public static let crownBrlv: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.crownBrlv.instance.id),
+        tokenName: "Crown BRLV",
+        symbol: AssetSymbol(validating: "BRLV"),
+        aggregatorId: "crown-brlv",
+        instances: [
+            EIP155.Base.crownBrlv,
+            EIP155.Ethereum.crownBrlv
+        ]
+    )
+
+    /// ECOMI, CoinGecko's `ecomi`: its home on EIP155.Ethereum, then its other instances
+    public static let ecomi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ecomi.instance.id),
+        tokenName: "ECOMI",
+        symbol: AssetSymbol(validating: "OMI"),
+        aggregatorId: "ecomi",
+        instances: [
+            EIP155.Ethereum.ecomi,
+            EIP155.Base.ecomi
+        ]
+    )
+
+    /// ONEchain, CoinGecko's `cross-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let cross2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.cross2.instance.id),
+        tokenName: "ONEchain",
+        symbol: AssetSymbol(validating: "ONE"),
+        aggregatorId: "cross-2",
+        instances: [
+            EIP155.BinanceSmartChain.cross2
+        ]
+    )
+
+    /// Prize Protocol, CoinGecko's `prize-protocol`: its home on SOLANA.Solana, then its other instances
+    public static let prizeProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.prizeProtocol.instance.id),
+        tokenName: "Prize Protocol",
+        symbol: AssetSymbol(validating: "PRIZE"),
+        aggregatorId: "prize-protocol",
+        instances: [
+            SOLANA.Solana.prizeProtocol
+        ]
+    )
+
+    /// Flying Tulip, CoinGecko's `flying-tulip`: its home on EIP155.Ethereum, then its other instances
+    public static let flyingTulip: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.flyingTulip.instance.id),
+        tokenName: "Flying Tulip",
+        symbol: AssetSymbol(validating: "FT"),
+        aggregatorId: "flying-tulip",
+        instances: [
+            EIP155.Ethereum.flyingTulip,
+            EIP155.BinanceSmartChain.flyingTulip,
+            EIP155.Avalanche.flyingTulip,
+            EIP155.Base.flyingTulip
+        ]
+    )
+
+    /// Baby Doge Coin, CoinGecko's `baby-doge-coin`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let babyDogeCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.babyDogeCoin.instance.id),
+        tokenName: "Baby Doge Coin",
+        symbol: AssetSymbol(validating: "BABYDOGE"),
+        aggregatorId: "baby-doge-coin",
+        instances: [
+            EIP155.BinanceSmartChain.babyDogeCoin,
+            EIP155.Ethereum.babyDogeCoin,
+            EIP155.Base.babyDogeCoin,
+            SOLANA.Solana.babyDogeCoin
+        ]
+    )
+
+    /// GAL (migrated to Gravity - G), CoinGecko's `project-galaxy`: its home on EIP155.Ethereum, then its other instances
+    public static let projectGalaxy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.projectGalaxy.instance.id),
+        tokenName: "GAL (migrated to Gravity - G)",
+        symbol: AssetSymbol(validating: "GAL"),
+        aggregatorId: "project-galaxy",
+        instances: [
+            EIP155.Ethereum.projectGalaxy,
+            EIP155.BinanceSmartChain.projectGalaxy
+        ]
+    )
+
+    /// Mubarak, CoinGecko's `mubarak`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let mubarak: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.mubarak.instance.id),
+        tokenName: "Mubarak",
+        symbol: AssetSymbol(validating: "MUBARAK"),
+        aggregatorId: "mubarak",
+        instances: [
+            EIP155.BinanceSmartChain.mubarak
+        ]
+    )
+
+    /// Hastra AUTO, CoinGecko's `hastra-auto`: its home on SOLANA.Solana, then its other instances
+    public static let hastraAuto: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.hastraAuto.instance.id),
+        tokenName: "Hastra AUTO",
+        symbol: AssetSymbol(validating: "AUTO"),
+        aggregatorId: "hastra-auto",
+        instances: [
+            SOLANA.Solana.hastraAuto,
+            EIP155.Ethereum.hastraAuto
+        ]
+    )
+
+    /// iShares Core S&P 500 ETF (Ondo Tokenized ETF), CoinGecko's `ishares-core-s-p-500-etf-ondo-tokenized-etf`: its home on EIP155.Ethereum, then its other instances
+    public static let isharesCoreSP500EtfOndoTokenizedEtf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.isharesCoreSP500EtfOndoTokenizedEtf.instance.id),
+        tokenName: "iShares Core S&P 500 ETF (Ondo Tokenized ETF)",
+        symbol: AssetSymbol(validating: "IVVON"),
+        aggregatorId: "ishares-core-s-p-500-etf-ondo-tokenized-etf",
+        instances: [
+            EIP155.Ethereum.isharesCoreSP500EtfOndoTokenizedEtf,
+            EIP155.BinanceSmartChain.isharesCoreSP500EtfOndoTokenizedEtf,
+            SOLANA.Solana.isharesCoreSP500EtfOndoTokenizedEtf
+        ]
+    )
+
+    /// Banana For Scale, CoinGecko's `banana-for-scale-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bananaForScale2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bananaForScale2.instance.id),
+        tokenName: "Banana For Scale",
+        symbol: AssetSymbol(validating: "BANANAS31"),
+        aggregatorId: "banana-for-scale-2",
+        instances: [
+            EIP155.BinanceSmartChain.bananaForScale2
+        ]
+    )
+
+    /// TempleDAO, CoinGecko's `temple`: its home on EIP155.Ethereum, then its other instances
+    public static let temple: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.temple.instance.id),
+        tokenName: "TempleDAO",
+        symbol: AssetSymbol(validating: "TEMPLE"),
+        aggregatorId: "temple",
+        instances: [
+            EIP155.Ethereum.temple
+        ]
+    )
+
+    /// UnifAI Network, CoinGecko's `unifai-network`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let unifaiNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.unifaiNetwork.instance.id),
+        tokenName: "UnifAI Network",
+        symbol: AssetSymbol(validating: "UAI"),
+        aggregatorId: "unifai-network",
+        instances: [
+            EIP155.BinanceSmartChain.unifaiNetwork
+        ]
+    )
+
+    /// Matrixdock Gold, CoinGecko's `matrixdock-gold`: its home on EIP155.Ethereum, then its other instances
+    public static let matrixdockGold: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.matrixdockGold.instance.id),
+        tokenName: "Matrixdock Gold",
+        symbol: AssetSymbol(validating: "XAUM"),
+        aggregatorId: "matrixdock-gold",
+        instances: [
+            EIP155.Ethereum.matrixdockGold,
+            EIP155.BinanceSmartChain.matrixdockGold,
+            EIP155.Polygon.matrixdockGold,
+            TRON.Tron.matrixdockGold,
+            SOLANA.Solana.matrixdockGold,
+            STELLAR.Stellar.matrixdockGold
+        ]
+    )
+
+    /// LCX, CoinGecko's `lcx`: its home on EIP155.Ethereum, then its other instances
+    public static let lcx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lcx.instance.id),
+        tokenName: "LCX",
+        symbol: AssetSymbol(validating: "LCX"),
+        aggregatorId: "lcx",
+        instances: [
+            EIP155.Ethereum.lcx
+        ]
+    )
+
+    /// Turbo, CoinGecko's `turbo`: its home on EIP155.Ethereum, then its other instances
+    public static let turbo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.turbo.instance.id),
+        tokenName: "Turbo",
+        symbol: AssetSymbol(validating: "TURBO"),
+        aggregatorId: "turbo",
+        instances: [
+            EIP155.Ethereum.turbo,
+            SOLANA.Solana.turbo
+        ]
+    )
+
+    /// Sushi, CoinGecko's `sushi`: its home on EIP155.Ethereum, then its other instances
+    public static let sushi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sushi.instance.id),
+        tokenName: "Sushi",
+        symbol: AssetSymbol(validating: "SUSHI"),
+        aggregatorId: "sushi",
+        instances: [
+            EIP155.Ethereum.sushi,
+            EIP155.BinanceSmartChain.sushi,
+            EIP155.Polygon.sushi,
+            EIP155.Fantom.sushi,
+            EIP155.Avalanche.sushi,
+            EIP155.Celo.sushi,
+            EIP155.Base.sushi,
+            SOLANA.Solana.sushi,
+            NEAR.Near.sushi
+        ]
+    )
+
+    /// Diem, CoinGecko's `diem`: its home on EIP155.Base, then its other instances
+    public static let diem: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.diem.instance.id),
+        tokenName: "Diem",
+        symbol: AssetSymbol(validating: "DIEM"),
+        aggregatorId: "diem",
+        instances: [
+            EIP155.Base.diem
+        ]
+    )
+
+    /// NOXO, CoinGecko's `noxo`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let noxo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.noxo.instance.id),
+        tokenName: "NOXO",
+        symbol: AssetSymbol(validating: "NOXO"),
+        aggregatorId: "noxo",
+        instances: [
+            EIP155.BinanceSmartChain.noxo
+        ]
+    )
+
+    /// MindWaveDAO, CoinGecko's `mindwavedao`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let mindwavedao: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.mindwavedao.instance.id),
+        tokenName: "MindWaveDAO",
+        symbol: AssetSymbol(validating: "NILA"),
+        aggregatorId: "mindwavedao",
+        instances: [
+            EIP155.BinanceSmartChain.mindwavedao
+        ]
+    )
+
+    /// Ondo U.S. Dollar Token, CoinGecko's `ondo-u-s-dollar-token`: its home on EIP155.Ethereum, then its other instances
+    public static let ondoUSDollarToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ondoUSDollarToken.instance.id),
+        tokenName: "Ondo U.S. Dollar Token",
+        symbol: AssetSymbol(validating: "USDON"),
+        aggregatorId: "ondo-u-s-dollar-token",
+        instances: [
+            EIP155.Ethereum.ondoUSDollarToken,
+            EIP155.BinanceSmartChain.ondoUSDollarToken
+        ]
+    )
+
+    /// BOOK OF MEME, CoinGecko's `book-of-meme`: its home on SOLANA.Solana, then its other instances
+    public static let bookOfMeme: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.bookOfMeme.instance.id),
+        tokenName: "BOOK OF MEME",
+        symbol: AssetSymbol(validating: "BOME"),
+        aggregatorId: "book-of-meme",
+        instances: [
+            SOLANA.Solana.bookOfMeme
+        ]
+    )
+
+    /// Unipoly, CoinGecko's `unipoly`: its home on EIP155.Ethereum, then its other instances
+    public static let unipoly: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.unipoly.instance.id),
+        tokenName: "Unipoly",
+        symbol: AssetSymbol(validating: "UNP"),
+        aggregatorId: "unipoly",
+        instances: [
+            EIP155.Ethereum.unipoly,
+            EIP155.BinanceSmartChain.unipoly
+        ]
+    )
+
+    /// Midas mF-ONE, CoinGecko's `midas-mf-one`: its home on EIP155.Ethereum, then its other instances
+    public static let midasMfOne: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasMfOne.instance.id),
+        tokenName: "Midas mF-ONE",
+        symbol: AssetSymbol(validating: "MF-ONE"),
+        aggregatorId: "midas-mf-one",
+        instances: [
+            EIP155.Ethereum.midasMfOne
+        ]
+    )
+
+    /// Comedian, CoinGecko's `comedian`: its home on SOLANA.Solana, then its other instances
+    public static let comedian: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.comedian.instance.id),
+        tokenName: "Comedian",
+        symbol: AssetSymbol(validating: "BAN"),
+        aggregatorId: "comedian",
+        instances: [
+            SOLANA.Solana.comedian
+        ]
+    )
+
+    /// XPR Network, CoinGecko's `proton`: its home on EIP155.Ethereum, then its other instances
+    public static let proton: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.proton.instance.id),
+        tokenName: "XPR Network",
+        symbol: AssetSymbol(validating: "XPR"),
+        aggregatorId: "proton",
+        instances: [
+            EIP155.Ethereum.proton,
+            EIP155.BinanceSmartChain.proton
+        ]
+    )
+
+    /// DeXe, CoinGecko's `dexe`: its home on EIP155.Ethereum, then its other instances
+    public static let dexe: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dexe.instance.id),
+        tokenName: "DeXe",
+        symbol: AssetSymbol(validating: "DEXE"),
+        aggregatorId: "dexe",
+        instances: [
+            EIP155.Ethereum.dexe,
+            EIP155.BinanceSmartChain.dexe
+        ]
+    )
+
+    /// Escoin, CoinGecko's `escoin-token`: its home on EIP155.Ethereum, then its other instances
+    public static let escoinToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.escoinToken.instance.id),
+        tokenName: "Escoin",
+        symbol: AssetSymbol(validating: "ELG"),
+        aggregatorId: "escoin-token",
+        instances: [
+            EIP155.Ethereum.escoinToken,
+            EIP155.BinanceSmartChain.escoinToken,
+            EIP155.Polygon.escoinToken
+        ]
+    )
+
+    /// Allora, CoinGecko's `allora`: its home on EIP155.Ethereum, then its other instances
+    public static let allora: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.allora.instance.id),
+        tokenName: "Allora",
+        symbol: AssetSymbol(validating: "ALLO"),
+        aggregatorId: "allora",
+        instances: [
+            EIP155.Ethereum.allora,
+            EIP155.BinanceSmartChain.allora,
+            EIP155.Base.allora
+        ]
+    )
+
+    /// AI Rig Complex, CoinGecko's `ai-rig-complex`: its home on SOLANA.Solana, then its other instances
+    public static let aiRigComplex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.aiRigComplex.instance.id),
+        tokenName: "AI Rig Complex",
+        symbol: AssetSymbol(validating: "ARC"),
+        aggregatorId: "ai-rig-complex",
+        instances: [
+            SOLANA.Solana.aiRigComplex
+        ]
+    )
+
+    /// 0G, CoinGecko's `zero-gravity`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let zeroGravity: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.zeroGravity.instance.id),
+        tokenName: "0G",
+        symbol: AssetSymbol(validating: "0G"),
+        aggregatorId: "zero-gravity",
+        instances: [
+            EIP155.BinanceSmartChain.zeroGravity,
+            EIP155.Ethereum.zeroGravity
+        ]
+    )
+
+    /// io.net, CoinGecko's `io`: its home on SOLANA.Solana, then its other instances
+    public static let io: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.io.instance.id),
+        tokenName: "io.net",
+        symbol: AssetSymbol(validating: "IO"),
+        aggregatorId: "io",
+        instances: [
+            SOLANA.Solana.io
+        ]
+    )
+
+    /// Axis USD, CoinGecko's `axis-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let axisUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.axisUsd.instance.id),
+        tokenName: "Axis USD",
+        symbol: AssetSymbol(validating: "USDX"),
+        aggregatorId: "axis-usd",
+        instances: [
+            EIP155.Ethereum.axisUsd
+        ]
+    )
+
+    /// Axelar, CoinGecko's `axelar`: its home on EIP155.Ethereum, then its other instances
+    public static let axelar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.axelar.instance.id),
+        tokenName: "Axelar",
+        symbol: AssetSymbol(validating: "AXL"),
+        aggregatorId: "axelar",
+        instances: [
+            EIP155.Ethereum.axelar,
+            EIP155.BinanceSmartChain.axelar,
+            EIP155.Polygon.axelar,
+            EIP155.Optimism.axelar,
+            EIP155.Fantom.axelar,
+            EIP155.Avalanche.axelar,
+            EIP155.Base.axelar
+        ]
+    )
+
+    /// Bio Protocol, CoinGecko's `bio-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let bioProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bioProtocol.instance.id),
+        tokenName: "Bio Protocol",
+        symbol: AssetSymbol(validating: "BIO"),
+        aggregatorId: "bio-protocol",
+        instances: [
+            EIP155.Ethereum.bioProtocol,
+            EIP155.BinanceSmartChain.bioProtocol,
+            EIP155.Base.bioProtocol,
+            SOLANA.Solana.bioProtocol
+        ]
+    )
+
+    /// Oasis, CoinGecko's `oasis-network`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let oasisNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.oasisNetwork.instance.id),
+        tokenName: "Oasis",
+        symbol: AssetSymbol(validating: "ROSE"),
+        aggregatorId: "oasis-network",
+        instances: [
+            EIP155.BinanceSmartChain.oasisNetwork
+        ]
+    )
+
+    /// Royal Euro, CoinGecko's `royal-euro`: its home on EIP155.Ethereum, then its other instances
+    public static let royalEuro: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.royalEuro.instance.id),
+        tokenName: "Royal Euro",
+        symbol: AssetSymbol(validating: "REUR"),
+        aggregatorId: "royal-euro",
+        instances: [
+            EIP155.Ethereum.royalEuro,
+            EIP155.BinanceSmartChain.royalEuro,
+            TRON.Tron.royalEuro
+        ]
+    )
+
+    /// Swop, CoinGecko's `swop-2`: its home on SOLANA.Solana, then its other instances
+    public static let swop2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.swop2.instance.id),
+        tokenName: "Swop",
+        symbol: AssetSymbol(validating: "SWOP"),
+        aggregatorId: "swop-2",
+        instances: [
+            SOLANA.Solana.swop2
+        ]
+    )
+
+    /// Fren Pet, CoinGecko's `frenpet`: its home on EIP155.Base, then its other instances
+    public static let frenpet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.frenpet.instance.id),
+        tokenName: "Fren Pet",
+        symbol: AssetSymbol(validating: "FP"),
+        aggregatorId: "frenpet",
+        instances: [
+            EIP155.Base.frenpet
+        ]
+    )
+
+    /// Metal Blockchain, CoinGecko's `metal-blockchain`: its home on EIP155.Ethereum, then its other instances
+    public static let metalBlockchain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.metalBlockchain.instance.id),
+        tokenName: "Metal Blockchain",
+        symbol: AssetSymbol(validating: "METAL"),
+        aggregatorId: "metal-blockchain",
+        instances: [
+            EIP155.Ethereum.metalBlockchain
+        ]
+    )
+
+    /// MEME HORSE, CoinGecko's `meme-horse`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let memeHorse: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.memeHorse.instance.id),
+        tokenName: "MEME HORSE",
+        symbol: AssetSymbol(validating: "MHORSE"),
+        aggregatorId: "meme-horse",
+        instances: [
+            EIP155.BinanceSmartChain.memeHorse
+        ]
+    )
+
+    /// GoPlus Security, CoinGecko's `goplus-security`: its home on EIP155.Base, then its other instances
+    public static let goplusSecurity: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.goplusSecurity.instance.id),
+        tokenName: "GoPlus Security",
+        symbol: AssetSymbol(validating: "GPS"),
+        aggregatorId: "goplus-security",
+        instances: [
+            EIP155.Base.goplusSecurity,
+            EIP155.BinanceSmartChain.goplusSecurity
+        ]
+    )
+
+    /// Creditcoin, CoinGecko's `creditcoin-2`: its home on EIP155.Ethereum, then its other instances
+    public static let creditcoin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.creditcoin2.instance.id),
+        tokenName: "Creditcoin",
+        symbol: AssetSymbol(validating: "CTC"),
+        aggregatorId: "creditcoin-2",
+        instances: [
+            EIP155.Ethereum.creditcoin2
+        ]
+    )
+
+    /// The Black Bull, CoinGecko's `the-black-bull`: its home on SOLANA.Solana, then its other instances
+    public static let theBlackBull: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.theBlackBull.instance.id),
+        tokenName: "The Black Bull",
+        symbol: AssetSymbol(validating: "ANSEM"),
+        aggregatorId: "the-black-bull",
+        instances: [
+            SOLANA.Solana.theBlackBull
+        ]
+    )
+
+    /// Pentagon Chain, CoinGecko's `pentagon-chain`: its home on EIP155.Ethereum, then its other instances
+    public static let pentagonChain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.pentagonChain.instance.id),
+        tokenName: "Pentagon Chain",
+        symbol: AssetSymbol(validating: "PC"),
+        aggregatorId: "pentagon-chain",
+        instances: [
+            EIP155.Ethereum.pentagonChain
+        ]
+    )
+
+    /// ChainOpera AI, CoinGecko's `chainopera-ai`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let chainoperaAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.chainoperaAi.instance.id),
+        tokenName: "ChainOpera AI",
+        symbol: AssetSymbol(validating: "COAI"),
+        aggregatorId: "chainopera-ai",
+        instances: [
+            EIP155.BinanceSmartChain.chainoperaAi
+        ]
+    )
+
+    /// VanEck Treasury Fund, CoinGecko's `vaneck-treasury-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let vaneckTreasuryFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.vaneckTreasuryFund.instance.id),
+        tokenName: "VanEck Treasury Fund",
+        symbol: AssetSymbol(validating: "VBILL"),
+        aggregatorId: "vaneck-treasury-fund",
+        instances: [
+            EIP155.Ethereum.vaneckTreasuryFund,
+            EIP155.BinanceSmartChain.vaneckTreasuryFund,
+            EIP155.Avalanche.vaneckTreasuryFund,
+            SOLANA.Solana.vaneckTreasuryFund
+        ]
+    )
+
+    /// iExec RLC, CoinGecko's `iexec-rlc`: its home on EIP155.Ethereum, then its other instances
+    public static let iexecRlc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.iexecRlc.instance.id),
+        tokenName: "iExec RLC",
+        symbol: AssetSymbol(validating: "RLC"),
+        aggregatorId: "iexec-rlc",
+        instances: [
+            EIP155.Ethereum.iexecRlc
+        ]
+    )
+
+    /// Nosana, CoinGecko's `nosana`: its home on SOLANA.Solana, then its other instances
+    public static let nosana: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.nosana.instance.id),
+        tokenName: "Nosana",
+        symbol: AssetSymbol(validating: "NOS"),
+        aggregatorId: "nosana",
+        instances: [
+            SOLANA.Solana.nosana
+        ]
+    )
+
+    /// Precious Metals USD, CoinGecko's `precious-metals-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let preciousMetalsUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.preciousMetalsUsd.instance.id),
+        tokenName: "Precious Metals USD",
+        symbol: AssetSymbol(validating: "PMUSD"),
+        aggregatorId: "precious-metals-usd",
+        instances: [
+            EIP155.Ethereum.preciousMetalsUsd
+        ]
+    )
+
+    /// Threshold Network, CoinGecko's `threshold-network-token`: its home on EIP155.Ethereum, then its other instances
+    public static let thresholdNetworkToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.thresholdNetworkToken.instance.id),
+        tokenName: "Threshold Network",
+        symbol: AssetSymbol(validating: "T"),
+        aggregatorId: "threshold-network-token",
+        instances: [
+            EIP155.Ethereum.thresholdNetworkToken,
+            EIP155.Optimism.thresholdNetworkToken,
+            EIP155.Base.thresholdNetworkToken,
+            SOLANA.Solana.thresholdNetworkToken
+        ]
+    )
+
+    /// Snek, CoinGecko's `snek`: its home on CIP34.Cardano, then its other instances
+    public static let snek: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: CIP34.Cardano.snek.instance.id),
+        tokenName: "Snek",
+        symbol: AssetSymbol(validating: "SNEK"),
+        aggregatorId: "snek",
+        instances: [
+            CIP34.Cardano.snek
+        ]
+    )
+
+    /// Brazilian Digital, CoinGecko's `brz`: its home on EIP155.Ethereum, then its other instances
+    public static let brz: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.brz.instance.id),
+        tokenName: "Brazilian Digital",
+        symbol: AssetSymbol(validating: "BRZ"),
+        aggregatorId: "brz",
+        instances: [
+            EIP155.Ethereum.brz,
+            EIP155.BinanceSmartChain.brz,
+            EIP155.Polygon.brz,
+            EIP155.Avalanche.brz,
+            SOLANA.Solana.brz,
+            STELLAR.Stellar.brz,
+            ALGORAND.Algorand.brz
+        ]
+    )
+
+    /// ORE, CoinGecko's `ore`: its home on SOLANA.Solana, then its other instances
+    public static let ore: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.ore.instance.id),
+        tokenName: "ORE",
+        symbol: AssetSymbol(validating: "ORE"),
+        aggregatorId: "ore",
+        instances: [
+            SOLANA.Solana.ore
+        ]
+    )
+
+    /// SPACE ID, CoinGecko's `space-id`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let spaceId: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.spaceId.instance.id),
+        tokenName: "SPACE ID",
+        symbol: AssetSymbol(validating: "ID"),
+        aggregatorId: "space-id",
+        instances: [
+            EIP155.BinanceSmartChain.spaceId,
+            EIP155.Ethereum.spaceId
+        ]
+    )
+
+    /// AB, CoinGecko's `newton-project`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let newtonProject: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.newtonProject.instance.id),
+        tokenName: "AB",
+        symbol: AssetSymbol(validating: "AB"),
+        aggregatorId: "newton-project",
+        instances: [
+            EIP155.BinanceSmartChain.newtonProject
+        ]
+    )
+
+    /// Strategy (bStocks Tokenized Stock), CoinGecko's `strategy-tokenized-bstocks`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let strategyTokenizedBstocks: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.strategyTokenizedBstocks.instance.id),
+        tokenName: "Strategy (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "MSTRB"),
+        aggregatorId: "strategy-tokenized-bstocks",
+        instances: [
+            EIP155.BinanceSmartChain.strategyTokenizedBstocks
+        ]
+    )
+
+    /// Tellor Tributes, CoinGecko's `tellor`: its home on EIP155.Ethereum, then its other instances
+    public static let tellor: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tellor.instance.id),
+        tokenName: "Tellor Tributes",
+        symbol: AssetSymbol(validating: "TRB"),
+        aggregatorId: "tellor",
+        instances: [
+            EIP155.Ethereum.tellor,
+            EIP155.Polygon.tellor,
+            EIP155.Optimism.tellor
+        ]
+    )
+
+    /// Arcium, CoinGecko's `arcium`: its home on SOLANA.Solana, then its other instances
+    public static let arcium: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.arcium.instance.id),
+        tokenName: "Arcium",
+        symbol: AssetSymbol(validating: "ARX"),
+        aggregatorId: "arcium",
+        instances: [
+            SOLANA.Solana.arcium,
+            EIP155.BinanceSmartChain.arcium
+        ]
+    )
+
+    /// Dolphin, CoinGecko's `dolphin-2`: its home on EIP155.Base, then its other instances
+    public static let dolphin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.dolphin2.instance.id),
+        tokenName: "Dolphin",
+        symbol: AssetSymbol(validating: "POD"),
+        aggregatorId: "dolphin-2",
+        instances: [
+            EIP155.Base.dolphin2
+        ]
+    )
+
+    /// BNB Attestation Service, CoinGecko's `bas`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bas: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bas.instance.id),
+        tokenName: "BNB Attestation Service",
+        symbol: AssetSymbol(validating: "BAS"),
+        aggregatorId: "bas",
+        instances: [
+            EIP155.BinanceSmartChain.bas
+        ]
+    )
+
+    /// FONQ, CoinGecko's `fonq`: its home on EIP155.Ethereum, then its other instances
+    public static let fonq: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fonq.instance.id),
+        tokenName: "FONQ",
+        symbol: AssetSymbol(validating: "FONQ"),
+        aggregatorId: "fonq",
+        instances: [
+            EIP155.Ethereum.fonq
+        ]
+    )
+
+    /// Blur, CoinGecko's `blur`: its home on EIP155.Ethereum, then its other instances
+    public static let blur: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.blur.instance.id),
+        tokenName: "Blur",
+        symbol: AssetSymbol(validating: "BLUR"),
+        aggregatorId: "blur",
+        instances: [
+            EIP155.Ethereum.blur
+        ]
+    )
+
+    /// TokenPocket Token, CoinGecko's `token-pocket`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let tokenPocket: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.tokenPocket.instance.id),
+        tokenName: "TokenPocket Token",
+        symbol: AssetSymbol(validating: "TPT"),
+        aggregatorId: "token-pocket",
+        instances: [
+            EIP155.BinanceSmartChain.tokenPocket
+        ]
+    )
+
+    /// AltLayer, CoinGecko's `altlayer`: its home on EIP155.Ethereum, then its other instances
+    public static let altlayer: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.altlayer.instance.id),
+        tokenName: "AltLayer",
+        symbol: AssetSymbol(validating: "ALT"),
+        aggregatorId: "altlayer",
+        instances: [
+            EIP155.Ethereum.altlayer,
+            EIP155.BinanceSmartChain.altlayer
+        ]
+    )
+
+    /// Open Campus, CoinGecko's `edu-coin`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let eduCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.eduCoin.instance.id),
+        tokenName: "Open Campus",
+        symbol: AssetSymbol(validating: "EDU"),
+        aggregatorId: "edu-coin",
+        instances: [
+            EIP155.BinanceSmartChain.eduCoin,
+            EIP155.Ethereum.eduCoin
+        ]
+    )
+
+    /// Jelly-My-Jelly, CoinGecko's `jelly-my-jelly`: its home on SOLANA.Solana, then its other instances
+    public static let jellyMyJelly: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.jellyMyJelly.instance.id),
+        tokenName: "Jelly-My-Jelly",
+        symbol: AssetSymbol(validating: "JELLYJELLY"),
+        aggregatorId: "jelly-my-jelly",
+        instances: [
+            SOLANA.Solana.jellyMyJelly
+        ]
+    )
+
+    /// PHALA, CoinGecko's `pha`: its home on EIP155.Ethereum, then its other instances
+    public static let pha: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.pha.instance.id),
+        tokenName: "PHALA",
+        symbol: AssetSymbol(validating: "PHA"),
+        aggregatorId: "pha",
+        instances: [
+            EIP155.Ethereum.pha
+        ]
+    )
+
+    /// Centrifuge, CoinGecko's `centrifuge-2`: its home on EIP155.Ethereum, then its other instances
+    public static let centrifuge2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.centrifuge2.instance.id),
+        tokenName: "Centrifuge",
+        symbol: AssetSymbol(validating: "CFG"),
+        aggregatorId: "centrifuge-2",
+        instances: [
+            EIP155.Ethereum.centrifuge2
+        ]
+    )
+
+    /// Neutrl USD, CoinGecko's `nusd-2`: its home on EIP155.Ethereum, then its other instances
+    public static let nusd2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nusd2.instance.id),
+        tokenName: "Neutrl USD",
+        symbol: AssetSymbol(validating: "NUSD"),
+        aggregatorId: "nusd-2",
+        instances: [
+            EIP155.Ethereum.nusd2
+        ]
+    )
+
+    /// Anonymous Cat, CoinGecko's `anonymous-cat`: its home on SOLANA.Solana, then its other instances
+    public static let anonymousCat: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.anonymousCat.instance.id),
+        tokenName: "Anonymous Cat",
+        symbol: AssetSymbol(validating: "ZCAT"),
+        aggregatorId: "anonymous-cat",
+        instances: [
+            SOLANA.Solana.anonymousCat
+        ]
+    )
+
+    /// Lido EarnUSD, CoinGecko's `lido-earnusd`: its home on EIP155.Ethereum, then its other instances
+    public static let lidoEarnusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lidoEarnusd.instance.id),
+        tokenName: "Lido EarnUSD",
+        symbol: AssetSymbol(validating: "EARNUSD"),
+        aggregatorId: "lido-earnusd",
+        instances: [
+            EIP155.Ethereum.lidoEarnusd
+        ]
+    )
+
+    /// StandX DUSD, CoinGecko's `standx-dusd`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let standxDusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.standxDusd.instance.id),
+        tokenName: "StandX DUSD",
+        symbol: AssetSymbol(validating: "DUSD"),
+        aggregatorId: "standx-dusd",
+        instances: [
+            EIP155.BinanceSmartChain.standxDusd,
+            SOLANA.Solana.standxDusd
+        ]
+    )
+
+    /// USDu, CoinGecko's `usdu`: its home on SOLANA.Solana, then its other instances
+    public static let usdu: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.usdu.instance.id),
+        tokenName: "USDu",
+        symbol: AssetSymbol(validating: "USDU"),
+        aggregatorId: "usdu",
+        instances: [
+            SOLANA.Solana.usdu,
+            EIP155.BinanceSmartChain.usdu
+        ]
+    )
+
+    /// Brett, CoinGecko's `based-brett`: its home on EIP155.Base, then its other instances
+    public static let basedBrett: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.basedBrett.instance.id),
+        tokenName: "Brett",
+        symbol: AssetSymbol(validating: "BRETT"),
+        aggregatorId: "based-brett",
+        instances: [
+            EIP155.Base.basedBrett,
+            EIP155.BinanceSmartChain.basedBrett
+        ]
+    )
+
+    /// Huma Finance, CoinGecko's `huma-finance`: its home on SOLANA.Solana, then its other instances
+    public static let humaFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.humaFinance.instance.id),
+        tokenName: "Huma Finance",
+        symbol: AssetSymbol(validating: "HUMA"),
+        aggregatorId: "huma-finance",
+        instances: [
+            SOLANA.Solana.humaFinance,
+            EIP155.BinanceSmartChain.humaFinance
+        ]
+    )
+
+    /// Venus, CoinGecko's `venus`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let venus: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.venus.instance.id),
+        tokenName: "Venus",
+        symbol: AssetSymbol(validating: "XVS"),
+        aggregatorId: "venus",
+        instances: [
+            EIP155.BinanceSmartChain.venus,
+            EIP155.Ethereum.venus,
+            EIP155.Optimism.venus,
+            EIP155.Base.venus
+        ]
+    )
+
+    /// WINkLink, CoinGecko's `wink`: its home on TRON.Tron, then its other instances
+    public static let wink: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.wink.instance.id),
+        tokenName: "WINkLink",
+        symbol: AssetSymbol(validating: "WIN"),
+        aggregatorId: "wink",
+        instances: [
+            TRON.Tron.wink
+        ]
+    )
+
+    /// MEMETOON, CoinGecko's `memetoon`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let memetoon: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.memetoon.instance.id),
+        tokenName: "MEMETOON",
+        symbol: AssetSymbol(validating: "MEME"),
+        aggregatorId: "memetoon",
+        instances: [
+            EIP155.BinanceSmartChain.memetoon
+        ]
+    )
+
+    /// Marscat Token, CoinGecko's `marscat-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let marscatToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.marscatToken.instance.id),
+        tokenName: "Marscat Token",
+        symbol: AssetSymbol(validating: "MCAT"),
+        aggregatorId: "marscat-token",
+        instances: [
+            EIP155.BinanceSmartChain.marscatToken
+        ]
+    )
+
+    /// XYO Network, CoinGecko's `xyo-network`: its home on EIP155.Ethereum, then its other instances
+    public static let xyoNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.xyoNetwork.instance.id),
+        tokenName: "XYO Network",
+        symbol: AssetSymbol(validating: "XYO"),
+        aggregatorId: "xyo-network",
+        instances: [
+            EIP155.Ethereum.xyoNetwork
+        ]
+    )
+
+    /// Amp, CoinGecko's `amp-token`: its home on EIP155.Ethereum, then its other instances
+    public static let ampToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ampToken.instance.id),
+        tokenName: "Amp",
+        symbol: AssetSymbol(validating: "AMP"),
+        aggregatorId: "amp-token",
+        instances: [
+            EIP155.Ethereum.ampToken,
+            NEAR.Near.ampToken
+        ]
+    )
+
+    /// Lisk, CoinGecko's `lisk`: its home on EIP155.Ethereum, then its other instances
+    public static let lisk: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lisk.instance.id),
+        tokenName: "Lisk",
+        symbol: AssetSymbol(validating: "LSK"),
+        aggregatorId: "lisk",
+        instances: [
+            EIP155.Ethereum.lisk,
+            EIP155.Base.lisk
+        ]
+    )
+
+    /// Securitize, CoinGecko's `securitize-corp`: its home on EIP155.Avalanche, then its other instances
+    public static let securitizeCorp: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.securitizeCorp.instance.id),
+        tokenName: "Securitize",
+        symbol: AssetSymbol(validating: "SECZ"),
+        aggregatorId: "securitize-corp",
+        instances: [
+            EIP155.Avalanche.securitizeCorp,
+            SOLANA.Solana.securitizeCorp
+        ]
+    )
+
+    /// Anemoy Tokenized Apollo Diversified Credit Fund, CoinGecko's `anemoy-tokenized-apollo-diversified-credit-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let anemoyTokenizedApolloDiversifiedCreditFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.anemoyTokenizedApolloDiversifiedCreditFund.instance.id),
+        tokenName: "Anemoy Tokenized Apollo Diversified Credit Fund",
+        symbol: AssetSymbol(validating: "ACRDX"),
+        aggregatorId: "anemoy-tokenized-apollo-diversified-credit-fund",
+        instances: [
+            EIP155.Ethereum.anemoyTokenizedApolloDiversifiedCreditFund
+        ]
+    )
+
+    /// Cortex, CoinGecko's `cortex-2`: its home on EIP155.Ethereum, then its other instances
+    public static let cortex2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cortex2.instance.id),
+        tokenName: "Cortex",
+        symbol: AssetSymbol(validating: "CX"),
+        aggregatorId: "cortex-2",
+        instances: [
+            EIP155.Ethereum.cortex2,
+            EIP155.BinanceSmartChain.cortex2,
+            EIP155.Optimism.cortex2,
+            EIP155.Avalanche.cortex2,
+            EIP155.Base.cortex2,
+            SOLANA.Solana.cortex2
+        ]
+    )
+
+    /// BlackRock Daily Reinvestment Stablecoin Reserve Vehicle, CoinGecko's `blackrock-daily-reinvestment-stablecoin-reserve-vehicle`: its home on EIP155.Ethereum, then its other instances
+    public static let blackrockDailyReinvestmentStablecoinReserveVehicle: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.blackrockDailyReinvestmentStablecoinReserveVehicle.instance.id),
+        tokenName: "BlackRock Daily Reinvestment Stablecoin Reserve Vehicle",
+        symbol: AssetSymbol(validating: "BRSRV"),
+        aggregatorId: "blackrock-daily-reinvestment-stablecoin-reserve-vehicle",
+        instances: [
+            EIP155.Ethereum.blackrockDailyReinvestmentStablecoinReserveVehicle,
+            SOLANA.Solana.blackrockDailyReinvestmentStablecoinReserveVehicle
+        ]
+    )
+
+    /// Ozapay, CoinGecko's `ozapay`: its home on SOLANA.Solana, then its other instances
+    public static let ozapay: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.ozapay.instance.id),
+        tokenName: "Ozapay",
+        symbol: AssetSymbol(validating: "OZA"),
+        aggregatorId: "ozapay",
+        instances: [
+            SOLANA.Solana.ozapay
+        ]
+    )
+
+    /// BIM, CoinGecko's `bim-2`: its home on EIP155.Base, then its other instances
+    public static let bim2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.bim2.instance.id),
+        tokenName: "BIM",
+        symbol: AssetSymbol(validating: "BIM"),
+        aggregatorId: "bim-2",
+        instances: [
+            EIP155.Base.bim2
+        ]
+    )
+
+    /// Alloy Tether, CoinGecko's `alloy-tether`: its home on EIP155.Ethereum, then its other instances
+    public static let alloyTether: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.alloyTether.instance.id),
+        tokenName: "Alloy Tether",
+        symbol: AssetSymbol(validating: "AUSDT"),
+        aggregatorId: "alloy-tether",
+        instances: [
+            EIP155.Ethereum.alloyTether
+        ]
+    )
+
+    /// USDKG, CoinGecko's `usdkg`: its home on TRON.Tron, then its other instances
+    public static let usdkg: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.usdkg.instance.id),
+        tokenName: "USDKG",
+        symbol: AssetSymbol(validating: "USDKG"),
+        aggregatorId: "usdkg",
+        instances: [
+            TRON.Tron.usdkg,
+            EIP155.Ethereum.usdkg
+        ]
+    )
+
+    /// Resupply USD, CoinGecko's `resupply-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let resupplyUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.resupplyUsd.instance.id),
+        tokenName: "Resupply USD",
+        symbol: AssetSymbol(validating: "REUSD"),
+        aggregatorId: "resupply-usd",
+        instances: [
+            EIP155.Ethereum.resupplyUsd
+        ]
+    )
+
+    /// GEKKO, CoinGecko's `gekko`: its home on EIP155.Ethereum, then its other instances
+    public static let gekko: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gekko.instance.id),
+        tokenName: "GEKKO",
+        symbol: AssetSymbol(validating: "GEKKO"),
+        aggregatorId: "gekko",
+        instances: [
+            EIP155.Ethereum.gekko
+        ]
+    )
+
+    /// Fidelity Digital Dollar, CoinGecko's `fidelity-digital-dollar`: its home on EIP155.Ethereum, then its other instances
+    public static let fidelityDigitalDollar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fidelityDigitalDollar.instance.id),
+        tokenName: "Fidelity Digital Dollar",
+        symbol: AssetSymbol(validating: "FIDD"),
+        aggregatorId: "fidelity-digital-dollar",
+        instances: [
+            EIP155.Ethereum.fidelityDigitalDollar
+        ]
+    )
+
+    /// Peanut the Squirrel, CoinGecko's `peanut-the-squirrel`: its home on SOLANA.Solana, then its other instances
+    public static let peanutTheSquirrel: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.peanutTheSquirrel.instance.id),
+        tokenName: "Peanut the Squirrel",
+        symbol: AssetSymbol(validating: "PNUT"),
+        aggregatorId: "peanut-the-squirrel",
+        instances: [
+            SOLANA.Solana.peanutTheSquirrel
+        ]
+    )
+
+    /// RaveDAO, CoinGecko's `ravedao`: its home on EIP155.Ethereum, then its other instances
+    public static let ravedao: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ravedao.instance.id),
+        tokenName: "RaveDAO",
+        symbol: AssetSymbol(validating: "RAVE"),
+        aggregatorId: "ravedao",
+        instances: [
+            EIP155.Ethereum.ravedao,
+            EIP155.BinanceSmartChain.ravedao,
+            EIP155.Base.ravedao
+        ]
+    )
+
+    /// Holoworld, CoinGecko's `holoworld`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let holoworld: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.holoworld.instance.id),
+        tokenName: "Holoworld",
+        symbol: AssetSymbol(validating: "HOLO"),
+        aggregatorId: "holoworld",
+        instances: [
+            EIP155.BinanceSmartChain.holoworld,
+            SOLANA.Solana.holoworld
+        ]
+    )
+
+    /// Toshi, CoinGecko's `toshi`: its home on EIP155.Base, then its other instances
+    public static let toshi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.toshi.instance.id),
+        tokenName: "Toshi",
+        symbol: AssetSymbol(validating: "TOSHI"),
+        aggregatorId: "toshi",
+        instances: [
+            EIP155.Base.toshi,
+            EIP155.BinanceSmartChain.toshi
+        ]
+    )
+
+    /// Popcat, CoinGecko's `popcat`: its home on SOLANA.Solana, then its other instances
+    public static let popcat: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.popcat.instance.id),
+        tokenName: "Popcat",
+        symbol: AssetSymbol(validating: "POPCAT"),
+        aggregatorId: "popcat",
+        instances: [
+            SOLANA.Solana.popcat
+        ]
+    )
+
+    /// Mantis, CoinGecko's `mantis`: its home on SOLANA.Solana, then its other instances
+    public static let mantis: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.mantis.instance.id),
+        tokenName: "Mantis",
+        symbol: AssetSymbol(validating: "M"),
+        aggregatorId: "mantis",
+        instances: [
+            SOLANA.Solana.mantis
+        ]
+    )
+
+    /// DUSK, CoinGecko's `dusk-network`: its home on EIP155.Ethereum, then its other instances
+    public static let duskNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.duskNetwork.instance.id),
+        tokenName: "DUSK",
+        symbol: AssetSymbol(validating: "DUSK"),
+        aggregatorId: "dusk-network",
+        instances: [
+            EIP155.Ethereum.duskNetwork,
+            EIP155.BinanceSmartChain.duskNetwork
+        ]
+    )
+
+    /// Micron Technology (bStocks Tokenized Stock), CoinGecko's `micron-technology-bstock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let micronTechnologyBstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.micronTechnologyBstock.instance.id),
+        tokenName: "Micron Technology (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "MUB"),
+        aggregatorId: "micron-technology-bstock",
+        instances: [
+            EIP155.BinanceSmartChain.micronTechnologyBstock
+        ]
+    )
+
+    /// SPDR S&P 500 ETF (Ondo Tokenized ETF), CoinGecko's `spdr-s-p-500-etf-ondo-tokenized-etf`: its home on EIP155.Ethereum, then its other instances
+    public static let spdrSP500EtfOndoTokenizedEtf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spdrSP500EtfOndoTokenizedEtf.instance.id),
+        tokenName: "SPDR S&P 500 ETF (Ondo Tokenized ETF)",
+        symbol: AssetSymbol(validating: "SPYON"),
+        aggregatorId: "spdr-s-p-500-etf-ondo-tokenized-etf",
+        instances: [
+            EIP155.Ethereum.spdrSP500EtfOndoTokenizedEtf,
+            EIP155.BinanceSmartChain.spdrSP500EtfOndoTokenizedEtf,
+            SOLANA.Solana.spdrSP500EtfOndoTokenizedEtf
+        ]
+    )
+
+    /// SpaceX xStock, CoinGecko's `spacex-xstocks`: its home on EIP155.Ethereum, then its other instances
+    public static let spacexXstocks: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spacexXstocks.instance.id),
+        tokenName: "SpaceX xStock",
+        symbol: AssetSymbol(validating: "SPCXX"),
+        aggregatorId: "spacex-xstocks",
+        instances: [
+            EIP155.Ethereum.spacexXstocks,
+            EIP155.BinanceSmartChain.spacexXstocks,
+            SOLANA.Solana.spacexXstocks
+        ]
+    )
+
+    /// Mask Network, CoinGecko's `mask-network`: its home on EIP155.Ethereum, then its other instances
+    public static let maskNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.maskNetwork.instance.id),
+        tokenName: "Mask Network",
+        symbol: AssetSymbol(validating: "MASK"),
+        aggregatorId: "mask-network",
+        instances: [
+            EIP155.Ethereum.maskNetwork,
+            EIP155.BinanceSmartChain.maskNetwork,
+            EIP155.Polygon.maskNetwork
+        ]
+    )
+
+    /// Velodrome Finance, CoinGecko's `velodrome-finance`: its home on EIP155.Optimism, then its other instances
+    public static let velodromeFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Optimism.velodromeFinance.instance.id),
+        tokenName: "Velodrome Finance",
+        symbol: AssetSymbol(validating: "VELO"),
+        aggregatorId: "velodrome-finance",
+        instances: [
+            EIP155.Optimism.velodromeFinance
+        ]
+    )
+
+    /// Rnt, CoinGecko's `reental`: its home on EIP155.Polygon, then its other instances
+    public static let reental: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.reental.instance.id),
+        tokenName: "Rnt",
+        symbol: AssetSymbol(validating: "RNT"),
+        aggregatorId: "reental",
+        instances: [
+            EIP155.Polygon.reental
+        ]
+    )
+
+    /// Ankr Network, CoinGecko's `ankr`: its home on EIP155.Ethereum, then its other instances
+    public static let ankr: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ankr.instance.id),
+        tokenName: "Ankr Network",
+        symbol: AssetSymbol(validating: "ANKR"),
+        aggregatorId: "ankr",
+        instances: [
+            EIP155.Ethereum.ankr,
+            EIP155.BinanceSmartChain.ankr,
+            EIP155.Polygon.ankr,
+            EIP155.Optimism.ankr,
+            EIP155.Fantom.ankr,
+            EIP155.Avalanche.ankr
+        ]
+    )
+
+    /// Metronome Synth USD, CoinGecko's `metronome-synth-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let metronomeSynthUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.metronomeSynthUsd.instance.id),
+        tokenName: "Metronome Synth USD",
+        symbol: AssetSymbol(validating: "MSUSD"),
+        aggregatorId: "metronome-synth-usd",
+        instances: [
+            EIP155.Ethereum.metronomeSynthUsd,
+            EIP155.Optimism.metronomeSynthUsd,
+            EIP155.Base.metronomeSynthUsd
+        ]
+    )
+
+    /// ALEO, CoinGecko's `aleo`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let aleo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.aleo.instance.id),
+        tokenName: "ALEO",
+        symbol: AssetSymbol(validating: "ALEO"),
+        aggregatorId: "aleo",
+        instances: [
+            EIP155.BinanceSmartChain.aleo
+        ]
+    )
+
+    /// Aurora, CoinGecko's `aurora-near`: its home on EIP155.Ethereum, then its other instances
+    public static let auroraNear: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.auroraNear.instance.id),
+        tokenName: "Aurora",
+        symbol: AssetSymbol(validating: "AURORA"),
+        aggregatorId: "aurora-near",
+        instances: [
+            EIP155.Ethereum.auroraNear,
+            NEAR.Near.auroraNear
+        ]
+    )
+
+    /// AI Analysis Token, CoinGecko's `ai-analysis-token`: its home on EIP155.Ethereum, then its other instances
+    public static let aiAnalysisToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aiAnalysisToken.instance.id),
+        tokenName: "AI Analysis Token",
+        symbol: AssetSymbol(validating: "AIAT"),
+        aggregatorId: "ai-analysis-token",
+        instances: [
+            EIP155.Ethereum.aiAnalysisToken
+        ]
+    )
+
+    /// Aztec, CoinGecko's `aztec`: its home on EIP155.Ethereum, then its other instances
+    public static let aztec: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aztec.instance.id),
+        tokenName: "Aztec",
+        symbol: AssetSymbol(validating: "AZTEC"),
+        aggregatorId: "aztec",
+        instances: [
+            EIP155.Ethereum.aztec
+        ]
+    )
+
+    /// Lombard, CoinGecko's `lombard-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let lombardProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.lombardProtocol.instance.id),
+        tokenName: "Lombard",
+        symbol: AssetSymbol(validating: "BARD"),
+        aggregatorId: "lombard-protocol",
+        instances: [
+            EIP155.Ethereum.lombardProtocol,
+            EIP155.BinanceSmartChain.lombardProtocol
+        ]
+    )
+
+    /// InfiniFi USD, CoinGecko's `infinifi-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let infinifiUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.infinifiUsd.instance.id),
+        tokenName: "InfiniFi USD",
+        symbol: AssetSymbol(validating: "IUSD"),
+        aggregatorId: "infinifi-usd",
+        instances: [
+            EIP155.Ethereum.infinifiUsd
+        ]
+    )
+
+    /// Api3, CoinGecko's `api3`: its home on EIP155.Ethereum, then its other instances
+    public static let api3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.api3.instance.id),
+        tokenName: "Api3",
+        symbol: AssetSymbol(validating: "API3"),
+        aggregatorId: "api3",
+        instances: [
+            EIP155.Ethereum.api3
+        ]
+    )
+
+    /// Alchemist AI, CoinGecko's `alchemist-ai`: its home on SOLANA.Solana, then its other instances
+    public static let alchemistAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.alchemistAi.instance.id),
+        tokenName: "Alchemist AI",
+        symbol: AssetSymbol(validating: "ALCH"),
+        aggregatorId: "alchemist-ai",
+        instances: [
+            SOLANA.Solana.alchemistAi
+        ]
+    )
+
+    /// NVIDIA (bStocks Tokenized Stock), CoinGecko's `nvidia-bstocks`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let nvidiaBstocks: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.nvidiaBstocks.instance.id),
+        tokenName: "NVIDIA (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "NVDAB"),
+        aggregatorId: "nvidia-bstocks",
+        instances: [
+            EIP155.BinanceSmartChain.nvidiaBstocks
+        ]
+    )
+
+    /// NovaChargeX Coin, CoinGecko's `novachargex-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let novachargexCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.novachargexCoin.instance.id),
+        tokenName: "NovaChargeX Coin",
+        symbol: AssetSymbol(validating: "NCX"),
+        aggregatorId: "novachargex-coin",
+        instances: [
+            EIP155.Ethereum.novachargexCoin
+        ]
+    )
+
+    /// Veranta, CoinGecko's `avantis`: its home on EIP155.Base, then its other instances
+    public static let avantis: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.avantis.instance.id),
+        tokenName: "Veranta",
+        symbol: AssetSymbol(validating: "AVNT"),
+        aggregatorId: "avantis",
+        instances: [
+            EIP155.Base.avantis
+        ]
+    )
+
+    /// Magic Eden, CoinGecko's `magic-eden`: its home on SOLANA.Solana, then its other instances
+    public static let magicEden: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.magicEden.instance.id),
+        tokenName: "Magic Eden",
+        symbol: AssetSymbol(validating: "ME"),
+        aggregatorId: "magic-eden",
+        instances: [
+            SOLANA.Solana.magicEden
+        ]
+    )
+
+    /// Mog Coin, CoinGecko's `mog-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let mogCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mogCoin.instance.id),
+        tokenName: "Mog Coin",
+        symbol: AssetSymbol(validating: "MOG"),
+        aggregatorId: "mog-coin",
+        instances: [
+            EIP155.Ethereum.mogCoin,
+            EIP155.Avalanche.mogCoin,
+            EIP155.Base.mogCoin
+        ]
+    )
+
+    /// cat in a dogs world, CoinGecko's `cat-in-a-dogs-world`: its home on SOLANA.Solana, then its other instances
+    public static let catInADogsWorld: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.catInADogsWorld.instance.id),
+        tokenName: "cat in a dogs world",
+        symbol: AssetSymbol(validating: "MEW"),
+        aggregatorId: "cat-in-a-dogs-world",
+        instances: [
+            SOLANA.Solana.catInADogsWorld
+        ]
+    )
+
+    /// Micron Technology (Ondo Tokenized Stock), CoinGecko's `micron-technology-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let micronTechnologyOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.micronTechnologyOndoTokenizedStock.instance.id),
+        tokenName: "Micron Technology (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "MUON"),
+        aggregatorId: "micron-technology-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.micronTechnologyOndoTokenizedStock,
+            EIP155.BinanceSmartChain.micronTechnologyOndoTokenizedStock,
+            SOLANA.Solana.micronTechnologyOndoTokenizedStock
+        ]
+    )
+
+    /// Request, CoinGecko's `request-network`: its home on EIP155.Ethereum, then its other instances
+    public static let requestNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.requestNetwork.instance.id),
+        tokenName: "Request",
+        symbol: AssetSymbol(validating: "REQ"),
+        aggregatorId: "request-network",
+        instances: [
+            EIP155.Ethereum.requestNetwork,
+            EIP155.Polygon.requestNetwork
+        ]
+    )
+
+    /// DAPPOS, CoinGecko's `dappos`: its home on EIP155.Ethereum, then its other instances
+    public static let dappos: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dappos.instance.id),
+        tokenName: "DAPPOS",
+        symbol: AssetSymbol(validating: "DOS"),
+        aggregatorId: "dappos",
+        instances: [
+            EIP155.Ethereum.dappos,
+            EIP155.BinanceSmartChain.dappos
+        ]
+    )
+
+    /// America Party, CoinGecko's `america-party-5`: its home on EIP155.Ethereum, then its other instances
+    public static let americaParty5: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.americaParty5.instance.id),
+        tokenName: "America Party",
+        symbol: AssetSymbol(validating: "AMERICA"),
+        aggregatorId: "america-party-5",
+        instances: [
+            EIP155.Ethereum.americaParty5
+        ]
+    )
+
+    /// Frankencoin, CoinGecko's `frankencoin`: its home on EIP155.Ethereum, then its other instances
+    public static let frankencoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.frankencoin.instance.id),
+        tokenName: "Frankencoin",
+        symbol: AssetSymbol(validating: "ZCHF"),
+        aggregatorId: "frankencoin",
+        instances: [
+            EIP155.Ethereum.frankencoin,
+            EIP155.Polygon.frankencoin,
+            EIP155.Optimism.frankencoin,
+            EIP155.Avalanche.frankencoin,
+            EIP155.Base.frankencoin
+        ]
+    )
+
+    /// GOHOME, CoinGecko's `gohome`: its home on SOLANA.Solana, then its other instances
+    public static let gohome: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.gohome.instance.id),
+        tokenName: "GOHOME",
+        symbol: AssetSymbol(validating: "GOHOME"),
+        aggregatorId: "gohome",
+        instances: [
+            SOLANA.Solana.gohome
+        ]
+    )
+
+    /// SSV Network, CoinGecko's `ssv-network`: its home on EIP155.Ethereum, then its other instances
+    public static let ssvNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ssvNetwork.instance.id),
+        tokenName: "SSV Network",
+        symbol: AssetSymbol(validating: "SSV"),
+        aggregatorId: "ssv-network",
+        instances: [
+            EIP155.Ethereum.ssvNetwork
+        ]
+    )
+
+    /// Atoshi, CoinGecko's `atoshi`: its home on EIP155.Ethereum, then its other instances
+    public static let atoshi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.atoshi.instance.id),
+        tokenName: "Atoshi",
+        symbol: AssetSymbol(validating: "ATOS"),
+        aggregatorId: "atoshi",
+        instances: [
+            EIP155.Ethereum.atoshi
+        ]
+    )
+
+    /// AllUnity CHF, CoinGecko's `allunity-chf`: its home on EIP155.Ethereum, then its other instances
+    public static let allunityChf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.allunityChf.instance.id),
+        tokenName: "AllUnity CHF",
+        symbol: AssetSymbol(validating: "CHFAU"),
+        aggregatorId: "allunity-chf",
+        instances: [
+            EIP155.Ethereum.allunityChf,
+            EIP155.Polygon.allunityChf,
+            EIP155.Base.allunityChf,
+            SOLANA.Solana.allunityChf
+        ]
+    )
+
+    /// Moo Deng, CoinGecko's `moo-deng`: its home on SOLANA.Solana, then its other instances
+    public static let mooDeng: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.mooDeng.instance.id),
+        tokenName: "Moo Deng",
+        symbol: AssetSymbol(validating: "MOODENG"),
+        aggregatorId: "moo-deng",
+        instances: [
+            SOLANA.Solana.mooDeng
+        ]
+    )
+
+    /// Unitas, CoinGecko's `unitas`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let unitas: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.unitas.instance.id),
+        tokenName: "Unitas",
+        symbol: AssetSymbol(validating: "UP"),
+        aggregatorId: "unitas",
+        instances: [
+            EIP155.BinanceSmartChain.unitas,
+            EIP155.Ethereum.unitas,
+            SOLANA.Solana.unitas
+        ]
+    )
+
+    /// Space and Time, CoinGecko's `space-and-time`: its home on EIP155.Ethereum, then its other instances
+    public static let spaceAndTime: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spaceAndTime.instance.id),
+        tokenName: "Space and Time",
+        symbol: AssetSymbol(validating: "SXT"),
+        aggregatorId: "space-and-time",
+        instances: [
+            EIP155.Ethereum.spaceAndTime,
+            EIP155.Base.spaceAndTime
+        ]
+    )
+
+    /// StraitsX XUSD, CoinGecko's `straitsx-xusd`: its home on EIP155.Ethereum, then its other instances
+    public static let straitsxXusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.straitsxXusd.instance.id),
+        tokenName: "StraitsX XUSD",
+        symbol: AssetSymbol(validating: "XUSD"),
+        aggregatorId: "straitsx-xusd",
+        instances: [
+            EIP155.Ethereum.straitsxXusd,
+            EIP155.BinanceSmartChain.straitsxXusd,
+            SOLANA.Solana.straitsxXusd
+        ]
+    )
+
+    /// Movement, CoinGecko's `movement`: its home on EIP155.Ethereum, then its other instances
+    public static let movement: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.movement.instance.id),
+        tokenName: "Movement",
+        symbol: AssetSymbol(validating: "MOVE"),
+        aggregatorId: "movement",
+        instances: [
+            EIP155.Ethereum.movement,
+            EIP155.Base.movement
+        ]
+    )
+
+    /// Rocket Pool, CoinGecko's `rocket-pool`: its home on EIP155.Ethereum, then its other instances
+    public static let rocketPool: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.rocketPool.instance.id),
+        tokenName: "Rocket Pool",
+        symbol: AssetSymbol(validating: "RPL"),
+        aggregatorId: "rocket-pool",
+        instances: [
+            EIP155.Ethereum.rocketPool,
+            EIP155.Polygon.rocketPool
+        ]
+    )
+
+    /// FOLKS, CoinGecko's `folks`: its home on EIP155.Avalanche, then its other instances
+    public static let folks: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.folks.instance.id),
+        tokenName: "FOLKS",
+        symbol: AssetSymbol(validating: "FOLKS"),
+        aggregatorId: "folks",
+        instances: [
+            EIP155.Avalanche.folks,
+            EIP155.Ethereum.folks,
+            EIP155.BinanceSmartChain.folks,
+            EIP155.Polygon.folks,
+            EIP155.Base.folks,
+            ALGORAND.Algorand.folks
+        ]
+    )
+
+    /// ConstitutionDAO, CoinGecko's `constitutiondao`: its home on EIP155.Ethereum, then its other instances
+    public static let constitutiondao: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.constitutiondao.instance.id),
+        tokenName: "ConstitutionDAO",
+        symbol: AssetSymbol(validating: "PEOPLE"),
+        aggregatorId: "constitutiondao",
+        instances: [
+            EIP155.Ethereum.constitutiondao
+        ]
+    )
+
+    /// Synapse, CoinGecko's `synapse-2`: its home on EIP155.Ethereum, then its other instances
+    public static let synapse2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.synapse2.instance.id),
+        tokenName: "Synapse",
+        symbol: AssetSymbol(validating: "SYN"),
+        aggregatorId: "synapse-2",
+        instances: [
+            EIP155.Ethereum.synapse2,
+            EIP155.BinanceSmartChain.synapse2,
+            EIP155.Polygon.synapse2,
+            EIP155.Optimism.synapse2,
+            EIP155.Fantom.synapse2,
+            EIP155.Avalanche.synapse2,
+            EIP155.Base.synapse2
+        ]
+    )
+
+    /// BeethovenX sFTMX, CoinGecko's `stader-sftmx`: its home on EIP155.Fantom, then its other instances
+    public static let staderSftmx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Fantom.staderSftmx.instance.id),
+        tokenName: "BeethovenX sFTMX",
+        symbol: AssetSymbol(validating: "SFTMX"),
+        aggregatorId: "stader-sftmx",
+        instances: [
+            EIP155.Fantom.staderSftmx
+        ]
+    )
+
+    /// Band, CoinGecko's `band-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let bandProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bandProtocol.instance.id),
+        tokenName: "Band",
+        symbol: AssetSymbol(validating: "BAND"),
+        aggregatorId: "band-protocol",
+        instances: [
+            EIP155.Ethereum.bandProtocol,
+            EIP155.Fantom.bandProtocol
+        ]
+    )
+
+    /// Baseline, CoinGecko's `baseline`: its home on EIP155.Ethereum, then its other instances
+    public static let baseline: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.baseline.instance.id),
+        tokenName: "Baseline",
+        symbol: AssetSymbol(validating: "B"),
+        aggregatorId: "baseline",
+        instances: [
+            EIP155.Ethereum.baseline
+        ]
+    )
+
+    /// Auki, CoinGecko's `auki-labs`: its home on EIP155.Base, then its other instances
+    public static let aukiLabs: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.aukiLabs.instance.id),
+        tokenName: "Auki",
+        symbol: AssetSymbol(validating: "AUKI"),
+        aggregatorId: "auki-labs",
+        instances: [
+            EIP155.Base.aukiLabs
+        ]
+    )
+
+    /// Keeta, CoinGecko's `keeta`: its home on EIP155.Base, then its other instances
+    public static let keeta: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.keeta.instance.id),
+        tokenName: "Keeta",
+        symbol: AssetSymbol(validating: "KTA"),
+        aggregatorId: "keeta",
+        instances: [
+            EIP155.Base.keeta
+        ]
+    )
+
+    /// TROLL, CoinGecko's `troll-2`: its home on SOLANA.Solana, then its other instances
+    public static let troll2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.troll2.instance.id),
+        tokenName: "TROLL",
+        symbol: AssetSymbol(validating: "TROLL"),
+        aggregatorId: "troll-2",
+        instances: [
+            SOLANA.Solana.troll2
+        ]
+    )
+
+    /// Succinct, CoinGecko's `succinct`: its home on EIP155.Ethereum, then its other instances
+    public static let succinct: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.succinct.instance.id),
+        tokenName: "Succinct",
+        symbol: AssetSymbol(validating: "PROVE"),
+        aggregatorId: "succinct",
+        instances: [
+            EIP155.Ethereum.succinct,
+            EIP155.BinanceSmartChain.succinct
+        ]
+    )
+
+    /// SanDisk (bStocks Tokenized Stock), CoinGecko's `sandisk-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let sandiskBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.sandiskBstocksTokenizedStock.instance.id),
+        tokenName: "SanDisk (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "SNDKB"),
+        aggregatorId: "sandisk-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.sandiskBstocksTokenizedStock
+        ]
+    )
+
+    /// AI Powered Finance, CoinGecko's `ai-powered-finance`: its home on EIP155.Polygon, then its other instances
+    public static let aiPoweredFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.aiPoweredFinance.instance.id),
+        tokenName: "AI Powered Finance",
+        symbol: AssetSymbol(validating: "AIPF"),
+        aggregatorId: "ai-powered-finance",
+        instances: [
+            EIP155.Polygon.aiPoweredFinance
+        ]
+    )
+
+    /// Main Street Yield, CoinGecko's `main-street-yield`: its home on EIP155.Ethereum, then its other instances
+    public static let mainStreetYield: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mainStreetYield.instance.id),
+        tokenName: "Main Street Yield",
+        symbol: AssetSymbol(validating: "MSY"),
+        aggregatorId: "main-street-yield",
+        instances: [
+            EIP155.Ethereum.mainStreetYield
+        ]
+    )
+
+    /// Moca Network, CoinGecko's `mocaverse`: its home on EIP155.Ethereum, then its other instances
+    public static let mocaverse: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mocaverse.instance.id),
+        tokenName: "Moca Network",
+        symbol: AssetSymbol(validating: "MOCA"),
+        aggregatorId: "mocaverse",
+        instances: [
+            EIP155.Ethereum.mocaverse,
+            EIP155.Base.mocaverse
+        ]
+    )
+
+    /// Nesa, CoinGecko's `nesa`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let nesa: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.nesa.instance.id),
+        tokenName: "Nesa",
+        symbol: AssetSymbol(validating: "NES"),
+        aggregatorId: "nesa",
+        instances: [
+            EIP155.BinanceSmartChain.nesa,
+            EIP155.Ethereum.nesa
+        ]
+    )
+
+    /// Status, CoinGecko's `status`: its home on EIP155.Ethereum, then its other instances
+    public static let status: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.status.instance.id),
+        tokenName: "Status",
+        symbol: AssetSymbol(validating: "SNT"),
+        aggregatorId: "status",
+        instances: [
+            EIP155.Ethereum.status
+        ]
+    )
+
+    /// LAB, CoinGecko's `lab`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let lab: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.lab.instance.id),
+        tokenName: "LAB",
+        symbol: AssetSymbol(validating: "LAB"),
+        aggregatorId: "lab",
+        instances: [
+            EIP155.BinanceSmartChain.lab
+        ]
+    )
+
+    /// NKYC Token, CoinGecko's `nkyc-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let nkycToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.nkycToken.instance.id),
+        tokenName: "NKYC Token",
+        symbol: AssetSymbol(validating: "NKYC"),
+        aggregatorId: "nkyc-token",
+        instances: [
+            EIP155.BinanceSmartChain.nkycToken
+        ]
+    )
+
+    /// Gemini Dollar, CoinGecko's `gemini-dollar`: its home on EIP155.Ethereum, then its other instances
+    public static let geminiDollar: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.geminiDollar.instance.id),
+        tokenName: "Gemini Dollar",
+        symbol: AssetSymbol(validating: "GUSD"),
+        aggregatorId: "gemini-dollar",
+        instances: [
+            EIP155.Ethereum.geminiDollar,
+            NEAR.Near.geminiDollar
+        ]
+    )
+
+    /// Frax Staked frxUSD, CoinGecko's `staked-frax-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let stakedFraxUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.stakedFraxUsd.instance.id),
+        tokenName: "Frax Staked frxUSD",
+        symbol: AssetSymbol(validating: "SFRXUSD"),
+        aggregatorId: "staked-frax-usd",
+        instances: [
+            EIP155.Ethereum.stakedFraxUsd
+        ]
+    )
+
+    /// ARCS, CoinGecko's `arcs`: its home on EIP155.Ethereum, then its other instances
+    public static let arcs: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.arcs.instance.id),
+        tokenName: "ARCS",
+        symbol: AssetSymbol(validating: "ARX"),
+        aggregatorId: "arcs",
+        instances: [
+            EIP155.Ethereum.arcs
+        ]
+    )
+
+    /// BOLD, CoinGecko's `liquity-bold-2`: its home on EIP155.Ethereum, then its other instances
+    public static let liquityBold2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.liquityBold2.instance.id),
+        tokenName: "BOLD",
+        symbol: AssetSymbol(validating: "BOLD"),
+        aggregatorId: "liquity-bold-2",
+        instances: [
+            EIP155.Ethereum.liquityBold2,
+            EIP155.Optimism.liquityBold2,
+            EIP155.Base.liquityBold2
+        ]
+    )
+
+    /// UMA, CoinGecko's `uma`: its home on EIP155.Ethereum, then its other instances
+    public static let uma: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.uma.instance.id),
+        tokenName: "UMA",
+        symbol: AssetSymbol(validating: "UMA"),
+        aggregatorId: "uma",
+        instances: [
+            EIP155.Ethereum.uma,
+            EIP155.Avalanche.uma
+        ]
+    )
+
+    /// Rekt, CoinGecko's `rekt-4`: its home on EIP155.Ethereum, then its other instances
+    public static let rekt4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.rekt4.instance.id),
+        tokenName: "Rekt",
+        symbol: AssetSymbol(validating: "REKT"),
+        aggregatorId: "rekt-4",
+        instances: [
+            EIP155.Ethereum.rekt4,
+            EIP155.BinanceSmartChain.rekt4,
+            EIP155.Avalanche.rekt4,
+            EIP155.Base.rekt4,
+            SOLANA.Solana.rekt4
+        ]
+    )
+
+    /// ETHGas, CoinGecko's `ethgas-2`: its home on EIP155.Ethereum, then its other instances
+    public static let ethgas2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ethgas2.instance.id),
+        tokenName: "ETHGas",
+        symbol: AssetSymbol(validating: "GWEI"),
+        aggregatorId: "ethgas-2",
+        instances: [
+            EIP155.Ethereum.ethgas2,
+            EIP155.BinanceSmartChain.ethgas2
+        ]
+    )
+
+    /// APEX, CoinGecko's `apex-token-2`: its home on EIP155.Ethereum, then its other instances
+    public static let apexToken2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.apexToken2.instance.id),
+        tokenName: "APEX",
+        symbol: AssetSymbol(validating: "APEX"),
+        aggregatorId: "apex-token-2",
+        instances: [
+            EIP155.Ethereum.apexToken2
+        ]
+    )
+
+    /// Eurite, CoinGecko's `eurite`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let eurite: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.eurite.instance.id),
+        tokenName: "Eurite",
+        symbol: AssetSymbol(validating: "EURI"),
+        aggregatorId: "eurite",
+        instances: [
+            EIP155.BinanceSmartChain.eurite,
+            EIP155.Ethereum.eurite
+        ]
+    )
+
+    /// Hermez Network, CoinGecko's `hermez-network-token`: its home on EIP155.Ethereum, then its other instances
+    public static let hermezNetworkToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.hermezNetworkToken.instance.id),
+        tokenName: "Hermez Network",
+        symbol: AssetSymbol(validating: "HEZ"),
+        aggregatorId: "hermez-network-token",
+        instances: [
+            EIP155.Ethereum.hermezNetworkToken
+        ]
+    )
+
+    /// Noon USN, CoinGecko's `noon-usn`: its home on EIP155.Ethereum, then its other instances
+    public static let noonUsn: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.noonUsn.instance.id),
+        tokenName: "Noon USN",
+        symbol: AssetSymbol(validating: "USN"),
+        aggregatorId: "noon-usn",
+        instances: [
+            EIP155.Ethereum.noonUsn
+        ]
+    )
+
+    /// Mango, CoinGecko's `mango-markets`: its home on SOLANA.Solana, then its other instances
+    public static let mangoMarkets: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.mangoMarkets.instance.id),
+        tokenName: "Mango",
+        symbol: AssetSymbol(validating: "MNGO"),
+        aggregatorId: "mango-markets",
+        instances: [
+            SOLANA.Solana.mangoMarkets
+        ]
+    )
+
+    /// BankrCoin, CoinGecko's `bankercoin-2`: its home on EIP155.Base, then its other instances
+    public static let bankercoin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.bankercoin2.instance.id),
+        tokenName: "BankrCoin",
+        symbol: AssetSymbol(validating: "BNKR"),
+        aggregatorId: "bankercoin-2",
+        instances: [
+            EIP155.Base.bankercoin2
+        ]
+    )
+
+    /// Memecoin, CoinGecko's `memecoin-2`: its home on EIP155.Ethereum, then its other instances
+    public static let memecoin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.memecoin2.instance.id),
+        tokenName: "Memecoin",
+        symbol: AssetSymbol(validating: "MEME"),
+        aggregatorId: "memecoin-2",
+        instances: [
+            EIP155.Ethereum.memecoin2
+        ]
+    )
+
+    /// Degen, CoinGecko's `degen-base`: its home on EIP155.Base, then its other instances
+    public static let degenBase: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.degenBase.instance.id),
+        tokenName: "Degen",
+        symbol: AssetSymbol(validating: "DEGEN"),
+        aggregatorId: "degen-base",
+        instances: [
+            EIP155.Base.degenBase,
+            EIP155.Ethereum.degenBase,
+            SOLANA.Solana.degenBase
+        ]
+    )
+
+    /// Moolah, CoinGecko's `moolah`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let moolah: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.moolah.instance.id),
+        tokenName: "Moolah",
+        symbol: AssetSymbol(validating: "MOOLAH"),
+        aggregatorId: "moolah",
+        instances: [
+            EIP155.BinanceSmartChain.moolah
+        ]
+    )
+
+    /// Sahara AI, CoinGecko's `sahara-ai`: its home on EIP155.Ethereum, then its other instances
+    public static let saharaAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.saharaAi.instance.id),
+        tokenName: "Sahara AI",
+        symbol: AssetSymbol(validating: "SAHARA"),
+        aggregatorId: "sahara-ai",
+        instances: [
+            EIP155.Ethereum.saharaAi,
+            EIP155.BinanceSmartChain.saharaAi
+        ]
+    )
+
+    /// OSK, CoinGecko's `osk`: its home on TRON.Tron, then its other instances
+    public static let osk: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.osk.instance.id),
+        tokenName: "OSK",
+        symbol: AssetSymbol(validating: "OSK"),
+        aggregatorId: "osk",
+        instances: [
+            TRON.Tron.osk
+        ]
+    )
+
+    /// NVIDIA (Ondo Tokenized Stock), CoinGecko's `nvidia-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let nvidiaOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nvidiaOndoTokenizedStock.instance.id),
+        tokenName: "NVIDIA (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "NVDAON"),
+        aggregatorId: "nvidia-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.nvidiaOndoTokenizedStock,
+            EIP155.BinanceSmartChain.nvidiaOndoTokenizedStock,
+            SOLANA.Solana.nvidiaOndoTokenizedStock
+        ]
+    )
+
+    /// Sai, CoinGecko's `sai`: its home on EIP155.Ethereum, then its other instances
+    public static let sai: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sai.instance.id),
+        tokenName: "Sai",
+        symbol: AssetSymbol(validating: "SAI"),
+        aggregatorId: "sai",
+        instances: [
+            EIP155.Ethereum.sai
+        ]
+    )
+
+    /// Giggle Fund, CoinGecko's `giggle-fund`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let giggleFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.giggleFund.instance.id),
+        tokenName: "Giggle Fund",
+        symbol: AssetSymbol(validating: "GIGGLE"),
+        aggregatorId: "giggle-fund",
+        instances: [
+            EIP155.BinanceSmartChain.giggleFund
+        ]
+    )
+
+    /// Steakhouse Confidential Prime USDC, CoinGecko's `steakhouse-confidential-prime-usdc`: its home on EIP155.Ethereum, then its other instances
+    public static let steakhouseConfidentialPrimeUsdc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.steakhouseConfidentialPrimeUsdc.instance.id),
+        tokenName: "Steakhouse Confidential Prime USDC",
+        symbol: AssetSymbol(validating: "STEAKCUSDC"),
+        aggregatorId: "steakhouse-confidential-prime-usdc",
+        instances: [
+            EIP155.Ethereum.steakhouseConfidentialPrimeUsdc
+        ]
+    )
+
+    /// Opcode, CoinGecko's `opcode`: its home on EIP155.Ethereum, then its other instances
+    public static let opcode: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.opcode.instance.id),
+        tokenName: "Opcode",
+        symbol: AssetSymbol(validating: "OPCODE"),
+        aggregatorId: "opcode",
+        instances: [
+            EIP155.Ethereum.opcode
+        ]
+    )
+
+    /// Orbs, CoinGecko's `orbs`: its home on EIP155.Ethereum, then its other instances
+    public static let orbs: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.orbs.instance.id),
+        tokenName: "Orbs",
+        symbol: AssetSymbol(validating: "ORBS"),
+        aggregatorId: "orbs",
+        instances: [
+            EIP155.Ethereum.orbs,
+            EIP155.BinanceSmartChain.orbs,
+            EIP155.Polygon.orbs,
+            EIP155.Fantom.orbs,
+            EIP155.Avalanche.orbs
+        ]
+    )
+
+    /// Snowbank, CoinGecko's `snowbank`: its home on EIP155.Avalanche, then its other instances
+    public static let snowbank: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.snowbank.instance.id),
+        tokenName: "Snowbank",
+        symbol: AssetSymbol(validating: "SB"),
+        aggregatorId: "snowbank",
+        instances: [
+            EIP155.Avalanche.snowbank
+        ]
+    )
+
+    /// Bifrost, CoinGecko's `bifrost`: its home on EIP155.Ethereum, then its other instances
+    public static let bifrost: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bifrost.instance.id),
+        tokenName: "Bifrost",
+        symbol: AssetSymbol(validating: "BFC"),
+        aggregatorId: "bifrost",
+        instances: [
+            EIP155.Ethereum.bifrost,
+            EIP155.Fantom.bifrost
+        ]
+    )
+
+    /// Powerledger, CoinGecko's `power-ledger`: its home on EIP155.Ethereum, then its other instances
+    public static let powerLedger: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.powerLedger.instance.id),
+        tokenName: "Powerledger",
+        symbol: AssetSymbol(validating: "POWR"),
+        aggregatorId: "power-ledger",
+        instances: [
+            EIP155.Ethereum.powerLedger
+        ]
+    )
+
+    /// Ocean Protocol, CoinGecko's `ocean-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let oceanProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.oceanProtocol.instance.id),
+        tokenName: "Ocean Protocol",
+        symbol: AssetSymbol(validating: "OCEAN"),
+        aggregatorId: "ocean-protocol",
+        instances: [
+            EIP155.Ethereum.oceanProtocol,
+            EIP155.Polygon.oceanProtocol,
+            EIP155.Optimism.oceanProtocol
+        ]
+    )
+
+    /// Neiro, CoinGecko's `neiro-3`: its home on EIP155.Ethereum, then its other instances
+    public static let neiro3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.neiro3.instance.id),
+        tokenName: "Neiro",
+        symbol: AssetSymbol(validating: "NEIRO"),
+        aggregatorId: "neiro-3",
+        instances: [
+            EIP155.Ethereum.neiro3,
+            EIP155.BinanceSmartChain.neiro3,
+            EIP155.Base.neiro3
+        ]
+    )
+
+    /// YFSX, CoinGecko's `yfsx`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let yfsx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.yfsx.instance.id),
+        tokenName: "YFSX",
+        symbol: AssetSymbol(validating: "YFSX"),
+        aggregatorId: "yfsx",
+        instances: [
+            EIP155.BinanceSmartChain.yfsx
+        ]
+    )
+
+    /// Emerald Security Token, CoinGecko's `emerald-security-token`: its home on EIP155.Polygon, then its other instances
+    public static let emeraldSecurityToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.emeraldSecurityToken.instance.id),
+        tokenName: "Emerald Security Token",
+        symbol: AssetSymbol(validating: "EMRL.D"),
+        aggregatorId: "emerald-security-token",
+        instances: [
+            EIP155.Polygon.emeraldSecurityToken
+        ]
+    )
+
+    /// Not in Employment, Education, or Training, CoinGecko's `neet`: its home on SOLANA.Solana, then its other instances
+    public static let neet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.neet.instance.id),
+        tokenName: "Not in Employment, Education, or Training",
+        symbol: AssetSymbol(validating: "NEET"),
+        aggregatorId: "neet",
+        instances: [
+            SOLANA.Solana.neet
+        ]
+    )
+
+    /// Invesco QQQ ETF (Ondo Tokenized ETF), CoinGecko's `invesco-qqq-etf-ondo-tokenized-etf`: its home on EIP155.Ethereum, then its other instances
+    public static let invescoQqqEtfOndoTokenizedEtf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.invescoQqqEtfOndoTokenizedEtf.instance.id),
+        tokenName: "Invesco QQQ ETF (Ondo Tokenized ETF)",
+        symbol: AssetSymbol(validating: "QQQON"),
+        aggregatorId: "invesco-qqq-etf-ondo-tokenized-etf",
+        instances: [
+            EIP155.Ethereum.invescoQqqEtfOndoTokenizedEtf,
+            EIP155.BinanceSmartChain.invescoQqqEtfOndoTokenizedEtf,
+            SOLANA.Solana.invescoQqqEtfOndoTokenizedEtf
+        ]
+    )
+
+    /// Renzo, CoinGecko's `renzo`: its home on EIP155.Ethereum, then its other instances
+    public static let renzo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.renzo.instance.id),
+        tokenName: "Renzo",
+        symbol: AssetSymbol(validating: "REZ"),
+        aggregatorId: "renzo",
+        instances: [
+            EIP155.Ethereum.renzo,
+            EIP155.Base.renzo,
+            SOLANA.Solana.renzo
+        ]
+    )
+
+    /// IoTeX, CoinGecko's `iotex`: its home on EIP155.Ethereum, then its other instances
+    public static let iotex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.iotex.instance.id),
+        tokenName: "IoTeX",
+        symbol: AssetSymbol(validating: "IOTX"),
+        aggregatorId: "iotex",
+        instances: [
+            EIP155.Ethereum.iotex,
+            EIP155.Base.iotex
+        ]
+    )
+
+    /// SkyAI, CoinGecko's `skyai`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let skyai: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.skyai.instance.id),
+        tokenName: "SkyAI",
+        symbol: AssetSymbol(validating: "SKYAI"),
+        aggregatorId: "skyai",
+        instances: [
+            EIP155.BinanceSmartChain.skyai
+        ]
+    )
+
+    /// XPIN Network, CoinGecko's `xpin-network`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let xpinNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.xpinNetwork.instance.id),
+        tokenName: "XPIN Network",
+        symbol: AssetSymbol(validating: "XPIN"),
+        aggregatorId: "xpin-network",
+        instances: [
+            EIP155.BinanceSmartChain.xpinNetwork
+        ]
+    )
+
+    /// Aegis YUSD, CoinGecko's `aegis-yusd`: its home on EIP155.Ethereum, then its other instances
+    public static let aegisYusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aegisYusd.instance.id),
+        tokenName: "Aegis YUSD",
+        symbol: AssetSymbol(validating: "YUSD"),
+        aggregatorId: "aegis-yusd",
+        instances: [
+            EIP155.Ethereum.aegisYusd,
+            EIP155.BinanceSmartChain.aegisYusd,
+            EIP155.Avalanche.aegisYusd
+        ]
+    )
+
+    /// BUSD, CoinGecko's `binance-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let binanceUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.binanceUsd.instance.id),
+        tokenName: "BUSD",
+        symbol: AssetSymbol(validating: "BUSD"),
+        aggregatorId: "binance-usd",
+        instances: [
+            EIP155.Ethereum.binanceUsd
+        ]
+    )
+
+    /// Propy, CoinGecko's `propy`: its home on EIP155.Ethereum, then its other instances
+    public static let propy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.propy.instance.id),
+        tokenName: "Propy",
+        symbol: AssetSymbol(validating: "PRO"),
+        aggregatorId: "propy",
+        instances: [
+            EIP155.Ethereum.propy,
+            EIP155.Base.propy
+        ]
+    )
+
+    /// Palladium Network, CoinGecko's `palladium-network`: its home on EIP155.Ethereum, then its other instances
+    public static let palladiumNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.palladiumNetwork.instance.id),
+        tokenName: "Palladium Network",
+        symbol: AssetSymbol(validating: "PLLDV3"),
+        aggregatorId: "palladium-network",
+        instances: [
+            EIP155.Ethereum.palladiumNetwork
+        ]
+    )
+
+    /// B3 (Base), CoinGecko's `b3`: its home on EIP155.Base, then its other instances
+    public static let b3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.b3.instance.id),
+        tokenName: "B3 (Base)",
+        symbol: AssetSymbol(validating: "B3"),
+        aggregatorId: "b3",
+        instances: [
+            EIP155.Base.b3
+        ]
+    )
+
+    /// BasedHype, CoinGecko's `basedhype`: its home on EIP155.Base, then its other instances
+    public static let basedhype: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.basedhype.instance.id),
+        tokenName: "BasedHype",
+        symbol: AssetSymbol(validating: "BASEDHYPE"),
+        aggregatorId: "basedhype",
+        instances: [
+            EIP155.Base.basedhype
+        ]
+    )
+
+    /// Wiki Cat, CoinGecko's `wiki-cat`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let wikiCat: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.wikiCat.instance.id),
+        tokenName: "Wiki Cat",
+        symbol: AssetSymbol(validating: "WKC"),
+        aggregatorId: "wiki-cat",
+        instances: [
+            EIP155.BinanceSmartChain.wikiCat
+        ]
+    )
+
+    /// Midas Fasanara Global, CoinGecko's `midas-fasanara-global`: its home on EIP155.Ethereum, then its other instances
+    public static let midasFasanaraGlobal: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasFasanaraGlobal.instance.id),
+        tokenName: "Midas Fasanara Global",
+        symbol: AssetSymbol(validating: "MGLOBAL"),
+        aggregatorId: "midas-fasanara-global",
+        instances: [
+            EIP155.Ethereum.midasFasanaraGlobal,
+            EIP155.Avalanche.midasFasanaraGlobal
+        ]
+    )
+
+    /// MBG By Multibank Group, CoinGecko's `mbg-by-multibank-group`: its home on EIP155.Ethereum, then its other instances
+    public static let mbgByMultibankGroup: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.mbgByMultibankGroup.instance.id),
+        tokenName: "MBG By Multibank Group",
+        symbol: AssetSymbol(validating: "MBG"),
+        aggregatorId: "mbg-by-multibank-group",
+        instances: [
+            EIP155.Ethereum.mbgByMultibankGroup
+        ]
+    )
+
+    /// Sign, CoinGecko's `sign-global`: its home on EIP155.Ethereum, then its other instances
+    public static let signGlobal: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.signGlobal.instance.id),
+        tokenName: "Sign",
+        symbol: AssetSymbol(validating: "SIGN"),
+        aggregatorId: "sign-global",
+        instances: [
+            EIP155.Ethereum.signGlobal,
+            EIP155.BinanceSmartChain.signGlobal,
+            EIP155.Base.signGlobal
+        ]
+    )
+
+    /// Euler, CoinGecko's `euler`: its home on EIP155.Ethereum, then its other instances
+    public static let euler: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.euler.instance.id),
+        tokenName: "Euler",
+        symbol: AssetSymbol(validating: "EUL"),
+        aggregatorId: "euler",
+        instances: [
+            EIP155.Ethereum.euler,
+            EIP155.BinanceSmartChain.euler,
+            EIP155.Avalanche.euler,
+            EIP155.Base.euler
+        ]
+    )
+
+    /// MetaMask USD, CoinGecko's `metamask-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let metamaskUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.metamaskUsd.instance.id),
+        tokenName: "MetaMask USD",
+        symbol: AssetSymbol(validating: "MUSD"),
+        aggregatorId: "metamask-usd",
+        instances: [
+            EIP155.Ethereum.metamaskUsd
+        ]
+    )
+
+    /// Lista DAO, CoinGecko's `lista`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let lista: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.lista.instance.id),
+        tokenName: "Lista DAO",
+        symbol: AssetSymbol(validating: "LISTA"),
+        aggregatorId: "lista",
+        instances: [
+            EIP155.BinanceSmartChain.lista
+        ]
+    )
+
+    /// ChangeNOW, CoinGecko's `changenow`: its home on EIP155.Ethereum, then its other instances
+    public static let changenow: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.changenow.instance.id),
+        tokenName: "ChangeNOW",
+        symbol: AssetSymbol(validating: "NOW"),
+        aggregatorId: "changenow",
+        instances: [
+            EIP155.Ethereum.changenow,
+            EIP155.BinanceSmartChain.changenow
+        ]
+    )
+
+    /// CargoX, CoinGecko's `cargox`: its home on EIP155.Ethereum, then its other instances
+    public static let cargox: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cargox.instance.id),
+        tokenName: "CargoX",
+        symbol: AssetSymbol(validating: "CXO"),
+        aggregatorId: "cargox",
+        instances: [
+            EIP155.Ethereum.cargox,
+            EIP155.Polygon.cargox
+        ]
+    )
+
+    /// HashKey Platform Token, CoinGecko's `hashkey-ecopoints`: its home on EIP155.Ethereum, then its other instances
+    public static let hashkeyEcopoints: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.hashkeyEcopoints.instance.id),
+        tokenName: "HashKey Platform Token",
+        symbol: AssetSymbol(validating: "HSK"),
+        aggregatorId: "hashkey-ecopoints",
+        instances: [
+            EIP155.Ethereum.hashkeyEcopoints
+        ]
+    )
+
+    /// REAL, CoinGecko's `asset`: its home on EIP155.Ethereum, then its other instances
+    public static let asset: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.asset.instance.id),
+        tokenName: "REAL",
+        symbol: AssetSymbol(validating: "ASSET"),
+        aggregatorId: "asset",
+        instances: [
+            EIP155.Ethereum.asset
+        ]
+    )
+
+    /// Monerium EUR emoney, CoinGecko's `monerium-eur-money-2`: its home on EIP155.Ethereum, then its other instances
+    public static let moneriumEurMoney2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.moneriumEurMoney2.instance.id),
+        tokenName: "Monerium EUR emoney",
+        symbol: AssetSymbol(validating: "EURE"),
+        aggregatorId: "monerium-eur-money-2",
+        instances: [
+            EIP155.Ethereum.moneriumEurMoney2,
+            EIP155.Polygon.moneriumEurMoney2,
+            COSMOS.Terra.moneriumEurMoney2
+        ]
+    )
+
+    /// Tornado Cash, CoinGecko's `tornado-cash`: its home on EIP155.Ethereum, then its other instances
+    public static let tornadoCash: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tornadoCash.instance.id),
+        tokenName: "Tornado Cash",
+        symbol: AssetSymbol(validating: "TORN"),
+        aggregatorId: "tornado-cash",
+        instances: [
+            EIP155.Ethereum.tornadoCash,
+            EIP155.BinanceSmartChain.tornadoCash
+        ]
+    )
+
+    /// Alphabet (bStocks Tokenized Stock), CoinGecko's `alphabet-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let alphabetBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.alphabetBstocksTokenizedStock.instance.id),
+        tokenName: "Alphabet (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "GOOGLB"),
+        aggregatorId: "alphabet-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.alphabetBstocksTokenizedStock
+        ]
+    )
+
+    /// Definitive, CoinGecko's `definitive`: its home on EIP155.Base, then its other instances
+    public static let definitive: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.definitive.instance.id),
+        tokenName: "Definitive",
+        symbol: AssetSymbol(validating: "EDGE"),
+        aggregatorId: "definitive",
+        instances: [
+            EIP155.Base.definitive
+        ]
+    )
+
+    /// Velvet, CoinGecko's `velvet`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let velvet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.velvet.instance.id),
+        tokenName: "Velvet",
+        symbol: AssetSymbol(validating: "VELVET"),
+        aggregatorId: "velvet",
+        instances: [
+            EIP155.BinanceSmartChain.velvet,
+            EIP155.Base.velvet
+        ]
+    )
+
+    /// JETT CRYPTO, CoinGecko's `jett-crypto-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let jettCrypto2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.jettCrypto2.instance.id),
+        tokenName: "JETT CRYPTO",
+        symbol: AssetSymbol(validating: "JETT"),
+        aggregatorId: "jett-crypto-2",
+        instances: [
+            EIP155.BinanceSmartChain.jettCrypto2
+        ]
+    )
+
+    /// Bancor Network, CoinGecko's `bancor`: its home on EIP155.Ethereum, then its other instances
+    public static let bancor: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bancor.instance.id),
+        tokenName: "Bancor Network",
+        symbol: AssetSymbol(validating: "BNT"),
+        aggregatorId: "bancor",
+        instances: [
+            EIP155.Ethereum.bancor
+        ]
+    )
+
+    /// Arcblock, CoinGecko's `arcblock`: its home on EIP155.Ethereum, then its other instances
+    public static let arcblock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.arcblock.instance.id),
+        tokenName: "Arcblock",
+        symbol: AssetSymbol(validating: "ABT"),
+        aggregatorId: "arcblock",
+        instances: [
+            EIP155.Ethereum.arcblock
+        ]
+    )
+
+    /// BULLA, CoinGecko's `bulla-3`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bulla3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bulla3.instance.id),
+        tokenName: "BULLA",
+        symbol: AssetSymbol(validating: "BULLA"),
+        aggregatorId: "bulla-3",
+        instances: [
+            EIP155.BinanceSmartChain.bulla3
+        ]
+    )
+
+    /// COINDEPO, CoinGecko's `coindepo`: its home on EIP155.Ethereum, then its other instances
+    public static let coindepo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.coindepo.instance.id),
+        tokenName: "COINDEPO",
+        symbol: AssetSymbol(validating: "COINDEPO"),
+        aggregatorId: "coindepo",
+        instances: [
+            EIP155.Ethereum.coindepo
+        ]
+    )
+
+    /// Teller, CoinGecko's `teller`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let teller: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.teller.instance.id),
+        tokenName: "Teller",
+        symbol: AssetSymbol(validating: "DEBIT"),
+        aggregatorId: "teller",
+        instances: [
+            EIP155.BinanceSmartChain.teller
+        ]
+    )
+
+    /// Sanctum, CoinGecko's `sanctum-2`: its home on SOLANA.Solana, then its other instances
+    public static let sanctum2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.sanctum2.instance.id),
+        tokenName: "Sanctum",
+        symbol: AssetSymbol(validating: "SANC"),
+        aggregatorId: "sanctum-2",
+        instances: [
+            SOLANA.Solana.sanctum2
+        ]
+    )
+
+    /// Illuvium, CoinGecko's `illuvium`: its home on EIP155.Ethereum, then its other instances
+    public static let illuvium: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.illuvium.instance.id),
+        tokenName: "Illuvium",
+        symbol: AssetSymbol(validating: "ILV"),
+        aggregatorId: "illuvium",
+        instances: [
+            EIP155.Ethereum.illuvium
+        ]
+    )
+
+    /// Capricorn, CoinGecko's `apriori`: its home on EIP155.Ethereum, then its other instances
+    public static let apriori: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.apriori.instance.id),
+        tokenName: "Capricorn",
+        symbol: AssetSymbol(validating: "APR"),
+        aggregatorId: "apriori",
+        instances: [
+            EIP155.Ethereum.apriori,
+            EIP155.BinanceSmartChain.apriori
+        ]
+    )
+
+    /// Zora, CoinGecko's `zora`: its home on EIP155.Base, then its other instances
+    public static let zora: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.zora.instance.id),
+        tokenName: "Zora",
+        symbol: AssetSymbol(validating: "ZORA"),
+        aggregatorId: "zora",
+        instances: [
+            EIP155.Base.zora
+        ]
+    )
+
+    /// Hims & Hers Health (Ondo Tokenized Stock), CoinGecko's `hims-hers-health-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let himsHersHealthOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.himsHersHealthOndoTokenizedStock.instance.id),
+        tokenName: "Hims & Hers Health (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "HIMSON"),
+        aggregatorId: "hims-hers-health-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.himsHersHealthOndoTokenizedStock,
+            EIP155.BinanceSmartChain.himsHersHealthOndoTokenizedStock,
+            SOLANA.Solana.himsHersHealthOndoTokenizedStock
+        ]
+    )
+
+    /// Vana, CoinGecko's `vana`: its home on EIP155.Ethereum, then its other instances
+    public static let vana: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.vana.instance.id),
+        tokenName: "Vana",
+        symbol: AssetSymbol(validating: "VANA"),
+        aggregatorId: "vana",
+        instances: [
+            EIP155.Ethereum.vana,
+            EIP155.BinanceSmartChain.vana,
+            EIP155.Polygon.vana,
+            EIP155.Optimism.vana,
+            EIP155.Base.vana
+        ]
+    )
+
+    /// RHEA, CoinGecko's `rhea-2`: its home on NEAR.Near, then its other instances
+    public static let rhea2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: NEAR.Near.rhea2.instance.id),
+        tokenName: "RHEA",
+        symbol: AssetSymbol(validating: "RHEA"),
+        aggregatorId: "rhea-2",
+        instances: [
+            NEAR.Near.rhea2,
+            EIP155.BinanceSmartChain.rhea2,
+            SOLANA.Solana.rhea2
+        ]
+    )
+
+    /// Hunter Biden's Laptop, CoinGecko's `hunter-biden-s-laptop-3`: its home on EIP155.Base, then its other instances
+    public static let hunterBidenSLaptop3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.hunterBidenSLaptop3.instance.id),
+        tokenName: "Hunter Biden's Laptop",
+        symbol: AssetSymbol(validating: "LAPTOP"),
+        aggregatorId: "hunter-biden-s-laptop-3",
+        instances: [
+            EIP155.Base.hunterBidenSLaptop3
+        ]
+    )
+
+    /// XT.com, CoinGecko's `xtcom-token`: its home on EIP155.Ethereum, then its other instances
+    public static let xtcomToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.xtcomToken.instance.id),
+        tokenName: "XT.com",
+        symbol: AssetSymbol(validating: "XT"),
+        aggregatorId: "xtcom-token",
+        instances: [
+            EIP155.Ethereum.xtcomToken
+        ]
+    )
+
+    /// Midas mHYPER, CoinGecko's `midas-mhyper`: its home on EIP155.Ethereum, then its other instances
+    public static let midasMhyper: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasMhyper.instance.id),
+        tokenName: "Midas mHYPER",
+        symbol: AssetSymbol(validating: "MHYPER"),
+        aggregatorId: "midas-mhyper",
+        instances: [
+            EIP155.Ethereum.midasMhyper
+        ]
+    )
+
+    /// Across Protocol, CoinGecko's `across-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let acrossProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.acrossProtocol.instance.id),
+        tokenName: "Across Protocol",
+        symbol: AssetSymbol(validating: "ACX"),
+        aggregatorId: "across-protocol",
+        instances: [
+            EIP155.Ethereum.acrossProtocol,
+            EIP155.Polygon.acrossProtocol,
+            EIP155.Optimism.acrossProtocol
+        ]
+    )
+
+    /// Gravity (by Galxe), CoinGecko's `g-token`: its home on EIP155.Ethereum, then its other instances
+    public static let gToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gToken.instance.id),
+        tokenName: "Gravity (by Galxe)",
+        symbol: AssetSymbol(validating: "G"),
+        aggregatorId: "g-token",
+        instances: [
+            EIP155.Ethereum.gToken,
+            EIP155.BinanceSmartChain.gToken,
+            EIP155.Base.gToken
+        ]
+    )
+
+    /// Dogelon Mars, CoinGecko's `dogelon-mars`: its home on EIP155.Ethereum, then its other instances
+    public static let dogelonMars: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dogelonMars.instance.id),
+        tokenName: "Dogelon Mars",
+        symbol: AssetSymbol(validating: "ELON"),
+        aggregatorId: "dogelon-mars",
+        instances: [
+            EIP155.Ethereum.dogelonMars,
+            EIP155.BinanceSmartChain.dogelonMars,
+            EIP155.Polygon.dogelonMars,
+            EIP155.Base.dogelonMars,
+            SOLANA.Solana.dogelonMars
+        ]
+    )
+
+    /// SentismAI, CoinGecko's `sentismai`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let sentismai: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.sentismai.instance.id),
+        tokenName: "SentismAI",
+        symbol: AssetSymbol(validating: "SENTIS"),
+        aggregatorId: "sentismai",
+        instances: [
+            EIP155.BinanceSmartChain.sentismai
+        ]
+    )
+
+    /// Clearpool, CoinGecko's `clearpool`: its home on EIP155.Ethereum, then its other instances
+    public static let clearpool: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.clearpool.instance.id),
+        tokenName: "Clearpool",
+        symbol: AssetSymbol(validating: "CPOOL"),
+        aggregatorId: "clearpool",
+        instances: [
+            EIP155.Ethereum.clearpool,
+            SOLANA.Solana.clearpool
+        ]
+    )
+
+    /// Audiera, CoinGecko's `audiera`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let audiera: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.audiera.instance.id),
+        tokenName: "Audiera",
+        symbol: AssetSymbol(validating: "BEAT"),
+        aggregatorId: "audiera",
+        instances: [
+            EIP155.BinanceSmartChain.audiera
+        ]
+    )
+
+    /// Spiko Digital Assets Cash & Carry Fund - Euro Share Class, CoinGecko's `spiko-digital-assets-cash-carry-fund-euro-share-class`: its home on EIP155.Ethereum, then its other instances
+    public static let spikoDigitalAssetsCashCarryFundEuroShareClass: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spikoDigitalAssetsCashCarryFundEuroShareClass.instance.id),
+        tokenName: "Spiko Digital Assets Cash & Carry Fund - Euro Share Class",
+        symbol: AssetSymbol(validating: "EURSPKCC"),
+        aggregatorId: "spiko-digital-assets-cash-carry-fund-euro-share-class",
+        instances: [
+            EIP155.Ethereum.spikoDigitalAssetsCashCarryFundEuroShareClass,
+            EIP155.Polygon.spikoDigitalAssetsCashCarryFundEuroShareClass,
+            EIP155.Base.spikoDigitalAssetsCashCarryFundEuroShareClass
+        ]
+    )
+
+    /// CEA Industries (bStocks Tokenized Stock), CoinGecko's `cea-industries-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let ceaIndustriesBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.ceaIndustriesBstocksTokenizedStock.instance.id),
+        tokenName: "CEA Industries (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "BNCB"),
+        aggregatorId: "cea-industries-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.ceaIndustriesBstocksTokenizedStock
+        ]
+    )
+
+    /// Nirvana ANA, CoinGecko's `nirvana-ana-2`: its home on SOLANA.Solana, then its other instances
+    public static let nirvanaAna2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.nirvanaAna2.instance.id),
+        tokenName: "Nirvana ANA",
+        symbol: AssetSymbol(validating: "ANA"),
+        aggregatorId: "nirvana-ana-2",
+        instances: [
+            SOLANA.Solana.nirvanaAna2
+        ]
+    )
+
+    /// OpenGradient, CoinGecko's `opengradient`: its home on EIP155.Base, then its other instances
+    public static let opengradient: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.opengradient.instance.id),
+        tokenName: "OpenGradient",
+        symbol: AssetSymbol(validating: "OPG"),
+        aggregatorId: "opengradient",
+        instances: [
+            EIP155.Base.opengradient,
+            EIP155.BinanceSmartChain.opengradient
+        ]
+    )
+
+    /// Universal USD, CoinGecko's `universal-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let universalUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.universalUsd.instance.id),
+        tokenName: "Universal USD",
+        symbol: AssetSymbol(validating: "USDU"),
+        aggregatorId: "universal-usd",
+        instances: [
+            EIP155.Ethereum.universalUsd
+        ]
+    )
+
+    /// KiiChain, CoinGecko's `kiichain`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let kiichain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.kiichain.instance.id),
+        tokenName: "KiiChain",
+        symbol: AssetSymbol(validating: "KII"),
+        aggregatorId: "kiichain",
+        instances: [
+            EIP155.BinanceSmartChain.kiichain
+        ]
+    )
+
+    /// Canopy, CoinGecko's `canopy`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let canopy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.canopy.instance.id),
+        tokenName: "Canopy",
+        symbol: AssetSymbol(validating: "CNPY"),
+        aggregatorId: "canopy",
+        instances: [
+            EIP155.BinanceSmartChain.canopy
+        ]
+    )
+
+    /// Apro, CoinGecko's `apro`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let apro: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.apro.instance.id),
+        tokenName: "Apro",
+        symbol: AssetSymbol(validating: "AT"),
+        aggregatorId: "apro",
+        instances: [
+            EIP155.BinanceSmartChain.apro,
+            EIP155.Ethereum.apro
+        ]
+    )
+
+    /// SWFTCOIN, CoinGecko's `swftcoin`: its home on EIP155.Ethereum, then its other instances
+    public static let swftcoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.swftcoin.instance.id),
+        tokenName: "SWFTCOIN",
+        symbol: AssetSymbol(validating: "SWFTC"),
+        aggregatorId: "swftcoin",
+        instances: [
+            EIP155.Ethereum.swftcoin,
+            EIP155.BinanceSmartChain.swftcoin
+        ]
+    )
+
+    /// CARV, CoinGecko's `carv`: its home on EIP155.Base, then its other instances
+    public static let carv: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.carv.instance.id),
+        tokenName: "CARV",
+        symbol: AssetSymbol(validating: "CARV"),
+        aggregatorId: "carv",
+        instances: [
+            EIP155.Base.carv,
+            EIP155.Ethereum.carv,
+            EIP155.BinanceSmartChain.carv,
+            SOLANA.Solana.carv
+        ]
+    )
+
+    /// BRLA Digital BRLA, CoinGecko's `brla-digital-brla`: its home on EIP155.Polygon, then its other instances
+    public static let brlaDigitalBrla: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.brlaDigitalBrla.instance.id),
+        tokenName: "BRLA Digital BRLA",
+        symbol: AssetSymbol(validating: "BRLA"),
+        aggregatorId: "brla-digital-brla",
+        instances: [
+            EIP155.Polygon.brlaDigitalBrla,
+            EIP155.Celo.brlaDigitalBrla
+        ]
+    )
+
+    /// Matrix, CoinGecko's `matrix-6`: its home on EIP155.Ethereum, then its other instances
+    public static let matrix6: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.matrix6.instance.id),
+        tokenName: "Matrix",
+        symbol: AssetSymbol(validating: "MTX"),
+        aggregatorId: "matrix-6",
+        instances: [
+            EIP155.Ethereum.matrix6
+        ]
+    )
+
+    /// MicroStrategy (Ondo Tokenized Stock), CoinGecko's `microstrategy-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let microstrategyOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.microstrategyOndoTokenizedStock.instance.id),
+        tokenName: "MicroStrategy (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "MSTRON"),
+        aggregatorId: "microstrategy-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.microstrategyOndoTokenizedStock,
+            EIP155.BinanceSmartChain.microstrategyOndoTokenizedStock,
+            SOLANA.Solana.microstrategyOndoTokenizedStock
+        ]
+    )
+
+    /// Spacecoin, CoinGecko's `spacecoin-2`: its home on EIP155.Ethereum, then its other instances
+    public static let spacecoin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.spacecoin2.instance.id),
+        tokenName: "Spacecoin",
+        symbol: AssetSymbol(validating: "SPACE"),
+        aggregatorId: "spacecoin-2",
+        instances: [
+            EIP155.Ethereum.spacecoin2,
+            EIP155.BinanceSmartChain.spacecoin2
+        ]
+    )
+
+    /// MVL, CoinGecko's `mass-vehicle-ledger`: its home on EIP155.Ethereum, then its other instances
+    public static let massVehicleLedger: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.massVehicleLedger.instance.id),
+        tokenName: "MVL",
+        symbol: AssetSymbol(validating: "MVL"),
+        aggregatorId: "mass-vehicle-ledger",
+        instances: [
+            EIP155.Ethereum.massVehicleLedger,
+            EIP155.BinanceSmartChain.massVehicleLedger
+        ]
+    )
+
+    /// Croatian Football Federation Token, CoinGecko's `croatian-ff-fan-token`: its home on EIP155.Polygon, then its other instances
+    public static let croatianFfFanToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.croatianFfFanToken.instance.id),
+        tokenName: "Croatian Football Federation Token",
+        symbol: AssetSymbol(validating: "VATRENI"),
+        aggregatorId: "croatian-ff-fan-token",
+        instances: [
+            EIP155.Polygon.croatianFfFanToken,
+            EIP155.Ethereum.croatianFfFanToken,
+            SOLANA.Solana.croatianFfFanToken
+        ]
+    )
+
+    /// Zerebro, CoinGecko's `zerebro`: its home on SOLANA.Solana, then its other instances
+    public static let zerebro: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.zerebro.instance.id),
+        tokenName: "Zerebro",
+        symbol: AssetSymbol(validating: "ZEREBRO"),
+        aggregatorId: "zerebro",
+        instances: [
+            SOLANA.Solana.zerebro
+        ]
+    )
+
+    /// BitDCA, CoinGecko's `bitdca`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bitdca: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bitdca.instance.id),
+        tokenName: "BitDCA",
+        symbol: AssetSymbol(validating: "BDCA"),
+        aggregatorId: "bitdca",
+        instances: [
+            EIP155.BinanceSmartChain.bitdca
+        ]
+    )
+
+    /// DEAPCOIN, CoinGecko's `deapcoin`: its home on EIP155.Ethereum, then its other instances
+    public static let deapcoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.deapcoin.instance.id),
+        tokenName: "DEAPCOIN",
+        symbol: AssetSymbol(validating: "DEP"),
+        aggregatorId: "deapcoin",
+        instances: [
+            EIP155.Ethereum.deapcoin,
+            EIP155.BinanceSmartChain.deapcoin,
+            EIP155.Avalanche.deapcoin,
+            SOLANA.Solana.deapcoin
+        ]
+    )
+
+    /// Pundi X, CoinGecko's `pundi-x-2`: its home on EIP155.Ethereum, then its other instances
+    public static let pundiX2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.pundiX2.instance.id),
+        tokenName: "Pundi X",
+        symbol: AssetSymbol(validating: "PUNDIX"),
+        aggregatorId: "pundi-x-2",
+        instances: [
+            EIP155.Ethereum.pundiX2
+        ]
+    )
+
+    /// FLOCK, CoinGecko's `flock-2`: its home on EIP155.Base, then its other instances
+    public static let flock2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.flock2.instance.id),
+        tokenName: "FLOCK",
+        symbol: AssetSymbol(validating: "FLOCK"),
+        aggregatorId: "flock-2",
+        instances: [
+            EIP155.Base.flock2,
+            EIP155.Ethereum.flock2,
+            EIP155.BinanceSmartChain.flock2,
+            SOLANA.Solana.flock2
+        ]
+    )
+
+    /// Frax (prev. FXS), CoinGecko's `frax-share`: its home on EIP155.Ethereum, then its other instances
+    public static let fraxShare: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fraxShare.instance.id),
+        tokenName: "Frax (prev. FXS)",
+        symbol: AssetSymbol(validating: "FRAX"),
+        aggregatorId: "frax-share",
+        instances: [
+            EIP155.Ethereum.fraxShare,
+            EIP155.BinanceSmartChain.fraxShare,
+            EIP155.Polygon.fraxShare,
+            EIP155.Fantom.fraxShare,
+            EIP155.Avalanche.fraxShare,
+            SOLANA.Solana.fraxShare
+        ]
+    )
+
+    /// SideShift, CoinGecko's `sideshift-token`: its home on EIP155.Ethereum, then its other instances
+    public static let sideshiftToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sideshiftToken.instance.id),
+        tokenName: "SideShift",
+        symbol: AssetSymbol(validating: "XAI"),
+        aggregatorId: "sideshift-token",
+        instances: [
+            EIP155.Ethereum.sideshiftToken
+        ]
+    )
+
+    /// Backed CSPX Core S&P 500, CoinGecko's `backed-cspx-core-s-p-500`: its home on EIP155.Ethereum, then its other instances
+    public static let backedCspxCoreSP500: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.backedCspxCoreSP500.instance.id),
+        tokenName: "Backed CSPX Core S&P 500",
+        symbol: AssetSymbol(validating: "BCSPX"),
+        aggregatorId: "backed-cspx-core-s-p-500",
+        instances: [
+            EIP155.Ethereum.backedCspxCoreSP500,
+            EIP155.BinanceSmartChain.backedCspxCoreSP500,
+            EIP155.Polygon.backedCspxCoreSP500,
+            EIP155.Avalanche.backedCspxCoreSP500,
+            EIP155.Base.backedCspxCoreSP500
+        ]
+    )
+
+    /// Hemi, CoinGecko's `hemi`: its home on EIP155.Ethereum, then its other instances
+    public static let hemi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.hemi.instance.id),
+        tokenName: "Hemi",
+        symbol: AssetSymbol(validating: "HEMI"),
+        aggregatorId: "hemi",
+        instances: [
+            EIP155.Ethereum.hemi,
+            EIP155.BinanceSmartChain.hemi
+        ]
+    )
+
+    /// iShares Bitcoin Trust (Ondo Tokenized), CoinGecko's `ishares-bitcoin-trust-ondo-tokenized`: its home on EIP155.Ethereum, then its other instances
+    public static let isharesBitcoinTrustOndoTokenized: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.isharesBitcoinTrustOndoTokenized.instance.id),
+        tokenName: "iShares Bitcoin Trust (Ondo Tokenized)",
+        symbol: AssetSymbol(validating: "IBITON"),
+        aggregatorId: "ishares-bitcoin-trust-ondo-tokenized",
+        instances: [
+            EIP155.Ethereum.isharesBitcoinTrustOndoTokenized,
+            EIP155.BinanceSmartChain.isharesBitcoinTrustOndoTokenized,
+            SOLANA.Solana.isharesBitcoinTrustOndoTokenized
+        ]
+    )
+
+    /// Kyber Network Crystal, CoinGecko's `kyber-network-crystal`: its home on EIP155.Ethereum, then its other instances
+    public static let kyberNetworkCrystal: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.kyberNetworkCrystal.instance.id),
+        tokenName: "Kyber Network Crystal",
+        symbol: AssetSymbol(validating: "KNC"),
+        aggregatorId: "kyber-network-crystal",
+        instances: [
+            EIP155.Ethereum.kyberNetworkCrystal,
+            EIP155.BinanceSmartChain.kyberNetworkCrystal,
+            EIP155.Polygon.kyberNetworkCrystal,
+            EIP155.Optimism.kyberNetworkCrystal,
+            EIP155.Fantom.kyberNetworkCrystal,
+            EIP155.Avalanche.kyberNetworkCrystal
+        ]
+    )
+
+    /// Civic, CoinGecko's `civic`: its home on EIP155.Ethereum, then its other instances
+    public static let civic: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.civic.instance.id),
+        tokenName: "Civic",
+        symbol: AssetSymbol(validating: "CVC"),
+        aggregatorId: "civic",
+        instances: [
+            EIP155.Ethereum.civic,
+            EIP155.Polygon.civic
+        ]
+    )
+
+    /// Cartesi, CoinGecko's `cartesi`: its home on EIP155.Ethereum, then its other instances
+    public static let cartesi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cartesi.instance.id),
+        tokenName: "Cartesi",
+        symbol: AssetSymbol(validating: "CTSI"),
+        aggregatorId: "cartesi",
+        instances: [
+            EIP155.Ethereum.cartesi,
+            EIP155.BinanceSmartChain.cartesi,
+            EIP155.Polygon.cartesi,
+            EIP155.Optimism.cartesi,
+            EIP155.Avalanche.cartesi,
+            EIP155.Base.cartesi
+        ]
+    )
+
+    /// DMT-NAT, CoinGecko's `dmt-nat`: its home on EIP155.Ethereum, then its other instances
+    public static let dmtNat: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dmtNat.instance.id),
+        tokenName: "DMT-NAT",
+        symbol: AssetSymbol(validating: "NAT"),
+        aggregatorId: "dmt-nat",
+        instances: [
+            EIP155.Ethereum.dmtNat
+        ]
+    )
+
+    /// Agoras: Tau Net, CoinGecko's `agoras-currency-of-tau`: its home on EIP155.Ethereum, then its other instances
+    public static let agorasCurrencyOfTau: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.agorasCurrencyOfTau.instance.id),
+        tokenName: "Agoras: Tau Net",
+        symbol: AssetSymbol(validating: "AGRS"),
+        aggregatorId: "agoras-currency-of-tau",
+        instances: [
+            EIP155.Ethereum.agorasCurrencyOfTau
+        ]
+    )
+
+    /// Tensor, CoinGecko's `tensor`: its home on SOLANA.Solana, then its other instances
+    public static let tensor: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.tensor.instance.id),
+        tokenName: "Tensor",
+        symbol: AssetSymbol(validating: "TNSR"),
+        aggregatorId: "tensor",
+        instances: [
+            SOLANA.Solana.tensor
+        ]
+    )
+
+    /// The Innovation Game, CoinGecko's `the-innovation-game`: its home on EIP155.Base, then its other instances
+    public static let theInnovationGame: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.theInnovationGame.instance.id),
+        tokenName: "The Innovation Game",
+        symbol: AssetSymbol(validating: "TIG"),
+        aggregatorId: "the-innovation-game",
+        instances: [
+            EIP155.Base.theInnovationGame
+        ]
+    )
+
+    /// Edel, CoinGecko's `edel`: its home on EIP155.Base, then its other instances
+    public static let edel: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.edel.instance.id),
+        tokenName: "Edel",
+        symbol: AssetSymbol(validating: "EDEL"),
+        aggregatorId: "edel",
+        instances: [
+            EIP155.Base.edel,
+            EIP155.Ethereum.edel,
+            EIP155.BinanceSmartChain.edel,
+            SOLANA.Solana.edel
+        ]
+    )
+
+    /// would, CoinGecko's `would`: its home on SOLANA.Solana, then its other instances
+    public static let would: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.would.instance.id),
+        tokenName: "would",
+        symbol: AssetSymbol(validating: "WOULD"),
+        aggregatorId: "would",
+        instances: [
+            SOLANA.Solana.would
+        ]
+    )
+
+    /// OpenAI (Republic Pre-IPO), CoinGecko's `openai-republic-pre-ipo`: its home on SOLANA.Solana, then its other instances
+    public static let openaiRepublicPreIpo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.openaiRepublicPreIpo.instance.id),
+        tokenName: "OpenAI (Republic Pre-IPO)",
+        symbol: AssetSymbol(validating: "PREOPAI"),
+        aggregatorId: "openai-republic-pre-ipo",
+        instances: [
+            SOLANA.Solana.openaiRepublicPreIpo
+        ]
+    )
+
+    /// Monerium EUR emoney [OLD], CoinGecko's `monerium-eur-money`: its home on EIP155.Ethereum, then its other instances
+    public static let moneriumEurMoney: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.moneriumEurMoney.instance.id),
+        tokenName: "Monerium EUR emoney [OLD]",
+        symbol: AssetSymbol(validating: "EURE"),
+        aggregatorId: "monerium-eur-money",
+        instances: [
+            EIP155.Ethereum.moneriumEurMoney,
+            EIP155.Polygon.moneriumEurMoney
+        ]
+    )
+
+    /// Anoma, CoinGecko's `anoma`: its home on EIP155.Ethereum, then its other instances
+    public static let anoma: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.anoma.instance.id),
+        tokenName: "Anoma",
+        symbol: AssetSymbol(validating: "XAN"),
+        aggregatorId: "anoma",
+        instances: [
+            EIP155.Ethereum.anoma,
+            EIP155.BinanceSmartChain.anoma
+        ]
+    )
+
+    /// Bounce, CoinGecko's `auction`: its home on EIP155.Ethereum, then its other instances
+    public static let auction: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.auction.instance.id),
+        tokenName: "Bounce",
+        symbol: AssetSymbol(validating: "AUCTION"),
+        aggregatorId: "auction",
+        instances: [
+            EIP155.Ethereum.auction
+        ]
+    )
+
+    /// OpenEden, CoinGecko's `openeden`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let openeden: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.openeden.instance.id),
+        tokenName: "OpenEden",
+        symbol: AssetSymbol(validating: "EDEN"),
+        aggregatorId: "openeden",
+        instances: [
+            EIP155.BinanceSmartChain.openeden,
+            EIP155.Ethereum.openeden
+        ]
+    )
+
+    /// SKALE, CoinGecko's `skale`: its home on EIP155.Ethereum, then its other instances
+    public static let skale: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.skale.instance.id),
+        tokenName: "SKALE",
+        symbol: AssetSymbol(validating: "SKL"),
+        aggregatorId: "skale",
+        instances: [
+            EIP155.Ethereum.skale,
+            EIP155.Base.skale
+        ]
+    )
+
+    /// Zest Protocol, CoinGecko's `zest-protocol`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let zestProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.zestProtocol.instance.id),
+        tokenName: "Zest Protocol",
+        symbol: AssetSymbol(validating: "ZEST"),
+        aggregatorId: "zest-protocol",
+        instances: [
+            EIP155.BinanceSmartChain.zestProtocol,
+            EIP155.Ethereum.zestProtocol,
+            EIP155.Base.zestProtocol,
+            STACKS.Stacks.zestProtocol
+        ]
+    )
+
+    /// Chainflip, CoinGecko's `chainflip`: its home on EIP155.Ethereum, then its other instances
+    public static let chainflip: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.chainflip.instance.id),
+        tokenName: "Chainflip",
+        symbol: AssetSymbol(validating: "FLIP"),
+        aggregatorId: "chainflip",
+        instances: [
+            EIP155.Ethereum.chainflip
+        ]
+    )
+
+    /// Gensyn, CoinGecko's `gensyn`: its home on EIP155.Ethereum, then its other instances
+    public static let gensyn: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gensyn.instance.id),
+        tokenName: "Gensyn",
+        symbol: AssetSymbol(validating: "AI"),
+        aggregatorId: "gensyn",
+        instances: [
+            EIP155.Ethereum.gensyn
+        ]
+    )
+
+    /// Uquid Coin, CoinGecko's `uquid-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let uquidCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.uquidCoin.instance.id),
+        tokenName: "Uquid Coin",
+        symbol: AssetSymbol(validating: "UQC"),
+        aggregatorId: "uquid-coin",
+        instances: [
+            EIP155.Ethereum.uquidCoin
+        ]
+    )
+
+    /// Billions Network, CoinGecko's `billions-network`: its home on EIP155.Ethereum, then its other instances
+    public static let billionsNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.billionsNetwork.instance.id),
+        tokenName: "Billions Network",
+        symbol: AssetSymbol(validating: "BILL"),
+        aggregatorId: "billions-network",
+        instances: [
+            EIP155.Ethereum.billionsNetwork,
+            EIP155.BinanceSmartChain.billionsNetwork,
+            SOLANA.Solana.billionsNetwork
+        ]
+    )
+
+    /// Paradex, CoinGecko's `paradex`: its home on EIP155.Ethereum, then its other instances
+    public static let paradex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.paradex.instance.id),
+        tokenName: "Paradex",
+        symbol: AssetSymbol(validating: "DIME"),
+        aggregatorId: "paradex",
+        instances: [
+            EIP155.Ethereum.paradex,
+            SOLANA.Solana.paradex
+        ]
+    )
+
+    /// Waves, CoinGecko's `waves`: its home on EIP155.Ethereum, then its other instances
+    public static let waves: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.waves.instance.id),
+        tokenName: "Waves",
+        symbol: AssetSymbol(validating: "WAVES"),
+        aggregatorId: "waves",
+        instances: [
+            EIP155.Ethereum.waves
+        ]
+    )
+
+    /// Venom, CoinGecko's `venom`: its home on EIP155.Ethereum, then its other instances
+    public static let venom: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.venom.instance.id),
+        tokenName: "Venom",
+        symbol: AssetSymbol(validating: "VENOM"),
+        aggregatorId: "venom",
+        instances: [
+            EIP155.Ethereum.venom
+        ]
+    )
+
+    /// ZEROBASE, CoinGecko's `zerobase`: its home on EIP155.Ethereum, then its other instances
+    public static let zerobase: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.zerobase.instance.id),
+        tokenName: "ZEROBASE",
+        symbol: AssetSymbol(validating: "ZBT"),
+        aggregatorId: "zerobase",
+        instances: [
+            EIP155.Ethereum.zerobase,
+            EIP155.BinanceSmartChain.zerobase,
+            EIP155.Base.zerobase
+        ]
+    )
+
+    /// Super Inu, CoinGecko's `super-inu-2`: its home on SOLANA.Solana, then its other instances
+    public static let superInu2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.superInu2.instance.id),
+        tokenName: "Super Inu",
+        symbol: AssetSymbol(validating: "SI"),
+        aggregatorId: "super-inu-2",
+        instances: [
+            SOLANA.Solana.superInu2
+        ]
+    )
+
+    /// Hylo USD, CoinGecko's `hylo-usd`: its home on SOLANA.Solana, then its other instances
+    public static let hyloUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.hyloUsd.instance.id),
+        tokenName: "Hylo USD",
+        symbol: AssetSymbol(validating: "HYUSD"),
+        aggregatorId: "hylo-usd",
+        instances: [
+            SOLANA.Solana.hyloUsd
+        ]
+    )
+
+    /// Tokenised GBP, CoinGecko's `tokenised-gbp`: its home on EIP155.Ethereum, then its other instances
+    public static let tokenisedGbp: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tokenisedGbp.instance.id),
+        tokenName: "Tokenised GBP",
+        symbol: AssetSymbol(validating: "TGBP"),
+        aggregatorId: "tokenised-gbp",
+        instances: [
+            EIP155.Ethereum.tokenisedGbp,
+            EIP155.BinanceSmartChain.tokenisedGbp,
+            EIP155.Polygon.tokenisedGbp,
+            EIP155.Avalanche.tokenisedGbp,
+            EIP155.Base.tokenisedGbp,
+            SOLANA.Solana.tokenisedGbp
+        ]
+    )
+
+    /// Metis, CoinGecko's `metis-token`: its home on EIP155.Ethereum, then its other instances
+    public static let metisToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.metisToken.instance.id),
+        tokenName: "Metis",
+        symbol: AssetSymbol(validating: "METIS"),
+        aggregatorId: "metis-token",
+        instances: [
+            EIP155.Ethereum.metisToken
+        ]
+    )
+
+    /// Obligate Trade Finance Yield, CoinGecko's `obligate-trade-finance-yield`: its home on SOLANA.Solana, then its other instances
+    public static let obligateTradeFinanceYield: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.obligateTradeFinanceYield.instance.id),
+        tokenName: "Obligate Trade Finance Yield",
+        symbol: AssetSymbol(validating: "OTFY"),
+        aggregatorId: "obligate-trade-finance-yield",
+        instances: [
+            SOLANA.Solana.obligateTradeFinanceYield
+        ]
+    )
+
+    /// Midas M1 USD Market Neutral, CoinGecko's `midas-m1-usd-market-neutral`: its home on EIP155.Ethereum, then its other instances
+    public static let midasM1UsdMarketNeutral: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.midasM1UsdMarketNeutral.instance.id),
+        tokenName: "Midas M1 USD Market Neutral",
+        symbol: AssetSymbol(validating: "MM1-USD"),
+        aggregatorId: "midas-m1-usd-market-neutral",
+        instances: [
+            EIP155.Ethereum.midasM1UsdMarketNeutral
+        ]
+    )
+
+    /// Liquity USD, CoinGecko's `liquity-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let liquityUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.liquityUsd.instance.id),
+        tokenName: "Liquity USD",
+        symbol: AssetSymbol(validating: "LUSD"),
+        aggregatorId: "liquity-usd",
+        instances: [
+            EIP155.Ethereum.liquityUsd,
+            EIP155.Polygon.liquityUsd,
+            EIP155.Optimism.liquityUsd,
+            EIP155.Base.liquityUsd
+        ]
+    )
+
+    /// Everything, CoinGecko's `everything`: its home on EIP155.Ethereum, then its other instances
+    public static let everything: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.everything.instance.id),
+        tokenName: "Everything",
+        symbol: AssetSymbol(validating: "EV"),
+        aggregatorId: "everything",
+        instances: [
+            EIP155.Ethereum.everything,
+            EIP155.BinanceSmartChain.everything
+        ]
+    )
+
+    /// Pax Dollar, CoinGecko's `paxos-standard`: its home on EIP155.Ethereum, then its other instances
+    public static let paxosStandard: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.paxosStandard.instance.id),
+        tokenName: "Pax Dollar",
+        symbol: AssetSymbol(validating: "USDP"),
+        aggregatorId: "paxos-standard",
+        instances: [
+            EIP155.Ethereum.paxosStandard,
+            SOLANA.Solana.paxosStandard
+        ]
+    )
+
+    /// Fidelity USD Digital Liquidity Fund-Acc, CoinGecko's `fidelity-usd-digital-liquidity-fund-acc`: its home on EIP155.Ethereum, then its other instances
+    public static let fidelityUsdDigitalLiquidityFundAcc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fidelityUsdDigitalLiquidityFundAcc.instance.id),
+        tokenName: "Fidelity USD Digital Liquidity Fund-Acc",
+        symbol: AssetSymbol(validating: "FILQ-A"),
+        aggregatorId: "fidelity-usd-digital-liquidity-fund-acc",
+        instances: [
+            EIP155.Ethereum.fidelityUsdDigitalLiquidityFundAcc
+        ]
+    )
+
+    /// NYC, CoinGecko's `nyc-token`: its home on SOLANA.Solana, then its other instances
+    public static let nycToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.nycToken.instance.id),
+        tokenName: "NYC",
+        symbol: AssetSymbol(validating: "NYC"),
+        aggregatorId: "nyc-token",
+        instances: [
+            SOLANA.Solana.nycToken
+        ]
+    )
+
+    /// Metaplex, CoinGecko's `metaplex`: its home on SOLANA.Solana, then its other instances
+    public static let metaplex: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.metaplex.instance.id),
+        tokenName: "Metaplex",
+        symbol: AssetSymbol(validating: "MPLX"),
+        aggregatorId: "metaplex",
+        instances: [
+            SOLANA.Solana.metaplex,
+            EIP155.BinanceSmartChain.metaplex
+        ]
+    )
+
+    /// IXS, CoinGecko's `ix-swap`: its home on EIP155.Ethereum, then its other instances
+    public static let ixSwap: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ixSwap.instance.id),
+        tokenName: "IXS",
+        symbol: AssetSymbol(validating: "IXS"),
+        aggregatorId: "ix-swap",
+        instances: [
+            EIP155.Ethereum.ixSwap,
+            EIP155.Polygon.ixSwap,
+            EIP155.Base.ixSwap
+        ]
+    )
+
+    /// GMT, CoinGecko's `stepn`: its home on SOLANA.Solana, then its other instances
+    public static let stepn: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.stepn.instance.id),
+        tokenName: "GMT",
+        symbol: AssetSymbol(validating: "GMT"),
+        aggregatorId: "stepn",
+        instances: [
+            SOLANA.Solana.stepn,
+            EIP155.Ethereum.stepn,
+            EIP155.BinanceSmartChain.stepn,
+            EIP155.Polygon.stepn
+        ]
+    )
+
+    /// Tori Ecosystem Vault, CoinGecko's `tori-ecosystem-vault`: its home on EIP155.Ethereum, then its other instances
+    public static let toriEcosystemVault: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.toriEcosystemVault.instance.id),
+        tokenName: "Tori Ecosystem Vault",
+        symbol: AssetSymbol(validating: "ETRUSD"),
+        aggregatorId: "tori-ecosystem-vault",
+        instances: [
+            EIP155.Ethereum.toriEcosystemVault
+        ]
+    )
+
+    /// GRVT Token, CoinGecko's `grvt`: its home on EIP155.Ethereum, then its other instances
+    public static let grvt: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.grvt.instance.id),
+        tokenName: "GRVT Token",
+        symbol: AssetSymbol(validating: "GRVT"),
+        aggregatorId: "grvt",
+        instances: [
+            EIP155.Ethereum.grvt,
+            EIP155.BinanceSmartChain.grvt
+        ]
+    )
+
+    /// Prospective, CoinGecko's `prospective`: its home on TRON.Tron, then its other instances
+    public static let prospective: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.prospective.instance.id),
+        tokenName: "Prospective",
+        symbol: AssetSymbol(validating: "PROS"),
+        aggregatorId: "prospective",
+        instances: [
+            TRON.Tron.prospective,
+            EIP155.Ethereum.prospective,
+            EIP155.BinanceSmartChain.prospective,
+            EIP155.Polygon.prospective
+        ]
+    )
+
+    /// iShares Silver Trust (Ondo Tokenized Stock), CoinGecko's `ishares-silver-trust-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let isharesSilverTrustOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.isharesSilverTrustOndoTokenizedStock.instance.id),
+        tokenName: "iShares Silver Trust (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "SLVON"),
+        aggregatorId: "ishares-silver-trust-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.isharesSilverTrustOndoTokenizedStock,
+            EIP155.BinanceSmartChain.isharesSilverTrustOndoTokenizedStock,
+            SOLANA.Solana.isharesSilverTrustOndoTokenizedStock
+        ]
+    )
+
+    /// StrikeX, CoinGecko's `strikecoin`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let strikecoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.strikecoin.instance.id),
+        tokenName: "StrikeX",
+        symbol: AssetSymbol(validating: "STRX"),
+        aggregatorId: "strikecoin",
+        instances: [
+            EIP155.BinanceSmartChain.strikecoin,
+            EIP155.Ethereum.strikecoin,
+            SOLANA.Solana.strikecoin
+        ]
+    )
+
+    /// Victoria VR, CoinGecko's `victoria-vr`: its home on EIP155.Ethereum, then its other instances
+    public static let victoriaVr: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.victoriaVr.instance.id),
+        tokenName: "Victoria VR",
+        symbol: AssetSymbol(validating: "VR"),
+        aggregatorId: "victoria-vr",
+        instances: [
+            EIP155.Ethereum.victoriaVr
+        ]
+    )
+
+    /// OKZOO, CoinGecko's `okzoo`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let okzoo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.okzoo.instance.id),
+        tokenName: "OKZOO",
+        symbol: AssetSymbol(validating: "AIOT"),
+        aggregatorId: "okzoo",
+        instances: [
+            EIP155.BinanceSmartChain.okzoo
+        ]
+    )
+
+    /// Cysic, CoinGecko's `cysic`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let cysic: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.cysic.instance.id),
+        tokenName: "Cysic",
+        symbol: AssetSymbol(validating: "CYS"),
+        aggregatorId: "cysic",
+        instances: [
+            EIP155.BinanceSmartChain.cysic,
+            EIP155.Base.cysic
+        ]
+    )
+
+    /// Wowbit, CoinGecko's `wowbit-2`: its home on EIP155.Optimism, then its other instances
+    public static let wowbit2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Optimism.wowbit2.instance.id),
+        tokenName: "Wowbit",
+        symbol: AssetSymbol(validating: "WWB"),
+        aggregatorId: "wowbit-2",
+        instances: [
+            EIP155.Optimism.wowbit2
+        ]
+    )
+
+    /// Fidelity Digital Interest Token, CoinGecko's `fidelity-digital-interest-token`: its home on EIP155.Ethereum, then its other instances
+    public static let fidelityDigitalInterestToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fidelityDigitalInterestToken.instance.id),
+        tokenName: "Fidelity Digital Interest Token",
+        symbol: AssetSymbol(validating: "FDIT"),
+        aggregatorId: "fidelity-digital-interest-token",
+        instances: [
+            EIP155.Ethereum.fidelityDigitalInterestToken
+        ]
+    )
+
+    /// HOME, CoinGecko's `home`: its home on EIP155.Base, then its other instances
+    public static let home: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.home.instance.id),
+        tokenName: "HOME",
+        symbol: AssetSymbol(validating: "HOME"),
+        aggregatorId: "home",
+        instances: [
+            EIP155.Base.home,
+            EIP155.BinanceSmartChain.home,
+            SOLANA.Solana.home
+        ]
+    )
+
+    /// AI Companions, CoinGecko's `ai-companions`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let aiCompanions: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.aiCompanions.instance.id),
+        tokenName: "AI Companions",
+        symbol: AssetSymbol(validating: "AIC"),
+        aggregatorId: "ai-companions",
+        instances: [
+            EIP155.BinanceSmartChain.aiCompanions
+        ]
+    )
+
+    /// VulgarTycoon, CoinGecko's `vin-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let vin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.vin2.instance.id),
+        tokenName: "VulgarTycoon",
+        symbol: AssetSymbol(validating: "VIN"),
+        aggregatorId: "vin-2",
+        instances: [
+            EIP155.BinanceSmartChain.vin2
+        ]
+    )
+
+    /// Tesla (bStocks Tokenized Stock), CoinGecko's `tesla-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let teslaBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.teslaBstocksTokenizedStock.instance.id),
+        tokenName: "Tesla (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "TSLAB"),
+        aggregatorId: "tesla-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.teslaBstocksTokenizedStock
+        ]
+    )
+
+    /// Whiteheart, CoinGecko's `whiteheart`: its home on EIP155.Ethereum, then its other instances
+    public static let whiteheart: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.whiteheart.instance.id),
+        tokenName: "Whiteheart",
+        symbol: AssetSymbol(validating: "WHITE"),
+        aggregatorId: "whiteheart",
+        instances: [
+            EIP155.Ethereum.whiteheart
+        ]
+    )
+
+    /// Tokenlon, CoinGecko's `tokenlon`: its home on EIP155.Ethereum, then its other instances
+    public static let tokenlon: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tokenlon.instance.id),
+        tokenName: "Tokenlon",
+        symbol: AssetSymbol(validating: "LON"),
+        aggregatorId: "tokenlon",
+        instances: [
+            EIP155.Ethereum.tokenlon
+        ]
+    )
+
+    /// Usual, CoinGecko's `usual`: its home on EIP155.Ethereum, then its other instances
+    public static let usual: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.usual.instance.id),
+        tokenName: "Usual",
+        symbol: AssetSymbol(validating: "USUAL"),
+        aggregatorId: "usual",
+        instances: [
+            EIP155.Ethereum.usual,
+            EIP155.BinanceSmartChain.usual,
+            EIP155.Base.usual
+        ]
+    )
+
+    /// Big Time, CoinGecko's `big-time`: its home on EIP155.Ethereum, then its other instances
+    public static let bigTime: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bigTime.instance.id),
+        tokenName: "Big Time",
+        symbol: AssetSymbol(validating: "BIGTIME"),
+        aggregatorId: "big-time",
+        instances: [
+            EIP155.Ethereum.bigTime
+        ]
+    )
+
+    /// River, CoinGecko's `river`: its home on EIP155.Ethereum, then its other instances
+    public static let river: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.river.instance.id),
+        tokenName: "River",
+        symbol: AssetSymbol(validating: "RIVER"),
+        aggregatorId: "river",
+        instances: [
+            EIP155.Ethereum.river,
+            EIP155.BinanceSmartChain.river,
+            EIP155.Base.river
+        ]
+    )
+
+    /// WOO, CoinGecko's `woo-network`: its home on EIP155.Ethereum, then its other instances
+    public static let wooNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.wooNetwork.instance.id),
+        tokenName: "WOO",
+        symbol: AssetSymbol(validating: "WOO"),
+        aggregatorId: "woo-network",
+        instances: [
+            EIP155.Ethereum.wooNetwork,
+            EIP155.BinanceSmartChain.wooNetwork,
+            EIP155.Polygon.wooNetwork,
+            EIP155.Fantom.wooNetwork,
+            EIP155.Avalanche.wooNetwork,
+            EIP155.Base.wooNetwork,
+            SOLANA.Solana.wooNetwork,
+            NEAR.Near.wooNetwork
+        ]
+    )
+
+    /// Impossible Cloud Network Token, CoinGecko's `impossible-cloud-network-token`: its home on EIP155.Ethereum, then its other instances
+    public static let impossibleCloudNetworkToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.impossibleCloudNetworkToken.instance.id),
+        tokenName: "Impossible Cloud Network Token",
+        symbol: AssetSymbol(validating: "ICNT"),
+        aggregatorId: "impossible-cloud-network-token",
+        instances: [
+            EIP155.Ethereum.impossibleCloudNetworkToken,
+            EIP155.Base.impossibleCloudNetworkToken
+        ]
+    )
+
+    /// Keep Network, CoinGecko's `keep-network`: its home on EIP155.Ethereum, then its other instances
+    public static let keepNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.keepNetwork.instance.id),
+        tokenName: "Keep Network",
+        symbol: AssetSymbol(validating: "KEEP"),
+        aggregatorId: "keep-network",
+        instances: [
+            EIP155.Ethereum.keepNetwork
+        ]
+    )
+
+    /// Liquity, CoinGecko's `liquity`: its home on EIP155.Ethereum, then its other instances
+    public static let liquity: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.liquity.instance.id),
+        tokenName: "Liquity",
+        symbol: AssetSymbol(validating: "LQTY"),
+        aggregatorId: "liquity",
+        instances: [
+            EIP155.Ethereum.liquity
+        ]
+    )
+
+    /// Celer Network, CoinGecko's `celer-network`: its home on EIP155.Ethereum, then its other instances
+    public static let celerNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.celerNetwork.instance.id),
+        tokenName: "Celer Network",
+        symbol: AssetSymbol(validating: "CELR"),
+        aggregatorId: "celer-network",
+        instances: [
+            EIP155.Ethereum.celerNetwork
+        ]
+    )
+
+    /// Electronic USD, CoinGecko's `electronic-usd`: its home on EIP155.Ethereum, then its other instances
+    public static let electronicUsd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.electronicUsd.instance.id),
+        tokenName: "Electronic USD",
+        symbol: AssetSymbol(validating: "EUSD"),
+        aggregatorId: "electronic-usd",
+        instances: [
+            EIP155.Ethereum.electronicUsd,
+            EIP155.Base.electronicUsd
+        ]
+    )
+
+    /// Nym, CoinGecko's `nym`: its home on EIP155.Ethereum, then its other instances
+    public static let nym: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nym.instance.id),
+        tokenName: "Nym",
+        symbol: AssetSymbol(validating: "NYM"),
+        aggregatorId: "nym",
+        instances: [
+            EIP155.Ethereum.nym
+        ]
+    )
+
+    /// Block Street, CoinGecko's `block-street`: its home on EIP155.Ethereum, then its other instances
+    public static let blockStreet: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.blockStreet.instance.id),
+        tokenName: "Block Street",
+        symbol: AssetSymbol(validating: "BSB"),
+        aggregatorId: "block-street",
+        instances: [
+            EIP155.Ethereum.blockStreet,
+            EIP155.BinanceSmartChain.blockStreet,
+            EIP155.Base.blockStreet
+        ]
+    )
+
+    /// IQ, CoinGecko's `everipedia`: its home on EIP155.Ethereum, then its other instances
+    public static let everipedia: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.everipedia.instance.id),
+        tokenName: "IQ",
+        symbol: AssetSymbol(validating: "IQ"),
+        aggregatorId: "everipedia",
+        instances: [
+            EIP155.Ethereum.everipedia,
+            EIP155.BinanceSmartChain.everipedia,
+            EIP155.Polygon.everipedia
+        ]
+    )
+
+    /// Aevo, CoinGecko's `aevo-exchange`: its home on EIP155.Ethereum, then its other instances
+    public static let aevoExchange: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aevoExchange.instance.id),
+        tokenName: "Aevo",
+        symbol: AssetSymbol(validating: "AEVO"),
+        aggregatorId: "aevo-exchange",
+        instances: [
+            EIP155.Ethereum.aevoExchange
+        ]
+    )
+
+    /// CZ's Dog, CoinGecko's `czs-dog`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let czsDog: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.czsDog.instance.id),
+        tokenName: "CZ's Dog",
+        symbol: AssetSymbol(validating: "BROCCOLI"),
+        aggregatorId: "czs-dog",
+        instances: [
+            EIP155.BinanceSmartChain.czsDog
+        ]
+    )
+
+    /// Tokamak Network, CoinGecko's `tokamak-network`: its home on EIP155.Ethereum, then its other instances
+    public static let tokamakNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.tokamakNetwork.instance.id),
+        tokenName: "Tokamak Network",
+        symbol: AssetSymbol(validating: "TON"),
+        aggregatorId: "tokamak-network",
+        instances: [
+            EIP155.Ethereum.tokamakNetwork
+        ]
+    )
+
+    /// Audius, CoinGecko's `audius`: its home on EIP155.Ethereum, then its other instances
+    public static let audius: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.audius.instance.id),
+        tokenName: "Audius",
+        symbol: AssetSymbol(validating: "AUDIO"),
+        aggregatorId: "audius",
+        instances: [
+            EIP155.Ethereum.audius,
+            SOLANA.Solana.audius
+        ]
+    )
+
+    /// AntFun, CoinGecko's `antfun`: its home on SOLANA.Solana, then its other instances
+    public static let antfun: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.antfun.instance.id),
+        tokenName: "AntFun",
+        symbol: AssetSymbol(validating: "ANTFUN"),
+        aggregatorId: "antfun",
+        instances: [
+            SOLANA.Solana.antfun,
+            EIP155.BinanceSmartChain.antfun
+        ]
+    )
+
+    /// Hex Trust USD, CoinGecko's `hex-trust-usdx`: its home on EIP155.Ethereum, then its other instances
+    public static let hexTrustUsdx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.hexTrustUsdx.instance.id),
+        tokenName: "Hex Trust USD",
+        symbol: AssetSymbol(validating: "USDX"),
+        aggregatorId: "hex-trust-usdx",
+        instances: [
+            EIP155.Ethereum.hexTrustUsdx
+        ]
+    )
+
+    /// JPY Coin, CoinGecko's `jpy-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let jpyCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.jpyCoin.instance.id),
+        tokenName: "JPY Coin",
+        symbol: AssetSymbol(validating: "JPYC"),
+        aggregatorId: "jpy-coin",
+        instances: [
+            EIP155.Ethereum.jpyCoin,
+            EIP155.Polygon.jpyCoin,
+            EIP155.Avalanche.jpyCoin
+        ]
+    )
+
+    /// Handy, CoinGecko's `handy`: its home on EIP155.Ethereum, then its other instances
+    public static let handy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.handy.instance.id),
+        tokenName: "Handy",
+        symbol: AssetSymbol(validating: "HANDY"),
+        aggregatorId: "handy",
+        instances: [
+            EIP155.Ethereum.handy
+        ]
+    )
+
+    /// Codatta, CoinGecko's `codatta`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let codatta: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.codatta.instance.id),
+        tokenName: "Codatta",
+        symbol: AssetSymbol(validating: "XNY"),
+        aggregatorId: "codatta",
+        instances: [
+            EIP155.BinanceSmartChain.codatta
+        ]
+    )
+
+    /// Roundhill Memory ETF (bStocks Tokenized Stock), CoinGecko's `roundhill-memory-etf-bstocks-tokenized-stock`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let roundhillMemoryEtfBstocksTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.roundhillMemoryEtfBstocksTokenizedStock.instance.id),
+        tokenName: "Roundhill Memory ETF (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "DRAMB"),
+        aggregatorId: "roundhill-memory-etf-bstocks-tokenized-stock",
+        instances: [
+            EIP155.BinanceSmartChain.roundhillMemoryEtfBstocksTokenizedStock
+        ]
+    )
+
+    /// Yield Guild Games, CoinGecko's `yield-guild-games`: its home on EIP155.Ethereum, then its other instances
+    public static let yieldGuildGames: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.yieldGuildGames.instance.id),
+        tokenName: "Yield Guild Games",
+        symbol: AssetSymbol(validating: "YGG"),
+        aggregatorId: "yield-guild-games",
+        instances: [
+            EIP155.Ethereum.yieldGuildGames,
+            EIP155.BinanceSmartChain.yieldGuildGames,
+            EIP155.Polygon.yieldGuildGames,
+            EIP155.Base.yieldGuildGames
+        ]
+    )
+
+    /// Lucidum, CoinGecko's `lucidum`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let lucidum: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.lucidum.instance.id),
+        tokenName: "Lucidum",
+        symbol: AssetSymbol(validating: "LUCIC"),
+        aggregatorId: "lucidum",
+        instances: [
+            EIP155.BinanceSmartChain.lucidum
+        ]
+    )
+
+    /// Bitcoin Pro, CoinGecko's `bitcoin-pro`: its home on EIP155.Ethereum, then its other instances
+    public static let bitcoinPro: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bitcoinPro.instance.id),
+        tokenName: "Bitcoin Pro",
+        symbol: AssetSymbol(validating: "BTCP"),
+        aggregatorId: "bitcoin-pro",
+        instances: [
+            EIP155.Ethereum.bitcoinPro
+        ]
+    )
+
+    /// BinaryX [OLD], CoinGecko's `binaryx`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let binaryx: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.binaryx.instance.id),
+        tokenName: "BinaryX [OLD]",
+        symbol: AssetSymbol(validating: "BNX"),
+        aggregatorId: "binaryx",
+        instances: [
+            EIP155.BinanceSmartChain.binaryx
+        ]
+    )
+
+    /// Elephant Money, CoinGecko's `elephant-money`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let elephantMoney: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.elephantMoney.instance.id),
+        tokenName: "Elephant Money",
+        symbol: AssetSymbol(validating: "ELEPHANT"),
+        aggregatorId: "elephant-money",
+        instances: [
+            EIP155.BinanceSmartChain.elephantMoney
+        ]
+    )
+
+    /// Verse World, CoinGecko's `verse-world`: its home on SOLANA.Solana, then its other instances
+    public static let verseWorld: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.verseWorld.instance.id),
+        tokenName: "Verse World",
+        symbol: AssetSymbol(validating: "VERSE"),
+        aggregatorId: "verse-world",
+        instances: [
+            SOLANA.Solana.verseWorld
+        ]
+    )
+
+    /// BurnedFi, CoinGecko's `burnedfi`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let burnedfi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.burnedfi.instance.id),
+        tokenName: "BurnedFi",
+        symbol: AssetSymbol(validating: "BURN"),
+        aggregatorId: "burnedfi",
+        instances: [
+            EIP155.BinanceSmartChain.burnedfi
+        ]
+    )
+
+    /// MetYa, CoinGecko's `metya`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let metya: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.metya.instance.id),
+        tokenName: "MetYa",
+        symbol: AssetSymbol(validating: "MY"),
+        aggregatorId: "metya",
+        instances: [
+            EIP155.BinanceSmartChain.metya
+        ]
+    )
+
+    /// JPY Coin v1, CoinGecko's `jpyc`: its home on EIP155.Ethereum, then its other instances
+    public static let jpyc: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.jpyc.instance.id),
+        tokenName: "JPY Coin v1",
+        symbol: AssetSymbol(validating: "JPYC"),
+        aggregatorId: "jpyc",
+        instances: [
+            EIP155.Ethereum.jpyc,
+            EIP155.Polygon.jpyc
+        ]
+    )
+
+    /// Doge Head Coin, CoinGecko's `doge-head-coin`: its home on SOLANA.Solana, then its other instances
+    public static let dogeHeadCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.dogeHeadCoin.instance.id),
+        tokenName: "Doge Head Coin",
+        symbol: AssetSymbol(validating: "DHC"),
+        aggregatorId: "doge-head-coin",
+        instances: [
+            SOLANA.Solana.dogeHeadCoin
+        ]
+    )
+
+    /// Solv Protocol, CoinGecko's `solv-protocol`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let solvProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.solvProtocol.instance.id),
+        tokenName: "Solv Protocol",
+        symbol: AssetSymbol(validating: "SOLV"),
+        aggregatorId: "solv-protocol",
+        instances: [
+            EIP155.BinanceSmartChain.solvProtocol,
+            EIP155.Ethereum.solvProtocol
+        ]
+    )
+
+    /// Theros, CoinGecko's `theros`: its home on SOLANA.Solana, then its other instances
+    public static let theros: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.theros.instance.id),
+        tokenName: "Theros",
+        symbol: AssetSymbol(validating: "THEROS"),
+        aggregatorId: "theros",
+        instances: [
+            SOLANA.Solana.theros
+        ]
+    )
+
+    /// Opal, CoinGecko's `opal-3`: its home on EIP155.Ethereum, then its other instances
+    public static let opal3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.opal3.instance.id),
+        tokenName: "Opal",
+        symbol: AssetSymbol(validating: "OPAL"),
+        aggregatorId: "opal-3",
+        instances: [
+            EIP155.Ethereum.opal3,
+            EIP155.Base.opal3
+        ]
+    )
+
+    /// Dual, CoinGecko's `dual`: its home on EIP155.Ethereum, then its other instances
+    public static let dual: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dual.instance.id),
+        tokenName: "Dual",
+        symbol: AssetSymbol(validating: "DUAL"),
+        aggregatorId: "dual",
+        instances: [
+            EIP155.Ethereum.dual,
+            EIP155.Base.dual
+        ]
+    )
+
+    /// Pharaoh Liquid Staking Token, CoinGecko's `pharaoh-liquid-staking-token`: its home on EIP155.Avalanche, then its other instances
+    public static let pharaohLiquidStakingToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.pharaohLiquidStakingToken.instance.id),
+        tokenName: "Pharaoh Liquid Staking Token",
+        symbol: AssetSymbol(validating: "P33"),
+        aggregatorId: "pharaoh-liquid-staking-token",
+        instances: [
+            EIP155.Avalanche.pharaohLiquidStakingToken
+        ]
+    )
+
+    /// Ferrum Network, CoinGecko's `ferrum-network`: its home on EIP155.Ethereum, then its other instances
+    public static let ferrumNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ferrumNetwork.instance.id),
+        tokenName: "Ferrum Network",
+        symbol: AssetSymbol(validating: "FRM"),
+        aggregatorId: "ferrum-network",
+        instances: [
+            EIP155.Ethereum.ferrumNetwork,
+            EIP155.BinanceSmartChain.ferrumNetwork,
+            EIP155.Polygon.ferrumNetwork,
+            EIP155.Avalanche.ferrumNetwork
+        ]
+    )
+
+    /// Lorenzo Protocol, CoinGecko's `lorenzo-protocol`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let lorenzoProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.lorenzoProtocol.instance.id),
+        tokenName: "Lorenzo Protocol",
+        symbol: AssetSymbol(validating: "BANK"),
+        aggregatorId: "lorenzo-protocol",
+        instances: [
+            EIP155.BinanceSmartChain.lorenzoProtocol
+        ]
+    )
+
+    /// Stable Coin, CoinGecko's `stable-coin-2`: its home on EIP155.Ethereum, then its other instances
+    public static let stableCoin2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.stableCoin2.instance.id),
+        tokenName: "Stable Coin",
+        symbol: AssetSymbol(validating: "SBC"),
+        aggregatorId: "stable-coin-2",
+        instances: [
+            EIP155.Ethereum.stableCoin2,
+            EIP155.Polygon.stableCoin2,
+            EIP155.Avalanche.stableCoin2,
+            EIP155.Base.stableCoin2,
+            SOLANA.Solana.stableCoin2
+        ]
+    )
+
+    /// Zylo Ecosystem, CoinGecko's `zylo-ecosystem`: its home on SOLANA.Solana, then its other instances
+    public static let zyloEcosystem: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.zyloEcosystem.instance.id),
+        tokenName: "Zylo Ecosystem",
+        symbol: AssetSymbol(validating: "ZYLO"),
+        aggregatorId: "zylo-ecosystem",
+        instances: [
+            SOLANA.Solana.zyloEcosystem
+        ]
+    )
+
+    /// Brevis, CoinGecko's `brevis`: its home on EIP155.Ethereum, then its other instances
+    public static let brevis: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.brevis.instance.id),
+        tokenName: "Brevis",
+        symbol: AssetSymbol(validating: "BREV"),
+        aggregatorId: "brevis",
+        instances: [
+            EIP155.Ethereum.brevis,
+            EIP155.BinanceSmartChain.brevis,
+            EIP155.Base.brevis
+        ]
+    )
+
+    /// MEDXT, CoinGecko's `medxt`: its home on EIP155.Ethereum, then its other instances
+    public static let medxt: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.medxt.instance.id),
+        tokenName: "MEDXT",
+        symbol: AssetSymbol(validating: "MEDXT"),
+        aggregatorId: "medxt",
+        instances: [
+            EIP155.Ethereum.medxt
+        ]
+    )
+
+    /// LocalCoinSwap, CoinGecko's `localcoinswap`: its home on EIP155.Ethereum, then its other instances
+    public static let localcoinswap: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.localcoinswap.instance.id),
+        tokenName: "LocalCoinSwap",
+        symbol: AssetSymbol(validating: "LCS"),
+        aggregatorId: "localcoinswap",
+        instances: [
+            EIP155.Ethereum.localcoinswap
+        ]
+    )
+
+    /// OHO Blockchain, CoinGecko's `oho-blockchain`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let ohoBlockchain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.ohoBlockchain.instance.id),
+        tokenName: "OHO Blockchain",
+        symbol: AssetSymbol(validating: "OHO"),
+        aggregatorId: "oho-blockchain",
+        instances: [
+            EIP155.BinanceSmartChain.ohoBlockchain
+        ]
+    )
+
+    /// Chromia, CoinGecko's `chromaway`: its home on EIP155.Ethereum, then its other instances
+    public static let chromaway: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.chromaway.instance.id),
+        tokenName: "Chromia",
+        symbol: AssetSymbol(validating: "CHR"),
+        aggregatorId: "chromaway",
+        instances: [
+            EIP155.Ethereum.chromaway,
+            EIP155.BinanceSmartChain.chromaway
+        ]
+    )
+
+    /// World Mobile Token, CoinGecko's `world-mobile-token`: its home on EIP155.Base, then its other instances
+    public static let worldMobileToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.worldMobileToken.instance.id),
+        tokenName: "World Mobile Token",
+        symbol: AssetSymbol(validating: "WMTX"),
+        aggregatorId: "world-mobile-token",
+        instances: [
+            EIP155.Base.worldMobileToken,
+            EIP155.BinanceSmartChain.worldMobileToken,
+            SOLANA.Solana.worldMobileToken,
+            CIP34.Cardano.worldMobileToken
+        ]
+    )
+
+    /// WYDE: End Hunger, CoinGecko's `wyde-end-hunger`: its home on EIP155.Base, then its other instances
+    public static let wydeEndHunger: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.wydeEndHunger.instance.id),
+        tokenName: "WYDE: End Hunger",
+        symbol: AssetSymbol(validating: "EAT"),
+        aggregatorId: "wyde-end-hunger",
+        instances: [
+            EIP155.Base.wydeEndHunger
+        ]
+    )
+
+    /// SAFEbit, CoinGecko's `safecoin`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let safecoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.safecoin.instance.id),
+        tokenName: "SAFEbit",
+        symbol: AssetSymbol(validating: "SAFE"),
+        aggregatorId: "safecoin",
+        instances: [
+            EIP155.BinanceSmartChain.safecoin
+        ]
+    )
+
+    /// HUNDRED, CoinGecko's `hundred`: its home on EIP155.Avalanche, then its other instances
+    public static let hundred: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.hundred.instance.id),
+        tokenName: "HUNDRED",
+        symbol: AssetSymbol(validating: "HUNDRED"),
+        aggregatorId: "hundred",
+        instances: [
+            EIP155.Avalanche.hundred
+        ]
+    )
+
+    /// BENQI, CoinGecko's `benqi`: its home on EIP155.Avalanche, then its other instances
+    public static let benqi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.benqi.instance.id),
+        tokenName: "BENQI",
+        symbol: AssetSymbol(validating: "QI"),
+        aggregatorId: "benqi",
+        instances: [
+            EIP155.Avalanche.benqi
+        ]
+    )
+
+    /// Scandic Coin, CoinGecko's `scandic-coin`: its home on EIP155.Ethereum, then its other instances
+    public static let scandicCoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.scandicCoin.instance.id),
+        tokenName: "Scandic Coin",
+        symbol: AssetSymbol(validating: "SNC"),
+        aggregatorId: "scandic-coin",
+        instances: [
+            EIP155.Ethereum.scandicCoin
+        ]
+    )
+
+    /// Yield Basis, CoinGecko's `yield-basis`: its home on EIP155.Ethereum, then its other instances
+    public static let yieldBasis: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.yieldBasis.instance.id),
+        tokenName: "Yield Basis",
+        symbol: AssetSymbol(validating: "YB"),
+        aggregatorId: "yield-basis",
+        instances: [
+            EIP155.Ethereum.yieldBasis,
+            EIP155.BinanceSmartChain.yieldBasis
+        ]
+    )
+
+    /// Re Protocol reUSDe, CoinGecko's `re-protocol-reusde`: its home on EIP155.Ethereum, then its other instances
+    public static let reProtocolReusde: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.reProtocolReusde.instance.id),
+        tokenName: "Re Protocol reUSDe",
+        symbol: AssetSymbol(validating: "REUSDE"),
+        aggregatorId: "re-protocol-reusde",
+        instances: [
+            EIP155.Ethereum.reProtocolReusde
+        ]
+    )
+
+    /// aixbt, CoinGecko's `aixbt`: its home on EIP155.Base, then its other instances
+    public static let aixbt: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.aixbt.instance.id),
+        tokenName: "aixbt",
+        symbol: AssetSymbol(validating: "AIXBT"),
+        aggregatorId: "aixbt",
+        instances: [
+            EIP155.Base.aixbt,
+            EIP155.Ethereum.aixbt,
+            SOLANA.Solana.aixbt
+        ]
+    )
+
+    /// Black Phoenix, CoinGecko's `black-phoenix`: its home on TRON.Tron, then its other instances
+    public static let blackPhoenix: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.blackPhoenix.instance.id),
+        tokenName: "Black Phoenix",
+        symbol: AssetSymbol(validating: "BPX"),
+        aggregatorId: "black-phoenix",
+        instances: [
+            TRON.Tron.blackPhoenix,
+            EIP155.BinanceSmartChain.blackPhoenix
+        ]
+    )
+
+    /// Stargate Finance, CoinGecko's `stargate-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let stargateFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.stargateFinance.instance.id),
+        tokenName: "Stargate Finance",
+        symbol: AssetSymbol(validating: "STG"),
+        aggregatorId: "stargate-finance",
+        instances: [
+            EIP155.Ethereum.stargateFinance,
+            EIP155.BinanceSmartChain.stargateFinance,
+            EIP155.Polygon.stargateFinance,
+            EIP155.Optimism.stargateFinance,
+            EIP155.Fantom.stargateFinance,
+            EIP155.Avalanche.stargateFinance,
+            EIP155.Base.stargateFinance
+        ]
+    )
+
+    /// Alphabet Class A (Ondo Tokenized Stock), CoinGecko's `alphabet-class-a-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let alphabetClassAOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.alphabetClassAOndoTokenizedStock.instance.id),
+        tokenName: "Alphabet Class A (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "GOOGLON"),
+        aggregatorId: "alphabet-class-a-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.alphabetClassAOndoTokenizedStock,
+            EIP155.BinanceSmartChain.alphabetClassAOndoTokenizedStock,
+            SOLANA.Solana.alphabetClassAOndoTokenizedStock
+        ]
+    )
+
+    /// Intel (bStocks Tokenized Stock), CoinGecko's `intel-tokenized-bstocks`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let intelTokenizedBstocks: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.intelTokenizedBstocks.instance.id),
+        tokenName: "Intel (bStocks Tokenized Stock)",
+        symbol: AssetSymbol(validating: "INTCB"),
+        aggregatorId: "intel-tokenized-bstocks",
+        instances: [
+            EIP155.BinanceSmartChain.intelTokenizedBstocks
+        ]
+    )
+
+    /// Biconomy, CoinGecko's `biconomy`: its home on EIP155.Ethereum, then its other instances
+    public static let biconomy: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.biconomy.instance.id),
+        tokenName: "Biconomy",
+        symbol: AssetSymbol(validating: "BICO"),
+        aggregatorId: "biconomy",
+        instances: [
+            EIP155.Ethereum.biconomy
+        ]
+    )
+
+    /// MEET48, CoinGecko's `meet48`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let meet48: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.meet48.instance.id),
+        tokenName: "MEET48",
+        symbol: AssetSymbol(validating: "IDOL"),
+        aggregatorId: "meet48",
+        instances: [
+            EIP155.BinanceSmartChain.meet48
+        ]
+    )
+
+    /// rsFIRO, CoinGecko's `rsfiro`: its home on EIP155.Ethereum, then its other instances
+    public static let rsfiro: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.rsfiro.instance.id),
+        tokenName: "rsFIRO",
+        symbol: AssetSymbol(validating: "RSFIRO"),
+        aggregatorId: "rsfiro",
+        instances: [
+            EIP155.Ethereum.rsfiro,
+            EIP155.BinanceSmartChain.rsfiro
+        ]
+    )
+
+    /// Mey Network, CoinGecko's `mey-network`: its home on EIP155.Base, then its other instances
+    public static let meyNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.meyNetwork.instance.id),
+        tokenName: "Mey Network",
+        symbol: AssetSymbol(validating: "MEY"),
+        aggregatorId: "mey-network",
+        instances: [
+            EIP155.Base.meyNetwork
+        ]
+    )
+
+    /// UBS USD Money Market Investment Fund Token, CoinGecko's `ubs_umint_eth`: its home on EIP155.Ethereum, then its other instances
+    public static let ubsUmintEth: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ubsUmintEth.instance.id),
+        tokenName: "UBS USD Money Market Investment Fund Token",
+        symbol: AssetSymbol(validating: "UMINT"),
+        aggregatorId: "ubs_umint_eth",
+        instances: [
+            EIP155.Ethereum.ubsUmintEth
+        ]
+    )
+
+    /// Bonfida, CoinGecko's `bonfida`: its home on SOLANA.Solana, then its other instances
+    public static let bonfida: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.bonfida.instance.id),
+        tokenName: "Bonfida",
+        symbol: AssetSymbol(validating: "FIDA"),
+        aggregatorId: "bonfida",
+        instances: [
+            SOLANA.Solana.bonfida
+        ]
+    )
+
+    /// ANyONe Protocol, CoinGecko's `airtor-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let airtorProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.airtorProtocol.instance.id),
+        tokenName: "ANyONe Protocol",
+        symbol: AssetSymbol(validating: "ANYONE"),
+        aggregatorId: "airtor-protocol",
+        instances: [
+            EIP155.Ethereum.airtorProtocol,
+            EIP155.Base.airtorProtocol
+        ]
+    )
+
+    /// Cobak, CoinGecko's `cobak-token`: its home on EIP155.Ethereum, then its other instances
+    public static let cobakToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cobakToken.instance.id),
+        tokenName: "Cobak",
+        symbol: AssetSymbol(validating: "CBK"),
+        aggregatorId: "cobak-token",
+        instances: [
+            EIP155.Ethereum.cobakToken,
+            EIP155.Polygon.cobakToken
+        ]
+    )
+
+    /// Peapods Finance, CoinGecko's `peapods-finance`: its home on EIP155.Ethereum, then its other instances
+    public static let peapodsFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.peapodsFinance.instance.id),
+        tokenName: "Peapods Finance",
+        symbol: AssetSymbol(validating: "PEAS"),
+        aggregatorId: "peapods-finance",
+        instances: [
+            EIP155.Ethereum.peapodsFinance,
+            EIP155.Base.peapodsFinance
+        ]
+    )
+
+    /// QANplatform, CoinGecko's `qanplatform`: its home on EIP155.Ethereum, then its other instances
+    public static let qanplatform: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.qanplatform.instance.id),
+        tokenName: "QANplatform",
+        symbol: AssetSymbol(validating: "QANX"),
+        aggregatorId: "qanplatform",
+        instances: [
+            EIP155.Ethereum.qanplatform,
+            EIP155.BinanceSmartChain.qanplatform
+        ]
+    )
+
+    /// PinkSale, CoinGecko's `pinksale`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let pinksale: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.pinksale.instance.id),
+        tokenName: "PinkSale",
+        symbol: AssetSymbol(validating: "PINKSALE"),
+        aggregatorId: "pinksale",
+        instances: [
+            EIP155.BinanceSmartChain.pinksale
+        ]
+    )
+
+    /// Realio Network Token, CoinGecko's `realio-network`: its home on EIP155.Ethereum, then its other instances
+    public static let realioNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.realioNetwork.instance.id),
+        tokenName: "Realio Network Token",
+        symbol: AssetSymbol(validating: "RIO"),
+        aggregatorId: "realio-network",
+        instances: [
+            EIP155.Ethereum.realioNetwork,
+            EIP155.BinanceSmartChain.realioNetwork,
+            EIP155.Base.realioNetwork,
+            SOLANA.Solana.realioNetwork,
+            STELLAR.Stellar.realioNetwork,
+            ALGORAND.Algorand.realioNetwork
+        ]
+    )
+
+    /// ChainGPT, CoinGecko's `chaingpt`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let chaingpt: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.chaingpt.instance.id),
+        tokenName: "ChainGPT",
+        symbol: AssetSymbol(validating: "CGPT"),
+        aggregatorId: "chaingpt",
+        instances: [
+            EIP155.BinanceSmartChain.chaingpt,
+            EIP155.Ethereum.chaingpt,
+            SOLANA.Solana.chaingpt
+        ]
+    )
+
+    /// BitMart, CoinGecko's `bitmart-token`: its home on EIP155.Ethereum, then its other instances
+    public static let bitmartToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.bitmartToken.instance.id),
+        tokenName: "BitMart",
+        symbol: AssetSymbol(validating: "BMX"),
+        aggregatorId: "bitmart-token",
+        instances: [
+            EIP155.Ethereum.bitmartToken
+        ]
+    )
+
+    /// Halo, CoinGecko's `halo-4`: its home on EIP155.Base, then its other instances
+    public static let halo4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.halo4.instance.id),
+        tokenName: "Halo",
+        symbol: AssetSymbol(validating: "HALO"),
+        aggregatorId: "halo-4",
+        instances: [
+            EIP155.Base.halo4
+        ]
+    )
+
+    /// Hunt, CoinGecko's `hunt-token`: its home on EIP155.Ethereum, then its other instances
+    public static let huntToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.huntToken.instance.id),
+        tokenName: "Hunt",
+        symbol: AssetSymbol(validating: "HUNT"),
+        aggregatorId: "hunt-token",
+        instances: [
+            EIP155.Ethereum.huntToken,
+            EIP155.Base.huntToken
+        ]
+    )
+
+    /// Gigachad, CoinGecko's `gigachad-2`: its home on SOLANA.Solana, then its other instances
+    public static let gigachad2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.gigachad2.instance.id),
+        tokenName: "Gigachad",
+        symbol: AssetSymbol(validating: "GIGA"),
+        aggregatorId: "gigachad-2",
+        instances: [
+            SOLANA.Solana.gigachad2
+        ]
+    )
+
+    /// Doppler Finance, CoinGecko's `doppler-finance`: its home on EIP155.Base, then its other instances
+    public static let dopplerFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.dopplerFinance.instance.id),
+        tokenName: "Doppler Finance",
+        symbol: AssetSymbol(validating: "XDP"),
+        aggregatorId: "doppler-finance",
+        instances: [
+            EIP155.Base.dopplerFinance
+        ]
+    )
+
+    /// DeGate, CoinGecko's `degate`: its home on EIP155.Ethereum, then its other instances
+    public static let degate: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.degate.instance.id),
+        tokenName: "DeGate",
+        symbol: AssetSymbol(validating: "DG"),
+        aggregatorId: "degate",
+        instances: [
+            EIP155.Ethereum.degate
+        ]
+    )
+
+    /// DIA, CoinGecko's `dia-data`: its home on EIP155.Ethereum, then its other instances
+    public static let diaData: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.diaData.instance.id),
+        tokenName: "DIA",
+        symbol: AssetSymbol(validating: "DIA"),
+        aggregatorId: "dia-data",
+        instances: [
+            EIP155.Ethereum.diaData,
+            EIP155.BinanceSmartChain.diaData
+        ]
+    )
+
+    /// Tread.fi, CoinGecko's `tread-fi`: its home on EIP155.Ethereum, then its other instances
+    public static let treadFi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.treadFi.instance.id),
+        tokenName: "Tread.fi",
+        symbol: AssetSymbol(validating: "TREAD"),
+        aggregatorId: "tread-fi",
+        instances: [
+            EIP155.Ethereum.treadFi
+        ]
+    )
+
+    /// GENIUS AI, CoinGecko's `genius-ai`: its home on EIP155.Polygon, then its other instances
+    public static let geniusAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.geniusAi.instance.id),
+        tokenName: "GENIUS AI",
+        symbol: AssetSymbol(validating: "GNUS"),
+        aggregatorId: "genius-ai",
+        instances: [
+            EIP155.Polygon.geniusAi,
+            EIP155.Ethereum.geniusAi,
+            EIP155.Base.geniusAi
+        ]
+    )
+
+    /// NXUSD, CoinGecko's `nxusd`: its home on EIP155.Avalanche, then its other instances
+    public static let nxusd: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.nxusd.instance.id),
+        tokenName: "NXUSD",
+        symbol: AssetSymbol(validating: "NXUSD"),
+        aggregatorId: "nxusd",
+        instances: [
+            EIP155.Avalanche.nxusd
+        ]
+    )
+
+    /// QuarkChain, CoinGecko's `quark-chain`: its home on EIP155.Ethereum, then its other instances
+    public static let quarkChain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.quarkChain.instance.id),
+        tokenName: "QuarkChain",
+        symbol: AssetSymbol(validating: "QKC"),
+        aggregatorId: "quark-chain",
+        instances: [
+            EIP155.Ethereum.quarkChain
+        ]
+    )
+
+    /// Perle, CoinGecko's `perle`: its home on SOLANA.Solana, then its other instances
+    public static let perle: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.perle.instance.id),
+        tokenName: "Perle",
+        symbol: AssetSymbol(validating: "PRL"),
+        aggregatorId: "perle",
+        instances: [
+            SOLANA.Solana.perle
+        ]
+    )
+
+    /// DebtReliefBot, CoinGecko's `debtreliefbot`: its home on EIP155.Base, then its other instances
+    public static let debtreliefbot: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.debtreliefbot.instance.id),
+        tokenName: "DebtReliefBot",
+        symbol: AssetSymbol(validating: "DRB"),
+        aggregatorId: "debtreliefbot",
+        instances: [
+            EIP155.Base.debtreliefbot
+        ]
+    )
+
+    /// inu wif sword, CoinGecko's `inu-wif-sword`: its home on SOLANA.Solana, then its other instances
+    public static let inuWifSword: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.inuWifSword.instance.id),
+        tokenName: "inu wif sword",
+        symbol: AssetSymbol(validating: "SWORDINU"),
+        aggregatorId: "inu-wif-sword",
+        instances: [
+            SOLANA.Solana.inuWifSword
+        ]
+    )
+
+    /// Tutorial, CoinGecko's `tutorial`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let tutorial: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.tutorial.instance.id),
+        tokenName: "Tutorial",
+        symbol: AssetSymbol(validating: "TUT"),
+        aggregatorId: "tutorial",
+        instances: [
+            EIP155.BinanceSmartChain.tutorial
+        ]
+    )
+
+    /// Umia, CoinGecko's `umia`: its home on EIP155.Base, then its other instances
+    public static let umia: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.umia.instance.id),
+        tokenName: "Umia",
+        symbol: AssetSymbol(validating: "UMIA"),
+        aggregatorId: "umia",
+        instances: [
+            EIP155.Base.umia
+        ]
+    )
+
+    /// Ryze, CoinGecko's `ryze`: its home on EIP155.Ethereum, then its other instances
+    public static let ryze: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ryze.instance.id),
+        tokenName: "Ryze",
+        symbol: AssetSymbol(validating: "RYZE"),
+        aggregatorId: "ryze",
+        instances: [
+            EIP155.Ethereum.ryze,
+            EIP155.BinanceSmartChain.ryze,
+            EIP155.Polygon.ryze
+        ]
+    )
+
+    /// CYBER, CoinGecko's `cyberconnect`: its home on EIP155.Ethereum, then its other instances
+    public static let cyberconnect: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.cyberconnect.instance.id),
+        tokenName: "CYBER",
+        symbol: AssetSymbol(validating: "CYBER"),
+        aggregatorId: "cyberconnect",
+        instances: [
+            EIP155.Ethereum.cyberconnect,
+            EIP155.BinanceSmartChain.cyberconnect,
+            EIP155.Optimism.cyberconnect
+        ]
+    )
+
+    /// ARPA, CoinGecko's `arpa`: its home on EIP155.Ethereum, then its other instances
+    public static let arpa: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.arpa.instance.id),
+        tokenName: "ARPA",
+        symbol: AssetSymbol(validating: "ARPA"),
+        aggregatorId: "arpa",
+        instances: [
+            EIP155.Ethereum.arpa,
+            EIP155.BinanceSmartChain.arpa,
+            EIP155.Polygon.arpa
+        ]
+    )
+
+    /// WalletConnect Token, CoinGecko's `connect-token-wct`: its home on EIP155.Optimism, then its other instances
+    public static let connectTokenWct: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Optimism.connectTokenWct.instance.id),
+        tokenName: "WalletConnect Token",
+        symbol: AssetSymbol(validating: "WCT"),
+        aggregatorId: "connect-token-wct",
+        instances: [
+            EIP155.Optimism.connectTokenWct,
+            EIP155.Ethereum.connectTokenWct,
+            EIP155.Base.connectTokenWct,
+            SOLANA.Solana.connectTokenWct
+        ]
+    )
+
+    /// Freysa AI, CoinGecko's `freysa-ai`: its home on EIP155.Base, then its other instances
+    public static let freysaAi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.freysaAi.instance.id),
+        tokenName: "Freysa AI",
+        symbol: AssetSymbol(validating: "FAI"),
+        aggregatorId: "freysa-ai",
+        instances: [
+            EIP155.Base.freysaAi
+        ]
+    )
+
+    /// Backed IB01 $ Treasury Bond 0-1yr, CoinGecko's `backed-ib01-treasury-bond-0-1yr`: its home on EIP155.Ethereum, then its other instances
+    public static let backedIb01TreasuryBond01yr: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.backedIb01TreasuryBond01yr.instance.id),
+        tokenName: "Backed IB01 $ Treasury Bond 0-1yr",
+        symbol: AssetSymbol(validating: "BIB01"),
+        aggregatorId: "backed-ib01-treasury-bond-0-1yr",
+        instances: [
+            EIP155.Ethereum.backedIb01TreasuryBond01yr,
+            EIP155.BinanceSmartChain.backedIb01TreasuryBond01yr,
+            EIP155.Polygon.backedIb01TreasuryBond01yr,
+            EIP155.Avalanche.backedIb01TreasuryBond01yr,
+            EIP155.Base.backedIb01TreasuryBond01yr
+        ]
+    )
+
+    /// Fusionist, CoinGecko's `endurance`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let endurance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.endurance.instance.id),
+        tokenName: "Fusionist",
+        symbol: AssetSymbol(validating: "ACE"),
+        aggregatorId: "endurance",
+        instances: [
+            EIP155.BinanceSmartChain.endurance
+        ]
+    )
+
+    /// dKargo, CoinGecko's `dkargo`: its home on EIP155.Ethereum, then its other instances
+    public static let dkargo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dkargo.instance.id),
+        tokenName: "dKargo",
+        symbol: AssetSymbol(validating: "DKA"),
+        aggregatorId: "dkargo",
+        instances: [
+            EIP155.Ethereum.dkargo
+        ]
+    )
+
+    /// Graphite Protocol, CoinGecko's `graphite-protocol`: its home on SOLANA.Solana, then its other instances
+    public static let graphiteProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.graphiteProtocol.instance.id),
+        tokenName: "Graphite Protocol",
+        symbol: AssetSymbol(validating: "GP"),
+        aggregatorId: "graphite-protocol",
+        instances: [
+            SOLANA.Solana.graphiteProtocol
+        ]
+    )
+
+    /// Felysyum, CoinGecko's `felysyum`: its home on EIP155.Polygon, then its other instances
+    public static let felysyum: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Polygon.felysyum.instance.id),
+        tokenName: "Felysyum",
+        symbol: AssetSymbol(validating: "FELY"),
+        aggregatorId: "felysyum",
+        instances: [
+            EIP155.Polygon.felysyum
+        ]
+    )
+
+    /// GameBuild, CoinGecko's `gamebuild`: its home on EIP155.Ethereum, then its other instances
+    public static let gamebuild: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gamebuild.instance.id),
+        tokenName: "GameBuild",
+        symbol: AssetSymbol(validating: "GAME"),
+        aggregatorId: "gamebuild",
+        instances: [
+            EIP155.Ethereum.gamebuild,
+            EIP155.BinanceSmartChain.gamebuild
+        ]
+    )
+
+    /// RealLink, CoinGecko's `reallink`: its home on TRON.Tron, then its other instances
+    public static let reallink: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.reallink.instance.id),
+        tokenName: "RealLink",
+        symbol: AssetSymbol(validating: "REAL"),
+        aggregatorId: "reallink",
+        instances: [
+            TRON.Tron.reallink,
+            EIP155.BinanceSmartChain.reallink
+        ]
+    )
+
+    /// Taiko, CoinGecko's `taiko`: its home on EIP155.Ethereum, then its other instances
+    public static let taiko: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.taiko.instance.id),
+        tokenName: "Taiko",
+        symbol: AssetSymbol(validating: "TAIKO"),
+        aggregatorId: "taiko",
+        instances: [
+            EIP155.Ethereum.taiko,
+            EIP155.BinanceSmartChain.taiko
+        ]
+    )
+
+    /// AI XOVIA, CoinGecko's `ai-xovia`: its home on SOLANA.Solana, then its other instances
+    public static let aiXovia: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.aiXovia.instance.id),
+        tokenName: "AI XOVIA",
+        symbol: AssetSymbol(validating: "AIX"),
+        aggregatorId: "ai-xovia",
+        instances: [
+            SOLANA.Solana.aiXovia
+        ]
+    )
+
+    /// Enso, CoinGecko's `enso`: its home on EIP155.Ethereum, then its other instances
+    public static let enso: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.enso.instance.id),
+        tokenName: "Enso",
+        symbol: AssetSymbol(validating: "ENSO"),
+        aggregatorId: "enso",
+        instances: [
+            EIP155.Ethereum.enso,
+            EIP155.BinanceSmartChain.enso
+        ]
+    )
+
+    /// BSquared Network, CoinGecko's `bsquared-network`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let bsquaredNetwork: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.bsquaredNetwork.instance.id),
+        tokenName: "BSquared Network",
+        symbol: AssetSymbol(validating: "B2"),
+        aggregatorId: "bsquared-network",
+        instances: [
+            EIP155.BinanceSmartChain.bsquaredNetwork
+        ]
+    )
+
+    /// NaoX Protocol, CoinGecko's `naoris`: its home on EIP155.Ethereum, then its other instances
+    public static let naoris: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.naoris.instance.id),
+        tokenName: "NaoX Protocol",
+        symbol: AssetSymbol(validating: "NAORIS"),
+        aggregatorId: "naoris",
+        instances: [
+            EIP155.Ethereum.naoris,
+            EIP155.BinanceSmartChain.naoris
+        ]
+    )
+
+    /// Fabric Protocol, CoinGecko's `robo-token-2`: its home on EIP155.Ethereum, then its other instances
+    public static let roboToken2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.roboToken2.instance.id),
+        tokenName: "Fabric Protocol",
+        symbol: AssetSymbol(validating: "ROBO"),
+        aggregatorId: "robo-token-2",
+        instances: [
+            EIP155.Ethereum.roboToken2,
+            EIP155.BinanceSmartChain.roboToken2,
+            EIP155.Base.roboToken2
+        ]
+    )
+
+    /// Neuberger Securitize High Income Tokenized Fund, CoinGecko's `neuberger-securitize-high-income-tokenized-fund`: its home on EIP155.Ethereum, then its other instances
+    public static let neubergerSecuritizeHighIncomeTokenizedFund: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.neubergerSecuritizeHighIncomeTokenizedFund.instance.id),
+        tokenName: "Neuberger Securitize High Income Tokenized Fund",
+        symbol: AssetSymbol(validating: "HINC"),
+        aggregatorId: "neuberger-securitize-high-income-tokenized-fund",
+        instances: [
+            EIP155.Ethereum.neubergerSecuritizeHighIncomeTokenizedFund,
+            EIP155.Avalanche.neubergerSecuritizeHighIncomeTokenizedFund,
+            SOLANA.Solana.neubergerSecuritizeHighIncomeTokenizedFund
+        ]
+    )
+
+    /// Radworks, CoinGecko's `radicle`: its home on EIP155.Ethereum, then its other instances
+    public static let radicle: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.radicle.instance.id),
+        tokenName: "Radworks",
+        symbol: AssetSymbol(validating: "RAD"),
+        aggregatorId: "radicle",
+        instances: [
+            EIP155.Ethereum.radicle
+        ]
+    )
+
+    /// Adshares, CoinGecko's `adshares`: its home on EIP155.Ethereum, then its other instances
+    public static let adshares: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.adshares.instance.id),
+        tokenName: "Adshares",
+        symbol: AssetSymbol(validating: "ADS"),
+        aggregatorId: "adshares",
+        instances: [
+            EIP155.Ethereum.adshares,
+            EIP155.BinanceSmartChain.adshares,
+            EIP155.Polygon.adshares,
+            EIP155.Base.adshares
+        ]
+    )
+
+    /// Hivemapper, CoinGecko's `hivemapper`: its home on SOLANA.Solana, then its other instances
+    public static let hivemapper: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.hivemapper.instance.id),
+        tokenName: "Hivemapper",
+        symbol: AssetSymbol(validating: "HONEY"),
+        aggregatorId: "hivemapper",
+        instances: [
+            SOLANA.Solana.hivemapper
+        ]
+    )
+
+    /// Manadia, CoinGecko's `manadia`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let manadia: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.manadia.instance.id),
+        tokenName: "Manadia",
+        symbol: AssetSymbol(validating: "UMXM"),
+        aggregatorId: "manadia",
+        instances: [
+            EIP155.BinanceSmartChain.manadia
+        ]
+    )
+
+    /// PolySwarm, CoinGecko's `polyswarm`: its home on EIP155.Ethereum, then its other instances
+    public static let polyswarm: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.polyswarm.instance.id),
+        tokenName: "PolySwarm",
+        symbol: AssetSymbol(validating: "NCT"),
+        aggregatorId: "polyswarm",
+        instances: [
+            EIP155.Ethereum.polyswarm,
+            EIP155.Polygon.polyswarm
+        ]
+    )
+
+    /// Verified Emeralds, CoinGecko's `verified-emeralds`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let verifiedEmeralds: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.verifiedEmeralds.instance.id),
+        tokenName: "Verified Emeralds",
+        symbol: AssetSymbol(validating: "VEREM"),
+        aggregatorId: "verified-emeralds",
+        instances: [
+            EIP155.BinanceSmartChain.verifiedEmeralds
+        ]
+    )
+
+    /// Quantix Finance, CoinGecko's `quantixai`: its home on TRON.Tron, then its other instances
+    public static let quantixai: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: TRON.Tron.quantixai.instance.id),
+        tokenName: "Quantix Finance",
+        symbol: AssetSymbol(validating: "QFI"),
+        aggregatorId: "quantixai",
+        instances: [
+            TRON.Tron.quantixai
+        ]
+    )
+
+    /// Adventure Gold, CoinGecko's `adventure-gold`: its home on EIP155.Ethereum, then its other instances
+    public static let adventureGold: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.adventureGold.instance.id),
+        tokenName: "Adventure Gold",
+        symbol: AssetSymbol(validating: "AGLD"),
+        aggregatorId: "adventure-gold",
+        instances: [
+            EIP155.Ethereum.adventureGold
+        ]
+    )
+
+    /// Intel (Ondo Tokenized Stock), CoinGecko's `intel-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let intelOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.intelOndoTokenizedStock.instance.id),
+        tokenName: "Intel (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "INTCON"),
+        aggregatorId: "intel-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.intelOndoTokenizedStock,
+            EIP155.BinanceSmartChain.intelOndoTokenizedStock,
+            SOLANA.Solana.intelOndoTokenizedStock
+        ]
+    )
+
+    /// Public Masterpiece Token, CoinGecko's `public-meme-token`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let publicMemeToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.publicMemeToken.instance.id),
+        tokenName: "Public Masterpiece Token",
+        symbol: AssetSymbol(validating: "PMT"),
+        aggregatorId: "public-meme-token",
+        instances: [
+            EIP155.BinanceSmartChain.publicMemeToken
+        ]
+    )
+
+    /// Sophon, CoinGecko's `sophon`: its home on EIP155.Ethereum, then its other instances
+    public static let sophon: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sophon.instance.id),
+        tokenName: "Sophon",
+        symbol: AssetSymbol(validating: "SOPH"),
+        aggregatorId: "sophon",
+        instances: [
+            EIP155.Ethereum.sophon,
+            EIP155.BinanceSmartChain.sophon,
+            EIP155.Polygon.sophon,
+            EIP155.Base.sophon
+        ]
+    )
+
+    /// IdleMine, CoinGecko's `idlemine`: its home on SOLANA.Solana, then its other instances
+    public static let idlemine: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.idlemine.instance.id),
+        tokenName: "IdleMine",
+        symbol: AssetSymbol(validating: "IDLE"),
+        aggregatorId: "idlemine",
+        instances: [
+            SOLANA.Solana.idlemine
+        ]
+    )
+
+    /// iShares 20+ Year Treasury Bond ETF (Ondo Tokenized ETF), CoinGecko's `ishares-20-year-treasury-bond-etf-ondo-tokenized-etf`: its home on EIP155.Ethereum, then its other instances
+    public static let ishares20YearTreasuryBondEtfOndoTokenizedEtf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ishares20YearTreasuryBondEtfOndoTokenizedEtf.instance.id),
+        tokenName: "iShares 20+ Year Treasury Bond ETF (Ondo Tokenized ETF)",
+        symbol: AssetSymbol(validating: "TLTON"),
+        aggregatorId: "ishares-20-year-treasury-bond-etf-ondo-tokenized-etf",
+        instances: [
+            EIP155.Ethereum.ishares20YearTreasuryBondEtfOndoTokenizedEtf,
+            EIP155.BinanceSmartChain.ishares20YearTreasuryBondEtfOndoTokenizedEtf,
+            SOLANA.Solana.ishares20YearTreasuryBondEtfOndoTokenizedEtf
+        ]
+    )
+
+    /// Janction, CoinGecko's `janction`: its home on EIP155.Ethereum, then its other instances
+    public static let janction: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.janction.instance.id),
+        tokenName: "Janction",
+        symbol: AssetSymbol(validating: "JCT"),
+        aggregatorId: "janction",
+        instances: [
+            EIP155.Ethereum.janction,
+            EIP155.BinanceSmartChain.janction
+        ]
+    )
+
+    /// DODO, CoinGecko's `dodo`: its home on EIP155.Ethereum, then its other instances
+    public static let dodo: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.dodo.instance.id),
+        tokenName: "DODO",
+        symbol: AssetSymbol(validating: "DODO"),
+        aggregatorId: "dodo",
+        instances: [
+            EIP155.Ethereum.dodo,
+            EIP155.BinanceSmartChain.dodo,
+            EIP155.Polygon.dodo,
+            NEAR.Near.dodo
+        ]
+    )
+
+    /// Qkacoin, CoinGecko's `qkacoin`: its home on SOLANA.Solana, then its other instances
+    public static let qkacoin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.qkacoin.instance.id),
+        tokenName: "Qkacoin",
+        symbol: AssetSymbol(validating: "QKA"),
+        aggregatorId: "qkacoin",
+        instances: [
+            SOLANA.Solana.qkacoin
+        ]
+    )
+
+    /// Sandisk Corporation xStock, CoinGecko's `sandisk-corporation-xstock`: its home on EIP155.Ethereum, then its other instances
+    public static let sandiskCorporationXstock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.sandiskCorporationXstock.instance.id),
+        tokenName: "Sandisk Corporation xStock",
+        symbol: AssetSymbol(validating: "SNDKX"),
+        aggregatorId: "sandisk-corporation-xstock",
+        instances: [
+            EIP155.Ethereum.sandiskCorporationXstock,
+            SOLANA.Solana.sandiskCorporationXstock
+        ]
+    )
+
+    /// Gold Park, CoinGecko's `gold-park`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let goldPark: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.goldPark.instance.id),
+        tokenName: "Gold Park",
+        symbol: AssetSymbol(validating: "GPT"),
+        aggregatorId: "gold-park",
+        instances: [
+            EIP155.BinanceSmartChain.goldPark
+        ]
+    )
+
+    /// GRIFFAIN, CoinGecko's `griffain`: its home on SOLANA.Solana, then its other instances
+    public static let griffain: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.griffain.instance.id),
+        tokenName: "GRIFFAIN",
+        symbol: AssetSymbol(validating: "GRIFFAIN"),
+        aggregatorId: "griffain",
+        instances: [
+            SOLANA.Solana.griffain
+        ]
+    )
+
+    /// Mira, CoinGecko's `mira-3`: its home on EIP155.Base, then its other instances
+    public static let mira3: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.mira3.instance.id),
+        tokenName: "Mira",
+        symbol: AssetSymbol(validating: "MIRA"),
+        aggregatorId: "mira-3",
+        instances: [
+            EIP155.Base.mira3,
+            EIP155.BinanceSmartChain.mira3
+        ]
+    )
+
+    /// Power Protocol, CoinGecko's `power-protocol`: its home on EIP155.Ethereum, then its other instances
+    public static let powerProtocol: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.powerProtocol.instance.id),
+        tokenName: "Power Protocol",
+        symbol: AssetSymbol(validating: "POWER"),
+        aggregatorId: "power-protocol",
+        instances: [
+            EIP155.Ethereum.powerProtocol,
+            EIP155.BinanceSmartChain.powerProtocol
+        ]
+    )
+
+    /// 4, CoinGecko's `4-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let _42: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain._42.instance.id),
+        tokenName: "4",
+        symbol: AssetSymbol(validating: "4"),
+        aggregatorId: "4-2",
+        instances: [
+            EIP155.BinanceSmartChain._42
+        ]
+    )
+
+    /// x-DOL-x, CoinGecko's `x-dol-x`: its home on EIP155.Ethereum, then its other instances
+    public static let xDolX: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.xDolX.instance.id),
+        tokenName: "x-DOL-x",
+        symbol: AssetSymbol(validating: "XDOL"),
+        aggregatorId: "x-dol-x",
+        instances: [
+            EIP155.Ethereum.xDolX
+        ]
+    )
+
+    /// Credible Finance, CoinGecko's `credible-finance`: its home on SOLANA.Solana, then its other instances
+    public static let credibleFinance: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.credibleFinance.instance.id),
+        tokenName: "Credible Finance",
+        symbol: AssetSymbol(validating: "CRED"),
+        aggregatorId: "credible-finance",
+        instances: [
+            SOLANA.Solana.credibleFinance
+        ]
+    )
+
+    /// JOE, CoinGecko's `joe`: its home on EIP155.Avalanche, then its other instances
+    public static let joe: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Avalanche.joe.instance.id),
+        tokenName: "JOE",
+        symbol: AssetSymbol(validating: "JOE"),
+        aggregatorId: "joe",
+        instances: [
+            EIP155.Avalanche.joe,
+            EIP155.BinanceSmartChain.joe
+        ]
+    )
+
+    /// MESSIER, CoinGecko's `messier`: its home on EIP155.Ethereum, then its other instances
+    public static let messier: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.messier.instance.id),
+        tokenName: "MESSIER",
+        symbol: AssetSymbol(validating: "M87"),
+        aggregatorId: "messier",
+        instances: [
+            EIP155.Ethereum.messier
+        ]
+    )
+
+    /// pippin, CoinGecko's `pippin`: its home on SOLANA.Solana, then its other instances
+    public static let pippin: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.pippin.instance.id),
+        tokenName: "pippin",
+        symbol: AssetSymbol(validating: "PIPPIN"),
+        aggregatorId: "pippin",
+        instances: [
+            SOLANA.Solana.pippin
+        ]
+    )
+
+    /// Coin98, CoinGecko's `coin98`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let coin98: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.coin98.instance.id),
+        tokenName: "Coin98",
+        symbol: AssetSymbol(validating: "C98"),
+        aggregatorId: "coin98",
+        instances: [
+            EIP155.BinanceSmartChain.coin98,
+            EIP155.Ethereum.coin98,
+            EIP155.Polygon.coin98,
+            SOLANA.Solana.coin98
+        ]
+    )
+
+    /// EURØP, CoinGecko's `schuman-europ`: its home on EIP155.Ethereum, then its other instances
+    public static let schumanEurop: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.schumanEurop.instance.id),
+        tokenName: "EURØP",
+        symbol: AssetSymbol(validating: "EUROP"),
+        aggregatorId: "schuman-europ",
+        instances: [
+            EIP155.Ethereum.schumanEurop,
+            EIP155.Polygon.schumanEurop,
+            EIP155.Avalanche.schumanEurop,
+            SOLANA.Solana.schumanEurop,
+            XRPL.XRPLedger.schumanEurop
+        ]
+    )
+
+    /// A Hunters Dream, CoinGecko's `a-hunters-dream`: its home on EIP155.Ethereum, then its other instances
+    public static let aHuntersDream: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.aHuntersDream.instance.id),
+        tokenName: "A Hunters Dream",
+        symbol: AssetSymbol(validating: "CAW"),
+        aggregatorId: "a-hunters-dream",
+        instances: [
+            EIP155.Ethereum.aHuntersDream
+        ]
+    )
+
+    /// Ninja Squad Token, CoinGecko's `ninja-squad`: its home on EIP155.Ethereum, then its other instances
+    public static let ninjaSquad: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.ninjaSquad.instance.id),
+        tokenName: "Ninja Squad Token",
+        symbol: AssetSymbol(validating: "NST"),
+        aggregatorId: "ninja-squad",
+        instances: [
+            EIP155.Ethereum.ninjaSquad,
+            SOLANA.Solana.ninjaSquad
+        ]
+    )
+
+    /// MarsMi, CoinGecko's `marsmi`: its home on SOLANA.Solana, then its other instances
+    public static let marsmi: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.marsmi.instance.id),
+        tokenName: "MarsMi",
+        symbol: AssetSymbol(validating: "MARSMI"),
+        aggregatorId: "marsmi",
+        instances: [
+            SOLANA.Solana.marsmi
+        ]
+    )
+
+    /// Goatseus Maximus, CoinGecko's `goatseus-maximus`: its home on SOLANA.Solana, then its other instances
+    public static let goatseusMaximus: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.goatseusMaximus.instance.id),
+        tokenName: "Goatseus Maximus",
+        symbol: AssetSymbol(validating: "GOAT"),
+        aggregatorId: "goatseus-maximus",
+        instances: [
+            SOLANA.Solana.goatseusMaximus
+        ]
+    )
+
+    /// My Neighbor Alice, CoinGecko's `my-neighbor-alice`: its home on EIP155.Ethereum, then its other instances
+    public static let myNeighborAlice: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.myNeighborAlice.instance.id),
+        tokenName: "My Neighbor Alice",
+        symbol: AssetSymbol(validating: "ALICE"),
+        aggregatorId: "my-neighbor-alice",
+        instances: [
+            EIP155.Ethereum.myNeighborAlice,
+            EIP155.BinanceSmartChain.myNeighborAlice
+        ]
+    )
+
+    /// TDCCP, CoinGecko's `tdccp`: its home on SOLANA.Solana, then its other instances
+    public static let tdccp: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.tdccp.instance.id),
+        tokenName: "TDCCP",
+        symbol: AssetSymbol(validating: "TDCCP"),
+        aggregatorId: "tdccp",
+        instances: [
+            SOLANA.Solana.tdccp
+        ]
+    )
+
+    /// Siren, CoinGecko's `siren-2`: its home on EIP155.BinanceSmartChain, then its other instances
+    public static let siren2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.BinanceSmartChain.siren2.instance.id),
+        tokenName: "Siren",
+        symbol: AssetSymbol(validating: "SIREN"),
+        aggregatorId: "siren-2",
+        instances: [
+            EIP155.BinanceSmartChain.siren2
+        ]
+    )
+
+    /// Sapien, CoinGecko's `sapien-2`: its home on EIP155.Base, then its other instances
+    public static let sapien2: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Base.sapien2.instance.id),
+        tokenName: "Sapien",
+        symbol: AssetSymbol(validating: "SAPIEN"),
+        aggregatorId: "sapien-2",
+        instances: [
+            EIP155.Base.sapien2
+        ]
+    )
+
+    /// GAIB AID, CoinGecko's `gaib-aid`: its home on EIP155.Ethereum, then its other instances
+    public static let gaibAid: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.gaibAid.instance.id),
+        tokenName: "GAIB AID",
+        symbol: AssetSymbol(validating: "AID"),
+        aggregatorId: "gaib-aid",
+        instances: [
+            EIP155.Ethereum.gaibAid
+        ]
+    )
+
+    /// Fake World Assets, CoinGecko's `fake-world-assets`: its home on EIP155.Ethereum, then its other instances
+    public static let fakeWorldAssets: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.fakeWorldAssets.instance.id),
+        tokenName: "Fake World Assets",
+        symbol: AssetSymbol(validating: "FWA"),
+        aggregatorId: "fake-world-assets",
+        instances: [
+            EIP155.Ethereum.fakeWorldAssets
+        ]
+    )
+
+    /// Tesla (Ondo Tokenized Stock), CoinGecko's `tesla-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let teslaOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.teslaOndoTokenizedStock.instance.id),
+        tokenName: "Tesla (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "TSLAON"),
+        aggregatorId: "tesla-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.teslaOndoTokenizedStock,
+            EIP155.BinanceSmartChain.teslaOndoTokenizedStock,
+            SOLANA.Solana.teslaOndoTokenizedStock
+        ]
+    )
+
+    /// MAX, CoinGecko's `max-token`: its home on EIP155.Ethereum, then its other instances
+    public static let maxToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.maxToken.instance.id),
+        tokenName: "MAX",
+        symbol: AssetSymbol(validating: "MAX"),
+        aggregatorId: "max-token",
+        instances: [
+            EIP155.Ethereum.maxToken
+        ]
+    )
+
+    /// Marvell Technology (Ondo Tokenized Stock), CoinGecko's `marvell-technology-ondo-tokenized-stock`: its home on EIP155.Ethereum, then its other instances
+    public static let marvellTechnologyOndoTokenizedStock: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.marvellTechnologyOndoTokenizedStock.instance.id),
+        tokenName: "Marvell Technology (Ondo Tokenized Stock)",
+        symbol: AssetSymbol(validating: "MRVLON"),
+        aggregatorId: "marvell-technology-ondo-tokenized-stock",
+        instances: [
+            EIP155.Ethereum.marvellTechnologyOndoTokenizedStock,
+            EIP155.BinanceSmartChain.marvellTechnologyOndoTokenizedStock,
+            SOLANA.Solana.marvellTechnologyOndoTokenizedStock
+        ]
+    )
+
+    /// Moonbirds, CoinGecko's `moonbirds`: its home on SOLANA.Solana, then its other instances
+    public static let moonbirds: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: SOLANA.Solana.moonbirds.instance.id),
+        tokenName: "Moonbirds",
+        symbol: AssetSymbol(validating: "BIRB"),
+        aggregatorId: "moonbirds",
+        instances: [
+            SOLANA.Solana.moonbirds
+        ]
+    )
+
+    /// Delta Exchange, CoinGecko's `delta-exchange-token`: its home on EIP155.Ethereum, then its other instances
+    public static let deltaExchangeToken: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.deltaExchangeToken.instance.id),
+        tokenName: "Delta Exchange",
+        symbol: AssetSymbol(validating: "DETO"),
+        aggregatorId: "delta-exchange-token",
+        instances: [
+            EIP155.Ethereum.deltaExchangeToken
+        ]
+    )
+
+    /// Kekius Maximus, CoinGecko's `kekius-maximus-6`: its home on EIP155.Ethereum, then its other instances
+    public static let kekiusMaximus6: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.kekiusMaximus6.instance.id),
+        tokenName: "Kekius Maximus",
+        symbol: AssetSymbol(validating: "KEKIUS"),
+        aggregatorId: "kekius-maximus-6",
+        instances: [
+            EIP155.Ethereum.kekiusMaximus6
+        ]
+    )
+
+    /// iShares Core MSCI EAFE ETF (Ondo Tokenized ETF), CoinGecko's `ishares-core-msci-eafe-etf-ondo-tokenized-etf`: its home on EIP155.Ethereum, then its other instances
+    public static let isharesCoreMsciEafeEtfOndoTokenizedEtf: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.isharesCoreMsciEafeEtfOndoTokenizedEtf.instance.id),
+        tokenName: "iShares Core MSCI EAFE ETF (Ondo Tokenized ETF)",
+        symbol: AssetSymbol(validating: "IEFAON"),
+        aggregatorId: "ishares-core-msci-eafe-etf-ondo-tokenized-etf",
+        instances: [
+            EIP155.Ethereum.isharesCoreMsciEafeEtfOndoTokenizedEtf,
+            EIP155.BinanceSmartChain.isharesCoreMsciEafeEtfOndoTokenizedEtf,
+            SOLANA.Solana.isharesCoreMsciEafeEtfOndoTokenizedEtf
+        ]
+    )
+
+    /// Nexus, CoinGecko's `nexus-4`: its home on EIP155.Ethereum, then its other instances
+    public static let nexus4: AssetDeclaration = try! AssetDeclaration(
+        asset: Asset(validating: EIP155.Ethereum.nexus4.instance.id),
+        tokenName: "Nexus",
+        symbol: AssetSymbol(validating: "NEX"),
+        aggregatorId: "nexus-4",
+        instances: [
+            EIP155.Ethereum.nexus4,
+            EIP155.BinanceSmartChain.nexus4
+        ]
+    )
+
     /// Every declaration above, in this file's order: what `AssetRegistry.shared` holds from the start
     public static let all: [AssetDeclaration] = [
         tether,
         usdCoin,
-        pepe
+        pepe,
+        usds,
+        chainlink,
+        whitebit,
+        leoToken,
+        ethenaUsde,
+        uniswap,
+        dai,
+        usd1Wlfi,
+        quantNetwork,
+        bitway,
+        tetherGold,
+        globalDollar,
+        shibaInu,
+        cryptoComChain,
+        ethena,
+        pumpFun,
+        paypalUsd,
+        okb,
+        aave,
+        hashnoteUsyc,
+        ondoUsDollarYield,
+        ondoFinance,
+        blackrockUsdInstitutionalDigitalLiquidityFund,
+        worldcoinWld,
+        mantle,
+        aster2,
+        sky,
+        falconFinance,
+        paxGold,
+        morpho,
+        worldLibertyFinancial,
+        usdd,
+        unitedStables,
+        htxDao,
+        bitgetToken,
+        usdgo,
+        veniceToken,
+        just,
+        gatechainToken,
+        jupiterExchangeSolana,
+        renderToken,
+        blockchainCapital,
+        lighter,
+        layerzero,
+        nexo,
+        aerodromeFinance,
+        superstateShortDurationUsGovernmentSecuritiesFundUstb,
+        midnight3,
+        injectiveProtocol,
+        openUsd,
+        pancakeswapToken,
+        gho,
+        etherFi,
+        raydium,
+        eutbl,
+        akedo,
+        janusHendersonAnemoyAaaCloFund,
+        beldex,
+        pythNetwork,
+        curveDaoToken,
+        usualUsd,
+        pudgyPenguins,
+        officialTrump,
+        virtualProtocol,
+        trueUsd,
+        usdtb,
+        euroCoin,
+        a7a5,
+        grass,
+        pendle,
+        falconFinanceFf,
+        derive,
+        starknet,
+        lidoDao,
+        spx6900,
+        bittorrent,
+        pieverse,
+        unibase,
+        sofiusd,
+        janusHendersonAnemoyTreasuryFund,
+        sunToken,
+        firstDigitalUsd,
+        ousg,
+        kite2,
+        apxusd,
+        gnosis,
+        bonk,
+        reProtocolReusd,
+        theGraph,
+        olympus,
+        jitoGovernanceToken,
+        optimism,
+        ethereumNameService,
+        syrup,
+        apeAndPepe,
+        floki,
+        collectorCrypt,
+        jasmycoin,
+        zebecNetwork,
+        theSandbox,
+        meteora,
+        compoundGovernanceToken,
+        apenft,
+        dogwifcoin,
+        eigenlayer,
+        trustWalletToken,
+        agoraDollar,
+        bnb48ClubToken,
+        frax,
+        crvusd,
+        kamino,
+        axieInfinity,
+        usx,
+        decentraland,
+        useless3,
+        shuffle2,
+        convexFinance,
+        doublezero,
+        zama,
+        societeGeneraleForgeEurcv,
+        origintrail,
+        usa,
+        sentient,
+        chain2,
+        mxToken,
+        orca,
+        apyusd,
+        instadapp,
+        nonPlayableCoin,
+        buildOn,
+        swissborg,
+        spikoUsTBillsMoneyMarketFund,
+        chiliz,
+        coco2,
+        vision3,
+        btseToken,
+        fartcoin,
+        strategyPpVariableXstock,
+        gmtToken,
+        immutableX,
+        bedrockToken,
+        basicAttentionToken,
+        aiozNetwork,
+        dgridAi,
+        superfarm,
+        humanity,
+        edgex,
+        havven,
+        railgun,
+        stonk3,
+        safepal,
+        circleInternetGroupBstock,
+        _1inch,
+        geodnet,
+        meta22,
+        aethir,
+        jpycoin,
+        beam2,
+        cash4,
+        jpysc,
+        strongholdToken,
+        golem,
+        avantUsd,
+        stpNetwork,
+        bcToken,
+        zencash,
+        plume,
+        midasFasanaraGlobalOpen,
+        gala,
+        rollbitCoin,
+        seeker,
+        cap4,
+        alphaBulgariaWarrants,
+        dydxChain,
+        nestBlackopalLiquidstoneIiVault,
+        sosovalue,
+        astherusUsdf,
+        soon2,
+        debridge,
+        fraxUsd,
+        nxm,
+        numeraire,
+        genius3,
+        anvil,
+        onyc,
+        cheemsToken,
+        securitizeTokenizedAaaCloFund,
+        helium,
+        reserveRightsToken,
+        _3janeUsd3,
+        _0x,
+        four,
+        quackAi,
+        unityUsd,
+        bitgetWrappedBtc,
+        marscoin4,
+        circleInternetGroupOndoTokenizedStock,
+        prometeus,
+        melaniaMeme,
+        apolloDiversifiedCreditSecuritizeFund,
+        wormhole,
+        usda2,
+        saturnDollar,
+        velo,
+        mag7Ssi,
+        funfair,
+        babyClaw,
+        fXProtocolFxusd,
+        arkham,
+        yearnFinance,
+        yzy,
+        circleXstock,
+        safe,
+        zignaly,
+        livepeer,
+        bendingSpoonsXstock,
+        fxUsdSaving,
+        cowProtocol,
+        goldfishGold,
+        unitywalletToken,
+        wrappedmByM0,
+        spacexBstocksTokenizedStock,
+        redstoneOracles,
+        usda3,
+        capUsd,
+        espresso,
+        tagger,
+        zetachain,
+        adiToken,
+        midasMtbill,
+        kaito,
+        apes22,
+        spark2,
+        dolaUsd,
+        holotoken,
+        helioProtocolHay,
+        cygnusFinanceGlobalUsd,
+        o1Exchange,
+        strategyStretchPreferredOndoTokenized,
+        toriTrusd,
+        re,
+        crownBrlv,
+        ecomi,
+        cross2,
+        prizeProtocol,
+        flyingTulip,
+        babyDogeCoin,
+        projectGalaxy,
+        mubarak,
+        hastraAuto,
+        isharesCoreSP500EtfOndoTokenizedEtf,
+        bananaForScale2,
+        temple,
+        unifaiNetwork,
+        matrixdockGold,
+        lcx,
+        turbo,
+        sushi,
+        diem,
+        noxo,
+        mindwavedao,
+        ondoUSDollarToken,
+        bookOfMeme,
+        unipoly,
+        midasMfOne,
+        comedian,
+        proton,
+        dexe,
+        escoinToken,
+        allora,
+        aiRigComplex,
+        zeroGravity,
+        io,
+        axisUsd,
+        axelar,
+        bioProtocol,
+        oasisNetwork,
+        royalEuro,
+        swop2,
+        frenpet,
+        metalBlockchain,
+        memeHorse,
+        goplusSecurity,
+        creditcoin2,
+        theBlackBull,
+        pentagonChain,
+        chainoperaAi,
+        vaneckTreasuryFund,
+        iexecRlc,
+        nosana,
+        preciousMetalsUsd,
+        thresholdNetworkToken,
+        snek,
+        brz,
+        ore,
+        spaceId,
+        newtonProject,
+        strategyTokenizedBstocks,
+        tellor,
+        arcium,
+        dolphin2,
+        bas,
+        fonq,
+        blur,
+        tokenPocket,
+        altlayer,
+        eduCoin,
+        jellyMyJelly,
+        pha,
+        centrifuge2,
+        nusd2,
+        anonymousCat,
+        lidoEarnusd,
+        standxDusd,
+        usdu,
+        basedBrett,
+        humaFinance,
+        venus,
+        wink,
+        memetoon,
+        marscatToken,
+        xyoNetwork,
+        ampToken,
+        lisk,
+        securitizeCorp,
+        anemoyTokenizedApolloDiversifiedCreditFund,
+        cortex2,
+        blackrockDailyReinvestmentStablecoinReserveVehicle,
+        ozapay,
+        bim2,
+        alloyTether,
+        usdkg,
+        resupplyUsd,
+        gekko,
+        fidelityDigitalDollar,
+        peanutTheSquirrel,
+        ravedao,
+        holoworld,
+        toshi,
+        popcat,
+        mantis,
+        duskNetwork,
+        micronTechnologyBstock,
+        spdrSP500EtfOndoTokenizedEtf,
+        spacexXstocks,
+        maskNetwork,
+        velodromeFinance,
+        reental,
+        ankr,
+        metronomeSynthUsd,
+        aleo,
+        auroraNear,
+        aiAnalysisToken,
+        aztec,
+        lombardProtocol,
+        infinifiUsd,
+        api3,
+        alchemistAi,
+        nvidiaBstocks,
+        novachargexCoin,
+        avantis,
+        magicEden,
+        mogCoin,
+        catInADogsWorld,
+        micronTechnologyOndoTokenizedStock,
+        requestNetwork,
+        dappos,
+        americaParty5,
+        frankencoin,
+        gohome,
+        ssvNetwork,
+        atoshi,
+        allunityChf,
+        mooDeng,
+        unitas,
+        spaceAndTime,
+        straitsxXusd,
+        movement,
+        rocketPool,
+        folks,
+        constitutiondao,
+        synapse2,
+        staderSftmx,
+        bandProtocol,
+        baseline,
+        aukiLabs,
+        keeta,
+        troll2,
+        succinct,
+        sandiskBstocksTokenizedStock,
+        aiPoweredFinance,
+        mainStreetYield,
+        mocaverse,
+        nesa,
+        status,
+        lab,
+        nkycToken,
+        geminiDollar,
+        stakedFraxUsd,
+        arcs,
+        liquityBold2,
+        uma,
+        rekt4,
+        ethgas2,
+        apexToken2,
+        eurite,
+        hermezNetworkToken,
+        noonUsn,
+        mangoMarkets,
+        bankercoin2,
+        memecoin2,
+        degenBase,
+        moolah,
+        saharaAi,
+        osk,
+        nvidiaOndoTokenizedStock,
+        sai,
+        giggleFund,
+        steakhouseConfidentialPrimeUsdc,
+        opcode,
+        orbs,
+        snowbank,
+        bifrost,
+        powerLedger,
+        oceanProtocol,
+        neiro3,
+        yfsx,
+        emeraldSecurityToken,
+        neet,
+        invescoQqqEtfOndoTokenizedEtf,
+        renzo,
+        iotex,
+        skyai,
+        xpinNetwork,
+        aegisYusd,
+        binanceUsd,
+        propy,
+        palladiumNetwork,
+        b3,
+        basedhype,
+        wikiCat,
+        midasFasanaraGlobal,
+        mbgByMultibankGroup,
+        signGlobal,
+        euler,
+        metamaskUsd,
+        lista,
+        changenow,
+        cargox,
+        hashkeyEcopoints,
+        asset,
+        moneriumEurMoney2,
+        tornadoCash,
+        alphabetBstocksTokenizedStock,
+        definitive,
+        velvet,
+        jettCrypto2,
+        bancor,
+        arcblock,
+        bulla3,
+        coindepo,
+        teller,
+        sanctum2,
+        illuvium,
+        apriori,
+        zora,
+        himsHersHealthOndoTokenizedStock,
+        vana,
+        rhea2,
+        hunterBidenSLaptop3,
+        xtcomToken,
+        midasMhyper,
+        acrossProtocol,
+        gToken,
+        dogelonMars,
+        sentismai,
+        clearpool,
+        audiera,
+        spikoDigitalAssetsCashCarryFundEuroShareClass,
+        ceaIndustriesBstocksTokenizedStock,
+        nirvanaAna2,
+        opengradient,
+        universalUsd,
+        kiichain,
+        canopy,
+        apro,
+        swftcoin,
+        carv,
+        brlaDigitalBrla,
+        matrix6,
+        microstrategyOndoTokenizedStock,
+        spacecoin2,
+        massVehicleLedger,
+        croatianFfFanToken,
+        zerebro,
+        bitdca,
+        deapcoin,
+        pundiX2,
+        flock2,
+        fraxShare,
+        sideshiftToken,
+        backedCspxCoreSP500,
+        hemi,
+        isharesBitcoinTrustOndoTokenized,
+        kyberNetworkCrystal,
+        civic,
+        cartesi,
+        dmtNat,
+        agorasCurrencyOfTau,
+        tensor,
+        theInnovationGame,
+        edel,
+        would,
+        openaiRepublicPreIpo,
+        moneriumEurMoney,
+        anoma,
+        auction,
+        openeden,
+        skale,
+        zestProtocol,
+        chainflip,
+        gensyn,
+        uquidCoin,
+        billionsNetwork,
+        paradex,
+        waves,
+        venom,
+        zerobase,
+        superInu2,
+        hyloUsd,
+        tokenisedGbp,
+        metisToken,
+        obligateTradeFinanceYield,
+        midasM1UsdMarketNeutral,
+        liquityUsd,
+        everything,
+        paxosStandard,
+        fidelityUsdDigitalLiquidityFundAcc,
+        nycToken,
+        metaplex,
+        ixSwap,
+        stepn,
+        toriEcosystemVault,
+        grvt,
+        prospective,
+        isharesSilverTrustOndoTokenizedStock,
+        strikecoin,
+        victoriaVr,
+        okzoo,
+        cysic,
+        wowbit2,
+        fidelityDigitalInterestToken,
+        home,
+        aiCompanions,
+        vin2,
+        teslaBstocksTokenizedStock,
+        whiteheart,
+        tokenlon,
+        usual,
+        bigTime,
+        river,
+        wooNetwork,
+        impossibleCloudNetworkToken,
+        keepNetwork,
+        liquity,
+        celerNetwork,
+        electronicUsd,
+        nym,
+        blockStreet,
+        everipedia,
+        aevoExchange,
+        czsDog,
+        tokamakNetwork,
+        audius,
+        antfun,
+        hexTrustUsdx,
+        jpyCoin,
+        handy,
+        codatta,
+        roundhillMemoryEtfBstocksTokenizedStock,
+        yieldGuildGames,
+        lucidum,
+        bitcoinPro,
+        binaryx,
+        elephantMoney,
+        verseWorld,
+        burnedfi,
+        metya,
+        jpyc,
+        dogeHeadCoin,
+        solvProtocol,
+        theros,
+        opal3,
+        dual,
+        pharaohLiquidStakingToken,
+        ferrumNetwork,
+        lorenzoProtocol,
+        stableCoin2,
+        zyloEcosystem,
+        brevis,
+        medxt,
+        localcoinswap,
+        ohoBlockchain,
+        chromaway,
+        worldMobileToken,
+        wydeEndHunger,
+        safecoin,
+        hundred,
+        benqi,
+        scandicCoin,
+        yieldBasis,
+        reProtocolReusde,
+        aixbt,
+        blackPhoenix,
+        stargateFinance,
+        alphabetClassAOndoTokenizedStock,
+        intelTokenizedBstocks,
+        biconomy,
+        meet48,
+        rsfiro,
+        meyNetwork,
+        ubsUmintEth,
+        bonfida,
+        airtorProtocol,
+        cobakToken,
+        peapodsFinance,
+        qanplatform,
+        pinksale,
+        realioNetwork,
+        chaingpt,
+        bitmartToken,
+        halo4,
+        huntToken,
+        gigachad2,
+        dopplerFinance,
+        degate,
+        diaData,
+        treadFi,
+        geniusAi,
+        nxusd,
+        quarkChain,
+        perle,
+        debtreliefbot,
+        inuWifSword,
+        tutorial,
+        umia,
+        ryze,
+        cyberconnect,
+        arpa,
+        connectTokenWct,
+        freysaAi,
+        backedIb01TreasuryBond01yr,
+        endurance,
+        dkargo,
+        graphiteProtocol,
+        felysyum,
+        gamebuild,
+        reallink,
+        taiko,
+        aiXovia,
+        enso,
+        bsquaredNetwork,
+        naoris,
+        roboToken2,
+        neubergerSecuritizeHighIncomeTokenizedFund,
+        radicle,
+        adshares,
+        hivemapper,
+        manadia,
+        polyswarm,
+        verifiedEmeralds,
+        quantixai,
+        adventureGold,
+        intelOndoTokenizedStock,
+        publicMemeToken,
+        sophon,
+        idlemine,
+        ishares20YearTreasuryBondEtfOndoTokenizedEtf,
+        janction,
+        dodo,
+        qkacoin,
+        sandiskCorporationXstock,
+        goldPark,
+        griffain,
+        mira3,
+        powerProtocol,
+        _42,
+        xDolX,
+        credibleFinance,
+        joe,
+        messier,
+        pippin,
+        coin98,
+        schumanEurop,
+        aHuntersDream,
+        ninjaSquad,
+        marsmi,
+        goatseusMaximus,
+        myNeighborAlice,
+        tdccp,
+        siren2,
+        sapien2,
+        gaibAid,
+        fakeWorldAssets,
+        teslaOndoTokenizedStock,
+        maxToken,
+        marvellTechnologyOndoTokenizedStock,
+        moonbirds,
+        deltaExchangeToken,
+        kekiusMaximus6,
+        isharesCoreMsciEafeEtfOndoTokenizedEtf,
+        nexus4
     ]
 }

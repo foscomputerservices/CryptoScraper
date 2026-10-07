@@ -8,4 +8,24 @@ import FOSFoundation
 import Foundation
 
 extension CIP34.Cardano {
+    /// Midnight, CoinGecko's `midnight-3`, at 6 decimals
+    public static let midnight3: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "0691b2fecca1ac4f53cb6dfb00b7013e561d1f34403b957cbb5af1fa4e49474854"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "NIGHT")
+    )
+
+    /// Snek, CoinGecko's `snek`, at 0 decimals
+    public static let snek: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "279c909f348e533da5808898f87f9a14bb2c3dfbbacccd631d927a3f534e454b"),
+        decimals: 0,
+        symbol: AssetSymbol(validating: "SNEK")
+    )
+
+    /// World Mobile Token, CoinGecko's `world-mobile-token`, at 6 decimals
+    public static let worldMobileToken: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "e5a42a1a1d3d1da71b0449663c32798725888d2eb0843c4dabeca05a576f726c644d6f62696c65546f6b656e58"),
+        decimals: 6,
+        symbol: AssetSymbol(validating: "WMTX")
+    )
 }

@@ -8,4 +8,10 @@ import FOSFoundation
 import Foundation
 
 extension NEO.Neo {
+    /// Chainlink, CoinGecko's `chainlink`, at 18 decimals
+    public static let chainlink: AssetDeclaration.Instance = try! AssetDeclaration.Instance(
+        instance: AssetInstance(validating: chainId + ":" + "0xb25de57d73ab177fc091327bcb725154dfbb5bfb"),
+        decimals: 18,
+        symbol: AssetSymbol(validating: "LINK")
+    )
 }

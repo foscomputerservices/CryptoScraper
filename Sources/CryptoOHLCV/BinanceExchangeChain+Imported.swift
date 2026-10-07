@@ -6,18 +6,607 @@
 
 import struct CryptoAsset.Asset
 import struct CryptoAsset.AssetDeclaration
+import enum CryptoAsset.ALGORAND
+import enum CryptoAsset.ARWEAVE
 import enum CryptoAsset.Assets
 import enum CryptoAsset.BIP122
+import enum CryptoAsset.CIP34
+import enum CryptoAsset.CKB
+import enum CryptoAsset.CONFLUX
+import enum CryptoAsset.COSMOS
+import enum CryptoAsset.DCR
 import enum CryptoAsset.EIP155
+import enum CryptoAsset.FIL
+import enum CryptoAsset.FLOW
+import enum CryptoAsset.HEDERA
+import enum CryptoAsset.ICP
+import enum CryptoAsset.IOTA
+import enum CryptoAsset.MINA
+import enum CryptoAsset.MVX
+import enum CryptoAsset.NEAR
+import enum CryptoAsset.NEO
+import enum CryptoAsset.ONT
+import enum CryptoAsset.POLKADOT
+import enum CryptoAsset.SIA
+import enum CryptoAsset.SOLANA
+import enum CryptoAsset.STACKS
+import enum CryptoAsset.STELLAR
+import enum CryptoAsset.TEZOS
 import enum CryptoAsset.TRON
+import enum CryptoAsset.VECHAIN
+import enum CryptoAsset.XRPL
+import enum CryptoAsset.ZIL
 
 extension BinanceExchangeChain {
     /// The rows generated from Binance's exchange information and CoinGecko's tickers: each holding keyed by the
-    /// first of its wire names, its class `nil` where the importer generated none
+    /// first of its wire names, each in a declared class; a listed name the run gave no class is a
+    /// `noClass` finding of the report, not a row
     static let importedRows: [Row] = [
         // BTC: CoinGecko's `bitcoin`
         Row(holding: BinanceHolding(address: "BTC"), wireNames: ["BTC"], decimals: 8, symbol: "BTC", asset: try! Asset(validating: BIP122.Bitcoin.btc.instance.id)),
         // USDT: CoinGecko's `tether`
         Row(holding: BinanceHolding(address: "USDT"), wireNames: ["USDT"], decimals: 8, symbol: "USDT", asset: Assets.tether.asset),
+        // ETH: CoinGecko's `ethereum`
+        Row(holding: BinanceHolding(address: "ETH"), wireNames: ["ETH"], decimals: 8, symbol: "ETH", asset: try! Asset(validating: EIP155.Ethereum.eth.instance.id)),
+        // LTC: CoinGecko's `litecoin`
+        Row(holding: BinanceHolding(address: "LTC"), wireNames: ["LTC"], decimals: 8, symbol: "LTC", asset: try! Asset(validating: BIP122.Litecoin.ltc.instance.id)),
+        // BNB: CoinGecko's `binancecoin`
+        Row(holding: BinanceHolding(address: "BNB"), wireNames: ["BNB"], decimals: 8, symbol: "BNB", asset: try! Asset(validating: EIP155.BinanceSmartChain.bnb.instance.id)),
+        // NEO: CoinGecko's `neo`
+        Row(holding: BinanceHolding(address: "NEO"), wireNames: ["NEO"], decimals: 8, symbol: "NEO", asset: try! Asset(validating: NEO.Neo.neo.instance.id)),
+        // QTUM: CoinGecko's `qtum`
+        Row(holding: BinanceHolding(address: "QTUM"), wireNames: ["QTUM"], decimals: 8, symbol: "QTUM", asset: try! Asset(validating: BIP122.Qtum.qtum.instance.id)),
+        // BNT: CoinGecko's `bancor`
+        Row(holding: BinanceHolding(address: "BNT"), wireNames: ["BNT"], decimals: 8, symbol: "BNT", asset: Assets.bancor.asset),
+        // ZRX: CoinGecko's `0x`
+        Row(holding: BinanceHolding(address: "ZRX"), wireNames: ["ZRX"], decimals: 8, symbol: "ZRX", asset: Assets._0x.asset),
+        // KNC: CoinGecko's `kyber-network-crystal`
+        Row(holding: BinanceHolding(address: "KNC"), wireNames: ["KNC"], decimals: 8, symbol: "KNC", asset: Assets.kyberNetworkCrystal.asset),
+        // IOTA: CoinGecko's `iota`
+        Row(holding: BinanceHolding(address: "IOTA"), wireNames: ["IOTA"], decimals: 8, symbol: "IOTA", asset: try! Asset(validating: IOTA.Iota.iota.instance.id)),
+        // LINK: CoinGecko's `chainlink`
+        Row(holding: BinanceHolding(address: "LINK"), wireNames: ["LINK"], decimals: 8, symbol: "LINK", asset: Assets.chainlink.asset),
+        // XVG: CoinGecko's `verge`
+        Row(holding: BinanceHolding(address: "XVG"), wireNames: ["XVG"], decimals: 8, symbol: "XVG", asset: try! Asset(validating: BIP122.Verge.xvg.instance.id)),
+        // ETC: CoinGecko's `ethereum-classic`
+        Row(holding: BinanceHolding(address: "ETC"), wireNames: ["ETC"], decimals: 8, symbol: "ETC", asset: try! Asset(validating: EIP155.EthereumClassic.etc.instance.id)),
+        // ZEC: CoinGecko's `zcash`
+        Row(holding: BinanceHolding(address: "ZEC"), wireNames: ["ZEC"], decimals: 8, symbol: "ZEC", asset: try! Asset(validating: BIP122.Zcash.zec.instance.id)),
+        // DASH: CoinGecko's `dash`
+        Row(holding: BinanceHolding(address: "DASH"), wireNames: ["DASH"], decimals: 8, symbol: "DASH", asset: try! Asset(validating: BIP122.Dash.dash.instance.id)),
+        // REQ: CoinGecko's `request-network`
+        Row(holding: BinanceHolding(address: "REQ"), wireNames: ["REQ"], decimals: 8, symbol: "REQ", asset: Assets.requestNetwork.asset),
+        // TRX: CoinGecko's `tron`
+        Row(holding: BinanceHolding(address: "TRX"), wireNames: ["TRX"], decimals: 8, symbol: "TRX", asset: try! Asset(validating: TRON.Tron.trx.instance.id)),
+        // POWR: CoinGecko's `power-ledger`
+        Row(holding: BinanceHolding(address: "POWR"), wireNames: ["POWR"], decimals: 8, symbol: "POWR", asset: Assets.powerLedger.asset),
+        // XRP: CoinGecko's `ripple`
+        Row(holding: BinanceHolding(address: "XRP"), wireNames: ["XRP"], decimals: 8, symbol: "XRP", asset: try! Asset(validating: XRPL.XRPLedger.xrp.instance.id)),
+        // ENJ: CoinGecko's `enjincoin`
+        Row(holding: BinanceHolding(address: "ENJ"), wireNames: ["ENJ"], decimals: 8, symbol: "ENJ", asset: try! Asset(validating: POLKADOT.Enjin.enj.instance.id)),
+        // BAT: CoinGecko's `basic-attention-token`
+        Row(holding: BinanceHolding(address: "BAT"), wireNames: ["BAT"], decimals: 8, symbol: "BAT", asset: Assets.basicAttentionToken.asset),
+        // LSK: CoinGecko's `lisk`
+        Row(holding: BinanceHolding(address: "LSK"), wireNames: ["LSK"], decimals: 8, symbol: "LSK", asset: Assets.lisk.asset),
+        // MANA: CoinGecko's `decentraland`
+        Row(holding: BinanceHolding(address: "MANA"), wireNames: ["MANA"], decimals: 8, symbol: "MANA", asset: Assets.decentraland.asset),
+        // ADA: CoinGecko's `cardano`
+        Row(holding: BinanceHolding(address: "ADA"), wireNames: ["ADA"], decimals: 8, symbol: "ADA", asset: try! Asset(validating: CIP34.Cardano.ada.instance.id)),
+        // XLM: CoinGecko's `stellar`
+        Row(holding: BinanceHolding(address: "XLM"), wireNames: ["XLM"], decimals: 8, symbol: "XLM", asset: try! Asset(validating: STELLAR.Stellar.xlm.instance.id)),
+        // RLC: CoinGecko's `iexec-rlc`
+        Row(holding: BinanceHolding(address: "RLC"), wireNames: ["RLC"], decimals: 8, symbol: "RLC", asset: Assets.iexecRlc.asset),
+        // ZIL: CoinGecko's `zilliqa`
+        Row(holding: BinanceHolding(address: "ZIL"), wireNames: ["ZIL"], decimals: 8, symbol: "ZIL", asset: try! Asset(validating: ZIL.Zilliqa.zil.instance.id)),
+        // ONT: CoinGecko's `ontology`
+        Row(holding: BinanceHolding(address: "ONT"), wireNames: ["ONT"], decimals: 8, symbol: "ONT", asset: try! Asset(validating: ONT.Ontology.ont.instance.id)),
+        // TUSD: CoinGecko's `true-usd`
+        Row(holding: BinanceHolding(address: "TUSD"), wireNames: ["TUSD"], decimals: 8, symbol: "TUSD", asset: Assets.trueUsd.asset),
+        // ZEN: CoinGecko's `zencash`
+        Row(holding: BinanceHolding(address: "ZEN"), wireNames: ["ZEN"], decimals: 8, symbol: "ZEN", asset: Assets.zencash.asset),
+        // CVC: CoinGecko's `civic`
+        Row(holding: BinanceHolding(address: "CVC"), wireNames: ["CVC"], decimals: 8, symbol: "CVC", asset: Assets.civic.asset),
+        // IOTX: CoinGecko's `iotex`
+        Row(holding: BinanceHolding(address: "IOTX"), wireNames: ["IOTX"], decimals: 8, symbol: "IOTX", asset: Assets.iotex.asset),
+        // QKC: CoinGecko's `quark-chain`
+        Row(holding: BinanceHolding(address: "QKC"), wireNames: ["QKC"], decimals: 8, symbol: "QKC", asset: Assets.quarkChain.asset),
+        // SC: CoinGecko's `siacoin`
+        Row(holding: BinanceHolding(address: "SC"), wireNames: ["SC"], decimals: 8, symbol: "SC", asset: try! Asset(validating: SIA.Sia.sc.instance.id)),
+        // HOT: CoinGecko's `holotoken`
+        Row(holding: BinanceHolding(address: "HOT"), wireNames: ["HOT"], decimals: 8, symbol: "HOT", asset: Assets.holotoken.asset),
+        // VET: CoinGecko's `vechain`
+        Row(holding: BinanceHolding(address: "VET"), wireNames: ["VET"], decimals: 8, symbol: "VET", asset: try! Asset(validating: VECHAIN.VeChain.vet.instance.id)),
+        // RVN: CoinGecko's `ravencoin`
+        Row(holding: BinanceHolding(address: "RVN"), wireNames: ["RVN"], decimals: 8, symbol: "RVN", asset: try! Asset(validating: BIP122.Ravencoin.rvn.instance.id)),
+        // DCR: CoinGecko's `decred`
+        Row(holding: BinanceHolding(address: "DCR"), wireNames: ["DCR"], decimals: 8, symbol: "DCR", asset: try! Asset(validating: DCR.Decred.dcr.instance.id)),
+        // USDC: CoinGecko's `usd-coin`
+        Row(holding: BinanceHolding(address: "USDC"), wireNames: ["USDC"], decimals: 8, symbol: "USDC", asset: Assets.usdCoin.asset),
+        // FET: CoinGecko's `fetch-ai`
+        Row(holding: BinanceHolding(address: "FET"), wireNames: ["FET"], decimals: 8, symbol: "FET", asset: try! Asset(validating: COSMOS.FetchAI.fet.instance.id)),
+        // CELR: CoinGecko's `celer-network`
+        Row(holding: BinanceHolding(address: "CELR"), wireNames: ["CELR"], decimals: 8, symbol: "CELR", asset: Assets.celerNetwork.asset),
+        // ATOM: CoinGecko's `cosmos`
+        Row(holding: BinanceHolding(address: "ATOM"), wireNames: ["ATOM"], decimals: 8, symbol: "ATOM", asset: try! Asset(validating: COSMOS.CosmosHub.atom.instance.id)),
+        // TFUEL: CoinGecko's `theta-fuel`
+        Row(holding: BinanceHolding(address: "TFUEL"), wireNames: ["TFUEL"], decimals: 8, symbol: "TFUEL", asset: try! Asset(validating: EIP155.Theta.tfuel.instance.id)),
+        // ALGO: CoinGecko's `algorand`
+        Row(holding: BinanceHolding(address: "ALGO"), wireNames: ["ALGO"], decimals: 8, symbol: "ALGO", asset: try! Asset(validating: ALGORAND.Algorand.algo.instance.id)),
+        // DOGE: CoinGecko's `dogecoin`
+        Row(holding: BinanceHolding(address: "DOGE"), wireNames: ["DOGE"], decimals: 8, symbol: "DOGE", asset: try! Asset(validating: BIP122.Dogecoin.doge.instance.id)),
+        // DUSK: CoinGecko's `dusk-network`
+        Row(holding: BinanceHolding(address: "DUSK"), wireNames: ["DUSK"], decimals: 8, symbol: "DUSK", asset: Assets.duskNetwork.asset),
+        // ANKR: CoinGecko's `ankr`
+        Row(holding: BinanceHolding(address: "ANKR"), wireNames: ["ANKR"], decimals: 8, symbol: "ANKR", asset: Assets.ankr.asset),
+        // WIN: CoinGecko's `wink`
+        Row(holding: BinanceHolding(address: "WIN"), wireNames: ["WIN"], decimals: 8, symbol: "WIN", asset: Assets.wink.asset),
+        // CHZ: CoinGecko's `chiliz`
+        Row(holding: BinanceHolding(address: "CHZ"), wireNames: ["CHZ"], decimals: 8, symbol: "CHZ", asset: Assets.chiliz.asset),
+        // BAND: CoinGecko's `band-protocol`
+        Row(holding: BinanceHolding(address: "BAND"), wireNames: ["BAND"], decimals: 8, symbol: "BAND", asset: Assets.bandProtocol.asset),
+        // XTZ: CoinGecko's `tezos`
+        Row(holding: BinanceHolding(address: "XTZ"), wireNames: ["XTZ"], decimals: 8, symbol: "XTZ", asset: try! Asset(validating: TEZOS.Tezos.xtz.instance.id)),
+        // HBAR: CoinGecko's `hedera-hashgraph`
+        Row(holding: BinanceHolding(address: "HBAR"), wireNames: ["HBAR"], decimals: 8, symbol: "HBAR", asset: try! Asset(validating: HEDERA.Hedera.hbar.instance.id)),
+        // STX: CoinGecko's `blockstack`
+        Row(holding: BinanceHolding(address: "STX"), wireNames: ["STX"], decimals: 8, symbol: "STX", asset: try! Asset(validating: STACKS.Stacks.stx.instance.id)),
+        // ARPA: CoinGecko's `arpa`
+        Row(holding: BinanceHolding(address: "ARPA"), wireNames: ["ARPA"], decimals: 8, symbol: "ARPA", asset: Assets.arpa.asset),
+        // BCH: CoinGecko's `bitcoin-cash`
+        Row(holding: BinanceHolding(address: "BCH"), wireNames: ["BCH"], decimals: 8, symbol: "BCH", asset: try! Asset(validating: BIP122.BitcoinCash.bch.instance.id)),
+        // COTI: CoinGecko's `coti`
+        Row(holding: BinanceHolding(address: "COTI"), wireNames: ["COTI"], decimals: 8, symbol: "COTI", asset: try! Asset(validating: EIP155.COTI.coti.instance.id)),
+        // SOL: CoinGecko's `solana`
+        Row(holding: BinanceHolding(address: "SOL"), wireNames: ["SOL"], decimals: 8, symbol: "SOL", asset: try! Asset(validating: SOLANA.Solana.sol.instance.id)),
+        // CTSI: CoinGecko's `cartesi`
+        Row(holding: BinanceHolding(address: "CTSI"), wireNames: ["CTSI"], decimals: 8, symbol: "CTSI", asset: Assets.cartesi.asset),
+        // CHR: CoinGecko's `chromaway`
+        Row(holding: BinanceHolding(address: "CHR"), wireNames: ["CHR"], decimals: 8, symbol: "CHR", asset: Assets.chromaway.asset),
+        // IQ: CoinGecko's `everipedia`
+        Row(holding: BinanceHolding(address: "IQ"), wireNames: ["IQ"], decimals: 8, symbol: "IQ", asset: Assets.everipedia.asset),
+        // DGB: CoinGecko's `digibyte`
+        Row(holding: BinanceHolding(address: "DGB"), wireNames: ["DGB"], decimals: 8, symbol: "DGB", asset: try! Asset(validating: BIP122.DigiByte.dgb.instance.id)),
+        // COMP: CoinGecko's `compound-governance-token`
+        Row(holding: BinanceHolding(address: "COMP"), wireNames: ["COMP"], decimals: 8, symbol: "COMP", asset: Assets.compoundGovernanceToken.asset),
+        // SNX: CoinGecko's `havven`
+        Row(holding: BinanceHolding(address: "SNX"), wireNames: ["SNX"], decimals: 8, symbol: "SNX", asset: Assets.havven.asset),
+        // RUNE: CoinGecko's `thorchain`
+        Row(holding: BinanceHolding(address: "RUNE"), wireNames: ["RUNE"], decimals: 8, symbol: "RUNE", asset: try! Asset(validating: COSMOS.THORChain.rune.instance.id)),
+        // YFI: CoinGecko's `yearn-finance`
+        Row(holding: BinanceHolding(address: "YFI"), wireNames: ["YFI"], decimals: 8, symbol: "YFI", asset: Assets.yearnFinance.asset),
+        // JST: CoinGecko's `just`
+        Row(holding: BinanceHolding(address: "JST"), wireNames: ["JST"], decimals: 8, symbol: "JST", asset: Assets.just.asset),
+        // CRV: CoinGecko's `curve-dao-token`
+        Row(holding: BinanceHolding(address: "CRV"), wireNames: ["CRV"], decimals: 8, symbol: "CRV", asset: Assets.curveDaoToken.asset),
+        // SAND: CoinGecko's `the-sandbox`
+        Row(holding: BinanceHolding(address: "SAND"), wireNames: ["SAND"], decimals: 8, symbol: "SAND", asset: Assets.theSandbox.asset),
+        // NMR: CoinGecko's `numeraire`
+        Row(holding: BinanceHolding(address: "NMR"), wireNames: ["NMR"], decimals: 8, symbol: "NMR", asset: Assets.numeraire.asset),
+        // DOT: CoinGecko's `polkadot`
+        Row(holding: BinanceHolding(address: "DOT"), wireNames: ["DOT"], decimals: 8, symbol: "DOT", asset: try! Asset(validating: POLKADOT.Polkadot.dot.instance.id)),
+        // LUNA: CoinGecko's `terra-luna-2`
+        Row(holding: BinanceHolding(address: "LUNA"), wireNames: ["LUNA"], decimals: 8, symbol: "LUNA", asset: try! Asset(validating: COSMOS.Terra.luna.instance.id)),
+        // RSR: CoinGecko's `reserve-rights-token`
+        Row(holding: BinanceHolding(address: "RSR"), wireNames: ["RSR"], decimals: 8, symbol: "RSR", asset: Assets.reserveRightsToken.asset),
+        // PAXG: CoinGecko's `pax-gold`
+        Row(holding: BinanceHolding(address: "PAXG"), wireNames: ["PAXG"], decimals: 8, symbol: "PAXG", asset: Assets.paxGold.asset),
+        // TRB: CoinGecko's `tellor`
+        Row(holding: BinanceHolding(address: "TRB"), wireNames: ["TRB"], decimals: 8, symbol: "TRB", asset: Assets.tellor.asset),
+        // SUSHI: CoinGecko's `sushi`
+        Row(holding: BinanceHolding(address: "SUSHI"), wireNames: ["SUSHI"], decimals: 8, symbol: "SUSHI", asset: Assets.sushi.asset),
+        // KSM: CoinGecko's `kusama`
+        Row(holding: BinanceHolding(address: "KSM"), wireNames: ["KSM"], decimals: 8, symbol: "KSM", asset: try! Asset(validating: POLKADOT.Kusama.ksm.instance.id)),
+        // EGLD: CoinGecko's `elrond-erd-2`
+        Row(holding: BinanceHolding(address: "EGLD"), wireNames: ["EGLD"], decimals: 8, symbol: "EGLD", asset: try! Asset(validating: MVX.MultiversX.egld.instance.id)),
+        // DIA: CoinGecko's `dia-data`
+        Row(holding: BinanceHolding(address: "DIA"), wireNames: ["DIA"], decimals: 8, symbol: "DIA", asset: Assets.diaData.asset),
+        // UMA: CoinGecko's `uma`
+        Row(holding: BinanceHolding(address: "UMA"), wireNames: ["UMA"], decimals: 8, symbol: "UMA", asset: Assets.uma.asset),
+        // UNI: CoinGecko's `uniswap`
+        Row(holding: BinanceHolding(address: "UNI"), wireNames: ["UNI"], decimals: 8, symbol: "UNI", asset: Assets.uniswap.asset),
+        // SUN: CoinGecko's `sun-token`
+        Row(holding: BinanceHolding(address: "SUN"), wireNames: ["SUN"], decimals: 8, symbol: "SUN", asset: Assets.sunToken.asset),
+        // AVAX: CoinGecko's `avalanche-2`
+        Row(holding: BinanceHolding(address: "AVAX"), wireNames: ["AVAX"], decimals: 8, symbol: "AVAX", asset: try! Asset(validating: EIP155.Avalanche.avax.instance.id)),
+        // CAKE: CoinGecko's `pancakeswap-token`
+        Row(holding: BinanceHolding(address: "CAKE"), wireNames: ["CAKE"], decimals: 8, symbol: "CAKE", asset: Assets.pancakeswapToken.asset),
+        // XVS: CoinGecko's `venus`
+        Row(holding: BinanceHolding(address: "XVS"), wireNames: ["XVS"], decimals: 8, symbol: "XVS", asset: Assets.venus.asset),
+        // AAVE: CoinGecko's `aave`
+        Row(holding: BinanceHolding(address: "AAVE"), wireNames: ["AAVE"], decimals: 8, symbol: "AAVE", asset: Assets.aave.asset),
+        // NEAR: CoinGecko's `near`
+        Row(holding: BinanceHolding(address: "NEAR"), wireNames: ["NEAR"], decimals: 8, symbol: "NEAR", asset: try! Asset(validating: NEAR.Near.near.instance.id)),
+        // FIL: CoinGecko's `filecoin`
+        Row(holding: BinanceHolding(address: "FIL"), wireNames: ["FIL"], decimals: 8, symbol: "FIL", asset: try! Asset(validating: FIL.Filecoin.fil.instance.id)),
+        // INJ: CoinGecko's `injective-protocol`
+        Row(holding: BinanceHolding(address: "INJ"), wireNames: ["INJ"], decimals: 8, symbol: "INJ", asset: Assets.injectiveProtocol.asset),
+        // AUDIO: CoinGecko's `audius`
+        Row(holding: BinanceHolding(address: "AUDIO"), wireNames: ["AUDIO"], decimals: 8, symbol: "AUDIO", asset: Assets.audius.asset),
+        // AXS: CoinGecko's `axie-infinity`
+        Row(holding: BinanceHolding(address: "AXS"), wireNames: ["AXS"], decimals: 8, symbol: "AXS", asset: Assets.axieInfinity.asset),
+        // ROSE: CoinGecko's `oasis-network`
+        Row(holding: BinanceHolding(address: "ROSE"), wireNames: ["ROSE"], decimals: 8, symbol: "ROSE", asset: Assets.oasisNetwork.asset),
+        // PROM: CoinGecko's `prometeus`
+        Row(holding: BinanceHolding(address: "PROM"), wireNames: ["PROM"], decimals: 8, symbol: "PROM", asset: Assets.prometeus.asset),
+        // SKL: CoinGecko's `skale`
+        Row(holding: BinanceHolding(address: "SKL"), wireNames: ["SKL"], decimals: 8, symbol: "SKL", asset: Assets.skale.asset),
+        // GLM: CoinGecko's `golem`
+        Row(holding: BinanceHolding(address: "GLM"), wireNames: ["GLM"], decimals: 8, symbol: "GLM", asset: Assets.golem.asset),
+        // GRT: CoinGecko's `the-graph`
+        Row(holding: BinanceHolding(address: "GRT"), wireNames: ["GRT"], decimals: 8, symbol: "GRT", asset: Assets.theGraph.asset),
+        // 1INCH: CoinGecko's `1inch`
+        Row(holding: BinanceHolding(address: "1INCH"), wireNames: ["1INCH"], decimals: 8, symbol: "1INCH", asset: Assets._1inch.asset),
+        // CELO: CoinGecko's `celo`
+        Row(holding: BinanceHolding(address: "CELO"), wireNames: ["CELO"], decimals: 8, symbol: "CELO", asset: try! Asset(validating: EIP155.Celo.celo.instance.id)),
+        // DEXE: CoinGecko's `dexe`
+        Row(holding: BinanceHolding(address: "DEXE"), wireNames: ["DEXE"], decimals: 8, symbol: "DEXE", asset: Assets.dexe.asset),
+        // CKB: CoinGecko's `nervos-network`
+        Row(holding: BinanceHolding(address: "CKB"), wireNames: ["CKB"], decimals: 8, symbol: "CKB", asset: try! Asset(validating: CKB.Nervos.ckb.instance.id)),
+        // TWT: CoinGecko's `trust-wallet-token`
+        Row(holding: BinanceHolding(address: "TWT"), wireNames: ["TWT"], decimals: 8, symbol: "TWT", asset: Assets.trustWalletToken.asset),
+        // SFP: CoinGecko's `safepal`
+        Row(holding: BinanceHolding(address: "SFP"), wireNames: ["SFP"], decimals: 8, symbol: "SFP", asset: Assets.safepal.asset),
+        // DODO: CoinGecko's `dodo`
+        Row(holding: BinanceHolding(address: "DODO"), wireNames: ["DODO"], decimals: 8, symbol: "DODO", asset: Assets.dodo.asset),
+        // AUCTION: CoinGecko's `auction`
+        Row(holding: BinanceHolding(address: "AUCTION"), wireNames: ["AUCTION"], decimals: 8, symbol: "AUCTION", asset: Assets.auction.asset),
+        // PHA: CoinGecko's `pha`
+        Row(holding: BinanceHolding(address: "PHA"), wireNames: ["PHA"], decimals: 8, symbol: "PHA", asset: Assets.pha.asset),
+        // ALICE: CoinGecko's `my-neighbor-alice`
+        Row(holding: BinanceHolding(address: "ALICE"), wireNames: ["ALICE"], decimals: 8, symbol: "ALICE", asset: Assets.myNeighborAlice.asset),
+        // SUPER: CoinGecko's `superfarm`
+        Row(holding: BinanceHolding(address: "SUPER"), wireNames: ["SUPER"], decimals: 8, symbol: "SUPER", asset: Assets.superfarm.asset),
+        // CFX: CoinGecko's `conflux-token`
+        Row(holding: BinanceHolding(address: "CFX"), wireNames: ["CFX"], decimals: 8, symbol: "CFX", asset: try! Asset(validating: CONFLUX.Conflux.cfx.instance.id)),
+        // PUNDIX: CoinGecko's `pundi-x-2`
+        Row(holding: BinanceHolding(address: "PUNDIX"), wireNames: ["PUNDIX"], decimals: 8, symbol: "PUNDIX", asset: Assets.pundiX2.asset),
+        // SHIB: CoinGecko's `shiba-inu`
+        Row(holding: BinanceHolding(address: "SHIB"), wireNames: ["SHIB"], decimals: 2, symbol: "SHIB", asset: Assets.shibaInu.asset),
+        // ICP: CoinGecko's `internet-computer`
+        Row(holding: BinanceHolding(address: "ICP"), wireNames: ["ICP"], decimals: 8, symbol: "ICP", asset: try! Asset(validating: ICP.InternetComputer.icp.instance.id)),
+        // AR: CoinGecko's `arweave`
+        Row(holding: BinanceHolding(address: "AR"), wireNames: ["AR"], decimals: 8, symbol: "AR", asset: try! Asset(validating: ARWEAVE.Arweave.ar.instance.id)),
+        // MASK: CoinGecko's `mask-network`
+        Row(holding: BinanceHolding(address: "MASK"), wireNames: ["MASK"], decimals: 8, symbol: "MASK", asset: Assets.maskNetwork.asset),
+        // LPT: CoinGecko's `livepeer`
+        Row(holding: BinanceHolding(address: "LPT"), wireNames: ["LPT"], decimals: 8, symbol: "LPT", asset: Assets.livepeer.asset),
+        // C98: CoinGecko's `coin98`
+        Row(holding: BinanceHolding(address: "C98"), wireNames: ["C98"], decimals: 8, symbol: "C98", asset: Assets.coin98.asset),
+        // QNT: CoinGecko's `quant-network`
+        Row(holding: BinanceHolding(address: "QNT"), wireNames: ["QNT"], decimals: 8, symbol: "QNT", asset: Assets.quantNetwork.asset),
+        // FLOW: CoinGecko's `flow`
+        Row(holding: BinanceHolding(address: "FLOW"), wireNames: ["FLOW"], decimals: 8, symbol: "FLOW", asset: try! Asset(validating: FLOW.Flow.flow.instance.id)),
+        // XEC: CoinGecko's `ecash`
+        Row(holding: BinanceHolding(address: "XEC"), wireNames: ["XEC"], decimals: 2, symbol: "XEC", asset: try! Asset(validating: BIP122.ECash.xec.instance.id)),
+        // MINA: CoinGecko's `mina-protocol`
+        Row(holding: BinanceHolding(address: "MINA"), wireNames: ["MINA"], decimals: 8, symbol: "MINA", asset: try! Asset(validating: MINA.Mina.mina.instance.id)),
+        // RAY: CoinGecko's `raydium`
+        Row(holding: BinanceHolding(address: "RAY"), wireNames: ["RAY"], decimals: 8, symbol: "RAY", asset: Assets.raydium.asset),
+        // GNO: CoinGecko's `gnosis`
+        Row(holding: BinanceHolding(address: "GNO"), wireNames: ["GNO"], decimals: 8, symbol: "GNO", asset: Assets.gnosis.asset),
+        // DYDX: CoinGecko's `dydx-chain`
+        Row(holding: BinanceHolding(address: "DYDX"), wireNames: ["DYDX"], decimals: 8, symbol: "DYDX", asset: Assets.dydxChain.asset),
+        // GALA: CoinGecko's `gala`
+        Row(holding: BinanceHolding(address: "GALA"), wireNames: ["GALA"], decimals: 8, symbol: "GALA", asset: Assets.gala.asset),
+        // ILV: CoinGecko's `illuvium`
+        Row(holding: BinanceHolding(address: "ILV"), wireNames: ["ILV"], decimals: 8, symbol: "ILV", asset: Assets.illuvium.asset),
+        // YGG: CoinGecko's `yield-guild-games`
+        Row(holding: BinanceHolding(address: "YGG"), wireNames: ["YGG"], decimals: 8, symbol: "YGG", asset: Assets.yieldGuildGames.asset),
+        // FIDA: CoinGecko's `bonfida`
+        Row(holding: BinanceHolding(address: "FIDA"), wireNames: ["FIDA"], decimals: 8, symbol: "FIDA", asset: Assets.bonfida.asset),
+        // AGLD: CoinGecko's `adventure-gold`
+        Row(holding: BinanceHolding(address: "AGLD"), wireNames: ["AGLD"], decimals: 8, symbol: "AGLD", asset: Assets.adventureGold.asset),
+        // RAD: CoinGecko's `radicle`
+        Row(holding: BinanceHolding(address: "RAD"), wireNames: ["RAD"], decimals: 8, symbol: "RAD", asset: Assets.radicle.asset),
+        // SSV: CoinGecko's `ssv-network`
+        Row(holding: BinanceHolding(address: "SSV"), wireNames: ["SSV"], decimals: 8, symbol: "SSV", asset: Assets.ssvNetwork.asset),
+        // ENS: CoinGecko's `ethereum-name-service`
+        Row(holding: BinanceHolding(address: "ENS"), wireNames: ["ENS"], decimals: 8, symbol: "ENS", asset: Assets.ethereumNameService.asset),
+        // QI: CoinGecko's `benqi`
+        Row(holding: BinanceHolding(address: "QI"), wireNames: ["QI"], decimals: 8, symbol: "QI", asset: Assets.benqi.asset),
+        // JASMY: CoinGecko's `jasmycoin`
+        Row(holding: BinanceHolding(address: "JASMY"), wireNames: ["JASMY"], decimals: 8, symbol: "JASMY", asset: Assets.jasmycoin.asset),
+        // AMP: CoinGecko's `amp-token`
+        Row(holding: BinanceHolding(address: "AMP"), wireNames: ["AMP"], decimals: 8, symbol: "AMP", asset: Assets.ampToken.asset),
+        // BICO: CoinGecko's `biconomy`
+        Row(holding: BinanceHolding(address: "BICO"), wireNames: ["BICO"], decimals: 8, symbol: "BICO", asset: Assets.biconomy.asset),
+        // CVX: CoinGecko's `convex-finance`
+        Row(holding: BinanceHolding(address: "CVX"), wireNames: ["CVX"], decimals: 8, symbol: "CVX", asset: Assets.convexFinance.asset),
+        // PEOPLE: CoinGecko's `constitutiondao`
+        Row(holding: BinanceHolding(address: "PEOPLE"), wireNames: ["PEOPLE"], decimals: 8, symbol: "PEOPLE", asset: Assets.constitutiondao.asset),
+        // JOE: CoinGecko's `joe`
+        Row(holding: BinanceHolding(address: "JOE"), wireNames: ["JOE"], decimals: 8, symbol: "JOE", asset: Assets.joe.asset),
+        // IMX: CoinGecko's `immutable-x`
+        Row(holding: BinanceHolding(address: "IMX"), wireNames: ["IMX"], decimals: 8, symbol: "IMX", asset: Assets.immutableX.asset),
+        // API3: CoinGecko's `api3`
+        Row(holding: BinanceHolding(address: "API3"), wireNames: ["API3"], decimals: 8, symbol: "API3", asset: Assets.api3.asset),
+        // BTTC: CoinGecko's `bittorrent`
+        Row(holding: BinanceHolding(address: "BTTC"), wireNames: ["BTTC"], decimals: 1, symbol: "BTTC", asset: Assets.bittorrent.asset),
+        // WOO: CoinGecko's `woo-network`
+        Row(holding: BinanceHolding(address: "WOO"), wireNames: ["WOO"], decimals: 8, symbol: "WOO", asset: Assets.wooNetwork.asset),
+        // T: CoinGecko's `threshold-network-token`
+        Row(holding: BinanceHolding(address: "T"), wireNames: ["T"], decimals: 8, symbol: "T", asset: Assets.thresholdNetworkToken.asset),
+        // GMT: CoinGecko's `stepn`
+        Row(holding: BinanceHolding(address: "GMT"), wireNames: ["GMT"], decimals: 8, symbol: "GMT", asset: Assets.stepn.asset),
+        // NEXO: CoinGecko's `nexo`
+        Row(holding: BinanceHolding(address: "NEXO"), wireNames: ["NEXO"], decimals: 8, symbol: "NEXO", asset: Assets.nexo.asset),
+        // LDO: CoinGecko's `lido-dao`
+        Row(holding: BinanceHolding(address: "LDO"), wireNames: ["LDO"], decimals: 8, symbol: "LDO", asset: Assets.lidoDao.asset),
+        // OP: CoinGecko's `optimism`
+        Row(holding: BinanceHolding(address: "OP"), wireNames: ["OP"], decimals: 8, symbol: "OP", asset: Assets.optimism.asset),
+        // STG: CoinGecko's `stargate-finance`
+        Row(holding: BinanceHolding(address: "STG"), wireNames: ["STG"], decimals: 8, symbol: "STG", asset: Assets.stargateFinance.asset),
+        // RPL: CoinGecko's `rocket-pool`
+        Row(holding: BinanceHolding(address: "RPL"), wireNames: ["RPL"], decimals: 8, symbol: "RPL", asset: Assets.rocketPool.asset),
+        // SYN: CoinGecko's `synapse-2`
+        Row(holding: BinanceHolding(address: "SYN"), wireNames: ["SYN"], decimals: 8, symbol: "SYN", asset: Assets.synapse2.asset),
+        // LQTY: CoinGecko's `liquity`
+        Row(holding: BinanceHolding(address: "LQTY"), wireNames: ["LQTY"], decimals: 8, symbol: "LQTY", asset: Assets.liquity.asset),
+        // ID: CoinGecko's `space-id`
+        Row(holding: BinanceHolding(address: "ID"), wireNames: ["ID"], decimals: 8, symbol: "ID", asset: Assets.spaceId.asset),
+        // EDU: CoinGecko's `edu-coin`
+        Row(holding: BinanceHolding(address: "EDU"), wireNames: ["EDU"], decimals: 8, symbol: "EDU", asset: Assets.eduCoin.asset),
+        // PEPE: CoinGecko's `pepe`
+        Row(holding: BinanceHolding(address: "PEPE"), wireNames: ["PEPE"], decimals: 2, symbol: "PEPE", asset: Assets.pepe.asset),
+        // FLOKI: CoinGecko's `floki`
+        Row(holding: BinanceHolding(address: "FLOKI"), wireNames: ["FLOKI"], decimals: 2, symbol: "FLOKI", asset: Assets.floki.asset),
+        // PENDLE: CoinGecko's `pendle`
+        Row(holding: BinanceHolding(address: "PENDLE"), wireNames: ["PENDLE"], decimals: 8, symbol: "PENDLE", asset: Assets.pendle.asset),
+        // ARKM: CoinGecko's `arkham`
+        Row(holding: BinanceHolding(address: "ARKM"), wireNames: ["ARKM"], decimals: 8, symbol: "ARKM", asset: Assets.arkham.asset),
+        // WLD: CoinGecko's `worldcoin-wld`
+        Row(holding: BinanceHolding(address: "WLD"), wireNames: ["WLD"], decimals: 8, symbol: "WLD", asset: Assets.worldcoinWld.asset),
+        // FDUSD: CoinGecko's `first-digital-usd`
+        Row(holding: BinanceHolding(address: "FDUSD"), wireNames: ["FDUSD"], decimals: 8, symbol: "FDUSD", asset: Assets.firstDigitalUsd.asset),
+        // CYBER: CoinGecko's `cyberconnect`
+        Row(holding: BinanceHolding(address: "CYBER"), wireNames: ["CYBER"], decimals: 8, symbol: "CYBER", asset: Assets.cyberconnect.asset),
+        // MEME: CoinGecko's `memecoin-2`
+        Row(holding: BinanceHolding(address: "MEME"), wireNames: ["MEME"], decimals: 8, symbol: "MEME", asset: Assets.memecoin2.asset),
+        // BEAMX: CoinGecko's `beam-2`
+        Row(holding: BinanceHolding(address: "BEAMX"), wireNames: ["BEAMX"], decimals: 8, symbol: "BEAMX", asset: Assets.beam2.asset),
+        // BLUR: CoinGecko's `blur`
+        Row(holding: BinanceHolding(address: "BLUR"), wireNames: ["BLUR"], decimals: 8, symbol: "BLUR", asset: Assets.blur.asset),
+        // JTO: CoinGecko's `jito-governance-token`
+        Row(holding: BinanceHolding(address: "JTO"), wireNames: ["JTO"], decimals: 8, symbol: "JTO", asset: Assets.jitoGovernanceToken.asset),
+        // BONK: CoinGecko's `bonk`
+        Row(holding: BinanceHolding(address: "BONK"), wireNames: ["BONK"], decimals: 2, symbol: "BONK", asset: Assets.bonk.asset),
+        // ACE: CoinGecko's `endurance`
+        Row(holding: BinanceHolding(address: "ACE"), wireNames: ["ACE"], decimals: 8, symbol: "ACE", asset: Assets.endurance.asset),
+        // ALT: CoinGecko's `altlayer`
+        Row(holding: BinanceHolding(address: "ALT"), wireNames: ["ALT"], decimals: 8, symbol: "ALT", asset: Assets.altlayer.asset),
+        // JUP: CoinGecko's `jupiter-exchange-solana`
+        Row(holding: BinanceHolding(address: "JUP"), wireNames: ["JUP"], decimals: 8, symbol: "JUP", asset: Assets.jupiterExchangeSolana.asset),
+        // PYTH: CoinGecko's `pyth-network`
+        Row(holding: BinanceHolding(address: "PYTH"), wireNames: ["PYTH"], decimals: 8, symbol: "PYTH", asset: Assets.pythNetwork.asset),
+        // STRK: CoinGecko's `starknet`
+        Row(holding: BinanceHolding(address: "STRK"), wireNames: ["STRK"], decimals: 8, symbol: "STRK", asset: Assets.starknet.asset),
+        // AXL: CoinGecko's `axelar`
+        Row(holding: BinanceHolding(address: "AXL"), wireNames: ["AXL"], decimals: 8, symbol: "AXL", asset: Assets.axelar.asset),
+        // WIF: CoinGecko's `dogwifcoin`
+        Row(holding: BinanceHolding(address: "WIF"), wireNames: ["WIF"], decimals: 8, symbol: "WIF", asset: Assets.dogwifcoin.asset),
+        // METIS: CoinGecko's `metis-token`
+        Row(holding: BinanceHolding(address: "METIS"), wireNames: ["METIS"], decimals: 8, symbol: "METIS", asset: Assets.metisToken.asset),
+        // AEVO: CoinGecko's `aevo-exchange`
+        Row(holding: BinanceHolding(address: "AEVO"), wireNames: ["AEVO"], decimals: 8, symbol: "AEVO", asset: Assets.aevoExchange.asset),
+        // BOME: CoinGecko's `book-of-meme`
+        Row(holding: BinanceHolding(address: "BOME"), wireNames: ["BOME"], decimals: 2, symbol: "BOME", asset: Assets.bookOfMeme.asset),
+        // ETHFI: CoinGecko's `ether-fi`
+        Row(holding: BinanceHolding(address: "ETHFI"), wireNames: ["ETHFI"], decimals: 8, symbol: "ETHFI", asset: Assets.etherFi.asset),
+        // ENA: CoinGecko's `ethena`
+        Row(holding: BinanceHolding(address: "ENA"), wireNames: ["ENA"], decimals: 8, symbol: "ENA", asset: Assets.ethena.asset),
+        // W: CoinGecko's `wormhole`
+        Row(holding: BinanceHolding(address: "W"), wireNames: ["W"], decimals: 8, symbol: "W", asset: Assets.wormhole.asset),
+        // TNSR: CoinGecko's `tensor`
+        Row(holding: BinanceHolding(address: "TNSR"), wireNames: ["TNSR"], decimals: 8, symbol: "TNSR", asset: Assets.tensor.asset),
+        // REZ: CoinGecko's `renzo`
+        Row(holding: BinanceHolding(address: "REZ"), wireNames: ["REZ"], decimals: 8, symbol: "REZ", asset: Assets.renzo.asset),
+        // IO: CoinGecko's `io`
+        Row(holding: BinanceHolding(address: "IO"), wireNames: ["IO"], decimals: 8, symbol: "IO", asset: Assets.io.asset),
+        // LISTA: CoinGecko's `lista`
+        Row(holding: BinanceHolding(address: "LISTA"), wireNames: ["LISTA"], decimals: 8, symbol: "LISTA", asset: Assets.lista.asset),
+        // ZRO: CoinGecko's `layerzero`
+        Row(holding: BinanceHolding(address: "ZRO"), wireNames: ["ZRO"], decimals: 8, symbol: "ZRO", asset: Assets.layerzero.asset),
+        // G: CoinGecko's `g-token`
+        Row(holding: BinanceHolding(address: "G"), wireNames: ["G"], decimals: 8, symbol: "G", asset: Assets.gToken.asset),
+        // RENDER: CoinGecko's `render-token`
+        Row(holding: BinanceHolding(address: "RENDER"), wireNames: ["RENDER"], decimals: 8, symbol: "RENDER", asset: Assets.renderToken.asset),
+        // EURI: CoinGecko's `eurite`
+        Row(holding: BinanceHolding(address: "EURI"), wireNames: ["EURI"], decimals: 8, symbol: "EURI", asset: Assets.eurite.asset),
+        // POL: CoinGecko's `polygon-ecosystem-token`
+        Row(holding: BinanceHolding(address: "POL"), wireNames: ["POL"], decimals: 8, symbol: "POL", asset: try! Asset(validating: EIP155.Polygon.pol.instance.id)),
+        // NEIRO: CoinGecko's `neiro-3`
+        Row(holding: BinanceHolding(address: "NEIRO"), wireNames: ["NEIRO"], decimals: 2, symbol: "NEIRO", asset: Assets.neiro3.asset),
+        // TURBO: CoinGecko's `turbo`
+        Row(holding: BinanceHolding(address: "TURBO"), wireNames: ["TURBO"], decimals: 8, symbol: "TURBO", asset: Assets.turbo.asset),
+        // EIGEN: CoinGecko's `eigenlayer`
+        Row(holding: BinanceHolding(address: "EIGEN"), wireNames: ["EIGEN"], decimals: 8, symbol: "EIGEN", asset: Assets.eigenlayer.asset),
+        // COW: CoinGecko's `cow-protocol`
+        Row(holding: BinanceHolding(address: "COW"), wireNames: ["COW"], decimals: 8, symbol: "COW", asset: Assets.cowProtocol.asset),
+        // PNUT: CoinGecko's `peanut-the-squirrel`
+        Row(holding: BinanceHolding(address: "PNUT"), wireNames: ["PNUT"], decimals: 8, symbol: "PNUT", asset: Assets.peanutTheSquirrel.asset),
+        // USUAL: CoinGecko's `usual`
+        Row(holding: BinanceHolding(address: "USUAL"), wireNames: ["USUAL"], decimals: 8, symbol: "USUAL", asset: Assets.usual.asset),
+        // ORCA: CoinGecko's `orca`
+        Row(holding: BinanceHolding(address: "ORCA"), wireNames: ["ORCA"], decimals: 8, symbol: "ORCA", asset: Assets.orca.asset),
+        // MOVE: CoinGecko's `movement`
+        Row(holding: BinanceHolding(address: "MOVE"), wireNames: ["MOVE"], decimals: 8, symbol: "MOVE", asset: Assets.movement.asset),
+        // ME: CoinGecko's `magic-eden`
+        Row(holding: BinanceHolding(address: "ME"), wireNames: ["ME"], decimals: 8, symbol: "ME", asset: Assets.magicEden.asset),
+        // VELODROME: CoinGecko's `velodrome-finance`
+        Row(holding: BinanceHolding(address: "VELODROME"), wireNames: ["VELODROME"], decimals: 8, symbol: "VELODROME", asset: Assets.velodromeFinance.asset),
+        // VANA: CoinGecko's `vana`
+        Row(holding: BinanceHolding(address: "VANA"), wireNames: ["VANA"], decimals: 8, symbol: "VANA", asset: Assets.vana.asset),
+        // PENGU: CoinGecko's `pudgy-penguins`
+        Row(holding: BinanceHolding(address: "PENGU"), wireNames: ["PENGU"], decimals: 8, symbol: "PENGU", asset: Assets.pudgyPenguins.asset),
+        // BIO: CoinGecko's `bio-protocol`
+        Row(holding: BinanceHolding(address: "BIO"), wireNames: ["BIO"], decimals: 8, symbol: "BIO", asset: Assets.bioProtocol.asset),
+        // AIXBT: CoinGecko's `aixbt`
+        Row(holding: BinanceHolding(address: "AIXBT"), wireNames: ["AIXBT"], decimals: 8, symbol: "AIXBT", asset: Assets.aixbt.asset),
+        // CGPT: CoinGecko's `chaingpt`
+        Row(holding: BinanceHolding(address: "CGPT"), wireNames: ["CGPT"], decimals: 8, symbol: "CGPT", asset: Assets.chaingpt.asset),
+        // SOLV: CoinGecko's `solv-protocol`
+        Row(holding: BinanceHolding(address: "SOLV"), wireNames: ["SOLV"], decimals: 8, symbol: "SOLV", asset: Assets.solvProtocol.asset),
+        // TRUMP: CoinGecko's `official-trump`
+        Row(holding: BinanceHolding(address: "TRUMP"), wireNames: ["TRUMP"], decimals: 8, symbol: "TRUMP", asset: Assets.officialTrump.asset),
+        // KAITO: CoinGecko's `kaito`
+        Row(holding: BinanceHolding(address: "KAITO"), wireNames: ["KAITO"], decimals: 8, symbol: "KAITO", asset: Assets.kaito.asset),
+        // RED: CoinGecko's `redstone-oracles`
+        Row(holding: BinanceHolding(address: "RED"), wireNames: ["RED"], decimals: 8, symbol: "RED", asset: Assets.redstoneOracles.asset),
+        // GPS: CoinGecko's `goplus-security`
+        Row(holding: BinanceHolding(address: "GPS"), wireNames: ["GPS"], decimals: 8, symbol: "GPS", asset: Assets.goplusSecurity.asset),
+        // FORM: CoinGecko's `four`
+        Row(holding: BinanceHolding(address: "FORM"), wireNames: ["FORM"], decimals: 8, symbol: "FORM", asset: Assets.four.asset),
+        // XUSD: CoinGecko's `straitsx-xusd`
+        Row(holding: BinanceHolding(address: "XUSD"), wireNames: ["XUSD"], decimals: 8, symbol: "XUSD", asset: Assets.straitsxXusd.asset),
+        // MUBARAK: CoinGecko's `mubarak`
+        Row(holding: BinanceHolding(address: "MUBARAK"), wireNames: ["MUBARAK"], decimals: 8, symbol: "MUBARAK", asset: Assets.mubarak.asset),
+        // TUT: CoinGecko's `tutorial`
+        Row(holding: BinanceHolding(address: "TUT"), wireNames: ["TUT"], decimals: 8, symbol: "TUT", asset: Assets.tutorial.asset),
+        // BROCCOLI714: CoinGecko's `czs-dog`
+        Row(holding: BinanceHolding(address: "BROCCOLI714"), wireNames: ["BROCCOLI714"], decimals: 8, symbol: "BROCCOLI714", asset: Assets.czsDog.asset),
+        // BANANAS31: CoinGecko's `banana-for-scale-2`
+        Row(holding: BinanceHolding(address: "BANANAS31"), wireNames: ["BANANAS31"], decimals: 8, symbol: "BANANAS31", asset: Assets.bananaForScale2.asset),
+        // ONDO: CoinGecko's `ondo-finance`
+        Row(holding: BinanceHolding(address: "ONDO"), wireNames: ["ONDO"], decimals: 8, symbol: "ONDO", asset: Assets.ondoFinance.asset),
+        // BIGTIME: CoinGecko's `big-time`
+        Row(holding: BinanceHolding(address: "BIGTIME"), wireNames: ["BIGTIME"], decimals: 8, symbol: "BIGTIME", asset: Assets.bigTime.asset),
+        // VIRTUAL: CoinGecko's `virtual-protocol`
+        Row(holding: BinanceHolding(address: "VIRTUAL"), wireNames: ["VIRTUAL"], decimals: 8, symbol: "VIRTUAL", asset: Assets.virtualProtocol.asset),
+        // WCT: CoinGecko's `connect-token-wct`
+        Row(holding: BinanceHolding(address: "WCT"), wireNames: ["WCT"], decimals: 8, symbol: "WCT", asset: Assets.connectTokenWct.asset),
+        // SIGN: CoinGecko's `sign-global`
+        Row(holding: BinanceHolding(address: "SIGN"), wireNames: ["SIGN"], decimals: 8, symbol: "SIGN", asset: Assets.signGlobal.asset),
+        // SYRUP: CoinGecko's `syrup`
+        Row(holding: BinanceHolding(address: "SYRUP"), wireNames: ["SYRUP"], decimals: 8, symbol: "SYRUP", asset: Assets.syrup.asset),
+        // KMNO: CoinGecko's `kamino`
+        Row(holding: BinanceHolding(address: "KMNO"), wireNames: ["KMNO"], decimals: 8, symbol: "KMNO", asset: Assets.kamino.asset),
+        // SXT: CoinGecko's `space-and-time`
+        Row(holding: BinanceHolding(address: "SXT"), wireNames: ["SXT"], decimals: 8, symbol: "SXT", asset: Assets.spaceAndTime.asset),
+        // AWE: CoinGecko's `stp-network`
+        Row(holding: BinanceHolding(address: "AWE"), wireNames: ["AWE"], decimals: 8, symbol: "AWE", asset: Assets.stpNetwork.asset),
+        // USD1: CoinGecko's `usd1-wlfi`
+        Row(holding: BinanceHolding(address: "USD1"), wireNames: ["USD1"], decimals: 8, symbol: "USD1", asset: Assets.usd1Wlfi.asset),
+        // HUMA: CoinGecko's `huma-finance`
+        Row(holding: BinanceHolding(address: "HUMA"), wireNames: ["HUMA"], decimals: 8, symbol: "HUMA", asset: Assets.humaFinance.asset),
+        // SOPH: CoinGecko's `sophon`
+        Row(holding: BinanceHolding(address: "SOPH"), wireNames: ["SOPH"], decimals: 8, symbol: "SOPH", asset: Assets.sophon.asset),
+        // HOME: CoinGecko's `home`
+        Row(holding: BinanceHolding(address: "HOME"), wireNames: ["HOME"], decimals: 8, symbol: "HOME", asset: Assets.home.asset),
+        // SPK: CoinGecko's `spark-2`
+        Row(holding: BinanceHolding(address: "SPK"), wireNames: ["SPK"], decimals: 8, symbol: "SPK", asset: Assets.spark2.asset),
+        // SAHARA: CoinGecko's `sahara-ai`
+        Row(holding: BinanceHolding(address: "SAHARA"), wireNames: ["SAHARA"], decimals: 8, symbol: "SAHARA", asset: Assets.saharaAi.asset),
+        // PROVE: CoinGecko's `succinct`
+        Row(holding: BinanceHolding(address: "PROVE"), wireNames: ["PROVE"], decimals: 8, symbol: "PROVE", asset: Assets.succinct.asset),
+        // PLUME: CoinGecko's `plume`
+        Row(holding: BinanceHolding(address: "PLUME"), wireNames: ["PLUME"], decimals: 8, symbol: "PLUME", asset: Assets.plume.asset),
+        // WLFI: CoinGecko's `world-liberty-financial`
+        Row(holding: BinanceHolding(address: "WLFI"), wireNames: ["WLFI"], decimals: 2, symbol: "WLFI", asset: Assets.worldLibertyFinancial.asset),
+        // USDE: CoinGecko's `ethena-usde`
+        Row(holding: BinanceHolding(address: "USDE"), wireNames: ["USDE"], decimals: 8, symbol: "USDE", asset: Assets.ethenaUsde.asset),
+        // HOLO: CoinGecko's `holoworld`
+        Row(holding: BinanceHolding(address: "HOLO"), wireNames: ["HOLO"], decimals: 8, symbol: "HOLO", asset: Assets.holoworld.asset),
+        // PUMP: CoinGecko's `pump-fun`
+        Row(holding: BinanceHolding(address: "PUMP"), wireNames: ["PUMP"], decimals: 2, symbol: "PUMP", asset: Assets.pumpFun.asset),
+        // AVNT: CoinGecko's `avantis`
+        Row(holding: BinanceHolding(address: "AVNT"), wireNames: ["AVNT"], decimals: 8, symbol: "AVNT", asset: Assets.avantis.asset),
+        // SKY: CoinGecko's `sky`
+        Row(holding: BinanceHolding(address: "SKY"), wireNames: ["SKY"], decimals: 8, symbol: "SKY", asset: Assets.sky.asset),
+        // BARD: CoinGecko's `lombard-protocol`
+        Row(holding: BinanceHolding(address: "BARD"), wireNames: ["BARD"], decimals: 8, symbol: "BARD", asset: Assets.lombardProtocol.asset),
+        // 0G: CoinGecko's `zero-gravity`
+        Row(holding: BinanceHolding(address: "0G"), wireNames: ["0G"], decimals: 8, symbol: "0G", asset: Assets.zeroGravity.asset),
+        // HEMI: CoinGecko's `hemi`
+        Row(holding: BinanceHolding(address: "HEMI"), wireNames: ["HEMI"], decimals: 8, symbol: "HEMI", asset: Assets.hemi.asset),
+        // MIRA: CoinGecko's `mira-3`
+        Row(holding: BinanceHolding(address: "MIRA"), wireNames: ["MIRA"], decimals: 8, symbol: "MIRA", asset: Assets.mira3.asset),
+        // FF: CoinGecko's `falcon-finance-ff`
+        Row(holding: BinanceHolding(address: "FF"), wireNames: ["FF"], decimals: 8, symbol: "FF", asset: Assets.falconFinanceFf.asset),
+        // EDEN: CoinGecko's `openeden`
+        Row(holding: BinanceHolding(address: "EDEN"), wireNames: ["EDEN"], decimals: 8, symbol: "EDEN", asset: Assets.openeden.asset),
+        // 2Z: CoinGecko's `doublezero`
+        Row(holding: BinanceHolding(address: "2Z"), wireNames: ["2Z"], decimals: 8, symbol: "2Z", asset: Assets.doublezero.asset),
+        // MORPHO: CoinGecko's `morpho`
+        Row(holding: BinanceHolding(address: "MORPHO"), wireNames: ["MORPHO"], decimals: 8, symbol: "MORPHO", asset: Assets.morpho.asset),
+        // ASTER: CoinGecko's `aster-2`
+        Row(holding: BinanceHolding(address: "ASTER"), wireNames: ["ASTER"], decimals: 8, symbol: "ASTER", asset: Assets.aster2.asset),
+        // EUL: CoinGecko's `euler`
+        Row(holding: BinanceHolding(address: "EUL"), wireNames: ["EUL"], decimals: 8, symbol: "EUL", asset: Assets.euler.asset),
+        // ENSO: CoinGecko's `enso`
+        Row(holding: BinanceHolding(address: "ENSO"), wireNames: ["ENSO"], decimals: 8, symbol: "ENSO", asset: Assets.enso.asset),
+        // YB: CoinGecko's `yield-basis`
+        Row(holding: BinanceHolding(address: "YB"), wireNames: ["YB"], decimals: 8, symbol: "YB", asset: Assets.yieldBasis.asset),
+        // ZBT: CoinGecko's `zerobase`
+        Row(holding: BinanceHolding(address: "ZBT"), wireNames: ["ZBT"], decimals: 8, symbol: "ZBT", asset: Assets.zerobase.asset),
+        // GIGGLE: CoinGecko's `giggle-fund`
+        Row(holding: BinanceHolding(address: "GIGGLE"), wireNames: ["GIGGLE"], decimals: 8, symbol: "GIGGLE", asset: Assets.giggleFund.asset),
+        // KITE: CoinGecko's `kite-2`
+        Row(holding: BinanceHolding(address: "KITE"), wireNames: ["KITE"], decimals: 8, symbol: "KITE", asset: Assets.kite2.asset),
+        // SAPIEN: CoinGecko's `sapien-2`
+        Row(holding: BinanceHolding(address: "SAPIEN"), wireNames: ["SAPIEN"], decimals: 8, symbol: "SAPIEN", asset: Assets.sapien2.asset),
+        // ALLO: CoinGecko's `allora`
+        Row(holding: BinanceHolding(address: "ALLO"), wireNames: ["ALLO"], decimals: 8, symbol: "ALLO", asset: Assets.allora.asset),
+        // BANK: CoinGecko's `lorenzo-protocol`
+        Row(holding: BinanceHolding(address: "BANK"), wireNames: ["BANK"], decimals: 8, symbol: "BANK", asset: Assets.lorenzoProtocol.asset),
+        // MET: CoinGecko's `meteora`
+        Row(holding: BinanceHolding(address: "MET"), wireNames: ["MET"], decimals: 8, symbol: "MET", asset: Assets.meteora.asset),
+        // AT: CoinGecko's `apro`
+        Row(holding: BinanceHolding(address: "AT"), wireNames: ["AT"], decimals: 8, symbol: "AT", asset: Assets.apro.asset),
+        // BREV: CoinGecko's `brevis`
+        Row(holding: BinanceHolding(address: "BREV"), wireNames: ["BREV"], decimals: 8, symbol: "BREV", asset: Assets.brevis.asset),
+        // U: CoinGecko's `united-stables`
+        Row(holding: BinanceHolding(address: "U"), wireNames: ["U"], decimals: 8, symbol: "U", asset: Assets.unitedStables.asset),
+        // FRAX: CoinGecko's `frax-share`
+        Row(holding: BinanceHolding(address: "FRAX"), wireNames: ["FRAX"], decimals: 8, symbol: "FRAX", asset: Assets.fraxShare.asset),
+        // SENT: CoinGecko's `sentient`
+        Row(holding: BinanceHolding(address: "SENT"), wireNames: ["SENT"], decimals: 8, symbol: "SENT", asset: Assets.sentient.asset),
+        // ZAMA: CoinGecko's `zama`
+        Row(holding: BinanceHolding(address: "ZAMA"), wireNames: ["ZAMA"], decimals: 8, symbol: "ZAMA", asset: Assets.zama.asset),
+        // ESP: CoinGecko's `espresso`
+        Row(holding: BinanceHolding(address: "ESP"), wireNames: ["ESP"], decimals: 8, symbol: "ESP", asset: Assets.espresso.asset),
+        // ROBO: CoinGecko's `robo-token-2`
+        Row(holding: BinanceHolding(address: "ROBO"), wireNames: ["ROBO"], decimals: 8, symbol: "ROBO", asset: Assets.roboToken2.asset),
+        // NIGHT: CoinGecko's `midnight-3`
+        Row(holding: BinanceHolding(address: "NIGHT"), wireNames: ["NIGHT"], decimals: 8, symbol: "NIGHT", asset: Assets.midnight3.asset),
+        // CFG: CoinGecko's `centrifuge-2`
+        Row(holding: BinanceHolding(address: "CFG"), wireNames: ["CFG"], decimals: 8, symbol: "CFG", asset: Assets.centrifuge2.asset),
+        // XAUT: CoinGecko's `tether-gold`
+        Row(holding: BinanceHolding(address: "XAUT"), wireNames: ["XAUT"], decimals: 8, symbol: "XAUT", asset: Assets.tetherGold.asset),
+        // USDS: CoinGecko's `usds`
+        Row(holding: BinanceHolding(address: "USDS"), wireNames: ["USDS"], decimals: 8, symbol: "USDS", asset: Assets.usds.asset),
+        // AIGENSYN: CoinGecko's `gensyn`
+        Row(holding: BinanceHolding(address: "AIGENSYN"), wireNames: ["AIGENSYN"], decimals: 8, symbol: "AIGENSYN", asset: Assets.gensyn.asset),
+        // GENIUS: CoinGecko's `genius-3`
+        Row(holding: BinanceHolding(address: "GENIUS"), wireNames: ["GENIUS"], decimals: 8, symbol: "GENIUS", asset: Assets.genius3.asset),
+        // OPG: CoinGecko's `opengradient`
+        Row(holding: BinanceHolding(address: "OPG"), wireNames: ["OPG"], decimals: 8, symbol: "OPG", asset: Assets.opengradient.asset),
+        // MUB: CoinGecko's `micron-technology-bstock`
+        Row(holding: BinanceHolding(address: "MUB"), wireNames: ["MUB"], decimals: 8, symbol: "MUB", asset: Assets.micronTechnologyBstock.asset),
+        // CRCLB: CoinGecko's `circle-internet-group-bstock`
+        Row(holding: BinanceHolding(address: "CRCLB"), wireNames: ["CRCLB"], decimals: 8, symbol: "CRCLB", asset: Assets.circleInternetGroupBstock.asset),
+        // NVDAB: CoinGecko's `nvidia-bstocks`
+        Row(holding: BinanceHolding(address: "NVDAB"), wireNames: ["NVDAB"], decimals: 8, symbol: "NVDAB", asset: Assets.nvidiaBstocks.asset),
+        // SNDKB: CoinGecko's `sandisk-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "SNDKB"), wireNames: ["SNDKB"], decimals: 8, symbol: "SNDKB", asset: Assets.sandiskBstocksTokenizedStock.asset),
+        // TSLAB: CoinGecko's `tesla-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "TSLAB"), wireNames: ["TSLAB"], decimals: 8, symbol: "TSLAB", asset: Assets.teslaBstocksTokenizedStock.asset),
+        // SPCXB: CoinGecko's `spacex-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "SPCXB"), wireNames: ["SPCXB"], decimals: 8, symbol: "SPCXB", asset: Assets.spacexBstocksTokenizedStock.asset),
+        // RE: CoinGecko's `re`
+        Row(holding: BinanceHolding(address: "RE"), wireNames: ["RE"], decimals: 8, symbol: "RE", asset: Assets.re.asset),
+        // INTCB: CoinGecko's `intel-tokenized-bstocks`
+        Row(holding: BinanceHolding(address: "INTCB"), wireNames: ["INTCB"], decimals: 8, symbol: "INTCB", asset: Assets.intelTokenizedBstocks.asset),
+        // MSTRB: CoinGecko's `strategy-tokenized-bstocks`
+        Row(holding: BinanceHolding(address: "MSTRB"), wireNames: ["MSTRB"], decimals: 8, symbol: "MSTRB", asset: Assets.strategyTokenizedBstocks.asset),
+        // DRAMB: CoinGecko's `roundhill-memory-etf-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "DRAMB"), wireNames: ["DRAMB"], decimals: 8, symbol: "DRAMB", asset: Assets.roundhillMemoryEtfBstocksTokenizedStock.asset),
+        // GOOGLB: CoinGecko's `alphabet-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "GOOGLB"), wireNames: ["GOOGLB"], decimals: 8, symbol: "GOOGLB", asset: Assets.alphabetBstocksTokenizedStock.asset),
+        // AERO: CoinGecko's `aerodrome-finance`
+        Row(holding: BinanceHolding(address: "AERO"), wireNames: ["AERO"], decimals: 8, symbol: "AERO", asset: Assets.aerodromeFinance.asset),
+        // MARSCOIN: CoinGecko's `marscoin-4`
+        Row(holding: BinanceHolding(address: "MARSCOIN"), wireNames: ["MARSCOIN"], decimals: 8, symbol: "MARSCOIN", asset: Assets.marscoin4.asset),
+        // BNCB: CoinGecko's `cea-industries-bstocks-tokenized-stock`
+        Row(holding: BinanceHolding(address: "BNCB"), wireNames: ["BNCB"], decimals: 8, symbol: "BNCB", asset: Assets.ceaIndustriesBstocksTokenizedStock.asset),
     ]
 }
