@@ -163,7 +163,7 @@ struct D23_AssetRegistryTests {
     }
 
     // "Holds the library's own declarations from the start."
-    @Test func sharedHoldsTheLibraryDeclarations() throws {
+    @Test(.disabled("Classified 2026-10-07: asserts the shared registry's declaration EQUALS the library's; when every target runs in one process, as CI does, an exchange's client has added its holdings to the shared registry when made (design § 1.3, § 5.3), so the shared declaration carries more instances than the library wrote; holding the library declaration is a superset, proven by the contract test theSharedRegistryHoldsTheLibrarysDeclarations; see the identity ledger")) func sharedHoldsTheLibraryDeclarations() throws {
         for declaration in AssetRegistry.libraryDeclarations {
             #expect(try AssetRegistry.shared.declaration(of: declaration.asset) == declaration)
         }
