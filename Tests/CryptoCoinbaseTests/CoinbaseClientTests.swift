@@ -319,6 +319,66 @@ struct CoinbaseClientTests {
         let cursor = try CoinbaseLedgerCursor(sequenceTimestamp: "2026-10-06T07:50:36.589181Z")
         #expect(try cursor.toJSON().fromJSON() == cursor)
     }
+
+    // The ledger cursor names the item (the owner's ruling of 2026-10-08, road A): the time and the trade ids read at it.
+    @Test func aCursorStoredBeforeItNamedFillsDecodesAsNamingNoneAndTheNewFormRoundTrips() throws {
+        let old: CoinbaseLedgerCursor = try #""2021-05-31T09:58:59Z""#.fromJSON()
+        #expect(old == (try CoinbaseLedgerCursor(sequenceTimestamp: "2021-05-31T09:58:59Z")))
+        #expect(old.read.isEmpty)
+        let named = try CoinbaseLedgerCursor(sequenceTimestamp: "2021-05-31T09:58:59Z", read: [try CoinbaseTradeId(validating: "1111-11111-111111")])
+        let json = try named.toJSON()
+        #expect(json.hasPrefix("{"))
+        #expect(try json.fromJSON() == named)
+        #expect(Set([old, named, try json.fromJSON()]).count == 2)
+        #expect(try CoinbaseLedgerCursor.stub().toJSON().fromJSON() == CoinbaseLedgerCursor.stub())
+        #expect(try CoinbaseTradeId.stub().toJSON().fromJSON() == CoinbaseTradeId.stub())
+        #expect(throws: (any Error).self) { let _: CoinbaseLedgerCursor = try #""yesterday""#.fromJSON() }
+        #expect(throws: (any Error).self) { let _: CoinbaseTradeId = try #""has space""#.fromJSON() }
+        #expect(throws: ExchangeClientError.self) { _ = try CoinbaseTradeId(validating: "") }
+    }
+
+    // The recorded page with its one fill repeated under a second trade id: two fills at one sequence time.
+    static let sameInstant: String = {
+        let page = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
+        let start = page.range(of: "    {\n      \"entry_id\"")!.lowerBound
+        let end = page.range(of: "\n  ],")!.lowerBound
+        let fill = String(page[start..<end])
+        let second = fill.replacingOccurrences(of: "\"trade_id\": \"1111-11111-111111\"", with: "\"trade_id\": \"1111-11111-222222\"")
+        return page.replacingCharacters(in: start..<end, with: fill + ",\n" + second)
+    }()
+
+    static func read(_ page: String, since: CoinbaseLedgerCursor?) async throws -> [CoinbaseLedgerCursor] {
+        let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(page.utf8))]))
+        return try await Coinbase.client(session).ledgerItems(account: "", since: since).compactMap { item in
+            guard case .fill(_, _, _, _, _, _, _, _, let cursor, _) = item else { return nil }
+            return cursor
+        }
+    }
+
+    @Test func twoFillsAtOneSequenceTimeAreHandedUpOnceEachAcrossTwoReads() async throws {
+        let first = try CoinbaseTradeId(validating: "1111-11111-111111")
+        let second = try CoinbaseTradeId(validating: "1111-11111-222222")
+        let time = "2021-05-31T09:58:59Z"
+        let whole = try await Self.read(Self.sameInstant, since: nil)
+        #expect(whole == [try CoinbaseLedgerCursor(sequenceTimestamp: time, read: [first]), try CoinbaseLedgerCursor(sequenceTimestamp: time, read: [first, second])])
+        // Coinbase's read includes the fill at the cursor's time; the one the cursor names is not handed up again.
+        #expect(try await Self.read(Self.sameInstant, since: whole[0]) == [whole[1]])
+        #expect(try await Self.read(Self.sameInstant, since: whole[1]).isEmpty)
+        // The old, bare cursor names no fill, so it reads as after the time exactly as before: both come back.
+        let old: CoinbaseLedgerCursor = try #""2021-05-31T09:58:59Z""#.fromJSON()
+        #expect(try await Self.read(Self.sameInstant, since: old) == whole)
+    }
+
+    @Test func aFillANewerReadAddsAtTheCursorsTimeIsHandedUpAndARepeatedPageRepeatsNone() async throws {
+        let onePage = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
+        let cursor = try #require(try await Self.read(onePage, since: nil).last)
+        #expect(cursor.read == [try CoinbaseTradeId(validating: "1111-11111-111111")])
+        #expect(try await Self.read(Self.sameInstant, since: cursor).map(\.read) == [[try CoinbaseTradeId(validating: "1111-11111-111111"), try CoinbaseTradeId(validating: "1111-11111-222222")]])
+        // The documented page names a next page and a recording answers every page alike: the one fill is read twice, handed up once.
+        let repeated = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self)
+        let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(repeated.utf8))]))
+        #expect(try await Coinbase.client(session).ledgerItems(account: "", since: nil).count == 1)
+    }
 }
 
 // The client gaps of the identity PR (fosline's layer B ledger § 6): the client order id, and the account state of a

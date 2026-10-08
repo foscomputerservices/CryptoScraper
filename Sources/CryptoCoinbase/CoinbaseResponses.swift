@@ -244,6 +244,7 @@ struct CoinbaseKeyPermissions: Decodable, Sendable {
 }
 
 struct CoinbaseFill: Decodable, Sendable {
+    let tradeId: String
     let orderId: String
     let tradeTime: String
     let price: WireDecimal
@@ -254,7 +255,7 @@ struct CoinbaseFill: Decodable, Sendable {
     let side: String
 
     private enum CodingKeys: String, CodingKey {
-        case orderId = "order_id", tradeTime = "trade_time", price, size, commission, productId = "product_id"
+        case tradeId = "trade_id", orderId = "order_id", tradeTime = "trade_time", price, size, commission, productId = "product_id"
         case sequenceTimestamp = "sequence_timestamp", side
     }
 }
