@@ -26,6 +26,10 @@ let package = Package(
             targets: ["CryptoAsset"]
         ),
         .library(
+            name: "CryptoAssetLocalization",
+            targets: ["CryptoAssetLocalization"]
+        ),
+        .library(
             name: "CryptoExchange",
             targets: ["CryptoExchange"]
         ),
@@ -88,6 +92,29 @@ let package = Package(
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver")
             ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        // An amount, a price and a fraction for a reader, on FOSMVVM's localizing encoder; CryptoAsset itself never
+        // imports FOSMVVM
+        .target(
+            name: "CryptoAssetLocalization",
+            dependencies: [
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoAssetLocalizationTests",
+            dependencies: [
+                .byName(name: "CryptoAssetLocalization"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            resources: [.copy("Resources")],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
