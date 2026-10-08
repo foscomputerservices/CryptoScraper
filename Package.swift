@@ -26,6 +26,10 @@ let package = Package(
             targets: ["CryptoAsset"]
         ),
         .library(
+            name: "CryptoAssetLocalization",
+            targets: ["CryptoAssetLocalization"]
+        ),
+        .library(
             name: "CryptoExchange",
             targets: ["CryptoExchange"]
         ),
@@ -88,6 +92,43 @@ let package = Package(
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver")
             ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        // An amount, a price and a fraction for a reader, on FOSMVVM's localizing encoder; CryptoAsset itself never
+        // imports FOSMVVM
+        .target(
+            name: "CryptoAssetLocalization",
+            dependencies: [
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities")
+            ],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "CryptoAssetLocalizationTests",
+            dependencies: [
+                .byName(name: "CryptoAssetLocalization"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities"),
+                .product(name: "FOSTesting", package: "FOSUtilities")
+            ],
+            exclude: ["Behavioral"],
+            resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        // The second channel, projected from the design alone: its own target, so its adapters (the design's
+        // initializers without a registry, a store named as the projection names it) never reach the contract tests
+        .testTarget(
+            name: "CryptoAssetLocalizationBehavioralTests",
+            dependencies: [
+                .byName(name: "CryptoAssetLocalization"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities")
+            ],
+            path: "Tests/CryptoAssetLocalizationTests/Behavioral",
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(

@@ -16,6 +16,11 @@ import Foundation
 /// let usdt = AssetInstance(BinanceHolding(address: "USDT"))
 /// usdt.id                          // "exchange:binance:USDT"
 /// ```
+///
+/// An EIP-155 address's case is a display checksum (EIP-55), never part of the identity: an instance on an
+/// `eip155` chain holds its address lowercased, so every spelling of one contract is one instance. Every other
+/// namespace keeps its address exactly as given, because its case is significant (base58 on Solana, Tron and
+/// Bitcoin).
 public struct AssetInstance: Codable, Hashable, Identifiable, Sendable, Stubbable {
     /// `chain.id + ":" + address`, or a fiat's id
     public let id: String
@@ -30,13 +35,16 @@ public struct AssetInstance: Codable, Hashable, Identifiable, Sendable, Stubbabl
         Self.split(id)?.address
     }
 
-    /// - Throws: ``AssetError/malformedIdentity(_:)`` when `id` is not a CAIP-2-shaped chain id and an address,
-    ///   or an `iso4217` code
+    /// An EIP-155 address's case is a display checksum (EIP-55), never part of the identity: on an `eip155` chain
+    /// the address is lowercased before the id is stored, and every other namespace keeps its address as given.
+    ///
+    /// - Throws: ``AssetError/malformedIdentity(_:)`` (carrying `id` as given) when `id` is not a CAIP-2-shaped
+    ///   chain id and an address, or an `iso4217` code
     public init(validating id: String) throws {
         guard Self.isWellFormed(id) else {
             throw AssetError.malformedIdentity(id)
         }
-        self.id = id
+        self.id = Self.canonical(id)
     }
 
     // MARK: Codable
@@ -95,6 +103,15 @@ private extension AssetInstance {
             return false
         }
         return isCAIP2ChainId(chainId)
+    }
+
+    // The canonical form: an `eip155` address lowercased (its case is the EIP-55 checksum, a display), every other id
+    // as given. Run after `isWellFormed`, so `split` finds the last colon.
+    static func canonical(_ id: String) -> String {
+        guard let (chainId, address) = split(id), chainId.hasPrefix(EIP155.namespace + ":") else {
+            return id
+        }
+        return chainId + ":" + address.lowercased()
     }
 
     static func split(_ id: String) -> (chainId: String, address: String)? {

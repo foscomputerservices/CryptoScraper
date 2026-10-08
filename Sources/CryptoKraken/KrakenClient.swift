@@ -281,47 +281,84 @@ public struct KrakenClient: ExchangeClient {
 
     /// The account's fills from TradesHistory and its deposits, withdrawals and transfers from Ledgers, oldest first
     ///
-    /// `since` is sent as `start` to both calls. Ledger kinds other than those three (a trade's own entry, margin,
-    /// rollover, staking) are not handed up: a trade is its fill. A fill's position effect is the one the trade
-    /// states: `close` where its `misc` notes say "closing", `open` where it carries a `posstatus` (present only on
-    /// a trade that opened a position, whatever that position's status now), `nil` on a spot trade, which states none.
+    /// The cursor names the oldest unmatched item, never a time alone: Kraken's `start` is exclusive, so the client
+    /// sends it the ten-thousandth of a second before the cursor's instant to both calls, then hands up every item
+    /// after the instant and those at the instant whose id the cursor does not name. Items of one instant come in the
+    /// order of their ids, and each item's cursor names it and every item before it at its instant. Ledger kinds
+    /// other than those three (a trade's own entry, margin, rollover, staking) are not handed up: a trade is its fill.
+    /// A fill's position effect is the one the trade states: `close` where its `misc` notes say "closing", `open`
+    /// where it carries a `posstatus` (present only on a trade that opened a position, whatever that position's
+    /// status now), `nil` on a spot trade, which states none.
     public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>] {
         do {
-            let start = since.map { [("start", $0.seconds.text)] } ?? []
+            let start = since.map { [("start", Self.startBefore($0.seconds))] } ?? []
             let trades: KrakenResult<KrakenTrades> = try await privatePost("TradesHistory", start)
             let ledger: KrakenResult<KrakenLedger> = try await privatePost("Ledgers", start)
 
-            var items: [(WireDecimal, ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>)] = []
-            for trade in trades.result.trades.values {
+            typealias Item = ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>
+            // Each item with its instant and its id; the cursor of each is made once the instant's items are known.
+            var items: [(time: WireDecimal, id: KrakenLedgerId, make: (KrakenLedgerCursor) throws -> Item)] = []
+            for (key, trade) in trades.result.trades {
+                let id = try KrakenLedgerId(validating: key)
                 let market = try KrakenMarketName(validating: trade.pair)
                 let pair = try await self.pair(market).declared()
-                items.append((trade.time, .fill(
-                    market: market, side: trade.type == "buy" ? .buy : .sell,
-                    units: try trade.vol.amount(of: pair.base, in: registry), price: try trade.price.price(of: pair.quote, per: pair.base, in: registry),
-                    fee: try trade.fee.amount(of: pair.quote, in: registry), order: try KrakenOrderId(validating: trade.ordertxid), closedBy: nil,
-                    time: KrakenLedgerCursor(seconds: trade.time).time, cursor: KrakenLedgerCursor(seconds: trade.time),
-                    positionEffect: trade.positionEffect
-                )))
+                let units = try trade.vol.amount(of: pair.base, in: registry)
+                let price = try trade.price.price(of: pair.quote, per: pair.base, in: registry)
+                let fee = try trade.fee.amount(of: pair.quote, in: registry)
+                let order = try KrakenOrderId(validating: trade.ordertxid)
+                items.append((trade.time, id, { cursor in
+                    .fill(market: market, side: trade.type == "buy" ? .buy : .sell, units: units, price: price, fee: fee, order: order,
+                          closedBy: nil, time: cursor.time, cursor: cursor, positionEffect: trade.positionEffect)
+                }))
             }
-            for entry in ledger.result.ledger.values {
-                let cursor = KrakenLedgerCursor(seconds: entry.time)
+            for (key, entry) in ledger.result.ledger {
+                let id = try KrakenLedgerId(validating: key)
                 switch entry.type {
                 case "deposit":
-                    items.append((entry.time, .deposit(try entry.amount.amount(of: try await holding(named: entry.asset), in: registry), time: cursor.time, cursor: cursor)))
+                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
+                    items.append((entry.time, id, { .deposit(amount, time: $0.time, cursor: $0) }))
                 case "withdrawal":
-                    items.append((entry.time, .withdrawal(try entry.amount.amount(of: try await holding(named: entry.asset), in: registry), time: cursor.time, cursor: cursor)))
+                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
+                    items.append((entry.time, id, { .withdrawal(amount, time: $0.time, cursor: $0) }))
                 case "transfer":
-                    items.append((entry.time, .internalMove(try entry.amount.amount(of: try await holding(named: entry.asset), in: registry), from: entry.subtype, to: entry.asset, time: cursor.time, cursor: cursor)))
+                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
+                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, time: $0.time, cursor: $0) }))
                 default:
                     // A trade's ledger entry is its fill, read from TradesHistory with its order; the other kinds (margin,
                     // rollover, staking…) have no case in C30 and are not handed up (a reading for the owner's pen).
                     continue
                 }
             }
-            return items.sorted { Self.seconds($0.0) < Self.seconds($1.0) }.map(\.1)
+
+            items.sort { (Self.seconds($0.time), $0.id) < (Self.seconds($1.time), $1.id) }
+            let resume = since.map { Self.seconds($0.seconds) }
+            var result: [Item] = []
+            var read: Set<KrakenLedgerId> = []
+            var instant: Int128?
+            for item in items {
+                let at = Self.seconds(item.time)
+                if at != instant {
+                    instant = at
+                    read = []
+                }
+                read.insert(item.id)
+                if let since, let resume {
+                    if at < resume || (at == resume && since.read.contains(item.id)) { continue }
+                }
+                result.append(try item.make(KrakenLedgerCursor(seconds: item.time, read: read)))
+            }
+            return result
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
+    }
+
+    // Kraken's `start` is exclusive: the cursor's instant less one ten-thousandth, which a read of it then includes.
+    private static func startBefore(_ time: WireDecimal) -> String {
+        let fourPlaces = time.fractionDigits <= 4
+            ? time.digits * WireDecimal.powerOfTen(4 - time.fractionDigits)
+            : time.digits / WireDecimal.powerOfTen(time.fractionDigits - 4)
+        return WireDecimal(digits: max(0, fourPlaces - 1), fractionDigits: 4).text
     }
 
     // A cost over a volume, exactly: Kraken states a cost at the pair's cost decimals, which may be finer than the

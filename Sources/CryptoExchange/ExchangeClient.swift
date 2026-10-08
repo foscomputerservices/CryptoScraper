@@ -46,6 +46,9 @@ public protocol ExchangeClient: Sendable {
     func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<MarketName, OrderId>]
     func cancelOrder(_ id: OrderId, market: MarketName, account: String) async throws
     func accountState(account: String) async throws -> ExchangeClientAccountState<MarketName>
+    /// The account's ledger items after `since`, oldest first; `since` is the cursor of the last item read (`nil`
+    /// reads from the start), which names the oldest unmatched item, never a time alone, so every item is handed up
+    /// once and none is skipped, including a second item at the cursor's own instant
     func ledgerItems(account: String, since: Cursor?) async throws -> [ExchangeClientLedgerItem<MarketName, OrderId, Cursor>]
     func setLeverage(_ leverage: Int, market: MarketName, isolated: Bool, account: String) async throws
     func transfer(_ amount: Amount, from: String, to: String) async throws

@@ -249,12 +249,13 @@ struct KrakenClientTests {
         #expect(price == Kraken.price("30010"))
         #expect(fee == .zero(of: Kraken.usd))
         #expect(order == (try KrakenOrderId(validating: "OQCLML-BW3P3-BUCMWZ")))
-        #expect(try cursor.toJSON() == #""1688667769.6396""#)
+        #expect(cursor == KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667769.6396"), read: [try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")]))
 
+        // Kraken's start is exclusive: the read asks from the ten-thousandth before the cursor's instant.
         let resumed = ReplaySession(route: Kraken.route())
         _ = try await Kraken.client(resumed).ledgerItems(account: "", since: cursor)
         for method in ["TradesHistory", "Ledgers"] {
-            #expect(resumed.requests.first { $0.url!.lastPathComponent == method }!.bodyText.hasSuffix("&start=1688667769.6396"))
+            #expect(resumed.requests.first { $0.url!.lastPathComponent == method }!.bodyText.hasSuffix("&start=1688667769.6395"))
         }
     }
 
@@ -340,6 +341,67 @@ struct KrakenClientTests {
         #expect(try id.toJSON().fromJSON() == id)
         let cursor = KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667796.8802"))
         #expect(try cursor.toJSON().fromJSON() == cursor)
+    }
+
+    // The ledger cursor names the item (the owner's ruling of 2026-10-08, road A): the instant and the ids read at it.
+    @Test func aCursorStoredBeforeItNamedItemsDecodesAsNamingNoneAndTheNewFormRoundTrips() throws {
+        let old: KrakenLedgerCursor = try #""1688667769.6396""#.fromJSON()
+        #expect(old == KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667769.6396")))
+        #expect(old.read.isEmpty)
+        let named = KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667769.6396"), read: [try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")])
+        let json = try named.toJSON()
+        #expect(json.hasPrefix("{"))
+        #expect(try json.fromJSON() == named)
+        #expect(Set([old, named, try json.fromJSON()]).count == 2)
+        #expect(try KrakenLedgerCursor.stub().toJSON().fromJSON() == KrakenLedgerCursor.stub())
+        #expect(try KrakenLedgerId.stub().toJSON().fromJSON() == KrakenLedgerId.stub())
+        #expect(throws: (any Error).self) { let _: KrakenLedgerId = try #""not an id""#.fromJSON() }
+        #expect(throws: ExchangeClientError.self) { _ = try KrakenLedgerId(validating: "") }
+    }
+
+    // The recorded TradesHistory with its later trade moved to the earlier trade's instant: two items at one instant.
+    static let sameInstant = String(decoding: Recording.body("Kraken/private-trades-history.json"), as: UTF8.self)
+        .replacingOccurrences(of: "1688667796.8802", with: "1688667769.6396")
+
+    static func read(_ trades: String, since: KrakenLedgerCursor?) async throws -> [KrakenLedgerCursor] {
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(Data(trades.utf8))]))
+        let items = try await Kraken.client(session).ledgerItems(account: "", since: since)
+        var cursors: [KrakenLedgerCursor] = []
+        for item in items {
+            guard case .fill(_, _, _, _, _, _, _, _, let cursor, _) = item else { continue }
+            cursors.append(cursor)
+        }
+        return cursors
+    }
+
+    @Test func twoItemsAtOneInstantAreHandedUpOnceEachAcrossTwoReads() async throws {
+        let first = try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")
+        let second = try KrakenLedgerId(validating: "THVRQM-33VKH-UCI7BS")
+        let instant = try WireDecimal(parsing: "1688667769.6396")
+        let whole = try await Self.read(Self.sameInstant, since: nil)
+        #expect(whole == [KrakenLedgerCursor(seconds: instant, read: [first]), KrakenLedgerCursor(seconds: instant, read: [first, second])])
+        // Resumed from the first item's cursor: the second, at the same instant, is handed up and the first is not.
+        #expect(try await Self.read(Self.sameInstant, since: whole[0]) == [whole[1]])
+        // And from the second's: nothing, though the instant is read again.
+        #expect(try await Self.read(Self.sameInstant, since: whole[1]).isEmpty)
+        // The old, bare cursor reads as after the instant: neither item at it is named, so both come back.
+        let old: KrakenLedgerCursor = try #""1688667769.6396""#.fromJSON()
+        #expect(try await Self.read(Self.sameInstant, since: old) == whole)
+    }
+
+    @Test func anItemThatAppearsAtTheCursorsInstantAfterTheReadIsHandedUpAndTheNamedIsNot() async throws {
+        // The first read sees one trade only; the second sees both at the one instant.
+        var one = try #require(JSONSerialization.jsonObject(with: Data(Self.sameInstant.utf8)) as? [String: Any])
+        var result = try #require(one["result"] as? [String: Any])
+        var trades = try #require(result["trades"] as? [String: Any])
+        trades["THVRQM-33VKH-UCI7BS"] = nil
+        result["trades"] = trades
+        one["result"] = result
+        let alone = String(decoding: try JSONSerialization.data(withJSONObject: one), as: UTF8.self)
+        let cursor = try #require(try await Self.read(alone, since: nil).last)
+        #expect(cursor.read == [try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")])
+        let later = try await Self.read(Self.sameInstant, since: cursor)
+        #expect(later.map(\.read) == [[try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6"), try KrakenLedgerId(validating: "THVRQM-33VKH-UCI7BS")]])
     }
 }
 

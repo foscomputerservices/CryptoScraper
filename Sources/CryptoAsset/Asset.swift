@@ -18,12 +18,14 @@ public struct Asset: Codable, Hashable, Identifiable, Sendable, Stubbable {
     /// The class's key: its home instance's id (§ 2.6)
     public let id: String
 
+    /// The key is the home instance's canonical id, so an EIP-155 home is keyed by its lowercase address whatever
+    /// spelling came in (an EIP-55 checksum is a display, never part of the identity).
+    ///
     /// - Throws: ``AssetError/malformedIdentity(_:)`` when `id` is not a well-formed instance id, as
     ///   ``AssetInstance/init(validating:)`` reads one
     public init(validating id: String) throws {
         // The key is the home instance's id, so it is well-formed exactly when that instance's id is.
-        _ = try AssetInstance(validating: id)
-        self.id = id
+        self.id = try AssetInstance(validating: id).id
     }
 
     /// A named unit of an asset: its name, its exponent above the base unit, and how a reader sees it
