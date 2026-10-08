@@ -1,4 +1,4 @@
-// LocalizablePriceTests.swift
+// LocalizablePriceContractTests.swift
 //
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
@@ -23,7 +23,7 @@ private func price(_ quote: Amount, per size: Amount) -> Price {
 
 // C11's DocC and § 8.2's planned tests for a price.
 @Suite("LocalizablePrice")
-struct LocalizablePriceTests: LocalizationStoreSuite {
+struct LocalizablePriceContractTests: LocalizationStoreSuite {
     let locStore: LocalizationStore
     init() throws {
         self.locStore = try Self.testStore()

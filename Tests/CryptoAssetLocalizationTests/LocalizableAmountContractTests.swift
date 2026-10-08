@@ -1,4 +1,4 @@
-// LocalizableAmountTests.swift
+// LocalizableAmountContractTests.swift
 //
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
@@ -15,7 +15,7 @@ private typealias F = LocalizationFixtures
 
 // C10's DocC and § 8.2's planned tests, each example's text in en_US and in de_DE.
 @Suite("LocalizableAmount")
-struct LocalizableAmountTests: LocalizationStoreSuite {
+struct LocalizableAmountContractTests: LocalizationStoreSuite {
     let locStore: LocalizationStore
     init() throws {
         self.locStore = try Self.testStore()

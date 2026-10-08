@@ -114,7 +114,21 @@ let package = Package(
                 .product(name: "FOSMVVM", package: "FOSUtilities"),
                 .product(name: "FOSTesting", package: "FOSUtilities")
             ],
+            exclude: ["Behavioral"],
             resources: [.copy("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        // The second channel, projected from the design alone: its own target, so its adapters (the design's
+        // initializers without a registry, a store named as the projection names it) never reach the contract tests
+        .testTarget(
+            name: "CryptoAssetLocalizationBehavioralTests",
+            dependencies: [
+                .byName(name: "CryptoAssetLocalization"),
+                .byName(name: "CryptoAsset"),
+                .product(name: "FOSFoundation", package: "FOSUtilities"),
+                .product(name: "FOSMVVM", package: "FOSUtilities")
+            ],
+            path: "Tests/CryptoAssetLocalizationTests/Behavioral",
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(

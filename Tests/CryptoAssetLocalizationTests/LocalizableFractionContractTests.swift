@@ -1,4 +1,4 @@
-// LocalizableFractionTests.swift
+// LocalizableFractionContractTests.swift
 //
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
@@ -15,7 +15,7 @@ private typealias F = LocalizationFixtures
 
 // C11's DocC and § 8.2's planned tests for a fraction.
 @Suite("LocalizableFraction")
-struct LocalizableFractionTests: LocalizationStoreSuite {
+struct LocalizableFractionContractTests: LocalizationStoreSuite {
     let locStore: LocalizationStore
     init() throws {
         self.locStore = try Self.testStore()
