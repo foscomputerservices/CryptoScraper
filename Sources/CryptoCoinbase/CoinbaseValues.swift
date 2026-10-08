@@ -91,11 +91,66 @@ public struct CoinbaseOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
-/// Where a read of Coinbase's fills resumes: the sequence time of a fill, exactly as Coinbase wrote it
+/// Coinbase's id for a trade, the `trade_id` of a fill
 ///
-/// Decoding refuses text that is not an RFC 3339 time.
+/// Coinbase's, never a value this package makes: a cursor names the fills it has read by these.
+public struct CoinbaseTradeId: Codable, Hashable, Comparable, Sendable, Stubbable {
+    package let text: String
+
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 64
+    ///   characters, or holds anything but printable ASCII without spaces. Decoding the same text throws a
+    ///   `DecodingError` instead.
+    public init(validating candidate: String) throws {
+        guard Self.isWellFormed(candidate) else {
+            throw ExchangeClientError.malformedTradeId(candidate)
+        }
+        self.text = candidate
+    }
+
+    private static func isWellFormed(_ candidate: String) -> Bool {
+        !candidate.isEmpty && candidate.count <= 64 && candidate.unicodeScalars.allSatisfy { ("!"..."~").contains($0) }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let candidate = try container.decode(String.self)
+        guard Self.isWellFormed(candidate) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a Coinbase trade id: \"\(candidate)\"")
+        }
+        self.text = candidate
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(text)
+    }
+
+    public static func < (lhs: Self, rhs: Self) -> Bool { lhs.text < rhs.text }
+
+    public static func stub() -> Self {
+        do {
+            return try .init(validating: "fred-barney-42")
+        } catch {
+            preconditionFailure("CoinbaseTradeId.stub() is not well-formed: \(error)")
+        }
+    }
+}
+
+/// Where a read of Coinbase's fills resumes: the oldest unmatched fill, named by the trade ids of the fills read at the
+/// cursor's own sequence time, never a time alone
+///
+/// A cursor is a sequence time exactly as Coinbase wrote it and ``read``, the trade ids of every fill at that time
+/// already handed up. List Fills includes the fill at its start; the client hands up the fills after the time plus
+/// those at it whose trade id the cursor does not name: none twice, none skipped.
+///
+/// It encodes as an object, `{"sequenceTimestamp": "…", "read": ["…"]}`. A cursor stored before it named fills is the
+/// RFC 3339 text alone; it decodes as a cursor naming no fill, which reads as "after the time" as it always did.
+/// Decoding refuses a time that is not RFC 3339.
 public struct CoinbaseLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     package let sequenceTimestamp: String
+
+    /// The trade ids of the fills at the cursor's time that have been read
+    public let read: Set<CoinbaseTradeId>
 
     /// The instant the cursor names, with the fractional seconds Coinbase wrote
     public var time: Date {
@@ -103,30 +158,45 @@ public struct CoinbaseLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     }
 
     /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when the text is not an RFC 3339 time
-    package init(sequenceTimestamp: String) throws {
+    package init(sequenceTimestamp: String, read: Set<CoinbaseTradeId> = []) throws {
         guard CoinbaseTime.date(sequenceTimestamp) != nil else {
             throw ExchangeClientError.malformedCursor(sequenceTimestamp)
         }
         self.sequenceTimestamp = sequenceTimestamp
+        self.read = read
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case sequenceTimestamp, read
     }
 
     public init(from decoder: any Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let text = try container.decode(String.self)
+        if let bare = try? decoder.singleValueContainer().decode(String.self) {
+            guard CoinbaseTime.date(bare) != nil else {
+                throw DecodingError.dataCorruptedError(in: try decoder.singleValueContainer(), debugDescription: "Not an RFC 3339 time: \"\(bare)\"")
+            }
+            self.sequenceTimestamp = bare
+            self.read = []
+            return
+        }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let text = try container.decode(String.self, forKey: .sequenceTimestamp)
         guard CoinbaseTime.date(text) != nil else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not an RFC 3339 time: \"\(text)\"")
+            throw DecodingError.dataCorruptedError(forKey: .sequenceTimestamp, in: container, debugDescription: "Not an RFC 3339 time: \"\(text)\"")
         }
         self.sequenceTimestamp = text
+        self.read = Set(try container.decode([CoinbaseTradeId].self, forKey: .read))
     }
 
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(sequenceTimestamp)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(sequenceTimestamp, forKey: .sequenceTimestamp)
+        try container.encode(read.sorted(), forKey: .read)
     }
 
     public static func stub() -> Self {
         do {
-            return try .init(sequenceTimestamp: "1970-02-12T00:00:00Z")
+            return try .init(sequenceTimestamp: "1970-02-12T00:00:00Z", read: [.stub()])
         } catch {
             preconditionFailure("CoinbaseLedgerCursor.stub() is not well-formed: \(error)")
         }

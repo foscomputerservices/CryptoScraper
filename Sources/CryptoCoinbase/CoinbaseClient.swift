@@ -275,7 +275,11 @@ public struct CoinbaseClient: ExchangeClient {
     }
 
     /// The portfolio's fills since the cursor, each with its commission; Advanced Trade states no deposit, withdrawal
-    /// or funding among them, oldest first by the cursor's time. A read is every page Coinbase hands back. `account`
+    /// or funding among them, oldest first by the cursor's time. The cursor names the oldest unmatched fill, never a
+    /// time alone: List Fills includes the fill at its start, and the client hands up the fills after the cursor's time
+    /// plus those at it whose trade id the cursor does not name. Fills of one time come in the order of their trade
+    /// ids, each fill's cursor names it and every fill before it at its time, and a fill a repeated page repeats is
+    /// handed up once. A read is every page Coinbase hands back. `account`
     /// is not sent. A fill's position effect is `nil`: List Fills states none (its side is buy or sell, nothing that
     /// opens or closes a position).
     public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>] {
@@ -294,19 +298,37 @@ public struct CoinbaseClient: ExchangeClient {
                 cursor = next != cursor ? next : nil
             } while cursor != nil
 
-            var items: [(Date, ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>)] = []
+            // Each fill once, by its trade id, in the order of its time and then its trade id.
+            var seen: Set<CoinbaseTradeId> = []
+            var keyed: [(time: Date, id: CoinbaseTradeId, fill: CoinbaseFill)] = []
             for fill in fills {
+                let id = try CoinbaseTradeId(validating: fill.tradeId)
+                guard seen.insert(id).inserted else { continue }
+                keyed.append((try CoinbaseLedgerCursor(sequenceTimestamp: fill.sequenceTimestamp).time, id, fill))
+            }
+            keyed.sort { ($0.time, $0.id) < ($1.time, $1.id) }
+
+            var items: [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>] = []
+            var read: Set<CoinbaseTradeId> = []
+            var instant: Date?
+            for (at, id, fill) in keyed {
+                if at != instant {
+                    instant = at
+                    read = []
+                }
+                read.insert(id)
+                if let since, at < since.time || (at == since.time && since.read.contains(id)) { continue }
                 let market = try CoinbaseMarketName(validating: fill.productId)
                 let pair = try await self.product(market).holdings(in: registry).declared()
-                let cursor = try CoinbaseLedgerCursor(sequenceTimestamp: fill.sequenceTimestamp)
+                let cursor = try CoinbaseLedgerCursor(sequenceTimestamp: fill.sequenceTimestamp, read: read)
                 let time = CoinbaseTime.date(fill.tradeTime) ?? cursor.time
-                items.append((cursor.time, .fill(
+                items.append(.fill(
                     market: market, side: fill.side == "BUY" ? .buy : .sell, units: try fill.size.amount(of: pair.base, in: registry),
                     price: try fill.price.price(of: pair.quote, per: pair.base, in: registry), fee: try fill.commission.amount(of: pair.quote, in: registry),
                     order: try CoinbaseOrderId(validating: fill.orderId), closedBy: nil, time: time, cursor: cursor
-                )))
+                ))
             }
-            return items.sorted { $0.0 < $1.0 }.map(\.1)
+            return items
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
         }

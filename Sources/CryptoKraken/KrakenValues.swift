@@ -79,32 +79,100 @@ public struct KrakenOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
-/// Where a read of Kraken's ledger resumes: the time of the last item read, as seconds to the ten-thousandth
+/// Kraken's id for an item of an account's history: a trade's transaction id from TradesHistory ("THVRQM-33VKH-UCI7BS")
+/// or a ledger entry's id from Ledgers ("L4UESK-KG3EQ-UFO4T5"), the key Kraken files the item under
 ///
-/// Kraken's ledger and trade reads take a start time, exclusive, to the ten-thousandth of a second it states. Kraken
-/// sends most times as JSON numbers, which the client reads as a Double and rounds to four places; a time Kraken
-/// sends as text is kept as written. It is sent as `start` and encoded as its text.
+/// Kraken's, never a value this package makes: a cursor names the items it has read by these.
+public struct KrakenLedgerId: Codable, Hashable, Comparable, Sendable, Stubbable {
+    package let text: String
+
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 40
+    ///   characters, or not ASCII letters, digits and dashes. Decoding the same text throws a `DecodingError` instead.
+    public init(validating candidate: String) throws {
+        guard Self.isWellFormed(candidate) else {
+            throw ExchangeClientError.malformedOrderId(candidate)
+        }
+        self.text = candidate
+    }
+
+    private static func isWellFormed(_ candidate: String) -> Bool {
+        !candidate.isEmpty && candidate.count <= 40 && candidate.unicodeScalars.allSatisfy {
+            ("A"..."Z").contains($0) || ("a"..."z").contains($0) || ("0"..."9").contains($0) || $0 == "-"
+        }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let candidate = try container.decode(String.self)
+        guard Self.isWellFormed(candidate) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a Kraken ledger id: \"\(candidate)\"")
+        }
+        self.text = candidate
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(text)
+    }
+
+    public static func < (lhs: Self, rhs: Self) -> Bool { lhs.text < rhs.text }
+
+    public static func stub() -> Self {
+        do {
+            return try .init(validating: "LFRED-BARNEY-42")
+        } catch {
+            preconditionFailure("KrakenLedgerId.stub() is not well-formed: \(error)")
+        }
+    }
+}
+
+/// Where a read of Kraken's ledger resumes: the oldest unmatched item, named by the ids Kraken gave the items read at
+/// the cursor's own instant, never a time alone
+///
+/// A cursor is an instant to the ten-thousandth of a second and ``read``, the ids of every item at that instant already
+/// handed up. Kraken's ledger and trade reads take a start time, exclusive; the client asks from the ten-thousandth
+/// before the instant, so the instant's own items come back, and hands up those after the instant plus those at it
+/// whose id the cursor does not name: none twice, none skipped. Kraken sends most times as JSON numbers, which the
+/// client reads as a Double and rounds to four places; a time Kraken sends as text is kept as written.
+///
+/// It encodes as an object, `{"seconds": "…", "read": ["…"]}`. A cursor stored before it named items is the seconds
+/// as bare text; it decodes as a cursor naming no item, which reads as "after the instant" as it always did.
 public struct KrakenLedgerCursor: Codable, Hashable, Sendable, Stubbable {
     package let seconds: WireDecimal
+
+    /// The ids of the items at the cursor's instant that have been read
+    public let read: Set<KrakenLedgerId>
 
     /// The instant the cursor names
     public var time: Date {
         Date(timeIntervalSince1970: Double(seconds.digits) / Double(WireDecimal.powerOfTen(seconds.fractionDigits)))
     }
 
-    package init(seconds: WireDecimal) {
+    package init(seconds: WireDecimal, read: Set<KrakenLedgerId> = []) {
         self.seconds = seconds
+        self.read = read
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case seconds, read
     }
 
     public init(from decoder: any Decoder) throws {
-        self.seconds = try WireDecimal(parsing: decoder.singleValueContainer().decode(String.self))
+        if let bare = try? decoder.singleValueContainer().decode(String.self) {
+            self.seconds = try WireDecimal(parsing: bare)
+            self.read = []
+            return
+        }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.seconds = try WireDecimal(parsing: container.decode(String.self, forKey: .seconds))
+        self.read = Set(try container.decode([KrakenLedgerId].self, forKey: .read))
     }
 
     public func encode(to encoder: any Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(seconds.text)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(seconds.text, forKey: .seconds)
+        try container.encode(read.sorted(), forKey: .read)
     }
 
-    public static func stub() -> Self { .init(seconds: WireDecimal(digits: 42 * 86_400, fractionDigits: 0)) }
+    public static func stub() -> Self { .init(seconds: WireDecimal(digits: 42 * 86_400, fractionDigits: 0), read: [.stub()]) }
 }
-
