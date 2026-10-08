@@ -57,12 +57,12 @@ jobs:
       # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
       # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
+        run: swift test --filter "CryptoAssetTests|CryptoAssetLocalizationTests|CryptoAssetLocalizationBehavioralTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
       # The identity PR's re-projection of the 2023 target (Tests/CryptoScraperTests/Behavioral/, its suites named
       # D<n>_…Tests, recorded answers only) runs here and is skipped by the network step, so it runs once.
       - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoAssetLocalizationTests|CryptoAssetLocalizationBehavioralTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
 
       # The no-network suites of the 2023 CryptoScraper target, selected by suite name (every one ends NoNetworkTests),
       # gate the build like the libraries' steps.
@@ -107,12 +107,12 @@ jobs:
       # classified red is disabled in place with its classification as the reason (recorded in fosline's step-2 and
       # step-3 layer-A ledgers), so what runs is exactly what is expected to pass (the owner's ruling of 2026-10-06).
       - name: Test the libraries' contracts (no network)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
+        run: swift test --filter "CryptoAssetTests|CryptoAssetLocalizationTests|CryptoAssetLocalizationBehavioralTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests" --skip "\\b[A-Z][A-Za-z0-9]*_|C30ValuesTests|HyperliquidContractTests|KrakenContractTests|CoinbaseContractTests|HyperliquidKeyTests|HyperliquidSigningTests\\b|KrakenSigningTests|KrakenMaintenanceTests|CoinbaseSigningTests|\\.BinanceOHLCVClientTests\\b|\\.HyperliquidOHLCVClientTests\\b|\\.KrakenOHLCVClientTests\\b|\\.CoinbaseOHLCVClientTests\\b"
 
       # The identity PR's re-projection of the 2023 target (Tests/CryptoScraperTests/Behavioral/, its suites named
       # D<n>_…Tests, recorded answers only) runs here and is skipped by the network step, so it runs once.
       - name: Test the libraries' behavioral suites (classified reds disabled in place with their reason)
-        run: swift test --filter "CryptoAssetTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
+        run: swift test --filter "CryptoAssetTests|CryptoAssetLocalizationTests|CryptoAssetLocalizationBehavioralTests|CryptoExchangeTests|CryptoHyperliquidTests|CryptoKrakenTests|CryptoCoinbaseTests|CryptoOHLCVTests|CryptoReferenceTests|CryptoFearGreedTests|CryptoScraperTests\\.D[0-9]+_" --skip-build
 
       # The no-network suites of the 2023 CryptoScraper target, selected by suite name (every one ends NoNetworkTests),
       # gate the build like the libraries' steps.

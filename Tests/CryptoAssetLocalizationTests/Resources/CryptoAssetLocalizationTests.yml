@@ -1,0 +1,9 @@
+# The store this target's tests localize with. The library's three types read nothing from a store: their
+# separators, signs and percent symbol are the locale's and their symbols the declarations'. FOSMVVM's localizing
+# encoder still needs a store, so the tests load this one.
+en:
+  CryptoAssetLocalizationTests:
+    store: "the tests' store"
+de:
+  CryptoAssetLocalizationTests:
+    store: "der Speicher der Tests"

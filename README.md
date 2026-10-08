@@ -55,6 +55,8 @@ The package's platform floor is 26 on macOS, iOS, Mac Catalyst, tvOS and watchOS
 
 **CryptoAsset** builds on macOS, iOS, tvOS, watchOS and Linux. It is the one library an app holds, so CI builds it for generic iOS, tvOS and watchOS devices beside its macOS and Linux tests.
 
+**CryptoAssetLocalization** renders CryptoAsset's amounts, prices and fractions for a reader through FOSMVVM's localizing encoder: `LocalizableAmount`, `LocalizablePrice` and `LocalizableFraction`, each drawn from the exact integer in the reader's locale, never through a `Double`. It links CryptoAsset, FOSFoundation and FOSMVVM; CryptoAsset itself never imports FOSMVVM. It is built and tested on macOS and Linux.
+
 **CryptoExchange, CryptoHyperliquid, CryptoKraken, CryptoCoinbase, CryptoOHLCV and CryptoReference** are built and tested on macOS and Linux only. No app speaks to an exchange, only services read bars, and no app shows reference facts yet, so CI builds none of them for a device.
 
 **CryptoFearGreed**, Alternative.me's Fear and Greed index, one value a day, links FOSFoundation alone and is built and tested on macOS and Linux only.
