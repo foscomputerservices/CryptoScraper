@@ -392,6 +392,59 @@ public final class AssetRegistry: @unchecked Sendable {
         }
     }
 
+    /// Declares holdings that stand for currencies, add-only and conflict-checked; declaring again what is declared adds
+    /// nothing
+    ///
+    /// Each holding is then accepted where its currency is named, one for one, with no conversion and no rate.
+    ///
+    /// - Throws: ``AssetRegistryError/notACurrency(_:)`` when a declaration's currency is not an `iso4217` instance;
+    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when a holding is not declared (the currency need not be);
+    ///   ``AssetRegistryError/standsForTwoCurrencies(_:)`` when a holding already stands for another currency. Nothing
+    ///   is added when anything throws.
+    public func add(_ declarations: [CurrencyDeclaration]) throws {
+        try withStatement { try $0.add(declarations) }
+    }
+
+    /// The one holding on the chain or exchange `chainId` that stands for `currency`
+    ///
+    /// ```swift
+    /// try registry.holding(standingFor: ISO4217.usd.instance, on: "exchange:hyperliquid")   // Hyperliquid's USDC
+    /// ```
+    ///
+    /// - Throws: ``AssetRegistryError/noHoldingStandsFor(_:on:)`` when none does;
+    ///   ``AssetRegistryError/holdingsStandFor(_:on:_:)``, a finding naming them, when more than one does
+    public func holding(standingFor currency: AssetInstance, on chainId: String) throws -> AssetInstance {
+        try read { statement in
+            let standing = statement.currencies
+                .filter { $0.value == currency && $0.key.chainId == chainId }
+                .map(\.key)
+                .sorted { $0.id < $1.id }
+            guard let only = standing.first else {
+                throw AssetRegistryError.noHoldingStandsFor(currency, on: chainId)
+            }
+            guard standing.count == 1 else {
+                throw AssetRegistryError.holdingsStandFor(currency, on: chainId, standing)
+            }
+            return only
+        }
+    }
+
+    /// The currency `holding` stands for
+    ///
+    /// ```swift
+    /// try registry.currency(of: binanceUSDT)                  // iso4217:USD
+    /// ```
+    ///
+    /// - Throws: ``AssetRegistryError/standsForNoCurrency(_:)`` when it stands for none
+    public func currency(of holding: AssetInstance) throws -> AssetInstance {
+        try read { statement in
+            guard let currency = statement.currencies[holding] else {
+                throw AssetRegistryError.standsForNoCurrency(holding)
+            }
+            return currency
+        }
+    }
+
     /// Whether two instances are one asset
     ///
     /// - Throws: ``AssetRegistryError/undeclaredInstance(_:)`` when either is an instance of no declared asset
@@ -437,6 +490,16 @@ public enum AssetRegistryError: Error, Hashable, Sendable {
     case decimalsChanged(AssetInstance)
     /// A reference source named a chain the library's table does not map
     case unknownReferenceChain(String, by: AssetReferenceSource)
+    /// A currency declaration names, as its currency, an instance outside the `iso4217` namespace
+    case notACurrency(AssetInstance)
+    /// The holding already stands for another currency
+    case standsForTwoCurrencies(AssetInstance)
+    /// No holding on that chain or exchange stands for the currency
+    case noHoldingStandsFor(AssetInstance, on: String)
+    /// More than one holding on that chain or exchange stands for the currency: a finding, naming them, never a pick
+    case holdingsStandFor(AssetInstance, on: String, [AssetInstance])
+    /// The holding stands for no currency
+    case standsForNoCurrency(AssetInstance)
 }
 
 // The statement as a value, so a change is made on a copy and kept only whole.
@@ -449,6 +512,8 @@ private struct Statement {
     private(set) var declarations: [Asset: AssetDeclaration] = [:]
     private(set) var entries: [AssetInstance: Entry] = [:]
     private(set) var fromTheLibrary: Set<Asset> = []
+    /// Each holding that stands for a currency, to its currency
+    private(set) var currencies: [AssetInstance: AssetInstance] = [:]
 
     func declaration(of asset: Asset) throws -> AssetDeclaration {
         guard let declaration = declarations[asset] else {
@@ -492,6 +557,24 @@ private struct Statement {
                 merged.append(instance)
             }
             declarations[declaration.asset] = existing.with(instances: merged)
+        }
+    }
+
+    mutating func add(_ incoming: [CurrencyDeclaration]) throws {
+        for declaration in incoming {
+            let currency = declaration.currency
+            // The currency is named by its `iso4217` id alone and need not be declared here: a registry that holds an
+            // exchange's holdings without the library's dollar still learns which of them stand for it.
+            guard currency.chainId == nil else {
+                throw AssetRegistryError.notACurrency(currency)
+            }
+            for holding in declaration.holdings {
+                _ = try entry(of: holding)
+                if let other = currencies[holding], other != currency {
+                    throw AssetRegistryError.standsForTwoCurrencies(holding)
+                }
+                currencies[holding] = currency
+            }
         }
     }
 
