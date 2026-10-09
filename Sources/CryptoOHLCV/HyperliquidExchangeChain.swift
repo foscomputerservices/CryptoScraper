@@ -15,6 +15,8 @@ import struct CryptoAsset.Asset
 import struct CryptoAsset.AssetDeclaration
 import struct CryptoAsset.AssetInstance
 import struct CryptoAsset.AssetSymbol
+import struct CryptoAsset.CurrencyDeclaration
+import enum CryptoAsset.ISO4217
 import CryptoExchange
 import CryptoScraper
 import FOSFoundation
@@ -230,13 +232,20 @@ extension HyperliquidExchangeChain {
         )
     }
 
-    /// Adds Hyperliquid's declarations to `registry` and registers the chain with `BlockChains`; twice is once
+    /// The holdings on Hyperliquid that stand for a currency, one for one, with no conversion and no rate: Hyperliquid's USDC, its unit of account
+    /// stand for the dollar, `iso4217:USD`
+    package static let currencyDeclarations: [CurrencyDeclaration] = [
+        CurrencyDeclaration(currency: ISO4217.usd.instance, holdings: [AssetInstance(HyperliquidHolding.usdc)])
+    ]
+
+    /// Adds Hyperliquid's declarations and the holdings that stand for a currency to `registry` and registers the chain with `BlockChains`; twice is once
     ///
     /// Called at each Hyperliquid client's init, with the client's registry.
     ///
     /// - Throws: what `AssetRegistry.add(_:)` throws when `registry` states a Hyperliquid holding otherwise
     package static func declare(in registry: AssetRegistry) throws {
         try registry.add(declarations)
+        try registry.add(currencyDeclarations)
         BlockChains.register(HyperliquidExchangeChain.default)
     }
 

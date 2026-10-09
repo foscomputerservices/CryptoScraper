@@ -13,6 +13,8 @@ import struct CryptoAsset.Asset
 import struct CryptoAsset.AssetDeclaration
 import struct CryptoAsset.AssetInstance
 import struct CryptoAsset.AssetSymbol
+import struct CryptoAsset.CurrencyDeclaration
+import enum CryptoAsset.ISO4217
 import CryptoScraper
 import FOSFoundation
 import Foundation
@@ -118,6 +120,8 @@ public extension BinanceHolding {
     static let btc = BinanceHolding(address: "BTC")
     /// Tether on Binance, "USDT", at 8 decimals, in `Asset.usdt` beside Ethereum's tether at 6
     static let usdt = BinanceHolding(address: "USDT")
+    /// USD Coin on Binance, "USDC", at 8 decimals, in `Asset.usdc` beside Ethereum's USDC at 6
+    static let usdc = BinanceHolding(address: "USDC")
 }
 
 public extension BinanceHolding {
@@ -211,13 +215,20 @@ extension BinanceExchangeChain {
         )
     }
 
-    /// Adds Binance's declarations to `registry` and registers the chain with `BlockChains`; twice is once
+    /// The holdings on Binance that stand for a currency, one for one, with no conversion and no rate: Binance's tether and its USDC
+    /// stand for the dollar, `iso4217:USD`
+    package static let currencyDeclarations: [CurrencyDeclaration] = [
+        CurrencyDeclaration(currency: ISO4217.usd.instance, holdings: [AssetInstance(BinanceHolding.usdt), AssetInstance(BinanceHolding.usdc)])
+    ]
+
+    /// Adds Binance's declarations and the holdings that stand for a currency to `registry` and registers the chain with `BlockChains`; twice is once
     ///
     /// Called at the candle client's init and at a market's, with their registry.
     ///
     /// - Throws: what `AssetRegistry.add(_:)` throws when `registry` states a Binance holding otherwise
     package static func declare(in registry: AssetRegistry) throws {
         try registry.add(declarations)
+        try registry.add(currencyDeclarations)
         BlockChains.register(BinanceExchangeChain.default)
     }
 
