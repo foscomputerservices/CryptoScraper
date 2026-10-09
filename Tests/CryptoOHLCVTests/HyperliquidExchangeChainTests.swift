@@ -51,7 +51,8 @@ struct HyperliquidExchangeChainTests {
     @Test func theChainsTokensAreItsHoldings() throws {
         let symbols = Set(HyperliquidExchangeChain.default.chainTokenInfos.map(\.symbol))
         // Carried in step 4c of the identity PR: BNB, POL and TRX joined the table, at the size decimals `meta` states.
-        #expect(symbols == ["BTC", "ETH", "USDC", "SOL", "kPEPE", "BNB", "POL", "TRX"])
+        // DOGE, SAND, NEO, RUNE and ALGO joined on 2026-10-09, the suite's picks the testnet refused undeclared.
+        #expect(symbols == ["BTC", "ETH", "USDC", "SOL", "kPEPE", "BNB", "POL", "TRX", "DOGE", "SAND", "NEO", "RUNE", "ALGO"])
         let btc = try #require(HyperliquidExchangeChain.default.tokenInfo(for: HyperliquidHolding.btc.address))
         #expect(btc.symbol == "BTC" && btc.tokenName == "Bitcoin")
     }
@@ -65,7 +66,8 @@ struct HyperliquidExchangeChainTests {
         #expect(try chain.contract(for: "kPEPE") == HyperliquidHolding.kPEPE)
     }
 
-    @Test(arguments: ["KPEPE", "btc", "NEO", "@107", ""])
+    // COTI and NMR: the suite's picks Hyperliquid lists on neither network (read 2026-10-09), findings, never rows.
+    @Test(arguments: ["KPEPE", "btc", "neo", "COTI", "NMR", "@107", ""])
     func aNameTheTableLacksThrows(name: String) {
         #expect(throws: AssetError.malformedIdentity(name)) { try HyperliquidExchangeChain.default.contract(for: name) }
     }
@@ -80,7 +82,8 @@ struct HyperliquidExchangeChainTests {
             }
         }
         // Carried in step 4c of the identity PR: BNB, POL and TRX joined the table, at the size decimals `meta` states.
-        #expect(Set(resolved) == ["BTC", "ETH", "SOL", "kPEPE", "BNB", "POL", "TRX"])
+        // DOGE, SAND, NEO, RUNE and ALGO joined on 2026-10-09.
+        #expect(Set(resolved) == ["BTC", "ETH", "SOL", "kPEPE", "BNB", "POL", "TRX", "DOGE", "SAND", "NEO", "RUNE", "ALGO"])
     }
 
     @Test func btcsWireNameIsTheCoinTheRecordedRequestSends() async throws {
@@ -106,8 +109,11 @@ struct HyperliquidExchangeChainTests {
         }
         // Carried in step 4c of the identity PR: BNB, POL and TRX joined the table, at the size decimals `meta` states.
         // SOL joined at 2 when Solana's class was named on its row.
+        // DOGE, SAND, NEO, RUNE and ALGO joined on 2026-10-09 at the size decimals `meta` states.
         #expect(declared == ["exchange:hyperliquid:BTC": 5, "exchange:hyperliquid:ETH": 4, "exchange:hyperliquid:BNB": 3,
-                             "exchange:hyperliquid:POL": 0, "exchange:hyperliquid:TRX": 0, "exchange:hyperliquid:SOL": 2])
+                             "exchange:hyperliquid:POL": 0, "exchange:hyperliquid:TRX": 0, "exchange:hyperliquid:SOL": 2,
+                             "exchange:hyperliquid:DOGE": 0, "exchange:hyperliquid:SAND": 0, "exchange:hyperliquid:NEO": 2,
+                             "exchange:hyperliquid:RUNE": 1, "exchange:hyperliquid:ALGO": 0])
         #expect(try registry.decimals(of: AssetInstance(HyperliquidHolding.usdc)) == 6)
     }
 
@@ -139,6 +145,42 @@ struct HyperliquidExchangeChainTests {
             #expect(try registry.isEquivalent(instance, home))
             let declared = try #require(try registry.declaration(of: registry.asset(of: home)).instances.first { $0.instance == instance })
             #expect(declared.symbol.text == symbol)
+        }
+    }
+
+    // Added 2026-10-09: the suite's picks the testnet refused `assetNotDeclared` (ALGO, DOGE) and their companions, each
+    // the instance on Hyperliquid of its class's home, at the size decimals both networks' `meta` state.
+    static let fiveHoldings: [(holding: HyperliquidHolding, home: AssetInstance, decimals: Int, symbol: String)] = [
+        (.doge, BIP122.Dogecoin.doge.instance, 0, "DOGE"),
+        (.sand, EIP155.Ethereum.theSandbox.instance, 0, "SAND"),
+        (.neo, NEO.Neo.neo.instance, 2, "NEO"),
+        (.rune, COSMOS.THORChain.rune.instance, 1, "RUNE"),
+        (.algo, ALGORAND.Algorand.algo.instance, 0, "ALGO")
+    ]
+
+    @Test func dogeSANDNEORUNEAndALGOResolveThroughTheirClassesOnHyperliquid() throws {
+        let registry = try Self.registry()
+        try HyperliquidExchangeChain.declare(in: registry)
+        for (holding, home, decimals, symbol) in Self.fiveHoldings {
+            let asset = try registry.asset(of: home)
+            let instance = try registry.instance(of: asset, on: EXCHANGE.Hyperliquid.chainId)
+            #expect(instance == AssetInstance(holding))
+            #expect(try registry.decimals(of: instance) == decimals)
+            #expect(try registry.isEquivalent(instance, home))
+            let declared = try #require(try registry.declaration(of: asset).instances.first { $0.instance == instance })
+            #expect(declared.symbol.text == symbol)
+            #expect(holding.wireName == symbol)
+        }
+    }
+
+    @Test func theRecordedMetaStatesTheFivesDeclaredDecimals() throws {
+        let registry = try Self.registry()
+        try HyperliquidExchangeChain.declare(in: registry)
+        let stated = Dictionary(uniqueKeysWithValues: Self.recordedCoins.map { ($0.name, $0.szDecimals) })
+        for (holding, _, decimals, _) in Self.fiveHoldings {
+            #expect(stated[holding.wireName] == decimals)
+            let instance = try #require(try HyperliquidExchangeChain.declaredInstance(wireName: holding.wireName, decimals: decimals, in: registry))
+            #expect(instance == AssetInstance(holding))
         }
     }
 

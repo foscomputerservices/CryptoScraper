@@ -87,7 +87,8 @@ public final class HyperliquidExchangeChain: CryptoChain, Sendable {
 
 /// A holding of an asset on Hyperliquid, or an account on it, by the library's key for it
 ///
-/// The constants (``btc``, ``eth``, ``usdc``, ``sol``, ``kPEPE``, ``bnb``, ``pol``, ``trx``) are what every call works in; Hyperliquid's own
+/// The constants (``btc``, ``eth``, ``usdc``, ``sol``, ``kPEPE``, ``bnb``, ``pol``, ``trx``, ``doge``, ``sand``, ``neo``,
+/// ``rune``, ``algo``) are what every call works in; Hyperliquid's own
 /// names for them reach them only through ``HyperliquidExchangeChain/contract(for:)``. A key is Hyperliquid's name as
 /// it spells it, case included, since its wire names are its only names (design § 1.3).
 ///
@@ -139,6 +140,17 @@ public extension HyperliquidHolding {
     static let pol = HyperliquidHolding(address: "POL")
     /// TRX's perpetual on Hyperliquid, "TRX", at 0 decimals, in Tron's coin's class
     static let trx = HyperliquidHolding(address: "TRX")
+    /// Dogecoin's perpetual on Hyperliquid, "DOGE", at 0 decimals, in Dogecoin's coin's class
+    static let doge = HyperliquidHolding(address: "DOGE")
+    /// The Sandbox's perpetual on Hyperliquid, "SAND", at 0 decimals, in The Sandbox's class (its home its contract on
+    /// Ethereum)
+    static let sand = HyperliquidHolding(address: "SAND")
+    /// NEO's perpetual on Hyperliquid, "NEO", at 2 decimals, in Neo's coin's class
+    static let neo = HyperliquidHolding(address: "NEO")
+    /// RUNE's perpetual on Hyperliquid, "RUNE", at 1 decimal, in THORChain's coin's class
+    static let rune = HyperliquidHolding(address: "RUNE")
+    /// ALGO's perpetual on Hyperliquid, "ALGO", at 0 decimals, in Algorand's coin's class
+    static let algo = HyperliquidHolding(address: "ALGO")
 }
 
 public extension HyperliquidHolding {
@@ -212,8 +224,8 @@ extension HyperliquidExchangeChain {
     // MARK: The declarations
 
     /// Hyperliquid's holdings as instances of their classes, each declared beside its class's home: BTC in Bitcoin's,
-    /// ETH in Ether's, USDC in USD Coin's, BNB, POL and TRX in their chains' coins'; a holding with no declared class
-    /// is left out
+    /// ETH in Ether's, USDC in USD Coin's, BNB, POL, TRX, DOGE, NEO, RUNE and ALGO in their chains' coins', SAND in The
+    /// Sandbox's; a holding with no declared class is left out
     package static let declarations: [AssetDeclaration] = rows.compactMap { row in
         guard let asset = row.asset,
               let library = AssetRegistry.libraryDeclarations.first(where: { $0.asset == asset }) else {

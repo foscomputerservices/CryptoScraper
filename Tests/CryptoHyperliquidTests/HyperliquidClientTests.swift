@@ -94,6 +94,20 @@ struct HyperliquidClientTests {
         #expect(btc.isPerpetual)
     }
 
+    // Added 2026-10-09: the recorded testnet `meta` lists DOGE, SAND, NEO, RUNE and ALGO; each market's base is its
+    // declared holding, and its lot one base unit of it.
+    @Test func theRecordedMarketsCarryDOGESANDNEORUNEAndALGOsDeclaredBases() async throws {
+        let session = ReplaySession(route: Hyperliquid.route())
+        let markets = try await Hyperliquid.client(session).markets()
+        for holding in [HyperliquidHolding.doge, .sand, .neo, .rune, .algo] {
+            let base = Hyperliquid.declared(holding)
+            let market = try #require(markets.first { $0.name.text == holding.wireName })
+            #expect(market.base == base)
+            #expect(market.lotSize == Amount(baseUnits: 1, of: base))
+            #expect(market.quote == Hyperliquid.usdc)
+        }
+    }
+
     @Test func theBookIsTheExchangesBestBidAndAskMidAndDayVolumeExactly() async throws {
         let session = ReplaySession(route: Hyperliquid.route())
         let book = try await Hyperliquid.client(session).orderBook(market: Hyperliquid.btc)

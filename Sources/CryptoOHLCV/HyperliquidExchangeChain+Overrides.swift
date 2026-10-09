@@ -6,7 +6,11 @@
 
 import struct CryptoAsset.Asset
 import struct CryptoAsset.AssetDeclaration
+import enum CryptoAsset.ALGORAND
+import enum CryptoAsset.BIP122
+import enum CryptoAsset.COSMOS
 import enum CryptoAsset.EIP155
+import enum CryptoAsset.NEO
 import enum CryptoAsset.SOLANA
 import enum CryptoAsset.TRON
 
@@ -25,7 +29,15 @@ extension HyperliquidExchangeChain {
         // `meta` states (the testnet recording states BNB and POL alike and lists no TRX).
         Row(holding: .bnb, wireNames: ["BNB"], decimals: 3, symbol: "BNB", asset: classOf(EIP155.BinanceSmartChain.bnb)),
         Row(holding: .pol, wireNames: ["POL"], decimals: 0, symbol: "POL", asset: classOf(EIP155.Polygon.pol)),
-        Row(holding: .trx, wireNames: ["TRX"], decimals: 0, symbol: "TRX", asset: classOf(TRON.Tron.trx))
+        Row(holding: .trx, wireNames: ["TRX"], decimals: 0, symbol: "TRX", asset: classOf(TRON.Tron.trx)),
+        // The suite's picks the testnet refused undeclared on 2026-10-09, at the size decimals production's and the
+        // testnet's `meta` both state (read 2026-10-09T08:47:26Z); SAND in The Sandbox's class, its home its contract
+        // on Ethereum. COTI and NMR, picked beside them, are listed on neither network: findings, never rows.
+        Row(holding: .doge, wireNames: ["DOGE"], decimals: 0, symbol: "DOGE", asset: classOf(BIP122.Dogecoin.doge)),
+        Row(holding: .sand, wireNames: ["SAND"], decimals: 0, symbol: "SAND", asset: classOf(EIP155.Ethereum.theSandbox)),
+        Row(holding: .neo, wireNames: ["NEO"], decimals: 2, symbol: "NEO", asset: classOf(NEO.Neo.neo)),
+        Row(holding: .rune, wireNames: ["RUNE"], decimals: 1, symbol: "RUNE", asset: classOf(COSMOS.THORChain.rune)),
+        Row(holding: .algo, wireNames: ["ALGO"], decimals: 0, symbol: "ALGO", asset: classOf(ALGORAND.Algorand.algo))
     ]
 
     // The class a library-declared home instance keys: the asset whose id is the home's.
