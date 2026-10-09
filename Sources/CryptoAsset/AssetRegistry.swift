@@ -398,7 +398,7 @@ public final class AssetRegistry: @unchecked Sendable {
     /// Each holding is then accepted where its currency is named, one for one, with no conversion and no rate.
     ///
     /// - Throws: ``AssetRegistryError/notACurrency(_:)`` when a declaration's currency is not an `iso4217` instance;
-    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when the currency or a holding is not declared;
+    ///   ``AssetRegistryError/undeclaredInstance(_:)`` when a holding is not declared (the currency need not be);
     ///   ``AssetRegistryError/standsForTwoCurrencies(_:)`` when a holding already stands for another currency. Nothing
     ///   is added when anything throws.
     public func add(_ declarations: [CurrencyDeclaration]) throws {
@@ -563,10 +563,11 @@ private struct Statement {
     mutating func add(_ incoming: [CurrencyDeclaration]) throws {
         for declaration in incoming {
             let currency = declaration.currency
+            // The currency is named by its `iso4217` id alone and need not be declared here: a registry that holds an
+            // exchange's holdings without the library's dollar still learns which of them stand for it.
             guard currency.chainId == nil else {
                 throw AssetRegistryError.notACurrency(currency)
             }
-            _ = try entry(of: currency)
             for holding in declaration.holdings {
                 _ = try entry(of: holding)
                 if let other = currencies[holding], other != currency {

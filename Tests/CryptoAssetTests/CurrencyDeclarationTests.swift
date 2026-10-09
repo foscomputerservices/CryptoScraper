@@ -80,7 +80,7 @@ struct CurrencyDeclarationTests {
         }
     }
 
-    @Test func anUndeclaredHoldingOrCurrencyIsRefusedAndNothingIsAdded() throws {
+    @Test func anUndeclaredHoldingIsRefusedAndNothingIsAdded() throws {
         let registry = try Self.registry()
         let stranger = Fixtures.instance("exchange:hyperliquid:FRED")
         #expect(throws: AssetRegistryError.undeclaredInstance(stranger)) {
@@ -89,10 +89,13 @@ struct CurrencyDeclarationTests {
         #expect(throws: AssetRegistryError.standsForNoCurrency(Fixtures.hyperliquidUSDC), "the declaration was refused whole") {
             try registry.currency(of: Fixtures.hyperliquidUSDC)
         }
-        let yen = Fixtures.instance("iso4217:JPY")
-        #expect(throws: AssetRegistryError.undeclaredInstance(yen)) {
-            try registry.add([CurrencyDeclaration(currency: yen, holdings: [Fixtures.hyperliquidUSDC])])
-        }
+    }
+
+    @Test func theCurrencyNeedNotBeDeclaredOnlyItsHoldings() throws {
+        // A registry of an exchange's holdings without the library's dollar still learns which stand for it.
+        let registry = try AssetRegistry([Fixtures.libraryDeclaration(of: .usdc, adding: [Fixtures.holding(Fixtures.hyperliquidUSDC, decimals: 6, symbol: "USDC")])])
+        try registry.add([CurrencyDeclaration(currency: Fixtures.usd, holdings: [Fixtures.hyperliquidUSDC])])
+        #expect(try registry.holding(standingFor: Fixtures.usd, on: "exchange:hyperliquid") == Fixtures.hyperliquidUSDC)
     }
 
     @Test func aHoldingStandsForOneCurrencyAtMostAndDeclaringAgainAddsNothing() throws {
