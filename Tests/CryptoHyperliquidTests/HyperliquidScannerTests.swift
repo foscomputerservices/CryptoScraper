@@ -19,10 +19,10 @@ import Testing
 // configured over a client whose answers are the recordings, the client's declarations and its units check, and the
 // recorded listing through the table. Each scanner is made fresh, so no test reads another's configuration.
 //
-// The owner's recorded sub-account holds positions and fills in coins no class declares (NEO, RUNE, ALGO; BNB has been
-// declared since step 4c of the identity PR), and a money value in an undeclared holding is refused (design § 5.3). So
-// the reads of a position and of a fill run over the same recordings with the other coins' rows taken out, and one test
-// states the refusal over the whole.
+// The owner's recorded sub-account holds positions and fills in ETH, BNB, NEO, RUNE and ALGO, every one declared since
+// 2026-10-09 (BNB since step 4c of the identity PR). A money value in an undeclared holding is refused (design § 5.3);
+// one test states the refusal over the recording with a position restated in kPEPE. The reads that keep only ETH's
+// rows were written while the other coins were undeclared and are kept as they were.
 
 @Suite("Hyperliquid's scanner and holdings")
 struct HyperliquidScannerTests {
@@ -110,11 +110,34 @@ struct HyperliquidScannerTests {
         #expect(balance.currency == HyperliquidHolding.bnb)
     }
 
+    // Added 2026-10-09: NEO and RUNE are declared (Neo's and THORChain's coins' classes, at the 2 and 1 size decimals
+    // `meta` states), so the recorded sub-account's NEO and RUNE positions are read.
+    @Test func theRecordedNEOAndRUNEPositionsAreReadInTheirHoldings() async throws {
+        let scanner = Self.configured()
+        let account = HyperliquidHolding(address: "four-hour-2x")
+        // The recorded positions: NEO szi "7.85" at two places, RUNE szi "44.3" at one, both longs
+        let neo = try await scanner.getBalance(forToken: .neo, forAccount: account)
+        #expect(neo.quantity == 785 && neo.currency == HyperliquidHolding.neo)
+        let rune = try await scanner.getBalance(forToken: .rune, forAccount: account)
+        #expect(rune.quantity == 443 && rune.currency == HyperliquidHolding.rune)
+    }
+
     @Test func aPositionInAnUndeclaredHoldingIsRefused() async throws {
-        // The recorded sub-account's third position is NEO's: no class declares Hyperliquid's NEO. (Carried in step 4c
-        // of the identity PR: its second, BNB's, is declared now.)
-        let error = await sharedError { try await Hyperliquid.client(ReplaySession(route: Hyperliquid.route())).accountState(account: "four-hour-2x") }
-        #expect(error == .refused(code: nil, text: "Hyperliquid's NEO is no declared holding"))
+        // Carried 2026-10-09: every coin the recorded sub-account holds is declared now (BNB since step 4c of the
+        // identity PR, NEO and RUNE since 2026-10-09), so its third position, NEO's, is restated as kPEPE's, the
+        // holding in the table no class declares.
+        let state = String(decoding: Recording.body("Hyperliquid/clearinghouse-sub.json"), as: UTF8.self)
+            .replacingOccurrences(of: #""coin":"NEO""#, with: #""coin":"kPEPE""#)
+        #expect(state.contains(#""coin":"kPEPE""#))
+        let route: @Sendable (URLRequest, Int) -> Reply = { request, index in
+            let body = request.jsonBody
+            if body["type"] as? String == "clearinghouseState", (body["user"] as? String) != Hyperliquid.master {
+                return .ok(Data(state.utf8))
+            }
+            return Hyperliquid.route()(request, index)
+        }
+        let error = await sharedError { try await Hyperliquid.client(ReplaySession(route: route)).accountState(account: "four-hour-2x") }
+        #expect(error == .refused(code: nil, text: "Hyperliquid's kPEPE is no declared holding"))
     }
 
     @Test func theLedgerMapsEachItemToAHyperliquidTransaction() async throws {
@@ -160,11 +183,12 @@ struct HyperliquidScannerTests {
         let coins = Set(fills.map { $0["coin"] as! String })
         #expect(coins == ["ALGO", "BNB", "ETH", "NEO", "RUNE"])
         #expect(try HyperliquidExchangeChain.default.contract(for: "ETH") == HyperliquidHolding.eth)
-        // Carried in step 4c of the identity PR: BNB joined the table.
+        // Carried in step 4c of the identity PR: BNB joined the table. Carried 2026-10-09: NEO, RUNE and ALGO joined
+        // it, so every coin the recorded account touches resolves and none is a finding.
         #expect(try HyperliquidExchangeChain.default.contract(for: "BNB") == HyperliquidHolding.bnb)
-        for coin in coins.subtracting(["ETH", "BNB"]) {
-            #expect(throws: AssetError.malformedIdentity(coin)) { try HyperliquidExchangeChain.default.contract(for: coin) }
-        }
+        #expect(try HyperliquidExchangeChain.default.contract(for: "NEO") == HyperliquidHolding.neo)
+        #expect(try HyperliquidExchangeChain.default.contract(for: "RUNE") == HyperliquidHolding.rune)
+        #expect(try HyperliquidExchangeChain.default.contract(for: "ALGO") == HyperliquidHolding.algo)
     }
 
     @Test func btcsWireNameIsTheCoinTheRecordedBookAsks() async throws {
