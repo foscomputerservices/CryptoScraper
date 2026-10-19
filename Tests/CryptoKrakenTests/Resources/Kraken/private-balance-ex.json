@@ -1,0 +1,14 @@
+// documentation-derived from https://docs.kraken.com/api/docs/rest-api/get-extended-balance.md, fetched 2026-10-19; the 200 example of Get Extended Balance
+{
+  "error": [],
+  "result": {
+    "ZUSD": {
+      "balance": "25435.21",
+      "hold_trade": "8249.76"
+    },
+    "XXBT": {
+      "balance": "1.2435",
+      "hold_trade": "0.8423"
+    }
+  }
+}

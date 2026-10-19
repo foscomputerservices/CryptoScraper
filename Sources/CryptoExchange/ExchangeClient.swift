@@ -46,6 +46,10 @@ public protocol ExchangeClient: Sendable {
     func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<MarketName, OrderId>]
     func cancelOrder(_ id: OrderId, market: MarketName, account: String) async throws
     func accountState(account: String) async throws -> ExchangeClientAccountState<MarketName>
+    /// The account's wallet: each holding the exchange lists for it, with its total and the part on hold, in the order
+    /// the exchange lists them; an undeclared holding is listed by its name alone (``ExchangeClientHolding``). A
+    /// conformer that does not read one throws ``ExchangeClientError/notOffered(member:)``, the default
+    func holdings(account: String) async throws -> [ExchangeClientHolding]
     /// The account's ledger items after `since`, oldest first; `since` is the cursor of the last item read (`nil`
     /// reads from the start), which names the oldest unmatched item, never a time alone, so every item is handed up
     /// once and none is skipped, including a second item at the cursor's own instant
@@ -57,4 +61,12 @@ public protocol ExchangeClient: Sendable {
     func maintenanceWindows() async throws -> [ExchangeClientMaintenanceWindow]
     func notices() async throws -> [ExchangeClientNotice<MarketName>]
     var hasTestMarket: Bool { get }
+}
+
+public extension ExchangeClient {
+    /// Throws ``ExchangeClientError/notOffered(member:)``: a conformer that reads its exchange's wallet states so by
+    /// its own `holdings(account:)`
+    func holdings(account: String) async throws -> [ExchangeClientHolding] {
+        throw ExchangeClientError.notOffered(member: "holdings")
+    }
 }

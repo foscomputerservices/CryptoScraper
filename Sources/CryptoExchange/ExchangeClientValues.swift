@@ -173,6 +173,38 @@ public struct ExchangeClientAccountState<Name: Hashable & Sendable>: Hashable, S
     }
 }
 
+/// One holding of an account's wallet, as the exchange states it: how much of the asset the account holds, and how much
+/// of that is on hold
+///
+/// ```swift
+/// for holding in try await client.holdings(account: account) {
+///     if let total = holding.total { … }      // in the declared holding, exactly as the exchange states it
+/// }
+/// ```
+///
+/// `name` is the exchange's own word for the holding ("USDC", "XXBT"). Where the exchange's table declares no holding
+/// for it, `instance`, `total` and `held` are `nil`: the holding is listed, and no money value is made in it. A
+/// holding is what the wallet holds, not what an account's margin is worth: Hyperliquid's spot balances are holdings,
+/// its perpetuals' value is ``ExchangeClientAccountState/balance``.
+public struct ExchangeClientHolding: Hashable, Sendable {
+    /// The exchange's own word for the holding
+    public let name: String
+    /// The declared holding on this exchange chain; `nil` where nothing is declared
+    public let instance: AssetInstance?
+    /// All of the holding the account holds, on hold or not; `nil` where the holding is undeclared
+    public let total: Amount?
+    /// The part of `total` on hold (open orders, a withdrawal in progress), as the exchange states it; `nil` where the
+    /// holding is undeclared
+    public let held: Amount?
+
+    public init(name: String, instance: AssetInstance?, total: Amount?, held: Amount?) {
+        self.name = name
+        self.instance = instance
+        self.total = total
+        self.held = held
+    }
+}
+
 /// A position the exchange holds for an account
 public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Sendable {
     public let market: Name

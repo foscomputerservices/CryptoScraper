@@ -43,6 +43,7 @@ enum Kraken {
             case "CancelOrder": "private-cancel-order.json"
             case "TradesHistory": "private-trades-history.json"
             case "Ledgers": "private-ledgers.json"
+            case "BalanceEx": "private-balance-ex.json"
             case "OpenPositions": "private-open-positions.json"
             default: "none"
             }
@@ -278,6 +279,23 @@ struct KrakenClientTests {
             }
         }
         #expect(fees == [Amount(baseUnits: 25_000, of: Kraken.usd), Amount(baseUnits: 50_000, of: Kraken.usd), .zero(of: Kraken.usd)])
+    }
+
+    // The documented BalanceEx: each asset's balance as its total, hold_trade as its held part, in the order of the names.
+    @Test func theWalletIsEachAssetsBalanceAndItsHeldPart() async throws {
+        let holdings = try await Kraken.client(ReplaySession(route: Kraken.route())).holdings(account: "")
+        #expect(holdings == [
+            ExchangeClientHolding(name: "XXBT", instance: Kraken.xbt, total: try WireDecimal(parsing: "1.2435").amount(of: Kraken.xbt),
+                                  held: try WireDecimal(parsing: "0.8423").amount(of: Kraken.xbt)),
+            ExchangeClientHolding(name: "ZUSD", instance: Kraken.usd, total: try WireDecimal(parsing: "25435.21").amount(of: Kraken.usd),
+                                  held: try WireDecimal(parsing: "8249.76").amount(of: Kraken.usd))
+        ])
+    }
+
+    @Test func anAssetAssetsDoesNotListIsListedByItsNameWithNoAmount() async throws {
+        let body = Data(#"{"error":[],"result":{"NOTANASSET":{"balance":"1.0","hold_trade":"0.0"}}}"#.utf8)
+        let holdings = try await Kraken.client(ReplaySession(route: Kraken.route(["BalanceEx": .ok(body)]))).holdings(account: "")
+        #expect(holdings == [ExchangeClientHolding(name: "NOTANASSET", instance: nil, total: nil, held: nil)])
     }
 
     // TradesHistory's position words, as documented (https://docs.kraken.com/api/docs/rest-api/get-trade-history.md):

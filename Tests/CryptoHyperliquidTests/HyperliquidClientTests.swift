@@ -47,6 +47,7 @@ enum Hyperliquid {
             case "userFillsByTime": "fills-sub.json"
             case "userFunding": "funding-sub.json"
             case "userNonFundingLedgerUpdates": "ledger-sub.json"
+            case "spotClearinghouseState": "spot-master.json"
             case "extraAgents": "extra-agents.json"
             case "userRateLimit": "user-rate-limit.json"
             case "userAbstraction": "user-abstraction.json"
@@ -584,6 +585,41 @@ struct HyperliquidClientGapsTests {
             .internalMove(try Amount(whole: 5, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub, time: Date(wireMilliseconds: 2),
                           cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1), fee: Amount(baseUnits: 100_000, of: Hyperliquid.usdc))
         ])
+    }
+
+    // MARK: The spot wallet (fosline's request of 2026-10-19: the main account's 0.004058 USDC on spot, which the
+    // perpetuals' value does not hold)
+
+    @Test func theSpotWalletsUSDCIsReadInTheUSDCHolding() async throws {
+        let session = ReplaySession(route: Hyperliquid.route())
+        let holdings = try await Hyperliquid.client(session).holdings(account: Hyperliquid.master)
+        #expect(holdings == [ExchangeClientHolding(name: "USDC", instance: Hyperliquid.usdc,
+                                                   total: Amount(baseUnits: 4_058, of: Hyperliquid.usdc), held: .zero(of: Hyperliquid.usdc))])
+        let asked = try #require(session.requests.last { $0.jsonBody["type"] as? String == "spotClearinghouseState" })
+        #expect(asked.jsonBody["user"] as? String == Hyperliquid.master)
+    }
+
+    // Constructed from the documented spotClearinghouseState: USDC held for an order, and PURR, token 1.
+    @Test func anotherSpotTokenIsListedByItsNameWithNoAmount() async throws {
+        let body = Data(#"{"balances":[{"coin":"USDC","token":0,"hold":"5.0","total":"14.625485","entryNtl":"0.0"},{"coin":"PURR","token":1,"hold":"0.0","total":"2000","entryNtl":"1234.56"}]}"#.utf8)
+        let session = ReplaySession { request, index in
+            request.jsonBody["type"] as? String == "spotClearinghouseState" ? .ok(body) : Hyperliquid.route()(request, index)
+        }
+        let holdings = try await Hyperliquid.client(session).holdings(account: Hyperliquid.master)
+        #expect(holdings == [
+            ExchangeClientHolding(name: "USDC", instance: Hyperliquid.usdc, total: Amount(baseUnits: 14_625_485, of: Hyperliquid.usdc),
+                                  held: try Amount(whole: 5, of: Hyperliquid.usdc)),
+            ExchangeClientHolding(name: "PURR", instance: nil, total: nil, held: nil)
+        ])
+    }
+
+    // Spot states USDC to eight places; the holding has six. A finer total is refused, never rounded.
+    @Test func aSpotUSDCFinerThanSixPlacesIsRefused() async throws {
+        let body = Data(#"{"balances":[{"coin":"USDC","token":0,"hold":"0.0","total":"0.00405812","entryNtl":"0.0"}]}"#.utf8)
+        let session = ReplaySession { request, index in
+            request.jsonBody["type"] as? String == "spotClearinghouseState" ? .ok(body) : Hyperliquid.route()(request, index)
+        }
+        await #expect(throws: ExchangeClientError.self) { try await Hyperliquid.client(session).holdings(account: Hyperliquid.master) }
     }
 
     static func cursor(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>) -> HyperliquidLedgerCursor {

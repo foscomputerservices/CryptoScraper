@@ -1,0 +1,2 @@
+// recorded 2026-10-19T10:15:08Z from POST https://api.hyperliquid-testnet.xyz/info {"type":"spotClearinghouseState","user":MASTER}, read-only, the owner's test-market main account; the answer names no address
+{"balances":[{"coin":"USDC","token":0,"total":"0.004058","hold":"0.0","entryNtl":"0.0"}]}

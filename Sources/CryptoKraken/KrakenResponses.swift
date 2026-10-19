@@ -126,6 +126,22 @@ struct KrakenTradeBalance: Decodable, Sendable {
     let mf: WireDecimal
 }
 
+// BalanceEx: each asset's total and the part held for spot orders, by Kraken's name for the asset.
+struct KrakenExtendedBalance: Decodable, Sendable {
+    let balance: WireDecimal
+    let holdTrade: WireDecimal
+
+    private enum CodingKeys: String, CodingKey {
+        case balance, holdTrade = "hold_trade"
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.balance = try container.decode(WireDecimal.self, forKey: .balance)
+        self.holdTrade = try container.decodeIfPresent(WireDecimal.self, forKey: .holdTrade) ?? WireDecimal(digits: 0, fractionDigits: 0)
+    }
+}
+
 struct KrakenOpenPosition: Decodable, Sendable {
     let pair: String
     let type: String

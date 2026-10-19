@@ -6,6 +6,15 @@ Each pull request adds its entry under **Unreleased**. At release, that section 
 
 ## [Unreleased]
 
+An account's wallet, read through every client.
+
+### Added
+
+- `holdings(account:)` on `ExchangeClient`: each holding the exchange lists for the account, by the exchange's own name, as an `ExchangeClientHolding` with its `total` and the part `held`. A holding the exchange's table declares none for is listed by its name, with `instance`, `total` and `held` `nil`. The default implementation throws `notOffered(member: "holdings")`, so an existing conformer still compiles.
+- **Hyperliquid:** the spot balances from `spotClearinghouseState`. Token 0, USDC, is read in the USDC holding the perpetuals' value counts in; a total finer than its six places is refused, never rounded. Other spot tokens are listed by name with no amount. The account's money is `accountState`'s `balance` (the perpetuals) plus its spot USDC.
+- **Kraken:** the wallet from `BalanceEx`, `balance` as the total and `hold_trade` as the held part.
+- **Coinbase:** the key's portfolio's wallets, available plus held as the total, each wallet once.
+
 ## [0.9.0] - 2026-10-19
 
 A deposit's, a withdrawal's and a move's fee, as the exchange states it. PR #29.

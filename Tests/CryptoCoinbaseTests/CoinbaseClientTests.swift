@@ -419,6 +419,24 @@ struct CoinbaseClientGapsTests {
         #expect(try await Coinbase.client(session).openOrders(account: "").map(\.clientOrderId) == [Self.token])
     }
 
+    // The documented List Accounts, whose two pages repeat its one BTC wallet: listed once, available and held as its
+    // total.
+    @Test func theWalletIsEachCurrencyOnceWithItsHeldPart() async throws {
+        let holdings = try await Coinbase.client(ReplaySession(route: Coinbase.route())).holdings(account: "")
+        let held = try WireDecimal(parsing: "1.23").amount(of: Coinbase.btc)
+        #expect(holdings == [ExchangeClientHolding(name: "BTC", instance: Coinbase.btc, total: held + held, held: held)])
+    }
+
+    @Test func aCurrencyTheTableLacksIsListedByItsNameWithNoAmount() async throws {
+        let accounts = #"{"accounts":[{"uuid":"a1","currency":"USD","available_balance":{"value":"100.00","currency":"USD"}},{"uuid":"a2","currency":"NOTACOIN","available_balance":{"value":"5","currency":"NOTACOIN"}}],"has_next":false,"cursor":""}"#
+        let session = ReplaySession(route: Coinbase.route(["/accounts": .ok(Data(accounts.utf8))]))
+        let holdings = try await Coinbase.client(session).holdings(account: "")
+        #expect(holdings == [
+            ExchangeClientHolding(name: "USD", instance: Coinbase.usd, total: try Amount(whole: 100, of: Coinbase.usd), held: .zero(of: Coinbase.usd)),
+            ExchangeClientHolding(name: "NOTACOIN", instance: nil, total: nil, held: nil)
+        ])
+    }
+
     // Coinbase's account reads are the key's own portfolio, whose uuid key_permissions states: another portfolio's
     // state is refused, naming it, and never answered with the key's own.
     @Test func anotherPortfoliosStateIsRefusedNamingIt() async throws {

@@ -244,20 +244,8 @@ public struct CoinbaseClient: ExchangeClient {
     public func accountState(account: String) async throws -> ExchangeClientAccountState<CoinbaseMarketName> {
         do {
             try declared.get()
-            let permissions: CoinbaseKeyPermissions = try await send("GET", "/api/v3/brokerage/key_permissions")
-            guard account == permissions.portfolioUuid else {
-                throw ExchangeClientError.notTheKeysPortfolio(account, keys: permissions.portfolioUuid)
-            }
-            var wallets: [CoinbaseAccount] = []
-            var cursor: String?
-            repeat {
-                var query = [URLQueryItem(name: "limit", value: "250")]
-                if let cursor { query.append(URLQueryItem(name: "cursor", value: cursor)) }
-                let page: CoinbaseAccounts = try await send("GET", "/api/v3/brokerage/accounts", query: query)
-                wallets += page.accounts
-                // The next page, until Coinbase says there is none or hands back the cursor it was just given.
-                cursor = page.hasNext && page.cursor != cursor ? page.cursor : nil
-            } while cursor != nil
+            let permissions = try await keysPortfolio(account)
+            let wallets = try await self.wallets()
 
             // The dollar's wallet: the one whose currency the table names Coinbase's USD.
             let usd = AssetInstance(CoinbaseHolding.usd)
@@ -272,6 +260,56 @@ public struct CoinbaseClient: ExchangeClient {
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
         }
+    }
+
+    /// The key's portfolio's wallets, each by its currency, once, in the order Coinbase lists them: its available and
+    /// held money as `total`, the held part as `held`
+    ///
+    /// A currency Coinbase's table declares no holding for is listed by its name with no amount. As for
+    /// ``accountState(account:)``, `account` must be the key's own portfolio's uuid; another is refused, naming both.
+    public func holdings(account: String) async throws -> [ExchangeClientHolding] {
+        do {
+            try declared.get()
+            _ = try await keysPortfolio(account)
+            // Each wallet once, by its uuid: a repeated page repeats it.
+            var seen: Set<String> = []
+            let wallets = try await self.wallets().filter { wallet in wallet.uuid.map { seen.insert($0).inserted } ?? true }
+            return try wallets.map { wallet in
+                guard let holding = try? CoinbaseExchangeChain.default.contract(for: wallet.currency),
+                      case let instance = AssetInstance(holding), (try? registry.decimals(of: instance)) != nil else {
+                    return ExchangeClientHolding(name: wallet.currency, instance: nil, total: nil, held: nil)
+                }
+                let available = try wallet.availableBalance.value.amount(of: instance, in: registry)
+                let held = try wallet.hold?.value.amount(of: instance, in: registry) ?? .zero(of: instance)
+                return ExchangeClientHolding(name: wallet.currency, instance: instance, total: available + held, held: held)
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
+        }
+    }
+
+    // The key's permissions, refusing an account that is not the key's own portfolio.
+    private func keysPortfolio(_ account: String) async throws -> CoinbaseKeyPermissions {
+        let permissions: CoinbaseKeyPermissions = try await send("GET", "/api/v3/brokerage/key_permissions")
+        guard account == permissions.portfolioUuid else {
+            throw ExchangeClientError.notTheKeysPortfolio(account, keys: permissions.portfolioUuid)
+        }
+        return permissions
+    }
+
+    // Every page of List Accounts.
+    private func wallets() async throws -> [CoinbaseAccount] {
+        var wallets: [CoinbaseAccount] = []
+        var cursor: String?
+        repeat {
+            var query = [URLQueryItem(name: "limit", value: "250")]
+            if let cursor { query.append(URLQueryItem(name: "cursor", value: cursor)) }
+            let page: CoinbaseAccounts = try await send("GET", "/api/v3/brokerage/accounts", query: query)
+            wallets += page.accounts
+            // The next page, until Coinbase says there is none or hands back the cursor it was just given.
+            cursor = page.hasNext && page.cursor != cursor ? page.cursor : nil
+        } while cursor != nil
+        return wallets
     }
 
     /// The portfolio's fills since the cursor, each with its commission; Advanced Trade states no deposit, withdrawal
