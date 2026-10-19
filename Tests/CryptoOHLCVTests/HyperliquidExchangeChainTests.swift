@@ -114,7 +114,7 @@ struct HyperliquidExchangeChainTests {
                              "exchange:hyperliquid:POL": 0, "exchange:hyperliquid:TRX": 0, "exchange:hyperliquid:SOL": 2,
                              "exchange:hyperliquid:DOGE": 0, "exchange:hyperliquid:SAND": 0, "exchange:hyperliquid:NEO": 2,
                              "exchange:hyperliquid:RUNE": 1, "exchange:hyperliquid:ALGO": 0])
-        #expect(try registry.decimals(of: AssetInstance(HyperliquidHolding.usdc)) == 6)
+        #expect(try registry.decimals(of: AssetInstance(HyperliquidHolding.usdc)) == 8)
     }
 
     // Added in step 4c of the identity PR at the coordinator's word: the coins whose class the library already
@@ -272,7 +272,7 @@ struct HyperliquidExchangeChainTests {
         let registry = try Self.registry()
         _ = HyperliquidOHLCVClient(session: ReplaySession(route: HyperliquidOHLCVClientContractTests.route(candles: "Hyperliquid/candles-btc-1d.json")),
                                    registry: registry)
-        #expect(try registry.decimals(of: AssetInstance(HyperliquidHolding.usdc)) == 6)
+        #expect(try registry.decimals(of: AssetInstance(HyperliquidHolding.usdc)) == 8)
     }
 
     // MARK: The scanner, unconfigured

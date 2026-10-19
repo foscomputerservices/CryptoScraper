@@ -10,9 +10,9 @@ swift test
 
 ### Changelog
 
-Every pull request that changes what a consumer sees adds its entry to [CHANGELOG.md](CHANGELOG.md) under **Unreleased**, in the section that fits (Added, Changed, Removed, Fixed), with **Breaking:** first on any change that needs a consumer to edit code.
+Every pull request that changes what a consumer sees adds its entry to [CHANGELOG.md](CHANGELOG.md), in the section that fits (Added, Changed, Removed, Fixed), with **Breaking:** first on any change that needs a consumer to edit code or migrate stored values.
 
-At release, **Unreleased** becomes the version and its date, and the GitHub release notes repeat that section.
+The entry goes under the version the pull request will be released as, with its date, so the release is tagged on that pull request's own merge commit and needs no second pull request. **Unreleased** holds only what is merged and not yet given a version. The GitHub release notes repeat the version's section.
 
 ### Coding Style
 

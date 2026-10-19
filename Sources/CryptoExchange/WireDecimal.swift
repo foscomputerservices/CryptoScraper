@@ -136,7 +136,7 @@ package struct WireDecimal: Hashable, Sendable {
     }
 
     /// This number of whole units of `instance`, cut toward zero at the instance's base unit: an exchange's day turnover,
-    /// which it may state finer than its quote asset holds (Hyperliquid's to ten digits for USDC's six), or a base
+    /// which it may state finer than its quote asset holds (Hyperliquid's to ten digits for USDC's eight), or a base
     /// volume priced at a mid
     ///
     /// - Throws: ``AmountError/malformedText`` when it does not fit an amount;

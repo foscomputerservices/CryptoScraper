@@ -43,11 +43,12 @@ import FoundationNetworking
 /// fill in that coin refuses the call, so an undeclared holding in an account refuses the read of that account.
 ///
 /// **Numbers.** A market's base is its coin's holding at the coin's size decimals, so one lot is one base unit; its
-/// quote is ``HyperliquidHolding/usdc`` at six decimals, Hyperliquid's unit of account, in which its $10 minimum order
-/// is stated. Every number Hyperliquid sends as text is decoded exactly but two, each cut toward zero: a funding rate finer than nine digits at a ``Fraction``'s
-/// nine, and a book's day turnover finer than USDC's six at six. A book's two volumes are Hyperliquid's own two
-/// statements of the day: `dayBaseVlm`, the base asset traded, and `dayNtlVlm`, the turnover in USDC (stated to ten
-/// digits, BTC's "1994433.2905599999" on the test market, so cut toward zero at six).
+/// quote is ``HyperliquidHolding/usdc`` at eight decimals (the finer of its perpetuals' and spot's precisions),
+/// Hyperliquid's unit of account, in which its $10 minimum order is stated. Every number Hyperliquid sends as text is
+/// decoded exactly but two, each cut toward zero: a funding rate finer than nine digits at a ``Fraction``'s nine, and a
+/// book's day turnover finer than USDC's eight at eight. A book's two volumes are Hyperliquid's own two statements of
+/// the day: `dayBaseVlm`, the base asset traded, and `dayNtlVlm`, the turnover in USDC (stated to ten digits, BTC's
+/// "1994433.2905599999" on the test market, so cut toward zero at eight).
 public struct HyperliquidClient: ExchangeClient {
     public typealias Credential = HyperliquidCredential
     public typealias MarketName = HyperliquidMarketName
@@ -288,10 +289,10 @@ public struct HyperliquidClient: ExchangeClient {
     /// The spot balances of `account`, from `spotClearinghouseState`, each by its coin's name, in the order Hyperliquid
     /// lists them
     ///
-    /// Token 0, USDC, is read in ``HyperliquidHolding/usdc``, the holding the perpetuals' value counts in; a balance
-    /// finer than its six places is refused (`belowBaseUnit`), never rounded, though spot states USDC to eight. Every
-    /// other spot token is listed by its name with no amount: the client reads no other spot token. The perpetuals'
-    /// value is ``accountState(account:)``'s `balance`; the account's money is the two together.
+    /// Token 0, USDC, is read in ``HyperliquidHolding/usdc``, the holding the perpetuals' value counts in, declared at
+    /// spot's eight places, so every spot balance of it reads exactly. Every other spot token is listed by its name
+    /// with no amount: the client reads no other spot token. The perpetuals' value is ``accountState(account:)``'s
+    /// `balance`; the account's money is the two together.
     public func holdings(account: String) async throws -> [ExchangeClientHolding] {
         do {
             try declared.get()
@@ -467,23 +468,32 @@ public struct HyperliquidClient: ExchangeClient {
 
     /// Moves USDC between the main account and one of its sub-accounts, signed by the agent key
     ///
-    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when `amount` is not USDC, or when neither `from` nor `to`
-    ///   is the main account
+    /// Hyperliquid takes the amount in whole millionths of a dollar; the holding counts hundred-millionths
+    /// (``HyperliquidHolding/usdc``), so an amount finer than a millionth is refused, never rounded.
+    ///
+    /// - Throws: ``ExchangeClientError/refused(code:text:)`` when `amount` is not USDC, is finer than a millionth, or
+    ///   when neither `from` nor `to` is the main account
     public func transfer(_ amount: Amount, from: String, to: String) async throws {
         do {
             try declared.get()
             guard amount.instance == usdc else {
                 throw ExchangeClientError.wrongAsset
             }
+            // The holding's hundred-millionths as Hyperliquid's millionths, exactly.
+            let perMillionth = WireDecimal.powerOfTen(try registry.decimals(of: usdc) - 6)
+            guard amount.baseUnits % perMillionth == 0 else {
+                throw ExchangeClientError.transferFinerThanAMillionth(amount, in: registry)
+            }
+            let microUSD = Int64(amount.baseUnits / perMillionth)
             let main = try await mainWallet()
             let source = try await address(of: from)
             let destination = try await address(of: to)
             let action: HyperliquidWireValue
             switch (source == main, destination == main) {
             case (true, false):
-                action = HyperliquidActions.subAccountTransfer(subAccount: destination, isDeposit: true, microUSD: Int64(amount.baseUnits))
+                action = HyperliquidActions.subAccountTransfer(subAccount: destination, isDeposit: true, microUSD: microUSD)
             case (false, true):
-                action = HyperliquidActions.subAccountTransfer(subAccount: source, isDeposit: false, microUSD: Int64(amount.baseUnits))
+                action = HyperliquidActions.subAccountTransfer(subAccount: source, isDeposit: false, microUSD: microUSD)
             default:
                 throw ExchangeClientError.transferNeedsTheMainAccount
             }
