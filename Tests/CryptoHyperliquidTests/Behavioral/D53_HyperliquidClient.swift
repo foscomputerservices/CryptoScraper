@@ -111,7 +111,8 @@ struct D53_HyperliquidClientTests {
     @Test func initAddsHyperliquidsDeclarations() throws {
         let registry = try AssetRegistry([])
         _ = try client("meta", registry: registry)
-        #expect(try registry.decimals(of: usdc) == 6)
+        // Amended: USDC at 8, the owner's ruling of 2026-10-19 over the design's 6 (one token, two books; the finer)
+        #expect(try registry.decimals(of: usdc) == 8)
         #expect(try registry.decimals(of: btc) == 5)
     }
 

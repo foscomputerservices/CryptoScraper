@@ -20,7 +20,8 @@ extension HyperliquidExchangeChain {
     static let overrideRows: [Row] = [
         Row(holding: .btc, wireNames: ["BTC"], decimals: 5, symbol: "BTC", asset: .btc),
         Row(holding: .eth, wireNames: ["ETH"], decimals: 4, symbol: "ETH", asset: .eth),
-        Row(holding: .usdc, wireNames: ["USDC"], decimals: 6, symbol: "USDC", asset: .usdc),
+        // USDC at eight, the finer of its two books' precisions (the owner's ruling of 2026-10-19): ``HyperliquidHolding/usdc``.
+        Row(holding: .usdc, wireNames: ["USDC"], decimals: 8, symbol: "USDC", asset: .usdc),
         // Solana's coin, in Solana's class (the recorded `meta` states SOL at 2 size decimals).
         Row(holding: .sol, wireNames: ["SOL"], decimals: 2, symbol: "SOL", asset: classOf(SOLANA.Solana.sol)),
         // A thousand PEPE: the map is one-to-one, so kPEPE joins no class until a scale is designed (design § 7.2).

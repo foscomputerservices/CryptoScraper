@@ -128,7 +128,14 @@ public extension HyperliquidHolding {
     static let btc = HyperliquidHolding(address: "BTC")
     /// Ether's perpetual on Hyperliquid, "ETH", at 4 decimals, in `Asset.eth`
     static let eth = HyperliquidHolding(address: "ETH")
-    /// Hyperliquid's USDC, its unit of account, at 6 decimals, in `Asset.usdc`
+    /// Hyperliquid's USDC, its unit of account, at 8 decimals, in `Asset.usdc`
+    ///
+    /// One token, two books: Hyperliquid states USDC (spot token 0) at six places on its perpetuals book (an account's
+    /// value, a fill's fee, a funding payment, a transfer between accounts) and at eight on its spot book (`spotMeta`'s
+    /// `szDecimals` and `weiDecimals`, a spot balance). The holding is declared at the finer, eight, so every figure the
+    /// exchange states in it is representable and none is refused for being finer than the declaration (the owner's
+    /// ruling of 2026-10-19). A six-place figure reads exactly at eight. The other way does not hold: what Hyperliquid
+    /// takes in millionths, a transfer between accounts, refuses an amount finer than a millionth.
     static let usdc = HyperliquidHolding(address: "USDC")
     /// Solana's coin's perpetual on Hyperliquid, "SOL", at 2 decimals, in Solana's class (`SOLANA.Solana.sol`'s asset)
     static let sol = HyperliquidHolding(address: "SOL")
@@ -192,8 +199,8 @@ public extension HyperliquidHolding.Units {
 
 extension HyperliquidExchangeChain {
     // One row per holding: its constant, Hyperliquid's name for it, and its decimals and symbol: a coin's as
-    // Hyperliquid's recorded `meta` answer of 2026-10-06 states its `szDecimals`, USDC's as the design states it (§ 2.1;
-    // no `meta` lists USDC, and the client's sub-account transfer counts it in millionths); the asset it is an instance
+    // Hyperliquid's recorded `meta` answer of 2026-10-06 states its `szDecimals`, USDC's the finer of its two books'
+    // (eight, spot's; no perpetuals `meta` lists USDC: ``HyperliquidHolding/usdc``); the asset it is an instance
     // of, or nil where no class is declared for it yet. The wire is checked against these, never the source of them.
     struct Row: Sendable {
         let holding: HyperliquidHolding

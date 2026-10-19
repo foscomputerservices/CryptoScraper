@@ -113,12 +113,12 @@ struct HyperliquidClientTests {
         let session = ReplaySession(route: Hyperliquid.route())
         let book = try await Hyperliquid.client(session).orderBook(market: Hyperliquid.btc)
         // l2Book: bid "85836.0", ask "85838.0", time 1791272943883; BTC's context: midPx "85831.0", dayBaseVlm
-        // "23.18704", dayNtlVlm "1994433.2905599999", the day's turnover in USDC, cut toward zero at USDC's six digits
+        // "23.18704", dayNtlVlm "1994433.2905599999", the day's turnover in USDC, cut toward zero at USDC's eight digits
         #expect(book.bestBid == Hyperliquid.price("85836"))
         #expect(book.bestAsk == Hyperliquid.price("85838"))
         #expect(book.mid == Hyperliquid.price("85831"))
         #expect(book.baseVolume == Amount(baseUnits: 2_318_704, of: Hyperliquid.btcAsset))
-        #expect(book.quoteVolume == Amount(baseUnits: 1_994_433_290_559, of: Hyperliquid.usdc))
+        #expect(book.quoteVolume == Amount(baseUnits: 199_443_329_055_999, of: Hyperliquid.usdc))
         #expect(book.readAt == Date(wireMilliseconds: 1_791_272_943_883))
     }
 
@@ -260,7 +260,7 @@ struct HyperliquidClientTests {
     @Test func aNumberFinerThanTheAssetIsMalformedResponseNeverRounded() async throws {
         let session = ReplaySession { request, index in
             request.jsonBody["type"] as? String == "clearinghouseState"
-                ? .ok(Data(#"{"marginSummary":{"accountValue":"1.0000001"},"withdrawable":"0","assetPositions":[],"time":1}"#.utf8))
+                ? .ok(Data(#"{"marginSummary":{"accountValue":"1.000000001"},"withdrawable":"0","assetPositions":[],"time":1}"#.utf8))
                 : Hyperliquid.route()(request, index)
         }
         #expect(await sharedError { try await Hyperliquid.client(session).accountState(account: Hyperliquid.master) }?.meaning == "malformedResponse")
@@ -292,8 +292,8 @@ struct HyperliquidClientTests {
         let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
         let state = try await Hyperliquid.client(session).accountState(account: "four-hour-2x")
         // clearinghouse-sub: accountValue "69.526412", withdrawable "20.816414", its ETH long, time 1791272972793
-        #expect(state.balance == Amount(baseUnits: 69_526_412, of: Hyperliquid.usdc))
-        #expect(state.withdrawable == Amount(baseUnits: 20_816_414, of: Hyperliquid.usdc))
+        #expect(state.balance == Amount(baseUnits: 6_952_641_200, of: Hyperliquid.usdc))
+        #expect(state.withdrawable == Amount(baseUnits: 2_081_641_400, of: Hyperliquid.usdc))
         #expect(state.readAt == Date(wireMilliseconds: 1_791_272_972_793))
         #expect(state.positions.map(\.market) == ["ETH"].map { try! HyperliquidMarketName(validating: $0) })
         let eth = try #require(state.positions.first)
@@ -324,7 +324,7 @@ struct HyperliquidClientTests {
         let eth = AssetInstance(HyperliquidHolding.eth)
         let fill = try #require(items.first { if case .fill = $0 { true } else { false } })
         #expect(fill == .fill(market: try HyperliquidMarketName(validating: "ETH"), side: .sell, units: Amount(baseUnits: 80, of: eth),
-                              price: Hyperliquid.price("2640.2", of: eth), fee: Amount(baseUnits: 9_504, of: Hyperliquid.usdc),
+                              price: Hyperliquid.price("2640.2", of: eth), fee: Amount(baseUnits: 950_400, of: Hyperliquid.usdc),
                               order: HyperliquidOrderId(61_246_678_885), closedBy: nil, time: Date(wireMilliseconds: 1_790_568_059_898),
                               cursor: HyperliquidLedgerCursor(milliseconds: 1_790_568_059_898, place: 1), positionEffect: .close))
         // A transfer between the main account and the sub-account is a move between their addresses.
@@ -374,10 +374,21 @@ struct HyperliquidClientTests {
         #expect(try HyperliquidClient.rate(WireDecimal(parsing: "0.0000125")) == (try WireDecimal(parsing: "0.0000125").fraction()))
     }
 
-    // Carried in step 4b of the identity PR: the amount is in Hyperliquid's USDC holding.
+    // Hyperliquid moves USDC in whole millionths; the holding counts hundred-millionths. A finer amount is refused,
+    // never rounded, and nothing is sent.
+    @Test func aTransferFinerThanAMillionthIsRefusedAndNothingIsSent() async throws {
+        let session = ReplaySession(route: Hyperliquid.route())
+        await #expect(throws: ExchangeClientError.refused(code: nil, text: "Hyperliquid moves USDC in whole millionths, not 500.25000001")) {
+            try await Hyperliquid.client(session).transfer(Amount(baseUnits: 50_025_000_001, of: Hyperliquid.usdc), from: Hyperliquid.master, to: "four-hour-2x")
+        }
+        #expect(!session.requests.contains { $0.url!.lastPathComponent == "exchange" })
+    }
+
+    // Carried in step 4b of the identity PR: the amount is in Hyperliquid's USDC holding, its hundred-millionths sent as
+    // Hyperliquid's millionths (500.25 USDC).
     @Test func aTransferIntoASubAccountIsADepositOfMicroDollars() async throws {
         let session = ReplaySession(route: Hyperliquid.route())
-        try await Hyperliquid.client(session).transfer(Amount(baseUnits: 500_250_000, of: Hyperliquid.usdc), from: Hyperliquid.master, to: "four-hour-2x")
+        try await Hyperliquid.client(session).transfer(Amount(baseUnits: 50_025_000_000, of: Hyperliquid.usdc), from: Hyperliquid.master, to: "four-hour-2x")
         let action = try #require(session.requests.last!.jsonBody["action"] as? [String: Any])
         #expect(action["type"] as? String == "subAccountTransfer")
         #expect(action["subAccountUser"] as? String == Hyperliquid.sub)
@@ -556,10 +567,10 @@ struct HyperliquidClientGapsTests {
 
     @Test func aSendWithinOneAccountIsAMoveBetweenItsDexesWithItsStatedZeroFee() async throws {
         let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
-        #expect(items[1] == .internalMove(Amount(baseUnits: 924_240_000, of: Hyperliquid.usdc), from: "spot", to: "perp",
+        #expect(items[1] == .internalMove(Amount(baseUnits: 92_424_000_000, of: Hyperliquid.usdc), from: "spot", to: "perp",
                                           time: Date(wireMilliseconds: 1_791_555_526_034),
                                           cursor: HyperliquidLedgerCursor(milliseconds: 1_791_555_526_034, place: 1),
-                                          fee: Amount(baseUnits: 0, of: Hyperliquid.usdc)))
+                                          fee: .zero(of: Hyperliquid.usdc)))
     }
 
     @Test func aSubAccountTransferStatesNoFee() async throws {
@@ -583,7 +594,7 @@ struct HyperliquidClientGapsTests {
             .withdrawal(try Amount(whole: 50, of: Hyperliquid.usdc), time: Date(wireMilliseconds: 1),
                         cursor: HyperliquidLedgerCursor(milliseconds: 1, place: 1), fee: try Amount(whole: 1, of: Hyperliquid.usdc)),
             .internalMove(try Amount(whole: 5, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub, time: Date(wireMilliseconds: 2),
-                          cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1), fee: Amount(baseUnits: 100_000, of: Hyperliquid.usdc))
+                          cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1), fee: Amount(baseUnits: 10_000_000, of: Hyperliquid.usdc))
         ])
     }
 
@@ -594,7 +605,7 @@ struct HyperliquidClientGapsTests {
         let session = ReplaySession(route: Hyperliquid.route())
         let holdings = try await Hyperliquid.client(session).holdings(account: Hyperliquid.master)
         #expect(holdings == [ExchangeClientHolding(name: "USDC", instance: Hyperliquid.usdc,
-                                                   total: Amount(baseUnits: 4_058, of: Hyperliquid.usdc), held: .zero(of: Hyperliquid.usdc))])
+                                                   total: Amount(baseUnits: 405_800, of: Hyperliquid.usdc), held: .zero(of: Hyperliquid.usdc))])
         let asked = try #require(session.requests.last { $0.jsonBody["type"] as? String == "spotClearinghouseState" })
         #expect(asked.jsonBody["user"] as? String == Hyperliquid.master)
     }
@@ -607,19 +618,24 @@ struct HyperliquidClientGapsTests {
         }
         let holdings = try await Hyperliquid.client(session).holdings(account: Hyperliquid.master)
         #expect(holdings == [
-            ExchangeClientHolding(name: "USDC", instance: Hyperliquid.usdc, total: Amount(baseUnits: 14_625_485, of: Hyperliquid.usdc),
+            ExchangeClientHolding(name: "USDC", instance: Hyperliquid.usdc, total: Amount(baseUnits: 1_462_548_500, of: Hyperliquid.usdc),
                                   held: try Amount(whole: 5, of: Hyperliquid.usdc)),
             ExchangeClientHolding(name: "PURR", instance: nil, total: nil, held: nil)
         ])
     }
 
-    // Spot states USDC to eight places; the holding has six. A finer total is refused, never rounded.
-    @Test func aSpotUSDCFinerThanSixPlacesIsRefused() async throws {
-        let body = Data(#"{"balances":[{"coin":"USDC","token":0,"hold":"0.0","total":"0.00405812","entryNtl":"0.0"}]}"#.utf8)
-        let session = ReplaySession { request, index in
-            request.jsonBody["type"] as? String == "spotClearinghouseState" ? .ok(body) : Hyperliquid.route()(request, index)
+    // Spot states USDC to eight places, and the holding is declared at eight (the owner's ruling of 2026-10-19): a
+    // spot total at eight reads exactly; one finer than eight is refused, never rounded.
+    @Test func aSpotUSDCAtEightPlacesReadsExactlyAndAFinerOneIsRefused() async throws {
+        func read(_ total: String) async throws -> [ExchangeClientHolding] {
+            let body = Data(#"{"balances":[{"coin":"USDC","token":0,"hold":"0.0","total":"\#(total)","entryNtl":"0.0"}]}"#.utf8)
+            let session = ReplaySession { request, index in
+                request.jsonBody["type"] as? String == "spotClearinghouseState" ? .ok(body) : Hyperliquid.route()(request, index)
+            }
+            return try await Hyperliquid.client(session).holdings(account: Hyperliquid.master)
         }
-        await #expect(throws: ExchangeClientError.self) { try await Hyperliquid.client(session).holdings(account: Hyperliquid.master) }
+        #expect(try await read("0.00405812").first?.total == Amount(baseUnits: 405_812, of: Hyperliquid.usdc))
+        await #expect(throws: ExchangeClientError.self) { try await read("0.004058123") }
     }
 
     static func cursor(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>) -> HyperliquidLedgerCursor {

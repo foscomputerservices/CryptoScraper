@@ -79,13 +79,13 @@ struct HyperliquidScannerTests {
     @Test func theBalanceIsTheRecordedAccountStatesBalance() async throws {
         let balance = try await Self.configured().getBalance(forAccount: .init(address: Hyperliquid.master))
         // clearinghouse-master: accountValue "421.2", in Hyperliquid's USDC at six places
-        #expect(balance.quantity == 421_200_000)
+        #expect(balance.quantity == 42_120_000_000)
         #expect(balance.currency == HyperliquidHolding.usdc)
     }
 
     @Test func theUSDCsBalanceIsTheAccountsBalance() async throws {
         let balance = try await Self.configured().getBalance(forToken: .usdc, forAccount: .init(address: Hyperliquid.master))
-        #expect(balance.quantity == 421_200_000 && balance.currency == HyperliquidHolding.usdc)
+        #expect(balance.quantity == 42_120_000_000 && balance.currency == HyperliquidHolding.usdc)
     }
 
     @Test func aHoldingsBalanceIsTheUnitsOfItsPositions() async throws {
@@ -175,7 +175,7 @@ struct HyperliquidScannerTests {
         _ = HyperliquidClient(credential: nil, endpoint: .testMarket, session: ReplaySession(route: Hyperliquid.route()), registry: registry)
         #expect(try registry.decimals(of: Self.btc) == 5)
         #expect(try registry.asset(of: Self.btc) == .btc)
-        #expect(try registry.decimals(of: Self.usdc) == 6)
+        #expect(try registry.decimals(of: Self.usdc) == 8)
     }
 
     @Test func everyCoinTheRecordedAccountTouchesResolvesOrIsAFinding() throws {
@@ -204,10 +204,10 @@ struct HyperliquidScannerTests {
         let btc = try #require(markets.first { $0.name == Hyperliquid.btc })
         #expect(btc.base == Self.btc && btc.quote == Self.usdc)
         #expect(btc.baseSymbol.text == "BTC" && btc.baseDecimals == 5)
-        #expect(btc.quoteSymbol.text == "USDC" && btc.quoteDecimals == 6)
+        #expect(btc.quoteSymbol.text == "USDC" && btc.quoteDecimals == 8)
         // One base unit of BTC at 5 is the lot; the $10 minimum is in Hyperliquid's USDC
         #expect(btc.lotSize == Amount(baseUnits: 1, of: Self.btc))
-        #expect(btc.minimumOrder == Amount(baseUnits: 10_000_000, of: Self.usdc))
+        #expect(btc.minimumOrder == Amount(baseUnits: 1_000_000_000, of: Self.usdc))
         #expect(btc.alternateName == nil)
     }
 

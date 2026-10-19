@@ -2,9 +2,22 @@
 
 Every change a consumer of CryptoScraper can see, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html): before 1.0, a breaking change takes a minor version and anything else a patch.
 
-Each pull request adds its entry under **Unreleased**. At release, that section becomes the version and its date, and the GitHub release notes repeat it.
+Each pull request adds its entry under the version it will be released as, dated, so the tag goes on its own merge commit; **Unreleased** holds only what is merged and not yet given a version. The GitHub release notes repeat the version's section.
 
 ## [Unreleased]
+
+## [0.11.0] - 2026-10-19
+
+Hyperliquid's USDC at eight decimals. PR #33.
+
+### Changed
+
+- **Breaking:** `HyperliquidHolding.usdc` is declared at 8 decimals, not 6. One token, two books: Hyperliquid states USDC at six places on its perpetuals book (an account's value, a fill's fee, a funding payment, a transfer) and at eight on its spot book (`spotMeta`'s `szDecimals` and `weiDecimals`, a spot balance). The holding takes the finer, so every figure the exchange states in it is representable and none is refused for being finer than the declaration (the owner's ruling of 2026-10-19).
+- **Migrate stored values:** the holding's base unit is now a hundred-millionth of a dollar, so every Hyperliquid USDC `Amount` stored as base units at six must be multiplied by 100. A stored `Price` quoted in Hyperliquid's USDC scales the same way. Values read fresh from the exchange need nothing.
+- A six-place figure reads exactly at eight. Perpetuals orders are unchanged: a limit and a size go out as the same decimal text, and a size is in the base coin's holding.
+- A market's `quoteDecimals` is 8, and a book's `quoteVolume` keeps eight places of the turnover where it kept six.
+- **Hyperliquid:** `transfer` sends Hyperliquid's millionths, the holding's base units over 100. An amount finer than a millionth is refused, never rounded, and nothing is sent.
+- **Hyperliquid:** `holdings(account:)` reads every spot USDC balance at its eight places; one finer than eight is refused.
 
 ## [0.10.0] - 2026-10-19
 
@@ -118,7 +131,8 @@ Asset identity: an asset is no longer a symbol. PR #23.
 
 `v0.1.0` to `v0.5.0` were tagged without release notes; their history is the git log.
 
-[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.11.0
 [0.10.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.10.0
 [0.9.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.9.0
 [0.8.1]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.8.1

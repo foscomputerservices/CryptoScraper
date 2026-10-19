@@ -31,6 +31,11 @@ extension ExchangeClientError {
     static let wrongAsset = ExchangeClientError.refused(code: nil, text: "A size or a price in an asset other than the market's, or a transfer of an asset other than USDC")
     static let transferNeedsTheMainAccount = ExchangeClientError.refused(code: nil, text: "Hyperliquid moves funds only between the main account and one of its sub-accounts")
 
+    static func transferFinerThanAMillionth(_ amount: Amount, in registry: AssetRegistry) -> ExchangeClientError {
+        let text = (try? WireDecimal(amount, in: registry).text) ?? String(amount.baseUnits)
+        return .refused(code: nil, text: "Hyperliquid moves USDC in whole millionths, not \(text)")
+    }
+
     static func malformedAddress(_ address: String) -> ExchangeClientError {
         .refused(code: nil, text: "An address that is not 20 bytes of hex: \(address)")
     }
