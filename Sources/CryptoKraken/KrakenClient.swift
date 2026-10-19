@@ -279,6 +279,31 @@ public struct KrakenClient: ExchangeClient {
         }
     }
 
+    /// The account's wallet from BalanceEx, each asset by Kraken's name for it, in the order of the names
+    ///
+    /// `total` is the asset's `balance`, `held` its `hold_trade` (held for spot orders; zero where Kraken states none).
+    /// A credit line, where the account has one, is not a holding and is not read. A name Kraken's table declares no
+    /// holding for, or Assets does not list, is listed by its name with no amount. `account` is not sent: the key
+    /// reads its own wallet.
+    public func holdings(account: String) async throws -> [ExchangeClientHolding] {
+        do {
+            let balances: KrakenResult<[String: KrakenExtendedBalance]> = try await privatePost("BalanceEx", [])
+            var holdings: [ExchangeClientHolding] = []
+            for (name, balance) in balances.result.sorted(by: { $0.key < $1.key }) {
+                guard let instance = try await declaredHolding(named: name) else {
+                    holdings.append(ExchangeClientHolding(name: name, instance: nil, total: nil, held: nil))
+                    continue
+                }
+                holdings.append(ExchangeClientHolding(name: name, instance: instance,
+                                                      total: try balance.balance.amount(of: instance, in: registry),
+                                                      held: try balance.holdTrade.amount(of: instance, in: registry)))
+            }
+            return holdings
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
+    }
+
     /// The account's fills from TradesHistory and its deposits, withdrawals and transfers from Ledgers, oldest first
     ///
     /// The cursor names the oldest unmatched item, never a time alone: Kraken's `start` is exclusive, so the client
@@ -488,17 +513,31 @@ public struct KrakenClient: ExchangeClient {
         return holding
     }
 
+    // The declared holding for a name, `nil` where Kraken's table declares none or Assets does not list the name.
+    private func declaredHolding(named name: String) async throws -> AssetInstance? {
+        try declared.get()
+        guard let entry = try await listedEntry(named: name) else {
+            return nil
+        }
+        return try KrakenExchangeChain.declaredInstance(wireName: name, decimals: entry.decimals, in: registry)
+    }
+
     // Kraken's Assets entry for a name, by its key ("XXBT") or its alternative name ("XBT"), asked of Assets once.
     private func entry(named name: String) async throws -> KrakenAssetEntry {
+        guard let entry = try await listedEntry(named: name) else {
+            throw ExchangeClientError.unknownAsset(name)
+        }
+        return entry
+    }
+
+    // The same, `nil` where Assets does not list the name.
+    private func listedEntry(named name: String) async throws -> KrakenAssetEntry? {
         if let known = await state.entry(name) {
             return known
         }
         let assets: KrakenResult<[String: KrakenAssetEntry]> = try await publicGet("Assets", [])
         await state.keep(assets.result)
-        guard let entry = await state.entry(name) else {
-            throw ExchangeClientError.unknownAsset(name)
-        }
-        return entry
+        return await state.entry(name)
     }
 
     private func publicGet<Value: Decodable & Sendable>(_ method: String, _ query: [URLQueryItem]) async throws -> Value {

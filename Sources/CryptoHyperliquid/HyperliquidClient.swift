@@ -285,6 +285,31 @@ public struct HyperliquidClient: ExchangeClient {
         }
     }
 
+    /// The spot balances of `account`, from `spotClearinghouseState`, each by its coin's name, in the order Hyperliquid
+    /// lists them
+    ///
+    /// Token 0, USDC, is read in ``HyperliquidHolding/usdc``, the holding the perpetuals' value counts in; a balance
+    /// finer than its six places is refused (`belowBaseUnit`), never rounded, though spot states USDC to eight. Every
+    /// other spot token is listed by its name with no amount: the client reads no other spot token. The perpetuals'
+    /// value is ``accountState(account:)``'s `balance`; the account's money is the two together.
+    public func holdings(account: String) async throws -> [ExchangeClientHolding] {
+        do {
+            try declared.get()
+            let address = try await self.address(of: account)
+            let spot: HyperliquidSpotState = try await info(.map([("type", .string("spotClearinghouseState")), ("user", .string(address))]))
+            return try spot.balances.map { balance in
+                guard balance.token == 0 else {
+                    return ExchangeClientHolding(name: balance.coin, instance: nil, total: nil, held: nil)
+                }
+                return ExchangeClientHolding(name: balance.coin, instance: usdc,
+                                             total: try balance.total.amount(of: usdc, in: registry),
+                                             held: try balance.hold.amount(of: usdc, in: registry))
+            }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
+    }
+
     // The leverage set on each coin the key's main wallet holds a position in, as its clearinghouse state states it;
     // none for a client without a credential, which has no account to read. C31's markets name no account, so the
     // main wallet's is the one read (a reading for the owner's pen); a coin with no position states none.

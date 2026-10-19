@@ -137,6 +137,18 @@ struct HyperliquidFunding: Decodable, Sendable {
     let delta: Delta
 }
 
+// `spotClearinghouseState`: the account's spot balances, each by its coin's name and its token's index.
+struct HyperliquidSpotState: Decodable, Sendable {
+    struct Balance: Decodable, Sendable {
+        let coin: String
+        let token: Int
+        let total: WireDecimal
+        let hold: WireDecimal
+    }
+
+    let balances: [Balance]
+}
+
 // `userNonFundingLedgerUpdates`: each item's `delta` by its `type`, the kinds C30 carries read, the others kept as other.
 // A withdrawal's and a move's `fee` is the wire's, `nil` where the item carries none; every fee read is in USDC.
 struct HyperliquidLedgerUpdate: Decodable, Sendable {

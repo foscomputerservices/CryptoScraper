@@ -212,12 +212,13 @@ struct CoinbaseAccount: Decodable, Sendable {
         let value: WireDecimal
     }
 
+    let uuid: String?
     let currency: String
     let availableBalance: Balance
     let hold: Balance?
 
     private enum CodingKeys: String, CodingKey {
-        case currency, availableBalance = "available_balance", hold
+        case uuid, currency, availableBalance = "available_balance", hold
     }
 }
 
