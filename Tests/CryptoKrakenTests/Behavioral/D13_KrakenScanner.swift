@@ -25,13 +25,13 @@ struct D13_KrakenScannerTests {
                          registry: AssetRegistry(AssetRegistry.libraryDeclarations))
     }
 
-    private func time<N, O, C>(of item: ExchangeClientLedgerItem<N, O, C>) -> Date {
+    private func time<N, O, T, C>(of item: ExchangeClientLedgerItem<N, O, T, C>) -> Date {
         switch item {
         case let .fill(_, _, _, _, _, _, _, time, _, _): time
         case let .funding(_, _, _, time, _): time
-        case let .deposit(_, time, _, _): time
-        case let .withdrawal(_, time, _, _): time
-        case let .internalMove(_, _, _, time, _, _): time
+        case let .deposit(_, _, time, _, _): time
+        case let .withdrawal(_, _, time, _, _): time
+        case let .internalMove(_, _, _, _, time, _, _): time
         }
     }
 

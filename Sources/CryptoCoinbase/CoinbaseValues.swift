@@ -91,6 +91,51 @@ public struct CoinbaseOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 }
 
+/// Coinbase's id for a movement of money between wallets or portfolios
+///
+/// Coinbase's, never a value this package makes. The client hands up no movement today: Advanced Trade's List Fills
+/// states none, so ``CoinbaseClient/ledgerItems(account:since:)`` makes no deposit, withdrawal or move, and none of
+/// these exists but by a consumer's decode.
+public struct CoinbaseTransferId: Codable, Hashable, Sendable, Stubbable {
+    package let text: String
+
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 64
+    ///   characters, or holds anything but printable ASCII without spaces. Decoding the same text throws a
+    ///   `DecodingError` instead.
+    public init(validating candidate: String) throws {
+        guard Self.isWellFormed(candidate) else {
+            throw ExchangeClientError.malformedTransferId(candidate)
+        }
+        self.text = candidate
+    }
+
+    private static func isWellFormed(_ candidate: String) -> Bool {
+        !candidate.isEmpty && candidate.count <= 64 && candidate.unicodeScalars.allSatisfy { ("!"..."~").contains($0) }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let candidate = try container.decode(String.self)
+        guard Self.isWellFormed(candidate) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a Coinbase transfer id: \"\(candidate)\"")
+        }
+        self.text = candidate
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(text)
+    }
+
+    public static func stub() -> Self {
+        do {
+            return try .init(validating: "fred-barney-42")
+        } catch {
+            preconditionFailure("CoinbaseTransferId.stub() is not well-formed: \(error)")
+        }
+    }
+}
+
 /// Coinbase's id for a trade, the `trade_id` of a fill
 ///
 /// Coinbase's, never a value this package makes: a cursor names the fills it has read by these.

@@ -47,6 +47,7 @@ public struct CoinbaseClient: ExchangeClient {
     public typealias Credential = CoinbaseCredential
     public typealias MarketName = CoinbaseMarketName
     public typealias OrderId = CoinbaseOrderId
+    public typealias TransferId = CoinbaseTransferId
     public typealias Cursor = CoinbaseLedgerCursor
 
     private let credential: CoinbaseCredential?
@@ -320,7 +321,7 @@ public struct CoinbaseClient: ExchangeClient {
     /// handed up once. A read is every page Coinbase hands back. `account`
     /// is not sent. A fill's position effect is `nil`: List Fills states none (its side is buy or sell, nothing that
     /// opens or closes a position).
-    public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>] {
+    public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTransferId, CoinbaseLedgerCursor>] {
         do {
             try declared.get()
             var fills: [CoinbaseFill] = []
@@ -346,7 +347,7 @@ public struct CoinbaseClient: ExchangeClient {
             }
             keyed.sort { ($0.time, $0.id) < ($1.time, $1.id) }
 
-            var items: [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseLedgerCursor>] = []
+            var items: [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTransferId, CoinbaseLedgerCursor>] = []
             var read: Set<CoinbaseTradeId> = []
             var instant: Date?
             for (at, id, fill) in keyed {

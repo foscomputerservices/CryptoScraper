@@ -37,6 +37,10 @@ extension ExchangeClientError {
         .malformedResponse(text: "A transaction id that is not one Kraken could write: \(candidate)")
     }
 
+    static func malformedTransferId(_ candidate: String) -> ExchangeClientError {
+        .malformedResponse(text: "A ledger entry whose refid is not one Kraken could write: \(candidate)")
+    }
+
     static func unknownMarket(_ market: KrakenMarketName) -> ExchangeClientError {
         .refused(code: nil, text: "Kraken's AssetPairs lists no market \(market.text)")
     }

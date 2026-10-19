@@ -6,6 +6,20 @@ Each pull request adds its entry under the version it will be released as, dated
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-19
+
+A movement's own id, required. PR #34.
+
+### Changed
+
+- **Breaking:** `ExchangeClient` gains an associated type, `TransferId`, the exchange's own id for a movement of money, and `ExchangeClientLedgerItem` a fourth generic parameter for it: `ExchangeClientLedgerItem<Name, OrderId, TransferId, Cursor>`. A conformer adds `typealias TransferId`.
+- **Breaking:** `deposit`, `withdrawal` and `internalMove` each carry `id: TransferId`, required, after the amount (after `to:` on a move). A fee charged on a movement, or a later read of it, names it by this id, as a fill's fee names its order (the owner's ruling of 2026-10-19). A positional pattern over the three cases needs one more `_`.
+- An item the exchange lists without its id is refused (`malformedResponse`), the whole read with it, never handed up without one.
+- **Hyperliquid:** `HyperliquidTransferId`, the update's `hash` (`0x` and 64 hex digits; all zeros refused). A move between the main account and a sub-account carries the same hash in both ledgers.
+- **Kraken:** `KrakenTransferId`, the Ledgers entry's `refid`, the reference Kraken's deposit and withdrawal status reads name the movement by. The entry's own key stays a `KrakenLedgerId`, in the cursor.
+- **Coinbase:** `CoinbaseTransferId`, declared for the protocol; the client hands up no movement, so none is made.
+- The CryptoOHLCV exchange transactions (`HyperliquidTransaction`, `KrakenTransaction`, `CoinbaseTransaction`) take a movement's transfer id as their `hash` and `transactionId`, where they took its cursor.
+
 ## [0.11.0] - 2026-10-19
 
 Hyperliquid's USDC at eight decimals. PR #33.
@@ -131,7 +145,8 @@ Asset identity: an asset is no longer a symbol. PR #23.
 
 `v0.1.0` to `v0.5.0` were tagged without release notes; their history is the git log.
 
-[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.12.0
 [0.11.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.11.0
 [0.10.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.10.0
 [0.9.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.9.0

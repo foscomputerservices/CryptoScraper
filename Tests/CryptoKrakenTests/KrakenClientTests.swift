@@ -274,7 +274,7 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
         let fees = try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item -> Amount?? in
             switch item {
-            case let .deposit(_, _, _, fee), let .withdrawal(_, _, _, fee), let .internalMove(_, _, _, _, _, fee): .some(fee)
+            case let .deposit(_, _, _, _, fee), let .withdrawal(_, _, _, _, fee), let .internalMove(_, _, _, _, _, _, fee): .some(fee)
             case .fill, .funding: nil
             }
         }
@@ -296,6 +296,29 @@ struct KrakenClientTests {
         let body = Data(#"{"error":[],"result":{"NOTANASSET":{"balance":"1.0","hold_trade":"0.0"}}}"#.utf8)
         let holdings = try await Kraken.client(ReplaySession(route: Kraken.route(["BalanceEx": .ok(body)]))).holdings(account: "")
         #expect(holdings == [ExchangeClientHolding(name: "NOTANASSET", instance: nil, total: nil, held: nil)])
+    }
+
+    // David's ruling of 2026-10-19 (via fosline): a movement carries the exchange's own id, required. Kraken's is the
+    // entry's refid, the reference its deposit and withdrawal status reads name; an entry of those kinds without one
+    // refuses the read.
+    @Test func aMovementCarriesItsEntrysRefid() async throws {
+        let trades = Data(#"{"error":[],"result":{"trades":{},"count":0}}"#.utf8)
+        let ledgers = Data(#"{"error":[],"result":{"ledger":{"L1AAAA-AAAAA-AAAAAA":{"refid":"FTQcuak-V6Za8qrWnhzTx67yYHz8Tg","time":1688000001.0,"type":"deposit","subtype":"","aclass":"currency","asset":"ZUSD","amount":"1000.0000","fee":"0.0000","balance":"1000.0000"}},"count":1}}"#.utf8)
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
+        let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
+        guard case .deposit(_, let id, _, _, _) = try #require(items.first) else {
+            Issue.record("Not a deposit")
+            return
+        }
+        #expect(id == (try KrakenTransferId(validating: "FTQcuak-V6Za8qrWnhzTx67yYHz8Tg")))
+    }
+
+    @Test func aMovementWithoutARefidRefusesTheRead() async throws {
+        let trades = Data(#"{"error":[],"result":{"trades":{},"count":0}}"#.utf8)
+        let ledgers = Data(#"{"error":[],"result":{"ledger":{"L1AAAA-AAAAA-AAAAAA":{"time":1688000001.0,"type":"withdrawal","subtype":"","aclass":"currency","asset":"ZUSD","amount":"-10.0000","fee":"0.0000","balance":"0.0000"}},"count":1}}"#.utf8)
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
+        let error = await sharedError { try await Kraken.client(session).ledgerItems(account: "", since: nil) }
+        #expect(error == .malformedResponse(text: "A ledger entry whose refid is not one Kraken could write: "))
     }
 
     // TradesHistory's position words, as documented (https://docs.kraken.com/api/docs/rest-api/get-trade-history.md):

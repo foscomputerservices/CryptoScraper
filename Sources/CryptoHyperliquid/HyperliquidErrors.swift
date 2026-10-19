@@ -36,6 +36,10 @@ extension ExchangeClientError {
         return .refused(code: nil, text: "Hyperliquid moves USDC in whole millionths, not \(text)")
     }
 
+    static func malformedTransferId(_ candidate: String) -> ExchangeClientError {
+        .malformedResponse(text: "A ledger update whose hash is not a transaction hash Hyperliquid could write: \(candidate)")
+    }
+
     static func malformedAddress(_ address: String) -> ExchangeClientError {
         .refused(code: nil, text: "An address that is not 20 bytes of hex: \(address)")
     }

@@ -46,6 +46,7 @@ public struct KrakenClient: ExchangeClient {
     public typealias Credential = KrakenCredential
     public typealias MarketName = KrakenMarketName
     public typealias OrderId = KrakenOrderId
+    public typealias TransferId = KrakenTransferId
     public typealias Cursor = KrakenLedgerCursor
 
     /// Kraken's REST root
@@ -315,14 +316,16 @@ public struct KrakenClient: ExchangeClient {
     /// where it carries a `posstatus` (present only on a trade that opened a position, whatever that position's
     /// status now), `nil` on a spot trade, which states none. A deposit's, a withdrawal's and a transfer's fee is the
     /// entry's `fee` in the entry's own asset, `nil` where the entry carries none; the amount is the entry's `amount`,
-    /// as stated (Kraken's balance after the entry is the one before it, plus the amount, less the fee).
-    public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>] {
+    /// as stated (Kraken's balance after the entry is the one before it, plus the amount, less the fee). Its `id` is
+    /// the entry's `refid`, the reference Kraken gives the deposit, withdrawal or transfer; an entry of those kinds
+    /// without one is refused, the whole read with it.
+    public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenTransferId, KrakenLedgerCursor>] {
         do {
             let start = since.map { [("start", Self.startBefore($0.seconds))] } ?? []
             let trades: KrakenResult<KrakenTrades> = try await privatePost("TradesHistory", start)
             let ledger: KrakenResult<KrakenLedger> = try await privatePost("Ledgers", start)
 
-            typealias Item = ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>
+            typealias Item = ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenTransferId, KrakenLedgerCursor>
             // Each item with its instant and its id; the cursor of each is made once the instant's items are known.
             var items: [(time: WireDecimal, id: KrakenLedgerId, make: (KrakenLedgerCursor) throws -> Item)] = []
             for (key, trade) in trades.result.trades {
@@ -348,13 +351,14 @@ public struct KrakenClient: ExchangeClient {
                 let holding = try await holding(named: entry.asset)
                 let amount = try entry.amount.amount(of: holding, in: registry)
                 let fee = try entry.fee?.amount(of: holding, in: registry)
+                let transfer = try KrakenTransferId(validating: entry.refid ?? "")
                 switch entry.type {
                 case "deposit":
-                    items.append((entry.time, id, { .deposit(amount, time: $0.time, cursor: $0, fee: fee) }))
+                    items.append((entry.time, id, { .deposit(amount, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
                 case "withdrawal":
-                    items.append((entry.time, id, { .withdrawal(amount, time: $0.time, cursor: $0, fee: fee) }))
+                    items.append((entry.time, id, { .withdrawal(amount, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
                 default:
-                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, time: $0.time, cursor: $0, fee: fee) }))
+                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
                 }
             }
 

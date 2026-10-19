@@ -46,6 +46,10 @@ extension ExchangeClientError {
         .malformedResponse(text: "A trade id that is not one Coinbase could write: \(candidate)")
     }
 
+    static func malformedTransferId(_ candidate: String) -> ExchangeClientError {
+        .malformedResponse(text: "A transfer id that is not one Coinbase could write: \(candidate)")
+    }
+
     static func malformedCursor(_ candidate: String) -> ExchangeClientError {
         .malformedResponse(text: "A cursor that is not an RFC 3339 time: \(candidate)")
     }

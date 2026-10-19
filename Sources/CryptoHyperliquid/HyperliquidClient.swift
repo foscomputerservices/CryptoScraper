@@ -53,6 +53,7 @@ public struct HyperliquidClient: ExchangeClient {
     public typealias Credential = HyperliquidCredential
     public typealias MarketName = HyperliquidMarketName
     public typealias OrderId = HyperliquidOrderId
+    public typealias TransferId = HyperliquidTransferId
     public typealias Cursor = HyperliquidLedgerCursor
 
     private let credential: HyperliquidCredential?
@@ -364,8 +365,10 @@ public struct HyperliquidClient: ExchangeClient {
     /// `amount`, as stated. A `send` within one account is a move between its dexes, `"spot"` and `"perp"` (the perp
     /// dex, which the wire names `""`) or a builder dex by its name; between accounts, a move between their addresses.
     /// A `send` of a token other than USDC, or whose fee is in one, is not handed up: the client reads no other spot
-    /// token.
-    public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>] {
+    /// token. A deposit's, a withdrawal's and a move's `id` is the update's `hash` (``HyperliquidTransferId``), the
+    /// same in both accounts' ledgers for a move between them; an update of those kinds without one, or with an
+    /// all-zero one, is refused, the whole read with it.
+    public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>] {
         do {
             try declared.get()
             let address = try await self.address(of: account)
@@ -376,7 +379,7 @@ public struct HyperliquidClient: ExchangeClient {
 
             // Each item with its millisecond and its order within the millisecond: the fills by trade id, then the
             // funding by coin, then the other updates by hash; its cursor is made once the order is known.
-            typealias Made = (HyperliquidLedgerCursor) -> ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>
+            typealias Made = (HyperliquidLedgerCursor) -> ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>
             var items: [(time: Int64, rank: Int, key: String, make: Made)] = []
             for fill in fills {
                 let market = try HyperliquidMarketName(validating: fill.coin)
@@ -408,15 +411,18 @@ public struct HyperliquidClient: ExchangeClient {
                 switch update.delta {
                 case .deposit(let amount):
                     let amount = try amount.amount(of: usdc, in: registry)
-                    made = { .deposit(amount, time: time, cursor: $0) }
+                    let id = try HyperliquidTransferId(validating: update.hash ?? "")
+                    made = { .deposit(amount, id: id, time: time, cursor: $0) }
                 case .withdrawal(let amount, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
                     let fee = try fee?.amount(of: usdc, in: registry)
-                    made = { .withdrawal(amount, time: time, cursor: $0, fee: fee) }
+                    let id = try HyperliquidTransferId(validating: update.hash ?? "")
+                    made = { .withdrawal(amount, id: id, time: time, cursor: $0, fee: fee) }
                 case .move(let amount, let from, let to, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
                     let fee = try fee?.amount(of: usdc, in: registry)
-                    made = { .internalMove(amount, from: from, to: to, time: time, cursor: $0, fee: fee) }
+                    let id = try HyperliquidTransferId(validating: update.hash ?? "")
+                    made = { .internalMove(amount, from: from, to: to, id: id, time: time, cursor: $0, fee: fee) }
                 case .other:
                     // A kind C30 has no case for (a vault's, a staking reward, a liquidation's own update, which the
                     // fills carry): not handed up (a reading for the owner's pen).
@@ -428,7 +434,7 @@ public struct HyperliquidClient: ExchangeClient {
 
             // Each item's place among the items of its millisecond, 1 for the first; a read from a cursor hands up only
             // what lies after it.
-            var handedUp: [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>] = []
+            var handedUp: [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>] = []
             var place = 0
             for (index, item) in items.enumerated() {
                 place = index > 0 && items[index - 1].time == item.time ? place + 1 : 1

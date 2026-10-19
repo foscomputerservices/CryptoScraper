@@ -32,6 +32,9 @@ public protocol ExchangeClient: Sendable {
     associatedtype MarketName: Hashable & Sendable
     /// The exchange's own id for an order, as its API has it
     associatedtype OrderId: Codable & Hashable & Sendable
+    /// The exchange's own id for a movement of money (a deposit, a withdrawal, a move between accounts), as its API
+    /// has it
+    associatedtype TransferId: Codable & Hashable & Sendable
     /// Where this exchange resumes a read of its ledger, as its API has it
     associatedtype Cursor: Codable & Hashable & Sendable
 
@@ -53,7 +56,7 @@ public protocol ExchangeClient: Sendable {
     /// The account's ledger items after `since`, oldest first; `since` is the cursor of the last item read (`nil`
     /// reads from the start), which names the oldest unmatched item, never a time alone, so every item is handed up
     /// once and none is skipped, including a second item at the cursor's own instant
-    func ledgerItems(account: String, since: Cursor?) async throws -> [ExchangeClientLedgerItem<MarketName, OrderId, Cursor>]
+    func ledgerItems(account: String, since: Cursor?) async throws -> [ExchangeClientLedgerItem<MarketName, OrderId, TransferId, Cursor>]
     func setLeverage(_ leverage: Int, market: MarketName, isolated: Bool, account: String) async throws
     func transfer(_ amount: Amount, from: String, to: String) async throws
     func keyFacts() async throws -> ExchangeClientKeyFacts
