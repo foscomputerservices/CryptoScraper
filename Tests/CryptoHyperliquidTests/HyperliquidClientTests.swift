@@ -314,7 +314,7 @@ struct HyperliquidClientTests {
         let cursors = items.map { item -> Int64 in
             switch item {
             case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor),
-                 .deposit(_, _, let cursor), .withdrawal(_, _, let cursor), .internalMove(_, _, _, _, let cursor): cursor.milliseconds
+                 .deposit(_, _, let cursor, _), .withdrawal(_, _, let cursor, _), .internalMove(_, _, _, _, let cursor, _): cursor.milliseconds
             }
         }
         #expect(cursors == cursors.sorted())
@@ -327,7 +327,7 @@ struct HyperliquidClientTests {
                               order: HyperliquidOrderId(61_246_678_885), closedBy: nil, time: Date(wireMilliseconds: 1_790_568_059_898),
                               cursor: HyperliquidLedgerCursor(milliseconds: 1_790_568_059_898, place: 1), positionEffect: .close))
         // A transfer between the main account and the sub-account is a move between their addresses.
-        #expect(items.contains { if case .internalMove(let amount, _, _, _, _) = $0 { amount == (try? Amount(whole: 20, of: Hyperliquid.usdc)) } else { false } })
+        #expect(items.contains { if case .internalMove(let amount, _, _, _, _, _) = $0 { amount == (try? Amount(whole: 20, of: Hyperliquid.usdc)) } else { false } })
     }
 
     // The owner's ruling (2026-10-07): a fill states what it did to the position. Hyperliquid states it in `dir`; its
@@ -528,10 +528,68 @@ struct HyperliquidClientGapsTests {
         #expect(result == .resting(id: HyperliquidOrderId(77_738_308), time: clock))
     }
 
+    // MARK: A ledger update's fee (fosline's request of 2026-10-19: the faucet's internalTransfer of 1,000 USDC carried
+    // `fee: "1.0"`, which the client dropped)
+
+    // The main account's ledger alone: its recorded updates, no fills, no funding.
+    static func masterLedger(_ updates: Data = Recording.body("Hyperliquid/ledger-master.json")) -> ReplaySession {
+        ReplaySession { request, index in
+            switch request.jsonBody["type"] as? String {
+            case "userFillsByTime", "userFunding": .ok(Data("[]".utf8))
+            case "userNonFundingLedgerUpdates": .ok(updates)
+            default: Hyperliquid.route()(request, index)
+            }
+        }
+    }
+
+    static let faucet = "0x00000000000000000000000000000000000000f0"
+
+    @Test func anInternalTransferCarriesItsFeeAndItsAmountAsStated() async throws {
+        let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
+        let first = try #require(items.first)
+        #expect(first == .internalMove(try Amount(whole: 1_000, of: Hyperliquid.usdc), from: Self.faucet, to: Hyperliquid.master,
+                                       time: Date(wireMilliseconds: 1_791_550_794_933),
+                                       cursor: HyperliquidLedgerCursor(milliseconds: 1_791_550_794_933, place: 1),
+                                       fee: try Amount(whole: 1, of: Hyperliquid.usdc)))
+    }
+
+    @Test func aSendWithinOneAccountIsAMoveBetweenItsDexesWithItsStatedZeroFee() async throws {
+        let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
+        #expect(items[1] == .internalMove(Amount(baseUnits: 924_240_000, of: Hyperliquid.usdc), from: "spot", to: "perp",
+                                          time: Date(wireMilliseconds: 1_791_555_526_034),
+                                          cursor: HyperliquidLedgerCursor(milliseconds: 1_791_555_526_034, place: 1),
+                                          fee: Amount(baseUnits: 0, of: Hyperliquid.usdc)))
+    }
+
+    @Test func aSubAccountTransferStatesNoFee() async throws {
+        let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
+        #expect(items[2] == .internalMove(try Amount(whole: 100, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub,
+                                          time: Date(wireMilliseconds: 1_791_576_041_830),
+                                          cursor: HyperliquidLedgerCursor(milliseconds: 1_791_576_041_830, place: 1)))
+    }
+
+    // Constructed from the documented update kinds (info endpoint, userNonFundingLedgerUpdates): a withdrawal with its
+    // fee, a send between two accounts, a send of another token and a send whose fee is in another token.
+    @Test func aWithdrawalCarriesItsFeeAndASendBetweenAccountsNamesTheirAddresses() async throws {
+        let updates = Data("""
+        [{"time":1,"hash":"0x01","delta":{"type":"withdraw","usdc":"50.0","nonce":1,"fee":"1.0"}},
+         {"time":2,"hash":"0x02","delta":{"type":"send","user":"\(Hyperliquid.master)","destination":"\(Hyperliquid.sub)","sourceDex":"","destinationDex":"","token":"USDC","amount":"5.0","usdcValue":"5.0","fee":"0.1","nativeTokenFee":"0.0","nonce":2,"feeToken":""}},
+         {"time":3,"hash":"0x03","delta":{"type":"send","user":"\(Hyperliquid.master)","destination":"\(Hyperliquid.sub)","sourceDex":"spot","destinationDex":"spot","token":"HYPE","amount":"2.0","usdcValue":"60.0","fee":"0.0","nativeTokenFee":"0.0","nonce":3,"feeToken":""}},
+         {"time":4,"hash":"0x04","delta":{"type":"send","user":"\(Hyperliquid.master)","destination":"\(Hyperliquid.sub)","sourceDex":"","destinationDex":"","token":"USDC","amount":"5.0","usdcValue":"5.0","fee":"0.0","nativeTokenFee":"0.01","nonce":4,"feeToken":"HYPE"}}]
+        """.utf8)
+        let items = try await Hyperliquid.client(Self.masterLedger(updates)).ledgerItems(account: Hyperliquid.master, since: nil)
+        #expect(items == [
+            .withdrawal(try Amount(whole: 50, of: Hyperliquid.usdc), time: Date(wireMilliseconds: 1),
+                        cursor: HyperliquidLedgerCursor(milliseconds: 1, place: 1), fee: try Amount(whole: 1, of: Hyperliquid.usdc)),
+            .internalMove(try Amount(whole: 5, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub, time: Date(wireMilliseconds: 2),
+                          cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1), fee: Amount(baseUnits: 100_000, of: Hyperliquid.usdc))
+        ])
+    }
+
     static func cursor(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>) -> HyperliquidLedgerCursor {
         switch item {
         case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor),
-             .deposit(_, _, let cursor), .withdrawal(_, _, let cursor), .internalMove(_, _, _, _, let cursor): cursor
+             .deposit(_, _, let cursor, _), .withdrawal(_, _, let cursor, _), .internalMove(_, _, _, _, let cursor, _): cursor
         }
     }
 }

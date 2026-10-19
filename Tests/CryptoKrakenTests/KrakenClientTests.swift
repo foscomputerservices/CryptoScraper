@@ -259,6 +259,27 @@ struct KrakenClientTests {
         }
     }
 
+    // Constructed from the documented Ledgers entry (https://docs.kraken.com/api/docs/rest-api/get-ledgers-info.md):
+    // a deposit, a withdrawal and a transfer in ZUSD, each with its `fee` in the entry's asset, one of them zero.
+    @Test func aDepositAWithdrawalAndATransferCarryTheEntrysFeeInItsAsset() async throws {
+        let trades = Data(#"{"error":[],"result":{"trades":{},"count":0}}"#.utf8)
+        let ledgers = Data(#"""
+        {"error":[],"result":{"ledger":{
+          "L1AAAA-AAAAA-AAAAAA":{"refid":"R1","time":1688000001.0,"type":"deposit","subtype":"","aclass":"currency","asset":"ZUSD","amount":"1000.0000","fee":"2.5000","balance":"997.5000"},
+          "L2AAAA-AAAAA-AAAAAA":{"refid":"R2","time":1688000002.0,"type":"withdrawal","subtype":"","aclass":"currency","asset":"ZUSD","amount":"-100.0000","fee":"5.0000","balance":"892.5000"},
+          "L3AAAA-AAAAA-AAAAAA":{"refid":"R3","time":1688000003.0,"type":"transfer","subtype":"spottofutures","aclass":"currency","asset":"ZUSD","amount":"-10.0000","fee":"0.0000","balance":"882.5000"}
+        },"count":3}}
+        """#.utf8)
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
+        let fees = try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item -> Amount?? in
+            switch item {
+            case let .deposit(_, _, _, fee), let .withdrawal(_, _, _, fee), let .internalMove(_, _, _, _, _, fee): .some(fee)
+            case .fill, .funding: nil
+            }
+        }
+        #expect(fees == [Amount(baseUnits: 25_000, of: Kraken.usd), Amount(baseUnits: 50_000, of: Kraken.usd), .zero(of: Kraken.usd)])
+    }
+
     // TradesHistory's position words, as documented (https://docs.kraken.com/api/docs/rest-api/get-trade-history.md):
     // misc "closing", "Trade closes all or part of a position"; posstatus, "Position status (open/closed) Only present
     // if trade opened a position", so either word states the trade opened one. The recorded spot trades carry neither.

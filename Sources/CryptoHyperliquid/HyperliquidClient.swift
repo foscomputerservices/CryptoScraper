@@ -332,6 +332,13 @@ public struct HyperliquidClient: ExchangeClient {
     /// is Hyperliquid's, and its position effect is the one Hyperliquid states in the fill's `dir` ("Open Long" and
     /// "Open Short" open, "Close Long" and "Close Short" close; any other word, `nil`). Update kinds the shared ledger
     /// has no case for are not handed up.
+    ///
+    /// A withdrawal's and a move's fee is the update's `fee` in USDC, `nil` where it carries none (a deposit and an
+    /// `accountClassTransfer` never do, nor has a recorded `subAccountTransfer`); the amount is the update's `usdc` or
+    /// `amount`, as stated. A `send` within one account is a move between its dexes, `"spot"` and `"perp"` (the perp
+    /// dex, which the wire names `""`) or a builder dex by its name; between accounts, a move between their addresses.
+    /// A `send` of a token other than USDC, or whose fee is in one, is not handed up: the client reads no other spot
+    /// token.
     public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidLedgerCursor>] {
         do {
             try declared.get()
@@ -376,12 +383,14 @@ public struct HyperliquidClient: ExchangeClient {
                 case .deposit(let amount):
                     let amount = try amount.amount(of: usdc, in: registry)
                     made = { .deposit(amount, time: time, cursor: $0) }
-                case .withdrawal(let amount):
+                case .withdrawal(let amount, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
-                    made = { .withdrawal(amount, time: time, cursor: $0) }
-                case .move(let amount, let from, let to):
+                    let fee = try fee?.amount(of: usdc, in: registry)
+                    made = { .withdrawal(amount, time: time, cursor: $0, fee: fee) }
+                case .move(let amount, let from, let to, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
-                    made = { .internalMove(amount, from: from, to: to, time: time, cursor: $0) }
+                    let fee = try fee?.amount(of: usdc, in: registry)
+                    made = { .internalMove(amount, from: from, to: to, time: time, cursor: $0, fee: fee) }
                 case .other:
                     // A kind C30 has no case for (a vault's, a staking reward, a liquidation's own update, which the
                     // fills carry): not handed up (a reading for the owner's pen).

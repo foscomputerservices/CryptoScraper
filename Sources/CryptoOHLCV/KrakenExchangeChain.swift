@@ -409,11 +409,11 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")
-        case let .deposit(deposited, depositTime, cursor):
+        case let .deposit(deposited, depositTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: cursor), "deposit")
-        case let .withdrawal(withdrawn, withdrawalTime, cursor):
+        case let .withdrawal(withdrawn, withdrawalTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (withdrawn.baseUnits, withdrawn.instance, withdrawalTime, try Self.text(of: cursor), "withdrawal")
-        case let .internalMove(moved, source, destination, moveTime, cursor):
+        case let .internalMove(moved, source, destination, moveTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (moved.baseUnits, moved.instance, moveTime, try Self.text(of: cursor), "internalMove")
             from = KrakenHolding(address: source)
             to = KrakenHolding(address: destination)

@@ -138,11 +138,12 @@ struct HyperliquidFunding: Decodable, Sendable {
 }
 
 // `userNonFundingLedgerUpdates`: each item's `delta` by its `type`, the kinds C30 carries read, the others kept as other.
+// A withdrawal's and a move's `fee` is the wire's, `nil` where the item carries none; every fee read is in USDC.
 struct HyperliquidLedgerUpdate: Decodable, Sendable {
     enum Delta: Sendable {
         case deposit(WireDecimal)
-        case withdrawal(WireDecimal)
-        case move(WireDecimal, from: String, to: String)
+        case withdrawal(WireDecimal, fee: WireDecimal?)
+        case move(WireDecimal, from: String, to: String, fee: WireDecimal?)
         case other
     }
 
@@ -155,7 +156,7 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable {
     }
 
     private enum DeltaKeys: String, CodingKey {
-        case type, usdc, user, destination, amount, toPerp
+        case type, usdc, user, destination, amount, toPerp, fee, token, sourceDex, destinationDex, feeToken, nativeTokenFee
     }
 
     init(from decoder: any Decoder) throws {
@@ -163,20 +164,39 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable {
         self.time = try container.decode(Int64.self, forKey: .time)
         self.hash = try container.decodeIfPresent(String.self, forKey: .hash)
         let delta = try container.nestedContainer(keyedBy: DeltaKeys.self, forKey: .delta)
+        let fee = try delta.decodeIfPresent(WireDecimal.self, forKey: .fee)
         switch try delta.decode(String.self, forKey: .type) {
         case "deposit":
             self.delta = .deposit(try delta.decode(WireDecimal.self, forKey: .usdc))
         case "withdraw":
-            self.delta = .withdrawal(try delta.decode(WireDecimal.self, forKey: .usdc))
+            self.delta = .withdrawal(try delta.decode(WireDecimal.self, forKey: .usdc), fee: fee)
         case "subAccountTransfer", "internalTransfer":
             self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc),
-                               from: try delta.decode(String.self, forKey: .user), to: try delta.decode(String.self, forKey: .destination))
+                               from: try delta.decode(String.self, forKey: .user), to: try delta.decode(String.self, forKey: .destination), fee: fee)
         case "send":
-            self.delta = .move(try delta.decode(WireDecimal.self, forKey: .amount),
-                               from: try delta.decode(String.self, forKey: .user), to: try delta.decode(String.self, forKey: .destination))
+            // Only a send of USDC with its fee in USDC is read: the client knows no other spot token, and a send in one
+            // read as USDC would be a wrong amount. Within one account, the sides are its dexes ("" is the perp dex),
+            // named as accountClassTransfer names them; between accounts, their addresses.
+            let token = try delta.decodeIfPresent(String.self, forKey: .token) ?? "USDC"
+            let feeToken = try delta.decodeIfPresent(String.self, forKey: .feeToken) ?? ""
+            let nativeTokenFee = try delta.decodeIfPresent(WireDecimal.self, forKey: .nativeTokenFee)
+            guard token == "USDC", feeToken.isEmpty || feeToken == "USDC" || nativeTokenFee.map({ $0.digits == 0 }) ?? true else {
+                self.delta = .other
+                return
+            }
+            let user = try delta.decode(String.self, forKey: .user)
+            let destination = try delta.decode(String.self, forKey: .destination)
+            let amount = try delta.decode(WireDecimal.self, forKey: .amount)
+            if user.lowercased() == destination.lowercased() {
+                let dex = { (name: String?) in name.flatMap { $0.isEmpty ? nil : $0 } ?? "perp" }
+                self.delta = .move(amount, from: dex(try delta.decodeIfPresent(String.self, forKey: .sourceDex)),
+                                   to: dex(try delta.decodeIfPresent(String.self, forKey: .destinationDex)), fee: fee)
+            } else {
+                self.delta = .move(amount, from: user, to: destination, fee: fee)
+            }
         case "accountClassTransfer":
             let toPerp = try delta.decode(Bool.self, forKey: .toPerp)
-            self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc), from: toPerp ? "spot" : "perp", to: toPerp ? "perp" : "spot")
+            self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc), from: toPerp ? "spot" : "perp", to: toPerp ? "perp" : "spot", fee: nil)
         default:
             self.delta = .other
         }
