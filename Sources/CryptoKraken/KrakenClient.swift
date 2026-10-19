@@ -288,7 +288,9 @@ public struct KrakenClient: ExchangeClient {
     /// other than those three (a trade's own entry, margin, rollover, staking) are not handed up: a trade is its fill.
     /// A fill's position effect is the one the trade states: `close` where its `misc` notes say "closing", `open`
     /// where it carries a `posstatus` (present only on a trade that opened a position, whatever that position's
-    /// status now), `nil` on a spot trade, which states none.
+    /// status now), `nil` on a spot trade, which states none. A deposit's, a withdrawal's and a transfer's fee is the
+    /// entry's `fee` in the entry's own asset, `nil` where the entry carries none; the amount is the entry's `amount`,
+    /// as stated (Kraken's balance after the entry is the one before it, plus the amount, less the fee).
     public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenLedgerCursor>] {
         do {
             let start = since.map { [("start", Self.startBefore($0.seconds))] } ?? []
@@ -313,20 +315,21 @@ public struct KrakenClient: ExchangeClient {
             }
             for (key, entry) in ledger.result.ledger {
                 let id = try KrakenLedgerId(validating: key)
-                switch entry.type {
-                case "deposit":
-                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
-                    items.append((entry.time, id, { .deposit(amount, time: $0.time, cursor: $0) }))
-                case "withdrawal":
-                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
-                    items.append((entry.time, id, { .withdrawal(amount, time: $0.time, cursor: $0) }))
-                case "transfer":
-                    let amount = try entry.amount.amount(of: try await holding(named: entry.asset), in: registry)
-                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, time: $0.time, cursor: $0) }))
-                default:
+                guard ["deposit", "withdrawal", "transfer"].contains(entry.type) else {
                     // A trade's ledger entry is its fill, read from TradesHistory with its order; the other kinds (margin,
                     // rollover, staking…) have no case in C30 and are not handed up (a reading for the owner's pen).
                     continue
+                }
+                let holding = try await holding(named: entry.asset)
+                let amount = try entry.amount.amount(of: holding, in: registry)
+                let fee = try entry.fee?.amount(of: holding, in: registry)
+                switch entry.type {
+                case "deposit":
+                    items.append((entry.time, id, { .deposit(amount, time: $0.time, cursor: $0, fee: fee) }))
+                case "withdrawal":
+                    items.append((entry.time, id, { .withdrawal(amount, time: $0.time, cursor: $0, fee: fee) }))
+                default:
+                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, time: $0.time, cursor: $0, fee: fee) }))
                 }
             }
 

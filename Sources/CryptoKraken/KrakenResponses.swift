@@ -194,9 +194,11 @@ struct KrakenLedger: Decodable, Sendable {
         let subtype: String
         let asset: String
         let amount: WireDecimal
+        /// The entry's fee in its own asset, `nil` where the entry carries none
+        let fee: WireDecimal?
 
         private enum CodingKeys: String, CodingKey {
-            case time, type, subtype, asset, amount
+            case time, type, subtype, asset, amount, fee
         }
 
         init(from decoder: any Decoder) throws {
@@ -206,6 +208,7 @@ struct KrakenLedger: Decodable, Sendable {
             self.subtype = try container.decodeIfPresent(String.self, forKey: .subtype) ?? ""
             self.asset = try container.decode(String.self, forKey: .asset)
             self.amount = try container.decode(WireDecimal.self, forKey: .amount)
+            self.fee = try container.decodeIfPresent(WireDecimal.self, forKey: .fee)
         }
     }
 
