@@ -6,7 +6,9 @@ Each pull request adds its entry under **Unreleased**. At release, that section 
 
 ## [Unreleased]
 
-An account's wallet, read through every client.
+## [0.10.0] - 2026-10-19
+
+An account's wallet, read through every client. PR #31.
 
 ### Added
 
@@ -116,7 +118,8 @@ Asset identity: an asset is no longer a symbol. PR #23.
 
 `v0.1.0` to `v0.5.0` were tagged without release notes; their history is the git log.
 
-[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/foscomputerservices/CryptoScraper/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.10.0
 [0.9.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.9.0
 [0.8.1]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.8.1
 [0.8.0]: https://github.com/foscomputerservices/CryptoScraper/releases/tag/0.8.0
