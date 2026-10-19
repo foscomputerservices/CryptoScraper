@@ -3,6 +3,7 @@
 // Copyright © 2026 FOS Services, LLC. All rights reserved.
 //
 
+import CryptoExchange
 import CryptoOHLCV
 import FOSFoundation
 import Foundation
@@ -59,6 +60,52 @@ public struct HyperliquidOrderId: Codable, Hashable, Sendable, Stubbable {
     }
 
     public static func stub() -> Self { .init(42) }
+}
+
+/// Hyperliquid's id for a movement of money, the `hash` of a `userNonFundingLedgerUpdates` item: `0x` and 64 hex digits
+/// ("0x4afdf4262828628d4c77042b49a3a20000390c0bc32b815feec69f78e72c3c77"), the action's transaction hash
+///
+/// Hyperliquid's, never a value this package makes. A move between the main account and a sub-account carries the same
+/// hash in both accounts' ledgers: it names the one movement. An all-zero hash names nothing and is refused.
+public struct HyperliquidTransferId: Codable, Hashable, Sendable, Stubbable {
+    package let text: String
+
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is not `0x` and 64 hex digits, or is
+    ///   all zeros. Decoding the same text throws a `DecodingError` instead.
+    public init(validating candidate: String) throws {
+        guard Self.isWellFormed(candidate) else {
+            throw ExchangeClientError.malformedTransferId(candidate)
+        }
+        self.text = candidate
+    }
+
+    private static func isWellFormed(_ candidate: String) -> Bool {
+        guard candidate.hasPrefix("0x") else { return false }
+        let digits = candidate.dropFirst(2)
+        return digits.count == 64 && digits.allSatisfy(\.isHexDigit) && digits.contains { $0 != "0" }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let candidate = try container.decode(String.self)
+        guard Self.isWellFormed(candidate) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a Hyperliquid transaction hash: \"\(candidate)\"")
+        }
+        self.text = candidate
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(text)
+    }
+
+    public static func stub() -> Self {
+        do {
+            return try .init(validating: "0x" + String(repeating: "0", count: 62) + "42")
+        } catch {
+            preconditionFailure("HyperliquidTransferId.stub() is not well-formed: \(error)")
+        }
+    }
 }
 
 /// Where a read of Hyperliquid's ledger resumes: the millisecond of the last item read, and that item's place among

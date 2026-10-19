@@ -266,17 +266,22 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 /// A fill's `positionEffect` is what the fill did to the position, as the exchange states it, `nil` where the
 /// exchange states none; it is last and defaults to `nil`, so a fill made without it states no effect.
 ///
+/// A deposit's, a withdrawal's and a move's `id` is the exchange's own identity of the movement, required: a fee
+/// charged on it, or a later read of it, names it by this. Each client states which of its exchange's ids it is; an
+/// item its exchange lists without one is refused (``ExchangeClientError/malformedResponse(text:)``), never handed up
+/// without an id.
+///
 /// A deposit's, a withdrawal's and a move's `fee` is the fee the exchange states on the item, in the holding it states
 /// it in, `nil` where the exchange states none; a fee stated as zero is a zero amount, never `nil`. The amount beside
 /// it is the exchange's own figure, and the fee is never taken from it or added to it here: what the two do to a
 /// balance is the exchange's convention, stated on each client's `ledgerItems`. The fee is last and defaults to `nil`,
 /// so an item made without it states no fee.
-public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
+public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, TransferId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
     case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil)
     case funding(market: Name, amount: Amount, rate: Fraction, time: Date, cursor: Cursor)
-    case deposit(Amount, time: Date, cursor: Cursor, fee: Amount? = nil)
-    case withdrawal(Amount, time: Date, cursor: Cursor, fee: Amount? = nil)
-    case internalMove(Amount, from: String, to: String, time: Date, cursor: Cursor, fee: Amount? = nil)
+    case deposit(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
+    case withdrawal(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
+    case internalMove(Amount, from: String, to: String, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
 }
 
 /// What the client's key may do, as the exchange states it

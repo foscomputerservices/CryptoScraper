@@ -126,28 +126,28 @@ enum LedgerLine<Name: Hashable & Sendable, OrderId: Hashable & Sendable>: Hashab
     }
 }
 
-func line<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, Cursor>) -> LedgerLine<Name, OrderId> {
+func line<Name, OrderId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, TransferId, Cursor>) -> LedgerLine<Name, OrderId> {
     switch item {
     case let .fill(market, side, units, price, fee, order, closedBy, time, _, _):
         .fill(market: market, side: side, units: units, price: price, fee: fee, order: order, closedBy: closedBy, time: time)
     case let .funding(market, amount, rate, time, _):
         .funding(market: market, amount: amount, rate: rate, time: time)
-    case let .deposit(amount, time, _, _):
+    case let .deposit(amount, _, time, _, _):
         .deposit(amount, time: time)
-    case let .withdrawal(amount, time, _, _):
+    case let .withdrawal(amount, _, time, _, _):
         .withdrawal(amount, time: time)
-    case let .internalMove(amount, from, to, time, _, _):
+    case let .internalMove(amount, from, to, _, time, _, _):
         .internalMove(amount, from: from, to: to, time: time)
     }
 }
 
-func cursor<Name, OrderId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, Cursor>) -> Cursor {
+func cursor<Name, OrderId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, TransferId, Cursor>) -> Cursor {
     switch item {
     case let .fill(_, _, _, _, _, _, _, _, cursor, _): cursor
     case let .funding(_, _, _, _, cursor): cursor
-    case let .deposit(_, _, cursor, _): cursor
-    case let .withdrawal(_, _, cursor, _): cursor
-    case let .internalMove(_, _, _, _, cursor, _): cursor
+    case let .deposit(_, _, _, cursor, _): cursor
+    case let .withdrawal(_, _, _, cursor, _): cursor
+    case let .internalMove(_, _, _, _, _, cursor, _): cursor
     }
 }
 

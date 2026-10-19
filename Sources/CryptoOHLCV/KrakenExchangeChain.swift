@@ -361,7 +361,8 @@ public final class KrakenScanner: CryptoScanner, Sendable {
 
 /// An item of Kraken's ledger as the 2023 protocol's transaction: its time, its amount and its id
 ///
-/// The id is the order's for a fill and the item's cursor for every other kind, each as its client writes it; the
+/// The id is the order's for a fill, the exchange's own transfer id for a deposit, a withdrawal or a move, and the
+/// item's cursor for a funding payment, each as its client writes it; the
 /// kind is the ledger item's case ("fill", "funding", "deposit", "withdrawal", "internalMove").
 public struct KrakenTransaction: CryptoTransaction, Sendable {
     public typealias Contract = KrakenHolding
@@ -377,7 +378,8 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
     public let amount: Amount<KrakenHolding>
     /// When the item happened, as its client states it
     public let timeStamp: Date
-    /// The order's id for a fill, the item's cursor for every other kind, as its client writes them
+    /// The order's id for a fill, the transfer id for a deposit, a withdrawal or a move, the item's cursor for a
+    /// funding payment, as its client writes them
     public let transactionId: String
     /// `nil`: an exchange's ledger states no gas
     public var gas: Int? { nil }
@@ -396,7 +398,7 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
     ///
     /// - Throws: ``ExchangeClientError/refused(code:text:)`` when the item's amount is in no Kraken holding; the
     ///   encoder's error when its id or cursor does not encode
-    public init<OrderId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<KrakenMarketName, OrderId, Cursor>) throws {
+    public init<OrderId: Encodable, TransferId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<KrakenMarketName, OrderId, TransferId, Cursor>) throws {
         let baseUnits: Int128
         let instance: AssetInstance
         let time: Date
@@ -409,12 +411,12 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")
-        case let .deposit(deposited, depositTime, cursor, _):
-            (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: cursor), "deposit")
-        case let .withdrawal(withdrawn, withdrawalTime, cursor, _):
-            (baseUnits, instance, time, id, kind) = (withdrawn.baseUnits, withdrawn.instance, withdrawalTime, try Self.text(of: cursor), "withdrawal")
-        case let .internalMove(moved, source, destination, moveTime, cursor, _):
-            (baseUnits, instance, time, id, kind) = (moved.baseUnits, moved.instance, moveTime, try Self.text(of: cursor), "internalMove")
+        case let .deposit(deposited, transfer, depositTime, _, _):
+            (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: transfer), "deposit")
+        case let .withdrawal(withdrawn, transfer, withdrawalTime, _, _):
+            (baseUnits, instance, time, id, kind) = (withdrawn.baseUnits, withdrawn.instance, withdrawalTime, try Self.text(of: transfer), "withdrawal")
+        case let .internalMove(moved, source, destination, transfer, moveTime, _, _):
+            (baseUnits, instance, time, id, kind) = (moved.baseUnits, moved.instance, moveTime, try Self.text(of: transfer), "internalMove")
             from = KrakenHolding(address: source)
             to = KrakenHolding(address: destination)
         }

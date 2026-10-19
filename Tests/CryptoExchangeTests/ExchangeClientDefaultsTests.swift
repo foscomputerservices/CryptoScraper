@@ -15,6 +15,7 @@ private struct WalletlessClient: ExchangeClient {
     typealias Credential = String
     typealias MarketName = String
     typealias OrderId = Int
+    typealias TransferId = String
     typealias Cursor = Int
 
     func markets() async throws -> [ExchangeClientMarket<String>] { [] }
@@ -26,7 +27,7 @@ private struct WalletlessClient: ExchangeClient {
     func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<String, Int>] { [] }
     func cancelOrder(_ id: Int, market: String, account: String) async throws {}
     func accountState(account: String) async throws -> ExchangeClientAccountState<String> { throw ExchangeClientError.notOffered(member: "accountState") }
-    func ledgerItems(account: String, since: Int?) async throws -> [ExchangeClientLedgerItem<String, Int, Int>] { [] }
+    func ledgerItems(account: String, since: Int?) async throws -> [ExchangeClientLedgerItem<String, Int, String, Int>] { [] }
     func setLeverage(_ leverage: Int, market: String, isolated: Bool, account: String) async throws {}
     func transfer(_ amount: Amount, from: String, to: String) async throws {}
     func keyFacts() async throws -> ExchangeClientKeyFacts { throw ExchangeClientError.notOffered(member: "keyFacts") }
