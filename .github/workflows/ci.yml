@@ -3,12 +3,17 @@ name: CI
 # The package is Swift tools 6.0, language mode 6 on its new libraries, with a floor of 26 on the Apple platforms, so the
 # Apple jobs need the macOS 26 SDK: the newest Xcode 26 or 27 the macos-26 runner carries. The platforms list sets Apple floors only; Linux builds with a Swift 6 toolchain.
 
+# A change to the documents alone (Markdown, the license) builds and tests nothing: no check is required by the
+# branch's protection, so a skipped run blocks no merge (the owner's word of 2026-10-19). A change touching any other
+# file runs everything, documents included.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     tags: ["v*"]
+    paths-ignore: ["**.md", "LICENSE"]
   pull_request:
+    paths-ignore: ["**.md", "LICENSE"]
 
 # A new push supersedes the run in progress on the same ref, which is cancelled; a run the latest push needs is never
 # cancelled (the owner's rule of 2026-10-06).
