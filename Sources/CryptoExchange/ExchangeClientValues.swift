@@ -266,6 +266,11 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 /// A fill's `positionEffect` is what the fill did to the position, as the exchange states it, `nil` where the
 /// exchange states none; it is last and defaults to `nil`, so a fill made without it states no effect.
 ///
+/// A funding item's `payments` is the number of payments the exchange states the item sums, where it hands up a
+/// summary in place of the payments themselves (Hyperliquid folds funding older than about a week into one item per
+/// market per day, its `nSamples`); `nil` where the exchange states no count, the item being one payment. A consumer
+/// tells a summary by this, never by the item's time. It is last and defaults to `nil`.
+///
 /// A deposit's, a withdrawal's and a move's `id` is the exchange's own identity of the movement, required: a fee
 /// charged on it, or a later read of it, names it by this. Each client states which of its exchange's ids it is; an
 /// item its exchange lists without one is refused (``ExchangeClientError/malformedResponse(text:)``), never handed up
@@ -278,7 +283,7 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 /// so an item made without it states no fee.
 public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, TransferId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
     case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil)
-    case funding(market: Name, amount: Amount, rate: Fraction, time: Date, cursor: Cursor)
+    case funding(market: Name, amount: Amount, rate: Fraction, time: Date, cursor: Cursor, payments: Int? = nil)
     case deposit(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
     case withdrawal(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
     case internalMove(Amount, from: String, to: String, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)

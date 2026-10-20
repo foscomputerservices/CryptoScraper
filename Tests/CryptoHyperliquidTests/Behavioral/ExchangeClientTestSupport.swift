@@ -130,7 +130,7 @@ func line<Name, OrderId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Na
     switch item {
     case let .fill(market, side, units, price, fee, order, closedBy, time, _, _):
         .fill(market: market, side: side, units: units, price: price, fee: fee, order: order, closedBy: closedBy, time: time)
-    case let .funding(market, amount, rate, time, _):
+    case let .funding(market, amount, rate, time, _, _):
         .funding(market: market, amount: amount, rate: rate, time: time)
     case let .deposit(amount, _, time, _, _):
         .deposit(amount, time: time)
@@ -144,7 +144,7 @@ func line<Name, OrderId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Na
 func cursor<Name, OrderId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, TransferId, Cursor>) -> Cursor {
     switch item {
     case let .fill(_, _, _, _, _, _, _, _, cursor, _): cursor
-    case let .funding(_, _, _, _, cursor): cursor
+    case let .funding(_, _, _, _, cursor, _): cursor
     case let .deposit(_, _, _, cursor, _): cursor
     case let .withdrawal(_, _, _, cursor, _): cursor
     case let .internalMove(_, _, _, _, _, cursor, _): cursor

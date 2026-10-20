@@ -6,6 +6,20 @@ Each pull request adds its entry under the version it will be released as, dated
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-20
+
+The Hyperliquid ledger read to the end, and a folded funding day's payment count. PR #35.
+
+### Changed
+
+- **Breaking:** `ExchangeClientLedgerItem.funding` carries `payments: Int? = nil`, last: the number of payments the exchange states the item sums, where it hands up a summary in place of the payments; `nil` where it states no count, the item being one payment. A consumer tells a summary by this, never by the item's time. A positional pattern over the case needs one more `_`; constructing a funding item without it is unchanged.
+- **Hyperliquid:** `ledgerItems` walks each of its three windowed reads (`userFillsByTime`, `userFunding`, `userNonFundingLedgerUpdates`) page by page to the end. Hyperliquid's documentation: "Responses that take a time range will only return 500 elements or distinct blocks of data. To query larger ranges, use the last returned timestamp as the next `startTime` for pagination"; `userFillsByTime` "returns at most 2000 fills per response". A page shorter than the cap is the last; a full page is followed from its last item's time, the window being inclusive, and the items already held at that time are dropped. Confirmed on mainnet, 2026-10-20: a `userFunding` from 0 answered 500 of an account's 969 items, and from the 500th's time the other 469.
+- **Hyperliquid:** a funding item's `payments` is the exchange's `nSamples`. Funding older than about a week Hyperliquid hands up folded, one item per market per day stamped at the day's 00:00:00.000 UTC summing the day's payments, `nSamples` their number (1 to 24 observed); a payment carries null, so `nil`. Observed on mainnet and testnet alike, 2026-10-20; the documentation lists `nSamples` without stating the fold.
+
+### Fixed
+
+- **Hyperliquid:** a ledger read from the start, or from an old cursor, on an account with more than 500 funding items (or 2000 fills, or 500 other updates) stopped at the exchange's cap with no sign that more existed; the newest days were missing.
+
 ## [0.12.0] - 2026-10-19
 
 A movement's own id, required. PR #34.

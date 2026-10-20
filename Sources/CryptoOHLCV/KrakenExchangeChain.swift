@@ -409,7 +409,7 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
         switch item {
         case let .fill(_, _, units, _, _, order, _, fillTime, _, _):
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
-        case let .funding(_, funded, _, fundingTime, cursor):
+        case let .funding(_, funded, _, fundingTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")
         case let .deposit(deposited, transfer, depositTime, _, _):
             (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: transfer), "deposit")
