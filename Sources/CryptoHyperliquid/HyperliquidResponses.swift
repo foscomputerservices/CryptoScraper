@@ -93,7 +93,12 @@ struct HyperliquidClearinghouseState: Decodable, Sendable {
     let time: Int64
 }
 
-struct HyperliquidFill: Decodable, Sendable {
+// An item of a windowed read (`startTime`, `endTime`): its millisecond, by which the client pages.
+protocol HyperliquidTimed {
+    var time: Int64 { get }
+}
+
+struct HyperliquidFill: Decodable, Sendable, HyperliquidTimed {
     let coin: String
     let px: WireDecimal
     let sz: WireDecimal
@@ -126,11 +131,14 @@ struct HyperliquidFill: Decodable, Sendable {
     }
 }
 
-struct HyperliquidFunding: Decodable, Sendable {
+// `userFunding`: a payment, or, for funding older than about a week, Hyperliquid's one item per coin per day summing
+// the day's payments, `nSamples` their number (null on a payment). Observed on mainnet and testnet alike, 2026-10-20.
+struct HyperliquidFunding: Decodable, Sendable, HyperliquidTimed {
     struct Delta: Decodable, Sendable {
         let coin: String
         let usdc: WireDecimal
         let fundingRate: WireDecimal
+        let nSamples: Int?
     }
 
     let time: Int64
@@ -151,7 +159,7 @@ struct HyperliquidSpotState: Decodable, Sendable {
 
 // `userNonFundingLedgerUpdates`: each item's `delta` by its `type`, the kinds C30 carries read, the others kept as other.
 // A withdrawal's and a move's `fee` is the wire's, `nil` where the item carries none; every fee read is in USDC.
-struct HyperliquidLedgerUpdate: Decodable, Sendable {
+struct HyperliquidLedgerUpdate: Decodable, Sendable, HyperliquidTimed {
     enum Delta: Sendable {
         case deposit(WireDecimal)
         case withdrawal(WireDecimal, fee: WireDecimal?)

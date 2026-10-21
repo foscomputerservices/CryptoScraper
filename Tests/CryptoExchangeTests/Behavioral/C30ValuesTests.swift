@@ -247,7 +247,7 @@ struct C30ValuesTests {
     @Test("C30: a funding payment carries its amount and its rate as a fraction")
     func fundingCarriesAmountAndRate() throws {
         let item = ExchangeClientLedgerItem<String, Int, String, Int>.funding(market: "BTC", amount: try amount("-0.0153", "USDC"), rate: try fraction("0.0000125"), time: ms(1_727_000_002_000), cursor: 5)
-        guard case let .funding(_, paid, rate, _, _) = item else {
+        guard case let .funding(_, paid, rate, _, _, _) = item else {
             Issue.record("not funding")
             return
         }

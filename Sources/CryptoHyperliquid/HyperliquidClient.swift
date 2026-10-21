@@ -355,10 +355,19 @@ public struct HyperliquidClient: ExchangeClient {
     /// The fills, the funding payments and the deposits, withdrawals and internal moves of `account` after `since`
     ///
     /// Reads from `since`'s millisecond (from time 0 when `nil`) and hands up, in order, only the items after the
-    /// cursor `{milliseconds, place}`; each item carries its own cursor (``HyperliquidLedgerCursor``). A fill's time
-    /// is Hyperliquid's, and its position effect is the one Hyperliquid states in the fill's `dir` ("Open Long" and
-    /// "Open Short" open, "Close Long" and "Close Short" close; any other word, `nil`). Update kinds the shared ledger
-    /// has no case for are not handed up.
+    /// cursor `{milliseconds, place}`; each item carries its own cursor (``HyperliquidLedgerCursor``). Each of the
+    /// three reads (`userFillsByTime`, `userFunding`, `userNonFundingLedgerUpdates`) is walked page by page to the end,
+    /// as Hyperliquid's documentation directs: a windowed answer holds at most 500 items (2000 fills), and the next
+    /// page starts at the last item's time. A fill's time is Hyperliquid's, and its position effect is the one
+    /// Hyperliquid states in the fill's `dir` ("Open Long" and "Open Short" open, "Close Long" and "Close Short" close;
+    /// any other word, `nil`). Update kinds the shared ledger has no case for are not handed up.
+    ///
+    /// Funding older than about a week Hyperliquid hands up folded, one item per market per day stamped at the day's
+    /// 00:00:00.000 UTC summing the day's payments, with `nSamples` their number (observed on mainnet and testnet
+    /// alike, 2026-10-20; the documentation lists the field without stating the fold). Such an item's `payments` is
+    /// that number, and a payment's is `nil`. The fold is relative to the present, so a read from an old cursor hands
+    /// up folded days where an earlier read handed up their payments: a consumer that keeps both would count the week
+    /// twice (a reading for the owner's pen; the library does not unfold).
     ///
     /// A withdrawal's and a move's fee is the update's `fee` in USDC, `nil` where it carries none (a deposit and an
     /// `accountClassTransfer` never do, nor has a recorded `subAccountTransfer`); the amount is the update's `usdc` or
@@ -372,10 +381,10 @@ public struct HyperliquidClient: ExchangeClient {
         do {
             try declared.get()
             let address = try await self.address(of: account)
-            let start = HyperliquidWireValue.integer(since?.milliseconds ?? 0)
-            let fills: [HyperliquidFill] = try await info(.map([("type", .string("userFillsByTime")), ("user", .string(address)), ("startTime", start)]))
-            let funding: [HyperliquidFunding] = try await info(.map([("type", .string("userFunding")), ("user", .string(address)), ("startTime", start)]))
-            let updates: [HyperliquidLedgerUpdate] = try await info(.map([("type", .string("userNonFundingLedgerUpdates")), ("user", .string(address)), ("startTime", start)]))
+            let start = since?.milliseconds ?? 0
+            let fills: [HyperliquidFill] = try await pages(of: "userFillsByTime", user: address, from: start, pageSize: 2000)
+            let funding: [HyperliquidFunding] = try await pages(of: "userFunding", user: address, from: start, pageSize: 500)
+            let updates: [HyperliquidLedgerUpdate] = try await pages(of: "userNonFundingLedgerUpdates", user: address, from: start, pageSize: 500)
 
             // Each item with its millisecond and its order within the millisecond: the fills by trade id, then the
             // funding by coin, then the other updates by hash; its cursor is made once the order is known.
@@ -402,7 +411,8 @@ public struct HyperliquidClient: ExchangeClient {
                 let amount = try payment.delta.usdc.amount(of: usdc, in: registry)
                 let rate = try Self.rate(payment.delta.fundingRate)
                 items.append((payment.time, 1, payment.delta.coin, { cursor in
-                    .funding(market: market, amount: amount, rate: rate, time: Date(wireMilliseconds: payment.time), cursor: cursor)
+                    .funding(market: market, amount: amount, rate: rate, time: Date(wireMilliseconds: payment.time), cursor: cursor,
+                             payments: payment.delta.nSamples)
                 }))
             }
             for update in updates {
@@ -447,6 +457,32 @@ public struct HyperliquidClient: ExchangeClient {
             return handedUp
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
+    }
+
+    // Every item of a windowed info read from `from`, the exchange's pages walked to the end. Hyperliquid's documentation:
+    // "Responses that take a time range will only return 500 elements or distinct blocks of data. To query larger ranges,
+    // use the last returned timestamp as the next startTime for pagination"; `userFillsByTime` states 2000 per response.
+    // `pageSize` is the documented cap, so a shorter page is the last; a full page is followed from its last millisecond.
+    // The window is inclusive, so the next page repeats the items already held at that millisecond (as many as were
+    // held, leading it), and those are dropped; a page that adds nothing ends the walk. Confirmed on mainnet 2026-10-20:
+    // a `userFunding` from 0 answered 500 of 969 items, and from the 500th's time the other 469 behind that one.
+    private func pages<Item: Decodable & Sendable & HyperliquidTimed>(of type: String, user: String, from start: Int64, pageSize: Int) async throws -> [Item] {
+        var items: [Item] = []
+        var from = start
+        while true {
+            let page: [Item] = try await info(.map([("type", .string(type)), ("user", .string(user)), ("startTime", .integer(from))]))
+            let held = items.count { $0.time == from }
+            let leading = page.prefix { $0.time == from }.count
+            let fresh = page.dropFirst(min(held, leading))
+            guard !fresh.isEmpty else {
+                return items
+            }
+            items.append(contentsOf: fresh)
+            guard page.count >= pageSize, let last = items.last else {
+                return items
+            }
+            from = last.time
         }
     }
 

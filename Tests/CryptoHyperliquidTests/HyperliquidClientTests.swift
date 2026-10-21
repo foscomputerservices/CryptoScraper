@@ -53,8 +53,18 @@ enum Hyperliquid {
             case "userAbstraction": "user-abstraction.json"
             default: "unknown"
             }
-            return .ok(Recording.body("Hyperliquid/\(file)"))
+            return .ok(windowed(Recording.body("Hyperliquid/\(file)"), request))
         }
+    }
+
+    // A recorded windowed read answered as the exchange answers it: the items at or after the request's `startTime`
+    // (inclusive, per Hyperliquid's documentation), so a client walking pages from the last item's time gets that
+    // item again and no more. A recording that is no list, or a request without a start, is served whole.
+    static func windowed(_ body: Data, _ request: URLRequest) -> Data {
+        guard let start = request.jsonBody["startTime"] as? Int64,
+              let items = try? JSONSerialization.jsonObject(with: body) as? [[String: Any]] else { return body }
+        let kept = items.filter { (($0["time"] as? Int64) ?? 0) >= start }
+        return try! JSONSerialization.data(withJSONObject: kept)
     }
 
     static func client(_ session: ReplaySession, now: Date = recordedAt) -> HyperliquidClient {
@@ -314,7 +324,7 @@ struct HyperliquidClientTests {
         #expect(items.count == 11 + 500 + 4)
         let cursors = items.map { item -> Int64 in
             switch item {
-            case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor),
+            case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor, _),
                  .deposit(_, _, _, let cursor, _), .withdrawal(_, _, _, let cursor, _), .internalMove(_, _, _, _, _, let cursor, _): cursor.milliseconds
             }
         }
@@ -540,6 +550,82 @@ struct HyperliquidClientGapsTests {
         #expect(result == .resting(id: HyperliquidOrderId(77_738_308), time: clock))
     }
 
+    // MARK: The funding read's pages and a folded day's payments (fosline's request of 2026-10-20: a read from the start
+    // on an old sub-account stopped at the exchange's 500th item, the last days missing, and `nSamples` was dropped)
+
+    // The recorded sub-account's funding is 500 items, Hyperliquid's documented cap on a windowed answer, the last at
+    // 1_790_971_200_006 (one item, ETH): the client asks again from that millisecond; this second page holds that item
+    // again, which it drops, and three later payments, which it keeps. A third page from the last of those is empty.
+    static let fundingLast: Int64 = 1_790_971_200_006
+    static func fundingPage(at time: Int64, coin: String, usdc: String, samples: String = "null") -> String {
+        #"{"time":\#(time),"hash":"0x0000000000000000000000000000000000000109000000000000000000000023","delta":{"type":"funding","coin":"\#(coin)","usdc":"\#(usdc)","szi":"0.0089","fundingRate":"0.0000125","nSamples":\#(samples)}}"#
+    }
+    static func pagedFunding() -> ReplaySession {
+        let page1 = Recording.body("Hyperliquid/funding-sub.json")
+        let page2 = Data("[\(fundingPage(at: fundingLast, coin: "ETH", usdc: "0.00069")),\(fundingPage(at: fundingLast + 3_600_000, coin: "ETH", usdc: "0.0007")),\(fundingPage(at: fundingLast + 7_200_000, coin: "ETH", usdc: "0.0008")),\(fundingPage(at: fundingLast + 7_200_000, coin: "BNB", usdc: "0.0009"))]".utf8)
+        let route = HyperliquidScannerTests.declaredOnlyRoute()
+        return ReplaySession { request, index in
+            guard request.jsonBody["type"] as? String == "userFunding" else { return route(request, index) }
+            switch request.jsonBody["startTime"] as? Int64 {
+            case .some(0): return .ok(page1)
+            case .some(fundingLast): return .ok(page2)
+            default: return .ok(Data("[]".utf8))
+            }
+        }
+    }
+
+    @Test func theFundingReadWalksTheExchangesPagesToTheEnd() async throws {
+        let session = Self.pagedFunding()
+        let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
+        #expect(items.count == 11 + 503 + 4)
+        let starts = session.requests.filter { $0.jsonBody["type"] as? String == "userFunding" }.map { $0.jsonBody["startTime"] as? Int64 }
+        #expect(starts == [0, Self.fundingLast])
+        let funding = items.compactMap { item -> (Date, Amount)? in
+            if case let .funding(_, amount, _, time, _, _) = item { (time, amount) } else { nil }
+        }
+        // The boundary item once, then the three new payments, the two at one millisecond in coin order.
+        #expect(funding.count { $0.0 == Date(wireMilliseconds: Self.fundingLast) } == 1)
+        #expect(funding.suffix(3).map(\.1) == [Amount(baseUnits: 70_000, of: Hyperliquid.usdc), Amount(baseUnits: 90_000, of: Hyperliquid.usdc), Amount(baseUnits: 80_000, of: Hyperliquid.usdc)])
+        let lastFunding = try #require(items.last { if case .funding = $0 { true } else { false } })
+        #expect(Self.cursor(lastFunding) == HyperliquidLedgerCursor(milliseconds: Self.fundingLast + 7_200_000, place: 2))
+    }
+
+    // The recorded fills are 36, short of the documented 2000, and the moves 4: each read once. The funding read, 500,
+    // is a full page, so it is asked once more from the last item's time, and the window's one repeat ends the walk.
+    @Test func aPageShortOfTheCapIsTheLastAndAFullOneIsFollowed() async throws {
+        let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
+        let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
+        #expect(items.count == 11 + 500 + 4)
+        let types = session.requests.compactMap { $0.jsonBody["type"] as? String }
+        #expect(types.count { $0 == "userFillsByTime" } == 1)
+        #expect(types.count { $0 == "userNonFundingLedgerUpdates" } == 1)
+        #expect(types.count { $0 == "userFunding" } == 2)
+    }
+
+    // A read from a cursor starts at the cursor's millisecond, as before, and still walks.
+    @Test func aReadFromACursorStartsItsFirstPageThere() async throws {
+        let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
+        let since = HyperliquidLedgerCursor(milliseconds: 1_790_467_200_025, place: 2)
+        let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: since)
+        let starts = session.requests.filter { $0.jsonBody["type"] as? String == "userFunding" }.map { $0.jsonBody["startTime"] as? Int64 }
+        #expect(starts.first == since.milliseconds)
+        #expect(items.allSatisfy { (Self.cursor($0).milliseconds, Self.cursor($0).place) > (since.milliseconds, since.place) })
+    }
+
+    // The recording's first item is ALGO's folded day of 2026-09-22, `nSamples` 24, stamped 00:00:00.000 UTC; the
+    // payment of 2026-09-27 00:00:00.025 carries null. The item states the count the exchange stated, or none.
+    @Test func aFoldedDayCarriesItsPaymentsCountAndAPaymentNone() async throws {
+        let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
+        let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
+        let day = try #require(items.first { if case .funding = $0 { true } else { false } })
+        #expect(day == .funding(market: try HyperliquidMarketName(validating: "ALGO"), amount: Amount(baseUnits: -637_900, of: Hyperliquid.usdc),
+                                rate: try WireDecimal(parsing: "0.0000125").fraction(), time: Date(wireMilliseconds: 1_790_035_200_000),
+                                cursor: HyperliquidLedgerCursor(milliseconds: 1_790_035_200_000, place: 1), payments: 24))
+        let payment = try #require(items.first { if case let .funding(_, _, _, time, _, _) = $0 { time == Date(wireMilliseconds: 1_790_467_200_025) } else { false } })
+        guard case let .funding(_, _, _, _, _, payments) = payment else { return }
+        #expect(payments == nil)
+    }
+
     // MARK: A ledger update's fee (fosline's request of 2026-10-19: the faucet's internalTransfer of 1,000 USDC carried
     // `fee: "1.0"`, which the client dropped)
 
@@ -668,7 +754,7 @@ struct HyperliquidClientGapsTests {
 
     static func cursor(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>) -> HyperliquidLedgerCursor {
         switch item {
-        case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor),
+        case .fill(_, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor, _),
              .deposit(_, _, _, let cursor, _), .withdrawal(_, _, _, let cursor, _), .internalMove(_, _, _, _, _, let cursor, _): cursor
         }
     }
