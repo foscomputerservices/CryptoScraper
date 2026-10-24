@@ -1,5 +1,5 @@
 {
-  "originHash" : "9957cf130998b0b20848949f5d07f5c493b93d3d5bce75cff7985bde83891cc4",
+  "originHash" : "515a5a5bd7c294c9365ee88c5ddc32b5a707496cb63213153a98dcaa81d9f3a9",
   "pins" : [
     {
       "identity" : "aexml",
@@ -87,17 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/foscomputerservices/FOSUtilities.git",
       "state" : {
-        "revision" : "96486bef46ff92578654ccce309d598c8d55c4d3",
-        "version" : "0.20.0"
-      }
-    },
-    {
-      "identity" : "javascriptkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftwasm/JavaScriptKit",
-      "state" : {
-        "revision" : "f4d52190ad1a4011c489165d43d25ae8e321bc4d",
-        "version" : "0.26.2"
+        "revision" : "99fc27e7de8531ec6c2174719e3c9190558f55ea",
+        "version" : "0.21.0"
       }
     },
     {
