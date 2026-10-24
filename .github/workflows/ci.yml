@@ -6,11 +6,14 @@ name: CI
 # A change to the documents alone (Markdown, the license) builds and tests nothing: no check is required by the
 # branch's protection, so a skipped run blocks no merge (the owner's word of 2026-10-19). A change touching any other
 # file runs everything, documents included.
+#
+# A release tag is unprefixed since 0.6.0 (`0.13.0`, made by `gh release create` on the merge commit), so the tag pattern
+# is three dot-separated numbers; the `v*` pattern of the earlier tags (`v0.5.0`) matched nothing since and is dropped.
 on:
   workflow_dispatch:
   push:
     branches: [main]
-    tags: ["v*"]
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
     paths-ignore: ["**.md", "LICENSE"]
   pull_request:
     paths-ignore: ["**.md", "LICENSE"]
