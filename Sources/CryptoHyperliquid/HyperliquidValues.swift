@@ -62,6 +62,31 @@ public struct HyperliquidOrderId: Codable, Hashable, Sendable, Stubbable {
     public static func stub() -> Self { .init(42) }
 }
 
+/// Hyperliquid's id for a fill, the `tid` of a `userFillsByTime` item (118906512037719), its trade id
+///
+/// Hyperliquid's, never a value this package makes. Several fills share one transaction `hash` (two of one order, or of
+/// one block), and the trade id tells them apart (mainnet, 2026-10-24: 2000 fills, 1761 hashes, 2000 trade ids); a fill
+/// listed without one is refused.
+public struct HyperliquidFillId: Codable, Hashable, Sendable, Stubbable {
+    package let tid: Int64
+
+    /// The fill Hyperliquid numbered `tid`
+    public init(_ tid: Int64) {
+        self.tid = tid
+    }
+
+    public init(from decoder: any Decoder) throws {
+        self.tid = try decoder.singleValueContainer().decode(Int64.self)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(tid)
+    }
+
+    public static func stub() -> Self { .init(118_906_512_037_719) }
+}
+
 /// Hyperliquid's id for a movement of money, the `hash` of a `userNonFundingLedgerUpdates` item: `0x` and 64 hex digits
 /// ("0x4afdf4262828628d4c77042b49a3a20000390c0bc32b815feec69f78e72c3c77"), the action's transaction hash
 ///

@@ -266,6 +266,24 @@ struct CoinbaseFills: Decodable, Sendable {
     let cursor: String?
 }
 
+// Get Transaction Summary: the account's fee tier, its maker and taker rates as decimal fractions ("0.0060").
+struct CoinbaseTransactionSummary: Decodable, Sendable {
+    struct FeeTier: Decodable, Sendable {
+        let makerFeeRate: WireDecimal
+        let takerFeeRate: WireDecimal
+
+        private enum CodingKeys: String, CodingKey {
+            case makerFeeRate = "maker_fee_rate", takerFeeRate = "taker_fee_rate"
+        }
+    }
+
+    let feeTier: FeeTier
+
+    private enum CodingKeys: String, CodingKey {
+        case feeTier = "fee_tier"
+    }
+}
+
 struct CoinbaseMovedFunds: Decodable, Sendable {
     let sourcePortfolioUuid: String
 

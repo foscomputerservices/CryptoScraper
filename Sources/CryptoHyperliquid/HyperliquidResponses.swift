@@ -80,6 +80,9 @@ struct HyperliquidClearinghouseState: Decodable, Sendable {
         let leverage: Leverage?
         let entryPx: WireDecimal?
         let liquidationPx: WireDecimal?
+        /// The position's unrealized profit and the margin held for it, in USDC, as stated (both networks state both)
+        let unrealizedPnl: WireDecimal?
+        let marginUsed: WireDecimal?
     }
 
     // A position's leverage: {"type": "isolated" or "cross", "value": 2, …}.
@@ -143,6 +146,16 @@ struct HyperliquidFunding: Decodable, Sendable, HyperliquidTimed {
 
     let time: Int64
     let delta: Delta
+}
+
+// `userFees`: the rates Hyperliquid applies to the account's trades, discounts included ("the fee rates applied to a
+// user's trades … include any active discounts from referrals or staking"): `cross` takes, `add` rests, on the
+// perpetuals book and on the spot book. The schedule and the volumes beside them are not read.
+struct HyperliquidUserFees: Decodable, Sendable {
+    let userCrossRate: WireDecimal
+    let userAddRate: WireDecimal
+    let userSpotCrossRate: WireDecimal
+    let userSpotAddRate: WireDecimal
 }
 
 // `spotClearinghouseState`: the account's spot balances, each by its coin's name and its token's index.

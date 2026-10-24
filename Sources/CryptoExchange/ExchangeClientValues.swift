@@ -206,6 +206,10 @@ public struct ExchangeClientHolding: Hashable, Sendable {
 }
 
 /// A position the exchange holds for an account
+///
+/// `openProfit` is the position's unrealized profit as the exchange states it, in the quote holding, negative for a
+/// loss; `heldMargin` is the margin the exchange states it holds for the position. Each is `nil` where the exchange
+/// states none (a spot exchange's position); both are last and default to `nil`.
 public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Sendable {
     public let market: Name
     public let side: ExchangeClientSide
@@ -213,15 +217,50 @@ public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Senda
     public let entryPrice: Price
     public let mark: Price
     public let liquidationPrice: Price?
+    public let openProfit: Amount?
+    public let heldMargin: Amount?
 
     public init(market: Name, side: ExchangeClientSide, units: Amount, entryPrice: Price, mark: Price,
-                liquidationPrice: Price?) {
+                liquidationPrice: Price?, openProfit: Amount? = nil, heldMargin: Amount? = nil) {
         self.market = market
         self.side = side
         self.units = units
         self.entryPrice = entryPrice
         self.mark = mark
         self.liquidationPrice = liquidationPrice
+        self.openProfit = openProfit
+        self.heldMargin = heldMargin
+    }
+}
+
+/// A fee rate the exchange states for an account, and the scope it states it for
+///
+/// `maker` is the rate on a trade that rested on the book, `taker` on one that took from it, each a fraction of the
+/// trade's value (0.00045 is 4.5 basis points), as the exchange applies them to the account's trades, discounts
+/// included where it states them so; a rebate is negative. The scope is the exchange's own: Hyperliquid states one
+/// pair per book (``Scope/perpetuals``, ``Scope/spot``), Kraken one per market (``Scope/market(_:)``), Coinbase one for
+/// the account (``Scope/account``). A consumer takes the rate whose scope holds the market it asks for.
+public struct ExchangeClientFeeRate<Name: Hashable & Sendable>: Hashable, Sendable {
+    /// What a fee rate applies to
+    public enum Scope: Hashable, Sendable {
+        /// Every market of the account
+        case account
+        /// The exchange's perpetuals book
+        case perpetuals
+        /// The exchange's spot book
+        case spot
+        /// One market
+        case market(Name)
+    }
+
+    public let scope: Scope
+    public let maker: Fraction
+    public let taker: Fraction
+
+    public init(scope: Scope, maker: Fraction, taker: Fraction) {
+        self.scope = scope
+        self.maker = maker
+        self.taker = taker
     }
 }
 
@@ -259,9 +298,15 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 ///
 /// ```swift
 /// for item in try await client.ledgerItems(account: account, since: cursor) {
-///     if case .fill(_, _, _, _, let fee, let order, _, _, _, _) = item { … }   // the fee read, never estimated
+///     if case .fill(_, _, _, _, let fee, let order, _, _, _, _, _) = item { … }   // the fee read, never estimated
 /// }
 /// ```
+///
+/// A fill's `id` is the exchange's own identity of the fill, required, beside the `order` it filled: two fills of one
+/// order, or of one transaction, differ by it, and a consumer names the fill's postings by it. Each client states
+/// which of its exchange's ids it is; a fill its exchange lists without one is refused
+/// (``ExchangeClientError/malformedResponse(text:)``). A funding item has no id of its own: its identity is its
+/// cursor, the exchange naming it by its time and market alone.
 ///
 /// A fill's `positionEffect` is what the fill did to the position, as the exchange states it, `nil` where the
 /// exchange states none; it is last and defaults to `nil`, so a fill made without it states no effect.
@@ -281,8 +326,8 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 /// it is the exchange's own figure, and the fee is never taken from it or added to it here: what the two do to a
 /// balance is the exchange's convention, stated on each client's `ledgerItems`. The fee is last and defaults to `nil`,
 /// so an item made without it states no fee.
-public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, TransferId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
-    case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil)
+public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, FillId: Hashable & Sendable, TransferId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
+    case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, id: FillId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil)
     case funding(market: Name, amount: Amount, rate: Fraction, time: Date, cursor: Cursor, payments: Int? = nil)
     case deposit(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
     case withdrawal(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)

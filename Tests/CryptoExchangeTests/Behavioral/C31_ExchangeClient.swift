@@ -39,7 +39,7 @@ private struct EchoingClient: ExchangeClient {
     func openOrders(account: String) async throws -> [ExchangeClientOpenOrder<String, Int>] { [] }
     func cancelOrder(_ id: Int, market: String, account: String) async throws {}
     func accountState(account: String) async throws -> ExchangeClientAccountState<String> { throw ExchangeClientError.notOffered(member: "accountState") }
-    func ledgerItems(account: String, since: Int?) async throws -> [ExchangeClientLedgerItem<String, Int, String, Int>] { [] }
+    func ledgerItems(account: String, since: Int?) async throws -> [ExchangeClientLedgerItem<String, Int, Int, String, Int>] { [] }
     func setLeverage(_ leverage: Int, market: String, isolated: Bool, account: String) async throws { throw ExchangeClientError.notOffered(member: "setLeverage") }
     func transfer(_ amount: Amount, from: String, to: String) async throws {}
     func keyFacts() async throws -> ExchangeClientKeyFacts { throw ExchangeClientError.notOffered(member: "keyFacts") }
@@ -111,10 +111,10 @@ struct C31_ExchangeClientTests {
         }
         let registry = try AssetRegistry(declarations)
         let price = try Price(Amount(whole: 42, of: quote, in: registry), per: base, in: registry)
-        let item = ExchangeClientLedgerItem<String, Int, String, Int>.fill(
+        let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(
             market: "FREDBARNEY", side: .buy, units: Amount(baseUnits: 42, of: base), price: price,
-            fee: Amount(baseUnits: 1, of: quote), order: 42, closedBy: nil, time: Date(timeIntervalSince1970: 42), cursor: 42)
-        guard case let .fill(_, _, units, at, fee, _, _, _, _, _) = item else { Issue.record("not a fill"); return }
+            fee: Amount(baseUnits: 1, of: quote), order: 42, id: 1, closedBy: nil, time: Date(timeIntervalSince1970: 42), cursor: 42)
+        guard case let .fill(_, _, units, at, fee, _, _, _, _, _, _) = item else { Issue.record("not a fill"); return }
         #expect(units.instance == base)
         #expect(at.base == base)
         #expect(fee.instance == quote)

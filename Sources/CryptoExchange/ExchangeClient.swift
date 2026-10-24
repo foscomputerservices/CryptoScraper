@@ -32,6 +32,9 @@ public protocol ExchangeClient: Sendable {
     associatedtype MarketName: Hashable & Sendable
     /// The exchange's own id for an order, as its API has it
     associatedtype OrderId: Codable & Hashable & Sendable
+    /// The exchange's own id for a fill (one trade of an order), as its API has it: two fills of one order, or of one
+    /// transaction, differ by it
+    associatedtype FillId: Codable & Hashable & Sendable
     /// The exchange's own id for a movement of money (a deposit, a withdrawal, a move between accounts), as its API
     /// has it
     associatedtype TransferId: Codable & Hashable & Sendable
@@ -56,7 +59,12 @@ public protocol ExchangeClient: Sendable {
     /// The account's ledger items after `since`, oldest first; `since` is the cursor of the last item read (`nil`
     /// reads from the start), which names the oldest unmatched item, never a time alone, so every item is handed up
     /// once and none is skipped, including a second item at the cursor's own instant
-    func ledgerItems(account: String, since: Cursor?) async throws -> [ExchangeClientLedgerItem<MarketName, OrderId, TransferId, Cursor>]
+    func ledgerItems(account: String, since: Cursor?) async throws -> [ExchangeClientLedgerItem<MarketName, OrderId, FillId, TransferId, Cursor>]
+    /// The fee rates the exchange states for the account, each with the scope the exchange states it for
+    /// (``ExchangeClientFeeRate``): one market, one of its books, or the whole account. The rates are the ones the
+    /// exchange applies to the account's trades, discounts included where it states them so. A conformer that does
+    /// not read them throws ``ExchangeClientError/notOffered(member:)``, the default
+    func feeRates(account: String) async throws -> [ExchangeClientFeeRate<MarketName>]
     func setLeverage(_ leverage: Int, market: MarketName, isolated: Bool, account: String) async throws
     func transfer(_ amount: Amount, from: String, to: String) async throws
     func keyFacts() async throws -> ExchangeClientKeyFacts
@@ -71,5 +79,11 @@ public extension ExchangeClient {
     /// its own `holdings(account:)`
     func holdings(account: String) async throws -> [ExchangeClientHolding] {
         throw ExchangeClientError.notOffered(member: "holdings")
+    }
+
+    /// Throws ``ExchangeClientError/notOffered(member:)``: a conformer that reads its exchange's fee rates states so by
+    /// its own `feeRates(account:)`
+    func feeRates(account: String) async throws -> [ExchangeClientFeeRate<MarketName>] {
+        throw ExchangeClientError.notOffered(member: "feeRates")
     }
 }

@@ -50,6 +50,7 @@ enum Coinbase {
             case path.hasSuffix("/accounts"): "private-list-accounts.json"
             case path.hasSuffix("/key_permissions"): "private-key-permissions.json"
             case path.hasSuffix("/portfolios/move_funds"): "private-move-funds.json"
+            case path.hasSuffix("/transaction_summary"): "private-transaction-summary.json"
             default: "none"
             }
             return .ok(Recording.body("Coinbase/\(file)"))
@@ -239,7 +240,7 @@ struct CoinbaseClientTests {
         let onePage = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(onePage.utf8))]))
         let items = try await Coinbase.client(session).ledgerItems(account: "", since: nil)
-        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, let cursor, _) = try #require(items.first) else {
+        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _) = try #require(items.first) else {
             Issue.record("Not a fill")
             return
         }
@@ -250,6 +251,10 @@ struct CoinbaseClientTests {
         #expect(order == (try CoinbaseOrderId(validating: "0000-000000-000000")))
         #expect(try cursor.toJSON().fromJSON() == cursor)
         #expect(items.count == 1)
+        // The fill's id is its trade_id, the id the cursor names it by.
+        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _) = try #require(items.first) else { return }
+        #expect(fillId == (try CoinbaseTradeId(validating: "1111-11111-111111")))
+        #expect(cursor.read == [fillId])
     }
 
     // List Fills states no position effect (the documented schema, the recording built from it, has side and
@@ -258,7 +263,7 @@ struct CoinbaseClientTests {
         let onePage = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(onePage.utf8))]))
         let items = try await Coinbase.client(session).ledgerItems(account: "", since: nil)
-        guard case .fill(_, _, _, _, _, _, _, _, _, let effect) = try #require(items.first) else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = try #require(items.first) else {
             Issue.record("Not a fill")
             return
         }
@@ -350,7 +355,7 @@ struct CoinbaseClientTests {
     static func read(_ page: String, since: CoinbaseLedgerCursor?) async throws -> [CoinbaseLedgerCursor] {
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(page.utf8))]))
         return try await Coinbase.client(session).ledgerItems(account: "", since: since).compactMap { item in
-            guard case .fill(_, _, _, _, _, _, _, _, let cursor, _) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _) = item else { return nil }
             return cursor
         }
     }
@@ -452,5 +457,14 @@ struct CoinbaseClientGapsTests {
         let session = ReplaySession(route: Coinbase.route(["/key_permissions": .ok(Data(permissions.utf8))]))
         let state = try await Coinbase.client(session).accountState(account: "8bfc20d7-0000-4000-8000-000000000001")
         #expect(state.mode.name == "DEFAULT")
+    }
+
+    // The account's fee rates (fosline's WI-20 ask of 2026-10-24): Get Transaction Summary's fee tier, one pair for the
+    // whole account, the rates as decimal fractions.
+    @Test func theFeeRatesAreTheFeeTiersPairForTheWholeAccount() async throws {
+        let session = ReplaySession(route: Coinbase.route())
+        let rates = try await Coinbase.client(session).feeRates(account: "")
+        #expect(rates == [ExchangeClientFeeRate(scope: .account, maker: Fraction(basisPoints: 20), taker: Fraction(basisPoints: 10))])
+        #expect(session.requests.contains { $0.url!.path.hasSuffix("/transaction_summary") && $0.httpMethod == "GET" })
     }
 }

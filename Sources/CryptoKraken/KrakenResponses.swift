@@ -149,10 +149,47 @@ struct KrakenOpenPosition: Decodable, Sendable {
     let vol: WireDecimal
     let volClosed: WireDecimal
     let value: WireDecimal
+    /// The position's initial margin, in the quote asset, as stated
+    let margin: WireDecimal?
+    /// The position's unrealized profit (`docalcs`), in the quote asset; Kraken writes a gain with a leading "+"
+    /// ("+154186.9728"), which is dropped before the number is read
+    let net: WireDecimal?
 
     private enum CodingKeys: String, CodingKey {
-        case pair, type, cost, vol, value
+        case pair, type, cost, vol, value, margin, net
         case volClosed = "vol_closed"
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.pair = try container.decode(String.self, forKey: .pair)
+        self.type = try container.decode(String.self, forKey: .type)
+        self.cost = try container.decode(WireDecimal.self, forKey: .cost)
+        self.vol = try container.decode(WireDecimal.self, forKey: .vol)
+        self.volClosed = try container.decode(WireDecimal.self, forKey: .volClosed)
+        self.value = try container.decode(WireDecimal.self, forKey: .value)
+        self.margin = try container.decodeIfPresent(WireDecimal.self, forKey: .margin)
+        if let signed = try container.decodeIfPresent(String.self, forKey: .net) {
+            self.net = try WireDecimal(parsing: signed.hasPrefix("+") ? String(signed.dropFirst()) : signed)
+        } else {
+            self.net = nil
+        }
+    }
+}
+
+// TradeVolume: the account's taker fee (`fees`) and maker fee (`fees_maker`) for each pair asked, each "expressed as
+// percentages" ("0.2600" is 0.26 %); a pair with one schedule has no `fees_maker` entry.
+struct KrakenTradeVolume: Decodable, Sendable {
+    struct Fee: Decodable, Sendable {
+        let fee: WireDecimal
+    }
+
+    let fees: [String: Fee]?
+    let feesMaker: [String: Fee]?
+
+    private enum CodingKeys: String, CodingKey {
+        case fees
+        case feesMaker = "fees_maker"
     }
 }
 
