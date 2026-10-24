@@ -429,7 +429,7 @@ public struct HyperliquidTransaction: CryptoTransaction, Sendable {
     ///
     /// - Throws: ``ExchangeClientError/refused(code:text:)`` when the item's amount is in no Hyperliquid holding; the
     ///   encoder's error when its id or cursor does not encode
-    public init<OrderId: Encodable, TransferId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, OrderId, TransferId, Cursor>) throws {
+    public init<OrderId: Encodable, FillId: Encodable, TransferId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, OrderId, FillId, TransferId, Cursor>) throws {
         let baseUnits: Int128
         let instance: AssetInstance
         let time: Date
@@ -438,7 +438,7 @@ public struct HyperliquidTransaction: CryptoTransaction, Sendable {
         var from: HyperliquidHolding?
         var to: HyperliquidHolding?
         switch item {
-        case let .fill(_, _, units, _, _, order, _, fillTime, _, _):
+        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _):
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")

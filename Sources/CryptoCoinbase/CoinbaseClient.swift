@@ -47,6 +47,7 @@ public struct CoinbaseClient: ExchangeClient {
     public typealias Credential = CoinbaseCredential
     public typealias MarketName = CoinbaseMarketName
     public typealias OrderId = CoinbaseOrderId
+    public typealias FillId = CoinbaseTradeId
     public typealias TransferId = CoinbaseTransferId
     public typealias Cursor = CoinbaseLedgerCursor
 
@@ -263,6 +264,18 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
+    /// The rates Coinbase applies to the key's trades, from Get Transaction Summary: the account's fee tier's
+    /// `maker_fee_rate` and `taker_fee_rate`, one pair for the whole account (``ExchangeClientFeeRate/Scope/account``),
+    /// each a decimal fraction as stated. `account` is not sent: the key reads its own summary.
+    public func feeRates(account: String) async throws -> [ExchangeClientFeeRate<CoinbaseMarketName>] {
+        do {
+            let summary: CoinbaseTransactionSummary = try await send("GET", "/api/v3/brokerage/transaction_summary")
+            return [ExchangeClientFeeRate(scope: .account, maker: try summary.feeTier.makerFeeRate.fraction(), taker: try summary.feeTier.takerFeeRate.fraction())]
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
+        }
+    }
+
     /// The key's portfolio's wallets, each by its currency, once, in the order Coinbase lists them: its available and
     /// held money as `total`, the held part as `held`
     ///
@@ -320,8 +333,8 @@ public struct CoinbaseClient: ExchangeClient {
     /// ids, each fill's cursor names it and every fill before it at its time, and a fill a repeated page repeats is
     /// handed up once. A read is every page Coinbase hands back. `account`
     /// is not sent. A fill's position effect is `nil`: List Fills states none (its side is buy or sell, nothing that
-    /// opens or closes a position).
-    public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTransferId, CoinbaseLedgerCursor>] {
+    /// opens or closes a position). A fill's `id` is its `trade_id` (``CoinbaseTradeId``), the id the cursor names it by.
+    public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTradeId, CoinbaseTransferId, CoinbaseLedgerCursor>] {
         do {
             try declared.get()
             var fills: [CoinbaseFill] = []
@@ -347,7 +360,7 @@ public struct CoinbaseClient: ExchangeClient {
             }
             keyed.sort { ($0.time, $0.id) < ($1.time, $1.id) }
 
-            var items: [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTransferId, CoinbaseLedgerCursor>] = []
+            var items: [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTradeId, CoinbaseTransferId, CoinbaseLedgerCursor>] = []
             var read: Set<CoinbaseTradeId> = []
             var instant: Date?
             for (at, id, fill) in keyed {
@@ -364,7 +377,7 @@ public struct CoinbaseClient: ExchangeClient {
                 items.append(.fill(
                     market: market, side: fill.side == "BUY" ? .buy : .sell, units: try fill.size.amount(of: pair.base, in: registry),
                     price: try fill.price.price(of: pair.quote, per: pair.base, in: registry), fee: try fill.commission.amount(of: pair.quote, in: registry),
-                    order: try CoinbaseOrderId(validating: fill.orderId), closedBy: nil, time: time, cursor: cursor
+                    order: try CoinbaseOrderId(validating: fill.orderId), id: id, closedBy: nil, time: time, cursor: cursor
                 ))
             }
             return items

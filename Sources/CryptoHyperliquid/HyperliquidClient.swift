@@ -53,6 +53,7 @@ public struct HyperliquidClient: ExchangeClient {
     public typealias Credential = HyperliquidCredential
     public typealias MarketName = HyperliquidMarketName
     public typealias OrderId = HyperliquidOrderId
+    public typealias FillId = HyperliquidFillId
     public typealias TransferId = HyperliquidTransferId
     public typealias Cursor = HyperliquidLedgerCursor
 
@@ -250,8 +251,10 @@ public struct HyperliquidClient: ExchangeClient {
 
     /// The value, the withdrawable amount and the open positions of `account`, in USDC and the coins' holdings
     ///
-    /// `mode` is the account mode of the main wallet (`userAbstraction`), whichever account is read. A position the
-    /// account holds in a coin whose holding is not declared refuses the whole read.
+    /// `balance` is `marginSummary.accountValue`. A position's `openProfit` is its `unrealizedPnl` and its `heldMargin`
+    /// its `marginUsed`, both in USDC as stated. `mode` is the account mode of the main wallet (`userAbstraction`),
+    /// whichever account is read. A position the account holds in a coin whose holding is not declared refuses the
+    /// whole read.
     public func accountState(account: String) async throws -> ExchangeClientAccountState<HyperliquidMarketName> {
         do {
             try declared.get()
@@ -272,7 +275,9 @@ public struct HyperliquidClient: ExchangeClient {
                     market: market, side: held.szi.digits > 0 ? .buy : .sell, units: units,
                     entryPrice: try entry.price(of: usdc, per: base, in: registry),
                     mark: try mark.price(of: usdc, per: base, in: registry),
-                    liquidationPrice: try held.liquidationPx.map { try $0.price(of: usdc, per: base, in: registry) }
+                    liquidationPrice: try held.liquidationPx.map { try $0.price(of: usdc, per: base, in: registry) },
+                    openProfit: try held.unrealizedPnl.map { try $0.amount(of: usdc, in: registry) },
+                    heldMargin: try held.marginUsed.map { try $0.amount(of: usdc, in: registry) }
                 ))
             }
             return ExchangeClientAccountState(
@@ -282,6 +287,23 @@ public struct HyperliquidClient: ExchangeClient {
                 mode: Self.mode(named: abstraction.text),
                 readAt: Date(wireMilliseconds: clearing.time)
             )
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
+    }
+
+    /// The rates Hyperliquid applies to `account`'s trades, from `userFees`: one pair for the perpetuals book
+    /// (`userAddRate` resting, `userCrossRate` taking) and one for the spot book (`userSpotAddRate`, `userSpotCrossRate`),
+    /// in that order, discounts included as the exchange states them. A rate finer than a fraction's nine digits is
+    /// cut toward zero at the ninth, as a funding rate is.
+    public func feeRates(account: String) async throws -> [ExchangeClientFeeRate<HyperliquidMarketName>] {
+        do {
+            let address = try await self.address(of: account)
+            let fees: HyperliquidUserFees = try await info(.map([("type", .string("userFees")), ("user", .string(address))]))
+            return [
+                ExchangeClientFeeRate(scope: .perpetuals, maker: try Self.rate(fees.userAddRate), taker: try Self.rate(fees.userCrossRate)),
+                ExchangeClientFeeRate(scope: .spot, maker: try Self.rate(fees.userSpotAddRate), taker: try Self.rate(fees.userSpotCrossRate))
+            ]
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
         }
@@ -374,10 +396,11 @@ public struct HyperliquidClient: ExchangeClient {
     /// `amount`, as stated. A `send` within one account is a move between its dexes, `"spot"` and `"perp"` (the perp
     /// dex, which the wire names `""`) or a builder dex by its name; between accounts, a move between their addresses.
     /// A `send` of a token other than USDC, or whose fee is in one, is not handed up: the client reads no other spot
-    /// token. A deposit's, a withdrawal's and a move's `id` is the update's `hash` (``HyperliquidTransferId``), the
+    /// token. A fill's `id` is its `tid` (``HyperliquidFillId``); a fill listed without one is refused, the whole read
+    /// with it. A deposit's, a withdrawal's and a move's `id` is the update's `hash` (``HyperliquidTransferId``), the
     /// same in both accounts' ledgers for a move between them; an update of those kinds without one, or with an
     /// all-zero one, is refused, the whole read with it.
-    public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>] {
+    public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>] {
         do {
             try declared.get()
             let address = try await self.address(of: account)
@@ -388,7 +411,7 @@ public struct HyperliquidClient: ExchangeClient {
 
             // Each item with its millisecond and its order within the millisecond: the fills by trade id, then the
             // funding by coin, then the other updates by hash; its cursor is made once the order is known.
-            typealias Made = (HyperliquidLedgerCursor) -> ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>
+            typealias Made = (HyperliquidLedgerCursor) -> ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>
             var items: [(time: Int64, rank: Int, key: String, make: Made)] = []
             for fill in fills {
                 let market = try HyperliquidMarketName(validating: fill.coin)
@@ -397,12 +420,15 @@ public struct HyperliquidClient: ExchangeClient {
                 let units = try fill.sz.amount(of: base, in: registry)
                 let price = try fill.px.price(of: usdc, per: base, in: registry)
                 let fee = try fill.fee.amount(of: usdc, in: registry)
+                guard let tid = fill.tid else {
+                    throw ExchangeClientError.fillWithoutTradeId(order: fill.oid, time: fill.time)
+                }
                 // The trade id as 20 digits, so that text orders it as a number does.
-                let tid = fill.tid.map(String.init) ?? ""
-                let key = String(repeating: "0", count: max(0, 20 - tid.count)) + tid
+                let digits = String(tid)
+                let key = String(repeating: "0", count: max(0, 20 - digits.count)) + digits
                 items.append((fill.time, 0, key, { cursor in
                     .fill(market: market, side: fill.side == "B" ? .buy : .sell, units: units, price: price, fee: fee,
-                          order: HyperliquidOrderId(fill.oid), closedBy: closedBy, time: Date(wireMilliseconds: fill.time), cursor: cursor,
+                          order: HyperliquidOrderId(fill.oid), id: HyperliquidFillId(tid), closedBy: closedBy, time: Date(wireMilliseconds: fill.time), cursor: cursor,
                           positionEffect: Self.positionEffect(dir: fill.dir))
                 }))
             }
@@ -444,7 +470,7 @@ public struct HyperliquidClient: ExchangeClient {
 
             // Each item's place among the items of its millisecond, 1 for the first; a read from a cursor hands up only
             // what lies after it.
-            var handedUp: [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidTransferId, HyperliquidLedgerCursor>] = []
+            var handedUp: [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>] = []
             var place = 0
             for (index, item) in items.enumerated() {
                 place = index > 0 && items[index - 1].time == item.time ? place + 1 : 1

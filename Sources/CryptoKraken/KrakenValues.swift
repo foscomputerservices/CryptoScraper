@@ -126,6 +126,52 @@ public struct KrakenLedgerId: Codable, Hashable, Comparable, Sendable, Stubbable
     }
 }
 
+/// Kraken's id for a fill, a TradesHistory trade's own key ("THVRQM-33VKH-UCI7BS"), the trade's transaction id: the
+/// id a trade's Ledgers entries name as their `refid`
+///
+/// Kraken's, never a value this package makes. The trade's `ordertxid` is the order's ``KrakenOrderId``; the trade's
+/// key, a ``KrakenLedgerId`` as well, is what the cursor names.
+public struct KrakenFillId: Codable, Hashable, Sendable, Stubbable {
+    package let text: String
+
+    /// - Throws: ``ExchangeClientError/malformedResponse(text:)`` when `candidate` is empty, longer than 40
+    ///   characters, or not ASCII letters, digits and dashes. Decoding the same text throws a `DecodingError` instead.
+    public init(validating candidate: String) throws {
+        guard Self.isWellFormed(candidate) else {
+            throw ExchangeClientError.malformedFillId(candidate)
+        }
+        self.text = candidate
+    }
+
+    private static func isWellFormed(_ candidate: String) -> Bool {
+        !candidate.isEmpty && candidate.count <= 40 && candidate.unicodeScalars.allSatisfy {
+            ("A"..."Z").contains($0) || ("a"..."z").contains($0) || ("0"..."9").contains($0) || $0 == "-"
+        }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let candidate = try container.decode(String.self)
+        guard Self.isWellFormed(candidate) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not a Kraken trade id: \"\(candidate)\"")
+        }
+        self.text = candidate
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(text)
+    }
+
+    public static func stub() -> Self {
+        do {
+            return try .init(validating: "TFRED-BARNEY-42")
+        } catch {
+            preconditionFailure("KrakenFillId.stub() is not well-formed: \(error)")
+        }
+    }
+}
+
 /// Kraken's id for a movement of money, a Ledgers entry's `refid`: the reference of the deposit, withdrawal or transfer
 /// the entry records ("FTQcuak-V6Za8qrWnhzTx67yYHz8Tg"), the id Kraken's deposit and withdrawal status reads name it by
 ///

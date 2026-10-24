@@ -45,6 +45,7 @@ enum Kraken {
             case "Ledgers": "private-ledgers.json"
             case "BalanceEx": "private-balance-ex.json"
             case "OpenPositions": "private-open-positions.json"
+            case "TradeVolume": "private-trade-volume.json"
             default: "none"
             }
             return .ok(Recording.body("Kraken/\(file)"))
@@ -234,14 +235,35 @@ struct KrakenClientTests {
         // TF5GVO-T7ZZ2-6NBKBI: cost "104610.52842" for vol "8.82412861", of which "0.20200000" closed; value "258797.5"
         let entry = Price(try WireDecimal(parsing: "1046105.2842").amount(of: Kraken.usd), per: try WireDecimal(parsing: "88.2412861").amount(of: Kraken.xbt))
         #expect(state.positions.contains { $0.entryPrice == entry })
+        // The first position by key, T24DOR: net "+94367.2314" (the leading plus dropped) reads at the dollar's four
+        // places; margin "29151.35371", stated at the pair's five, is nil, neither rounded nor refused.
+        #expect(first.openProfit == (try WireDecimal(parsing: "94367.2314").amount(of: Kraken.usd)))
+        #expect(first.heldMargin == nil)
+        #expect(state.positions.contains { $0.openProfit == (try? WireDecimal(parsing: "154186.9728").amount(of: Kraken.usd)) && $0.heldMargin == nil })
         #expect(state.mode.name == "spot")
+    }
+
+    // The account's fee rates (fosline's WI-20 ask of 2026-10-24): one TradeVolume call naming every recorded pair, each
+    // pair's percentages read as fractions; SOLUSD, with no maker schedule, takes its one fee for both.
+    @Test func theFeeRatesAreOnePerPairFromOneTradeVolumeCall() async throws {
+        let session = ReplaySession(route: Kraken.route())
+        let rates = try await Kraken.client(session).feeRates(account: "")
+        func fraction(_ percent: String) throws -> Fraction { try KrakenClient.percent(WireDecimal(parsing: percent)) }
+        #expect(rates == [
+            ExchangeClientFeeRate(scope: .market(try KrakenMarketName(validating: "SOLUSD")), maker: try fraction("0.4000"), taker: try fraction("0.4000")),
+            ExchangeClientFeeRate(scope: .market(try KrakenMarketName(validating: "XETHZUSD")), maker: try fraction("0.1600"), taker: try fraction("0.2600")),
+            ExchangeClientFeeRate(scope: .market(try KrakenMarketName(validating: "XXBTZUSD")), maker: try fraction("0.1600"), taker: try fraction("0.2600"))
+        ])
+        #expect(try fraction("0.2600") == Fraction(basisPoints: 26))
+        let volume = try #require(session.requests.first { $0.url!.lastPathComponent == "TradeVolume" })
+        #expect(volume.bodyText.contains("pair=SOLUSD%2CXETHZUSD%2CXXBTZUSD") || volume.bodyText.contains("pair=SOLUSD,XETHZUSD,XXBTZUSD"))
     }
 
     @Test func theLedgerIsTheTradesInTimeOrderEachWithItsExactCursor() async throws {
         let session = ReplaySession(route: Kraken.route())
         let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
         #expect(items.count == 2) // the two trades; the two ledger entries are those trades' and are not handed up twice
-        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, let cursor, _) = items[0] else {
+        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _) = items[0] else {
             Issue.record("Not a fill")
             return
         }
@@ -251,6 +273,9 @@ struct KrakenClientTests {
         #expect(fee == .zero(of: Kraken.usd))
         #expect(order == (try KrakenOrderId(validating: "OQCLML-BW3P3-BUCMWZ")))
         #expect(cursor == KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667769.6396"), read: [try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")]))
+        // The fill's id is the trade's own key, the one its ledger entries refer to.
+        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _) = items[0] else { return }
+        #expect(fillId == (try KrakenFillId(validating: "TCWJEG-FL4SZ-3FKGH6")))
 
         // Kraken's start is exclusive: the read asks from the ten-thousandth before the cursor's instant.
         let resumed = ReplaySession(route: Kraken.route())
@@ -258,6 +283,24 @@ struct KrakenClientTests {
         for method in ["TradesHistory", "Ledgers"] {
             #expect(resumed.requests.first { $0.url!.lastPathComponent == method }!.bodyText.hasSuffix("&start=1688667769.6395"))
         }
+    }
+
+    // A fill's fee is its ledger entry's in the quote (the owner's ruling of 2026-10-24): the recorded ledger's trade
+    // entries refer to other trades, so the recorded fills take their own stated fee ("0.00000"); with an entry for the
+    // trade added, in ZUSD with fee "0.7803", the fill carries that, the amount the balance moved by.
+    @Test func aFillsFeeIsItsLedgerEntrysInTheQuoteWhereTheLedgerHoldsOne() async throws {
+        let entry = #""LFEE00-TRADE-ENTRY":{"refid":"TCWJEG-FL4SZ-3FKGH6","time":1688667769.6396,"type":"trade","subtype":"","aclass":"currency","asset":"ZUSD","amount":"-300.1000","fee":"0.7803","balance":"100.0000"},"#
+        let ledgers = String(decoding: Recording.body("Kraken/private-ledgers.json"), as: UTF8.self).replacingOccurrences(of: #""ledger": {"#, with: #""ledger": {"# + entry)
+        #expect(ledgers.contains("LFEE00-TRADE-ENTRY"))
+        let session = ReplaySession(route: Kraken.route(["Ledgers": .ok(Data(ledgers.utf8))]))
+        let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
+        guard case .fill(_, _, _, _, let fee, _, let fillId, _, _, _, _) = try #require(items.first) else {
+            Issue.record("Not a fill")
+            return
+        }
+        #expect(fillId == (try KrakenFillId(validating: "TCWJEG-FL4SZ-3FKGH6")))
+        #expect(fee == (try WireDecimal(parsing: "0.7803").amount(of: Kraken.usd)))
+        #expect(items.count == 2)
     }
 
     // Constructed from the documented Ledgers entry (https://docs.kraken.com/api/docs/rest-api/get-ledgers-info.md):
@@ -328,7 +371,7 @@ struct KrakenClientTests {
         let trades = edit(String(decoding: Recording.body("Kraken/private-trades-history.json"), as: UTF8.self))
         let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(Data(trades.utf8))]))
         return try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item in
-            guard case .fill(_, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
             return effect
         }
     }
@@ -430,7 +473,7 @@ struct KrakenClientTests {
         let items = try await Kraken.client(session).ledgerItems(account: "", since: since)
         var cursors: [KrakenLedgerCursor] = []
         for item in items {
-            guard case .fill(_, _, _, _, _, _, _, _, let cursor, _) = item else { continue }
+            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _) = item else { continue }
             cursors.append(cursor)
         }
         return cursors

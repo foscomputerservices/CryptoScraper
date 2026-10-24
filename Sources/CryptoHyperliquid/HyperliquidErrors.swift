@@ -40,6 +40,10 @@ extension ExchangeClientError {
         .malformedResponse(text: "A ledger update whose hash is not a transaction hash Hyperliquid could write: \(candidate)")
     }
 
+    static func fillWithoutTradeId(order: Int64, time: Int64) -> ExchangeClientError {
+        .malformedResponse(text: "A fill of order \(order) at \(time) without its trade id (tid)")
+    }
+
     static func malformedAddress(_ address: String) -> ExchangeClientError {
         .refused(code: nil, text: "An address that is not 20 bytes of hex: \(address)")
     }

@@ -6,6 +6,34 @@ Each pull request adds its entry under the version it will be released as, dated
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-24
+
+A fill's own id, the account's fee rates, and a position's open profit and held margin, through every client. PR #38.
+
+### Changed
+
+- **Breaking:** `ExchangeClient` gains an associated type, `FillId`, the exchange's own id for a fill, and `ExchangeClientLedgerItem` a fifth generic parameter for it, after the order id: `ExchangeClientLedgerItem<Name, OrderId, FillId, TransferId, Cursor>`. A conformer adds `typealias FillId`.
+- **Breaking:** `fill` carries `id: FillId`, required, after `order:`: two fills of one order, or of one transaction, differ by it, and a consumer names the fill's postings by it (the owner's ruling of 2026-10-24). A positional pattern over the case needs one more `_`. A fill the exchange lists without one is refused, the whole read with it. A funding item has no id of its own: its identity is its cursor, the exchange naming it by its time and market alone (Hyperliquid's funding `hash` is all zeros on mainnet, probed 2026-10-24).
+- **Hyperliquid:** `HyperliquidFillId`, the fill's `tid`. Several fills share one transaction `hash` (mainnet, 2026-10-24: 2000 fills, 1761 hashes, 2000 trade ids).
+- **Kraken:** `KrakenFillId`, the trade's own key in TradesHistory, the transaction id its Ledgers entries refer to.
+- **Coinbase:** `FillId` is `CoinbaseTradeId`, the fill's `trade_id`, the id the cursor already names it by.
+- **Kraken:** a fill's `fee` is its Ledgers entry's in the pair's quote, the amount the balance moved by at the ledger's four places. Kraken states the trade's own `fee` at the pair's `cost_decimals` (5 on XBT/USD, 2 to 12 by pair on the dollar pairs, live 2026-10-24), finer than the dollar's four, and a real fill's fee was refused; the trade's own figure is read only where the ledger read holds no entry for the trade (the owner's ruling of 2026-10-24: the dollar stays at Kraken's ledger scale, four).
+
+### Added
+
+- `feeRates(account:)` on `ExchangeClient`: the rates the exchange applies to the account's trades, each an `ExchangeClientFeeRate` with `maker`, `taker` (fractions: 0.00045 is 4.5 basis points) and the `scope` the exchange states it for: `account`, `perpetuals`, `spot`, or `market(Name)`. The default implementation throws `notOffered(member: "feeRates")`, so an existing conformer still compiles.
+- **Hyperliquid:** `userFees`: the perpetuals pair (`userAddRate` maker, `userCrossRate` taker) then the spot pair (`userSpotAddRate`, `userSpotCrossRate`), discounts included as the documentation states ("include any active discounts from referrals or staking").
+- **Kraken:** one TradeVolume call naming every pair of AssetPairs: each pair's `fees` entry as the taker rate and its `fees_maker` entry as the maker rate, or the one `fees` rate where Kraken states no maker schedule; Kraken's percentages ("0.2600") read as fractions (0.0026). One rate per market.
+- **Coinbase:** Get Transaction Summary's fee tier, `maker_fee_rate` and `taker_fee_rate`, one pair for the whole account.
+- `ExchangeClientPosition` gains `openProfit: Amount?` and `heldMargin: Amount?`, last and defaulting to `nil`: the position's unrealized profit and the margin the exchange holds for it, as stated, `nil` where the exchange states none.
+- **Hyperliquid:** a position's `openProfit` is its `unrealizedPnl` and its `heldMargin` its `marginUsed`, in USDC. The account value fosline asked for is `balance`, already `marginSummary.accountValue`.
+- **Kraken:** a position's `openProfit` is its `net` (`docalcs`; a gain's leading "+" dropped) and its `heldMargin` its `margin`, in the pair's quote; `nil` where Kraken states the figure finer than the quote holding's places, the figure being Kraken's estimate that moves no balance: neither rounded nor refused.
+- **Coinbase:** no positions, so neither field.
+
+### Fixed
+
+- **Kraken:** a fill whose fee Kraken states with a fifth decimal was refused (`belowBaseUnit`), the whole ledger read with it; the recorded fixture's zero fee hid it. The fee now comes from the ledger entry, at four.
+
 ## [0.13.0] - 2026-10-20
 
 The Hyperliquid ledger read to the end, and a folded funding day's payment count. PR #35.

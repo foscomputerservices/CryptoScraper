@@ -69,11 +69,11 @@ struct ExchangeClientValuesTests {
 
     @Test func aLedgerItemCarriesItsCursor() {
         let fee = Amount(baseUnits: 2_500, asset: Self.usdc)
-        let item = ExchangeClientLedgerItem<String, Int, String, Int>.fill(
+        let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(
             market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid, fee: fee,
-            order: 42, closedBy: .liquidation, time: .distantPast, cursor: 7
+            order: 42, id: 1, closedBy: .liquidation, time: .distantPast, cursor: 7
         )
-        guard case .fill(_, _, _, _, let read, _, let reason, _, let cursor, _) = item else {
+        guard case .fill(_, _, _, _, let read, _, _, let reason, _, let cursor, _) = item else {
             Issue.record("Not a fill")
             return
         }
@@ -87,21 +87,21 @@ struct ExchangeClientValuesTests {
         #expect(try ExchangeClientPositionEffect.close.toJSON() == #""close""#)
         #expect(try #""open""#.fromJSON() == ExchangeClientPositionEffect.open)
         #expect(ExchangeClientPositionEffect.stub() == .open)
-        let unstated = ExchangeClientLedgerItem<String, Int, String, Int>.fill(
+        let unstated = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(
             market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid,
-            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, closedBy: nil, time: .distantPast, cursor: 7
+            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, id: 1, closedBy: nil, time: .distantPast, cursor: 7
         )
-        guard case .fill(_, _, _, _, _, _, _, _, _, let effect) = unstated else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = unstated else {
             Issue.record("Not a fill")
             return
         }
         #expect(effect == nil)
-        let closing = ExchangeClientLedgerItem<String, Int, String, Int>.fill(
+        let closing = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(
             market: "BTC", side: .sell, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid,
-            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, closedBy: nil, time: .distantPast, cursor: 7, positionEffect: .close
+            fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, id: 1, closedBy: nil, time: .distantPast, cursor: 7, positionEffect: .close
         )
         #expect(closing != unstated)
-        guard case .fill(_, _, _, _, _, _, _, _, _, .close) = closing else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, .close) = closing else {
             Issue.record("Not a closing fill")
             return
         }
