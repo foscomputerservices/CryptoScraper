@@ -370,9 +370,11 @@ public struct CoinbaseTransaction: CryptoTransaction, Sendable {
 
     /// The item's id: the ledger's own, not a chain's transaction hash
     public let hash: String
-    /// For a move between portfolios, the portfolio it left
+    /// For a move between portfolios, the portfolio it left, or, where Coinbase names none, the word for the wallet it
+    /// left; `nil` for any other item
     public let fromContract: CoinbaseHolding?
-    /// For a move between portfolios, the portfolio it reached
+    /// For a move between portfolios, the portfolio it reached, or the word for the wallet it reached; `nil` as
+    /// `fromContract` is
     public let toContract: CoinbaseHolding?
     /// The item's amount in its Coinbase holding, in the holding's base units: a fill's units, a funding's,
     /// deposit's, withdrawal's or move's amount
@@ -408,18 +410,18 @@ public struct CoinbaseTransaction: CryptoTransaction, Sendable {
         var from: CoinbaseHolding?
         var to: CoinbaseHolding?
         switch item {
-        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _):
+        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")
-        case let .deposit(deposited, transfer, depositTime, _, _):
+        case let .deposit(deposited, transfer, depositTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: transfer), "deposit")
-        case let .withdrawal(withdrawn, transfer, withdrawalTime, _, _):
+        case let .withdrawal(withdrawn, transfer, withdrawalTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (withdrawn.baseUnits, withdrawn.instance, withdrawalTime, try Self.text(of: transfer), "withdrawal")
         case let .internalMove(moved, source, destination, transfer, moveTime, _, _):
             (baseUnits, instance, time, id, kind) = (moved.baseUnits, moved.instance, moveTime, try Self.text(of: transfer), "internalMove")
-            from = CoinbaseHolding(address: source)
-            to = CoinbaseHolding(address: destination)
+            from = Self.contract(of: source)
+            to = Self.contract(of: destination)
         }
         self.hash = id
         self.fromContract = from
@@ -429,6 +431,18 @@ public struct CoinbaseTransaction: CryptoTransaction, Sendable {
         self.transactionId = id
         self.successful = true
         self.type = kind
+    }
+
+    // A move's side as a contract: the account it names, or, where it names none, the wallet's own word ("perpetuals",
+    // "spot", or the exchange's name for it) for the one account's wallet; nil where it states neither.
+    private static func contract(of side: ExchangeClientLedgerSide) -> CoinbaseHolding? {
+        if let account = side.account { return CoinbaseHolding(address: account) }
+        switch side.wallet {
+        case .perpetuals?: return CoinbaseHolding(address: "perpetuals")
+        case .spot?: return CoinbaseHolding(address: "spot")
+        case .named(let name)?: return CoinbaseHolding(address: name)
+        case nil: return nil
+        }
     }
 
     // A client's id or cursor as it writes itself: its JSON string's text, or its JSON where it is not a string.

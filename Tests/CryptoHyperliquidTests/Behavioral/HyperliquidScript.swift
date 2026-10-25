@@ -205,7 +205,7 @@ struct HyperliquidScript: ExchangeClientScript {
     func ledgerCase() throws -> LedgerCase<HyperliquidClient> {
         let oid = { (text: String) throws -> HyperliquidClient.OrderId in try decoded(HyperliquidClient.OrderId.self, json: text) }
         let deposit = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.deposit(try amount("1000.0", "USDC"), time: ms(1_727_000_000_500))
-        let move = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.internalMove(try amount("500.25", "USDC"), from: Self.mainWallet, to: Self.subAccount, time: ms(1_727_000_000_700))
+        let move = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.internalMove(try amount("500.25", "USDC"), from: ExchangeClientLedgerSide(account: Self.mainWallet, wallet: .perpetuals), to: ExchangeClientLedgerSide(account: Self.subAccount, wallet: .perpetuals), time: ms(1_727_000_000_700))
         let firstFill = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.fill(market: "BTC", side: .buy, units: try amount("0.00123", "BTC"), price: try price("64250.4", "USDC"), fee: try amount("0.023712", "USDC"), order: try oid("77738308"), closedBy: nil, time: ms(1_727_000_001_000))
         let fundingLine = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.funding(market: "BTC", amount: try amount("-0.0153", "USDC"), rate: try fraction("0.0000125"), time: ms(1_727_000_002_000))
         let withdrawal = LedgerLine<HyperliquidClient.MarketName, HyperliquidClient.OrderId>.withdrawal(try amount("100.0", "USDC"), time: ms(1_727_000_002_500))

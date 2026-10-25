@@ -205,11 +205,23 @@ public struct ExchangeClientHolding: Hashable, Sendable {
     }
 }
 
+/// How the exchange margins a position, as it states it
+///
+/// `cross` shares the account's collateral among its positions; `isolated` holds the position's own margin apart.
+/// The exchange's own words ("cross", "isolated") live only in its plug-in's table, which maps them to this value.
+public enum ExchangeClientMarginKind: String, Codable, Hashable, Sendable, CaseIterable, Stubbable {
+    /// The position draws on the account's shared collateral
+    case cross
+    /// The position holds its own margin, apart from the account's
+    case isolated
+}
+
 /// A position the exchange holds for an account
 ///
 /// `openProfit` is the position's unrealized profit as the exchange states it, in the quote holding, negative for a
 /// loss; `heldMargin` is the margin the exchange states it holds for the position. Each is `nil` where the exchange
-/// states none (a spot exchange's position); both are last and default to `nil`.
+/// states none (a spot exchange's position). `marginKind` is how the exchange margins the position, as it states it,
+/// `nil` where it states none. All three are last and default to `nil`.
 public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Sendable {
     public let market: Name
     public let side: ExchangeClientSide
@@ -219,9 +231,10 @@ public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Senda
     public let liquidationPrice: Price?
     public let openProfit: Amount?
     public let heldMargin: Amount?
+    public let marginKind: ExchangeClientMarginKind?
 
     public init(market: Name, side: ExchangeClientSide, units: Amount, entryPrice: Price, mark: Price,
-                liquidationPrice: Price?, openProfit: Amount? = nil, heldMargin: Amount? = nil) {
+                liquidationPrice: Price?, openProfit: Amount? = nil, heldMargin: Amount? = nil, marginKind: ExchangeClientMarginKind? = nil) {
         self.market = market
         self.side = side
         self.units = units
@@ -230,6 +243,7 @@ public struct ExchangeClientPosition<Name: Hashable & Sendable>: Hashable, Senda
         self.liquidationPrice = liquidationPrice
         self.openProfit = openProfit
         self.heldMargin = heldMargin
+        self.marginKind = marginKind
     }
 }
 
@@ -294,11 +308,42 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
     case close
 }
 
+/// A wallet of the exchange: the side of an account a balance sits on, in the exchanges' own word
+///
+/// An exchange with one balance per account has one wallet; one that keeps a perpetuals balance and a spot balance
+/// apart (Hyperliquid's "perp wallet" and "spot wallet", Kraken's spot and futures wallets) has two, and a move between
+/// them is a ledger item. `named` is a wallet the exchange names in its own word where it is neither of the two: a
+/// Hyperliquid builder dex by its name, Kraken's "staking" and "earn".
+public enum ExchangeClientWallet: Codable, Hashable, Sendable {
+    /// The exchange's perpetuals wallet, where its positions and their collateral sit
+    case perpetuals
+    /// The exchange's spot wallet
+    case spot
+    /// A wallet the exchange names otherwise, in its own word
+    case named(String)
+}
+
+/// One side of a move within the exchange: the account it names there, and the wallet on it
+///
+/// `account` is the exchange's own name for the account on that side (Hyperliquid's address, Coinbase's portfolio
+/// uuid), `nil` where the exchange states none, the side being the account the ledger was read for (a Hyperliquid
+/// `accountClassTransfer`, a Kraken wallet transfer). `wallet` is the wallet on that side, `nil` where the exchange
+/// states none.
+public struct ExchangeClientLedgerSide: Codable, Hashable, Sendable {
+    public let account: String?
+    public let wallet: ExchangeClientWallet?
+
+    public init(account: String?, wallet: ExchangeClientWallet?) {
+        self.account = account
+        self.wallet = wallet
+    }
+}
+
 /// An item of the exchange's own ledger, each kind with its values, every one carrying the cursor after it
 ///
 /// ```swift
 /// for item in try await client.ledgerItems(account: account, since: cursor) {
-///     if case .fill(_, _, _, _, let fee, let order, _, _, _, _, _) = item { … }   // the fee read, never estimated
+///     if case .fill(_, _, _, _, let fee, let order, _, _, _, _, _, _) = item { … }   // the fee read, never estimated
 /// }
 /// ```
 ///
@@ -324,14 +369,23 @@ public enum ExchangeClientPositionEffect: String, Codable, Hashable, Sendable, C
 /// A deposit's, a withdrawal's and a move's `fee` is the fee the exchange states on the item, in the holding it states
 /// it in, `nil` where the exchange states none; a fee stated as zero is a zero amount, never `nil`. The amount beside
 /// it is the exchange's own figure, and the fee is never taken from it or added to it here: what the two do to a
-/// balance is the exchange's convention, stated on each client's `ledgerItems`. The fee is last and defaults to `nil`,
-/// so an item made without it states no fee.
+/// balance is the exchange's convention, stated on each client's `ledgerItems`. The fee follows the cursor and
+/// defaults to `nil`, so an item made without it states no fee.
+///
+/// A fill's, a deposit's and a withdrawal's `wallet` is the wallet of the exchange the item is on
+/// (``ExchangeClientWallet``): the wallet a fill traded from, the wallet a deposit landed on or a withdrawal left, as
+/// the exchange states it, `nil` where it states none. A consumer lists a perpetuals statement from the items whose
+/// wallet is `perpetuals`, never by the item's market alone. It is last and defaults to `nil`.
+///
+/// A move's `from` and `to` are its two sides (``ExchangeClientLedgerSide``), each the account the exchange names on
+/// that side and the wallet on it: a move between two accounts names both, a move between the wallets of one account
+/// names the wallets with no account (the account being the one read), as the exchange states them.
 public enum ExchangeClientLedgerItem<Name: Hashable & Sendable, OrderId: Hashable & Sendable, FillId: Hashable & Sendable, TransferId: Hashable & Sendable, Cursor: Hashable & Sendable>: Hashable, Sendable {
-    case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, id: FillId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil)
+    case fill(market: Name, side: ExchangeClientSide, units: Amount, price: Price, fee: Amount, order: OrderId, id: FillId, closedBy: ExchangeClientCloseReason?, time: Date, cursor: Cursor, positionEffect: ExchangeClientPositionEffect? = nil, wallet: ExchangeClientWallet? = nil)
     case funding(market: Name, amount: Amount, rate: Fraction, time: Date, cursor: Cursor, payments: Int? = nil)
-    case deposit(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
-    case withdrawal(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
-    case internalMove(Amount, from: String, to: String, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
+    case deposit(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil, wallet: ExchangeClientWallet? = nil)
+    case withdrawal(Amount, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil, wallet: ExchangeClientWallet? = nil)
+    case internalMove(Amount, from: ExchangeClientLedgerSide, to: ExchangeClientLedgerSide, id: TransferId, time: Date, cursor: Cursor, fee: Amount? = nil)
 }
 
 /// What the client's key may do, as the exchange states it
@@ -425,6 +479,10 @@ extension ExchangeClientSide {
 
 extension ExchangeClientPositionEffect {
     public static func stub() -> Self { .open }
+}
+
+extension ExchangeClientMarginKind {
+    public static func stub() -> Self { .cross }
 }
 
 // The forms the exchanges take a 128-bit client order id in, written and read back by the plug-ins.

@@ -316,6 +316,8 @@ struct HyperliquidClientTests {
         // The recorded position's unrealizedPnl "0.000616" and marginUsed "12.134747", in USDC at eight places.
         #expect(eth.openProfit == Amount(baseUnits: 61_600, of: Hyperliquid.usdc))
         #expect(eth.heldMargin == Amount(baseUnits: 1_213_474_700, of: Hyperliquid.usdc))
+        // The recorded position's leverage {"type":"isolated","value":2,…}.
+        #expect(eth.marginKind == .isolated)
         #expect(state.mode == ExchangeClientAccountMode(name: "disabled", allowsTransfer: true, allowsIsolatedMargin: true, alternatives: ["unifiedAccount", "portfolioMargin"]))
     }
 
@@ -328,8 +330,8 @@ struct HyperliquidClientTests {
         #expect(items.count == 11 + 500 + 4)
         let cursors = items.map { item -> Int64 in
             switch item {
-            case .fill(_, _, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor, _),
-                 .deposit(_, _, _, let cursor, _), .withdrawal(_, _, _, let cursor, _), .internalMove(_, _, _, _, _, let cursor, _): cursor.milliseconds
+            case .fill(_, _, _, _, _, _, _, _, _, let cursor, _, _), .funding(_, _, _, _, let cursor, _),
+                 .deposit(_, _, _, let cursor, _, _), .withdrawal(_, _, _, let cursor, _, _), .internalMove(_, _, _, _, _, let cursor, _): cursor.milliseconds
             }
         }
         #expect(cursors == cursors.sorted())
@@ -340,9 +342,11 @@ struct HyperliquidClientTests {
         #expect(fill == .fill(market: try HyperliquidMarketName(validating: "ETH"), side: .sell, units: Amount(baseUnits: 80, of: eth),
                               price: Hyperliquid.price("2640.2", of: eth), fee: Amount(baseUnits: 950_400, of: Hyperliquid.usdc),
                               order: HyperliquidOrderId(61_246_678_885), id: HyperliquidFillId(520_656_802_617_420), closedBy: nil, time: Date(wireMilliseconds: 1_790_568_059_898),
-                              cursor: HyperliquidLedgerCursor(milliseconds: 1_790_568_059_898, place: 1), positionEffect: .close))
-        // A transfer between the main account and the sub-account is a move between their addresses.
-        #expect(items.contains { if case .internalMove(let amount, _, _, _, _, _, _) = $0 { amount == (try? Amount(whole: 20, of: Hyperliquid.usdc)) } else { false } })
+                              cursor: HyperliquidLedgerCursor(milliseconds: 1_790_568_059_898, place: 1), positionEffect: .close, wallet: .perpetuals))
+        // A transfer between the main account and the sub-account is a move between their addresses, on the perpetuals wallet at both ends.
+        #expect(items.contains { if case .internalMove(let amount, let from, let to, _, _, _, _) = $0 {
+            amount == (try? Amount(whole: 20, of: Hyperliquid.usdc)) && from == ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals) && to == ExchangeClientLedgerSide(account: Hyperliquid.sub, wallet: .perpetuals)
+        } else { false } })
     }
 
     // The owner's ruling (2026-10-07): a fill states what it did to the position. Hyperliquid states it in `dir`; its
@@ -362,7 +366,7 @@ struct HyperliquidClientTests {
         let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
         let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
         let effects = items.compactMap { item -> ExchangeClientPositionEffect?? in
-            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect, _) = item else { return nil }
             return .some(effect)
         }
         #expect(effects == [.close, .open, .close, .open, .close, .open, .open, .close, .open, .close, .open])
@@ -377,7 +381,7 @@ struct HyperliquidClientTests {
         })
         let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
         let effects = items.compactMap { item -> ExchangeClientPositionEffect?? in
-            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect, _) = item else { return nil }
             return .some(effect)
         }
         #expect(effects == [.close, .open, .close, .open, .close, .open, .open, nil, .open, .close, .open])
@@ -485,7 +489,7 @@ struct HyperliquidClientGapsTests {
         let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
         let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
         let pair = items.compactMap { item -> (Amount, HyperliquidLedgerCursor)? in
-            guard case .fill(_, _, let units, _, _, _, _, _, let time, let cursor, _) = item, time == Date(wireMilliseconds: 1_790_812_844_835) else { return nil }
+            guard case .fill(_, _, let units, _, _, _, _, _, let time, let cursor, _, _) = item, time == Date(wireMilliseconds: 1_790_812_844_835) else { return nil }
             return (units, cursor)
         }
         let eth = AssetInstance(HyperliquidHolding.eth)
@@ -505,7 +509,7 @@ struct HyperliquidClientGapsTests {
         let asked = session.requests.filter { $0.jsonBody["type"] as? String == "userFillsByTime" }
         #expect(asked.map { ($0.jsonBody["startTime"] as? NSNumber)?.int64Value } == [1_790_812_844_835])
         let first = try #require(items.first)
-        guard case .fill(_, _, let units, _, _, _, _, _, let time, let cursor, _) = first else {
+        guard case .fill(_, _, let units, _, _, _, _, _, let time, let cursor, _, _) = first else {
             Issue.record("Not a fill: \(first)")
             return
         }
@@ -561,7 +565,7 @@ struct HyperliquidClientGapsTests {
     @Test func aFillsIdIsItsTradeIdAndAFillWithoutOneIsRefused() async throws {
         let session = ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())
         let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
-        let ids = items.compactMap { item -> HyperliquidFillId? in if case let .fill(_, _, _, _, _, _, id, _, _, _, _) = item { id } else { nil } }
+        let ids = items.compactMap { item -> HyperliquidFillId? in if case let .fill(_, _, _, _, _, _, id, _, _, _, _, _) = item { id } else { nil } }
         #expect(ids.count == 11 && Set(ids).count == 11)
         #expect(ids.first == HyperliquidFillId(520_656_802_617_420))
 
@@ -680,15 +684,16 @@ struct HyperliquidClientGapsTests {
     @Test func anInternalTransferCarriesItsFeeAndItsAmountAsStated() async throws {
         let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
         let first = try #require(items.first)
-        #expect(first == .internalMove(try Amount(whole: 1_000, of: Hyperliquid.usdc), from: Self.faucet, to: Hyperliquid.master,
+        #expect(first == .internalMove(try Amount(whole: 1_000, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Self.faucet, wallet: .perpetuals), to: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals),
                                        id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000200"), time: Date(wireMilliseconds: 1_791_550_794_933),
                                        cursor: HyperliquidLedgerCursor(milliseconds: 1_791_550_794_933, place: 1),
                                        fee: try Amount(whole: 1, of: Hyperliquid.usdc)))
     }
 
-    @Test func aSendWithinOneAccountIsAMoveBetweenItsDexesWithItsStatedZeroFee() async throws {
+    @Test func aSendWithinOneAccountIsAMoveBetweenItsWalletsNamingTheAccountOnBothSidesWithItsStatedZeroFee() async throws {
         let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
-        #expect(items[1] == .internalMove(Amount(baseUnits: 92_424_000_000, of: Hyperliquid.usdc), from: "spot", to: "perp",
+        // sourceDex "spot", destinationDex "" (the perpetuals dex); user and destination both the main account.
+        #expect(items[1] == .internalMove(Amount(baseUnits: 92_424_000_000, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .spot), to: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals),
                                           id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000201"), time: Date(wireMilliseconds: 1_791_555_526_034),
                                           cursor: HyperliquidLedgerCursor(milliseconds: 1_791_555_526_034, place: 1),
                                           fee: .zero(of: Hyperliquid.usdc)))
@@ -696,7 +701,7 @@ struct HyperliquidClientGapsTests {
 
     @Test func aSubAccountTransferStatesNoFee() async throws {
         let items = try await Hyperliquid.client(Self.masterLedger()).ledgerItems(account: Hyperliquid.master, since: nil)
-        #expect(items[2] == .internalMove(try Amount(whole: 100, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub,
+        #expect(items[2] == .internalMove(try Amount(whole: 100, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals), to: ExchangeClientLedgerSide(account: Hyperliquid.sub, wallet: .perpetuals),
                                           id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000202"), time: Date(wireMilliseconds: 1_791_576_041_830),
                                           cursor: HyperliquidLedgerCursor(milliseconds: 1_791_576_041_830, place: 1)))
     }
@@ -713,8 +718,8 @@ struct HyperliquidClientGapsTests {
         let items = try await Hyperliquid.client(Self.masterLedger(updates)).ledgerItems(account: Hyperliquid.master, since: nil)
         #expect(items == [
             .withdrawal(try Amount(whole: 50, of: Hyperliquid.usdc), id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000001"), time: Date(wireMilliseconds: 1),
-                        cursor: HyperliquidLedgerCursor(milliseconds: 1, place: 1), fee: try Amount(whole: 1, of: Hyperliquid.usdc)),
-            .internalMove(try Amount(whole: 5, of: Hyperliquid.usdc), from: Hyperliquid.master, to: Hyperliquid.sub,
+                        cursor: HyperliquidLedgerCursor(milliseconds: 1, place: 1), fee: try Amount(whole: 1, of: Hyperliquid.usdc), wallet: .perpetuals),
+            .internalMove(try Amount(whole: 5, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals), to: ExchangeClientLedgerSide(account: Hyperliquid.sub, wallet: .perpetuals),
                           id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000002"), time: Date(wireMilliseconds: 2),
                           cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1), fee: Amount(baseUnits: 10_000_000, of: Hyperliquid.usdc))
         ])
@@ -732,6 +737,60 @@ struct HyperliquidClientGapsTests {
                         try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000109000000000000000000000025"),
                         try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000109000000000000000000000026"),
                         try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000109000000000000000000000027")])
+    }
+
+    // MARK: Wallets and sides
+
+    // Constructed from the documented update kinds: a deposit lands on the perpetuals wallet; an accountClassTransfer
+    // names no account, its sides the one account's wallets by toPerp; a spotTransfer (the older spot send, 2141 of
+    // them against 130 sends among 24 mainnet users probed 2026-10-25) is on the spot wallet at both ends; a send to a
+    // builder dex names the dex.
+    @Test func aDepositLandsOnThePerpetualsWalletAndEachMoveNamesItsSidesAsStated() async throws {
+        let updates = Data("""
+        [{"time":1,"hash":"0x0000000000000000000000000000000000000000000000000000000000000001","delta":{"type":"deposit","usdc":"20945.92"}},
+         {"time":2,"hash":"0x0000000000000000000000000000000000000000000000000000000000000002","delta":{"type":"accountClassTransfer","usdc":"60.0","toPerp":true}},
+         {"time":3,"hash":"0x0000000000000000000000000000000000000000000000000000000000000003","delta":{"type":"accountClassTransfer","usdc":"10.0","toPerp":false}},
+         {"time":4,"hash":"0x0000000000000000000000000000000000000000000000000000000000000004","delta":{"type":"spotTransfer","token":"USDC","amount":"74032.658254","usdcValue":"74032.658254","user":"\(Hyperliquid.master)","destination":"\(Hyperliquid.sub)","fee":"0.0","nativeTokenFee":"0.0","nonce":4,"feeToken":""}},
+         {"time":5,"hash":"0x0000000000000000000000000000000000000000000000000000000000000005","delta":{"type":"send","user":"\(Hyperliquid.master)","destination":"\(Hyperliquid.master)","sourceDex":"","destinationDex":"xyz","token":"USDC","amount":"997.836383","usdcValue":"997.836383","fee":"0.0","nativeTokenFee":"0.0","nonce":5,"feeToken":""}}]
+        """.utf8)
+        let items = try await Hyperliquid.client(Self.masterLedger(updates)).ledgerItems(account: Hyperliquid.master, since: nil)
+        let own = { (wallet: ExchangeClientWallet) in ExchangeClientLedgerSide(account: nil, wallet: wallet) }
+        #expect(items == [
+            .deposit(Amount(baseUnits: 2_094_592_000_000, of: Hyperliquid.usdc), id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000001"), time: Date(wireMilliseconds: 1),
+                     cursor: HyperliquidLedgerCursor(milliseconds: 1, place: 1), wallet: .perpetuals),
+            .internalMove(try Amount(whole: 60, of: Hyperliquid.usdc), from: own(.spot), to: own(.perpetuals), id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000002"),
+                          time: Date(wireMilliseconds: 2), cursor: HyperliquidLedgerCursor(milliseconds: 2, place: 1)),
+            .internalMove(try Amount(whole: 10, of: Hyperliquid.usdc), from: own(.perpetuals), to: own(.spot), id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000003"),
+                          time: Date(wireMilliseconds: 3), cursor: HyperliquidLedgerCursor(milliseconds: 3, place: 1)),
+            .internalMove(Amount(baseUnits: 7_403_265_825_400, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .spot), to: ExchangeClientLedgerSide(account: Hyperliquid.sub, wallet: .spot),
+                          id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000004"), time: Date(wireMilliseconds: 4),
+                          cursor: HyperliquidLedgerCursor(milliseconds: 4, place: 1), fee: .zero(of: Hyperliquid.usdc)),
+            .internalMove(Amount(baseUnits: 99_783_638_300, of: Hyperliquid.usdc), from: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .perpetuals), to: ExchangeClientLedgerSide(account: Hyperliquid.master, wallet: .named("xyz")),
+                          id: try HyperliquidTransferId(validating: "0x0000000000000000000000000000000000000000000000000000000000000005"), time: Date(wireMilliseconds: 5),
+                          cursor: HyperliquidLedgerCursor(milliseconds: 5, place: 1), fee: .zero(of: Hyperliquid.usdc))
+        ])
+    }
+
+    // Mainnet lists spot fills beside the perpetuals' (coin "@334", "PURR/USDC"; 5454 and 1035 of them against 4845
+    // perpetuals fills among 24 users probed 2026-10-25). The client declares no spot token, so such a fill is passed
+    // over, and the wallet's perpetuals fills read; a perpetual in an undeclared
+    // coin still refuses the read.
+    @Test func aSpotFillIsPassedOverAndThePerpetualsFillsReadWithTheirWallet() async throws {
+        let spot = """
+        {"coin":"@107","px":"38.5","sz":"2.0","side":"B","time":1790568059000,"startPosition":"0.0","dir":"Buy","closedPnl":"0.0","hash":"0x00000000000000000000000000000000000001090000000000000000000000f1","oid":61246678000,"crossed":true,"fee":"0.0539","tid":100000000000001,"feeToken":"USDC","twapId":null},\
+        {"coin":"PURR/USDC","px":"0.096959","sz":"179.0","side":"A","time":1790568059001,"startPosition":"179.0","dir":"Sell","closedPnl":"0.0","hash":"0x00000000000000000000000000000000000001090000000000000000000000f2","oid":61246678001,"crossed":true,"fee":"0.012","tid":100000000000002,"feeToken":"USDC","twapId":null},
+        """
+        let fills = String(decoding: HyperliquidScannerTests.kept("fills-sub.json", coins: ["ETH"]), as: UTF8.self).replacingOccurrences(of: "[{", with: "[" + spot + "{")
+        let route = HyperliquidScannerTests.declaredOnlyRoute()
+        let session = ReplaySession(route: { request, index in
+            request.jsonBody["type"] as? String == "userFillsByTime" ? .ok(Data(fills.utf8)) : route(request, index)
+        })
+        let items = try await Hyperliquid.client(session).ledgerItems(account: "four-hour-2x", since: nil)
+        let wallets = items.compactMap { item -> ExchangeClientWallet?? in
+            guard case .fill(_, _, _, _, _, _, _, _, _, _, _, let wallet) = item else { return nil }
+            return .some(wallet)
+        }
+        #expect(wallets.count == 11 && wallets.allSatisfy { $0 == .perpetuals })
     }
 
     @Test(arguments: [#""hash":null,"#, "", #""hash":"0x0000000000000000000000000000000000000000000000000000000000000000","#, #""hash":"0x01","#])
@@ -789,8 +848,8 @@ struct HyperliquidClientGapsTests {
 
     static func cursor(_ item: ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>) -> HyperliquidLedgerCursor {
         switch item {
-        case .fill(_, _, _, _, _, _, _, _, _, let cursor, _), .funding(_, _, _, _, let cursor, _),
-             .deposit(_, _, _, let cursor, _), .withdrawal(_, _, _, let cursor, _), .internalMove(_, _, _, _, _, let cursor, _): cursor
+        case .fill(_, _, _, _, _, _, _, _, _, let cursor, _, _), .funding(_, _, _, _, let cursor, _),
+             .deposit(_, _, _, let cursor, _, _), .withdrawal(_, _, _, let cursor, _, _), .internalMove(_, _, _, _, _, let cursor, _): cursor
         }
     }
 }

@@ -375,9 +375,10 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
 
     /// The item's id: Kraken has no transaction hash for a ledger item
     public let hash: String
-    /// For a move between an account's wallets, the wallet it left
+    /// For a move between an account's wallets, the word for the wallet it left ("perpetuals", "spot", or Kraken's own
+    /// name); `nil` where Kraken states none, and for any other item
     public let fromContract: KrakenHolding?
-    /// For a move between an account's wallets, the wallet it reached
+    /// For a move between an account's wallets, the word for the wallet it reached; `nil` as `fromContract` is
     public let toContract: KrakenHolding?
     /// The item's amount in its Kraken holding, in the holding's base units: a fill's units, a funding's,
     /// deposit's, withdrawal's or move's amount
@@ -413,18 +414,18 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
         var from: KrakenHolding?
         var to: KrakenHolding?
         switch item {
-        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _):
+        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")
-        case let .deposit(deposited, transfer, depositTime, _, _):
+        case let .deposit(deposited, transfer, depositTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (deposited.baseUnits, deposited.instance, depositTime, try Self.text(of: transfer), "deposit")
-        case let .withdrawal(withdrawn, transfer, withdrawalTime, _, _):
+        case let .withdrawal(withdrawn, transfer, withdrawalTime, _, _, _):
             (baseUnits, instance, time, id, kind) = (withdrawn.baseUnits, withdrawn.instance, withdrawalTime, try Self.text(of: transfer), "withdrawal")
         case let .internalMove(moved, source, destination, transfer, moveTime, _, _):
             (baseUnits, instance, time, id, kind) = (moved.baseUnits, moved.instance, moveTime, try Self.text(of: transfer), "internalMove")
-            from = KrakenHolding(address: source)
-            to = KrakenHolding(address: destination)
+            from = Self.contract(of: source)
+            to = Self.contract(of: destination)
         }
         self.hash = id
         self.fromContract = from
@@ -434,6 +435,18 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
         self.transactionId = id
         self.successful = true
         self.type = kind
+    }
+
+    // A move's side as a contract: the account it names, or, where it names none, the wallet's own word ("perpetuals",
+    // "spot", or the exchange's name for it) for the one account's wallet; nil where it states neither.
+    private static func contract(of side: ExchangeClientLedgerSide) -> KrakenHolding? {
+        if let account = side.account { return KrakenHolding(address: account) }
+        switch side.wallet {
+        case .perpetuals?: return KrakenHolding(address: "perpetuals")
+        case .spot?: return KrakenHolding(address: "spot")
+        case .named(let name)?: return KrakenHolding(address: name)
+        case nil: return nil
+        }
     }
 
     // A client's id or cursor as it writes itself: its JSON string's text, or its JSON where it is not a string.

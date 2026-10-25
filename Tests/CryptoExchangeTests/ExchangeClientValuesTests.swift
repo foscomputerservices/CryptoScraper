@@ -73,7 +73,7 @@ struct ExchangeClientValuesTests {
             market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid, fee: fee,
             order: 42, id: 1, closedBy: .liquidation, time: .distantPast, cursor: 7
         )
-        guard case .fill(_, _, _, _, let read, _, _, let reason, _, let cursor, _) = item else {
+        guard case .fill(_, _, _, _, let read, _, _, let reason, _, let cursor, _, _) = item else {
             Issue.record("Not a fill")
             return
         }
@@ -91,7 +91,7 @@ struct ExchangeClientValuesTests {
             market: "BTC", side: .buy, units: Amount(baseUnits: 15, asset: Self.btc), price: Self.mid,
             fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, id: 1, closedBy: nil, time: .distantPast, cursor: 7
         )
-        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = unstated else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect, _) = unstated else {
             Issue.record("Not a fill")
             return
         }
@@ -101,7 +101,7 @@ struct ExchangeClientValuesTests {
             fee: Amount(baseUnits: 2_500, asset: Self.usdc), order: 42, id: 1, closedBy: nil, time: .distantPast, cursor: 7, positionEffect: .close
         )
         #expect(closing != unstated)
-        guard case .fill(_, _, _, _, _, _, _, _, _, _, .close) = closing else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, .close, _) = closing else {
             Issue.record("Not a closing fill")
             return
         }

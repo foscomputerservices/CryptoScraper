@@ -240,7 +240,7 @@ struct CoinbaseClientTests {
         let onePage = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(onePage.utf8))]))
         let items = try await Coinbase.client(session).ledgerItems(account: "", since: nil)
-        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _) = try #require(items.first) else {
+        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _, _) = try #require(items.first) else {
             Issue.record("Not a fill")
             return
         }
@@ -252,9 +252,11 @@ struct CoinbaseClientTests {
         #expect(try cursor.toJSON().fromJSON() == cursor)
         #expect(items.count == 1)
         // The fill's id is its trade_id, the id the cursor names it by.
-        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _) = try #require(items.first) else { return }
+        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _, let wallet) = try #require(items.first) else { return }
         #expect(fillId == (try CoinbaseTradeId(validating: "1111-11111-111111")))
         #expect(cursor.read == [fillId])
+        // BTC-USD is a spot product (no future_product_details), so the fill is on the spot wallet.
+        #expect(wallet == .spot)
     }
 
     // List Fills states no position effect (the documented schema, the recording built from it, has side and
@@ -263,7 +265,7 @@ struct CoinbaseClientTests {
         let onePage = String(decoding: Recording.body("Coinbase/private-list-fills.json"), as: UTF8.self).replacingOccurrences(of: "789100", with: "")
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(onePage.utf8))]))
         let items = try await Coinbase.client(session).ledgerItems(account: "", since: nil)
-        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = try #require(items.first) else {
+        guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect, _) = try #require(items.first) else {
             Issue.record("Not a fill")
             return
         }
@@ -355,7 +357,7 @@ struct CoinbaseClientTests {
     static func read(_ page: String, since: CoinbaseLedgerCursor?) async throws -> [CoinbaseLedgerCursor] {
         let session = ReplaySession(route: Coinbase.route(["/orders/historical/fills": .ok(Data(page.utf8))]))
         return try await Coinbase.client(session).ledgerItems(account: "", since: since).compactMap { item in
-            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _, _) = item else { return nil }
             return cursor
         }
     }

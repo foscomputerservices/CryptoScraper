@@ -334,6 +334,8 @@ public struct CoinbaseClient: ExchangeClient {
     /// handed up once. A read is every page Coinbase hands back. `account`
     /// is not sent. A fill's position effect is `nil`: List Fills states none (its side is buy or sell, nothing that
     /// opens or closes a position). A fill's `id` is its `trade_id` (``CoinbaseTradeId``), the id the cursor names it by.
+    /// A fill's `wallet` is `perpetuals` where its product is a perpetual future (`future_product_details` with
+    /// `contract_expiry_type` "PERPETUAL"), `spot` otherwise.
     public func ledgerItems(account: String, since: CoinbaseLedgerCursor?) async throws -> [ExchangeClientLedgerItem<CoinbaseMarketName, CoinbaseOrderId, CoinbaseTradeId, CoinbaseTransferId, CoinbaseLedgerCursor>] {
         do {
             try declared.get()
@@ -371,13 +373,15 @@ public struct CoinbaseClient: ExchangeClient {
                 read.insert(id)
                 if let since, at < since.time || (at == since.time && since.read.contains(id)) { continue }
                 let market = try CoinbaseMarketName(validating: fill.productId)
-                let pair = try await self.product(market).holdings(in: registry).declared()
+                let product = try await self.product(market)
+                let pair = try product.holdings(in: registry).declared()
                 let cursor = try CoinbaseLedgerCursor(sequenceTimestamp: fill.sequenceTimestamp, read: read)
                 let time = CoinbaseTime.date(fill.tradeTime) ?? cursor.time
                 items.append(.fill(
                     market: market, side: fill.side == "BUY" ? .buy : .sell, units: try fill.size.amount(of: pair.base, in: registry),
                     price: try fill.price.price(of: pair.quote, per: pair.base, in: registry), fee: try fill.commission.amount(of: pair.quote, in: registry),
-                    order: try CoinbaseOrderId(validating: fill.orderId), id: id, closedBy: nil, time: time, cursor: cursor
+                    order: try CoinbaseOrderId(validating: fill.orderId), id: id, closedBy: nil, time: time, cursor: cursor,
+                    wallet: product.isPerpetual ? .perpetuals : .spot
                 ))
             }
             return items

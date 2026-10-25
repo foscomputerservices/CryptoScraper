@@ -114,7 +114,7 @@ struct C31_ExchangeClientTests {
         let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(
             market: "FREDBARNEY", side: .buy, units: Amount(baseUnits: 42, of: base), price: price,
             fee: Amount(baseUnits: 1, of: quote), order: 42, id: 1, closedBy: nil, time: Date(timeIntervalSince1970: 42), cursor: 42)
-        guard case let .fill(_, _, units, at, fee, _, _, _, _, _, _) = item else { Issue.record("not a fill"); return }
+        guard case let .fill(_, _, units, at, fee, _, _, _, _, _, _, _) = item else { Issue.record("not a fill"); return }
         #expect(units.instance == base)
         #expect(at.base == base)
         #expect(fee.instance == quote)
