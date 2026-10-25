@@ -50,6 +50,7 @@ enum Coinbase {
             case path.hasSuffix("/accounts"): "private-list-accounts.json"
             case path.hasSuffix("/key_permissions"): "private-key-permissions.json"
             case path.hasSuffix("/portfolios/move_funds"): "private-move-funds.json"
+            case path.hasSuffix("/portfolios"): "private-list-portfolios.json"
             case path.hasSuffix("/transaction_summary"): "private-transaction-summary.json"
             default: "none"
             }
@@ -463,6 +464,17 @@ struct CoinbaseClientGapsTests {
 
     // The account's fee rates (fosline's WI-20 ask of 2026-10-24): Get Transaction Summary's fee tier, one pair for the
     // whole account, the rates as decimal fractions.
+    // List Portfolios ("all portfolios of a user"): each portfolio by its uuid with its name, in Coinbase's order, a
+    // deleted one included as listed.
+    @Test func theAccountsAreTheUsersPortfoliosByUuidWithTheirNames() async throws {
+        let accounts = try await Coinbase.client(ReplaySession(route: Coinbase.route())).accounts()
+        #expect(accounts == [
+            ExchangeClientAccount(id: "00000000-0000-4000-8000-000000000001", name: "Default"),
+            ExchangeClientAccount(id: "00000000-0000-4000-8000-000000000002", name: "four-hour-2x"),
+            ExchangeClientAccount(id: "00000000-0000-4000-8000-000000000003", name: "retired")
+        ])
+    }
+
     @Test func theFeeRatesAreTheFeeTiersPairForTheWholeAccount() async throws {
         let session = ReplaySession(route: Coinbase.route())
         let rates = try await Coinbase.client(session).feeRates(account: "")

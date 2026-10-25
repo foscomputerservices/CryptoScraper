@@ -310,6 +310,26 @@ public struct HyperliquidClient: ExchangeClient {
         }
     }
 
+    /// The owner's accounts: the main wallet whose agent the key is, by its address with no name (Hyperliquid names
+    /// it by its address alone), then each sub-account the main wallet lists (`subAccounts`), by its address with its
+    /// name, in Hyperliquid's order. Each `id` is the address as Hyperliquid writes it, lower-cased, the text a
+    /// ledger side's `account` carries. The main wallet is listed even where it has no sub-account.
+    public func accounts() async throws -> [ExchangeClientAccount] {
+        do {
+            let main = try await mainWallet()
+            let subs: [HyperliquidSubAccount]? = try await info(.map([("type", .string("subAccounts")), ("user", .string(main))]))
+            var accounts = [ExchangeClientAccount(id: main, name: nil)]
+            for sub in subs ?? [] {
+                let address = sub.subAccountUser.lowercased()
+                await state.keep(subAccount: sub.name, address: address)
+                accounts.append(ExchangeClientAccount(id: address, name: sub.name))
+            }
+            return accounts
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.hyperliquid)
+        }
+    }
+
     /// The spot balances of `account`, from `spotClearinghouseState`, each by its coin's name, in the order Hyperliquid
     /// lists them
     ///

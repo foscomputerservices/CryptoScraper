@@ -435,6 +435,8 @@ struct KrakenClientTests {
         await #expect(throws: ExchangeClientError.notOffered(member: "setLeverage")) { try await client.setLeverage(2, market: Kraken.xbtusd, isolated: true, account: "") }
         await #expect(throws: ExchangeClientError.notOffered(member: "transfer")) { try await client.transfer(try Amount(whole: 1, of: Kraken.usd), from: "a", to: "b") }
         await #expect(throws: ExchangeClientError.notOffered(member: "keyFacts")) { try await client.keyFacts() }
+        // Kraken's subaccounts are institutional-only, with no listing endpoint.
+        await #expect(throws: ExchangeClientError.notOffered(member: "accounts")) { try await client.accounts() }
         #expect(!client.hasTestMarket)
     }
 

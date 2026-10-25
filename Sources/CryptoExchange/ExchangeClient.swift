@@ -65,6 +65,11 @@ public protocol ExchangeClient: Sendable {
     /// exchange applies to the account's trades, discounts included where it states them so. A conformer that does
     /// not read them throws ``ExchangeClientError/notOffered(member:)``, the default
     func feeRates(account: String) async throws -> [ExchangeClientFeeRate<MarketName>]
+    /// The owner's accounts the key reaches, as the exchange lists them (``ExchangeClientAccount``): each by the
+    /// exchange's own id for it, the value a ledger side's `account` carries, with the name the exchange gives it
+    /// where it gives one. A consumer names a move's side by matching the side's account to an id here. A conformer
+    /// whose exchange lists none throws ``ExchangeClientError/notOffered(member:)``, the default
+    func accounts() async throws -> [ExchangeClientAccount]
     func setLeverage(_ leverage: Int, market: MarketName, isolated: Bool, account: String) async throws
     func transfer(_ amount: Amount, from: String, to: String) async throws
     func keyFacts() async throws -> ExchangeClientKeyFacts
@@ -85,5 +90,11 @@ public extension ExchangeClient {
     /// its own `feeRates(account:)`
     func feeRates(account: String) async throws -> [ExchangeClientFeeRate<MarketName>] {
         throw ExchangeClientError.notOffered(member: "feeRates")
+    }
+
+    /// Throws ``ExchangeClientError/notOffered(member:)``: a conformer whose exchange lists the owner's accounts states
+    /// so by its own `accounts()`
+    func accounts() async throws -> [ExchangeClientAccount] {
+        throw ExchangeClientError.notOffered(member: "accounts")
     }
 }

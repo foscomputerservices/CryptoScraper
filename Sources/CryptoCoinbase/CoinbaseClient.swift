@@ -276,6 +276,20 @@ public struct CoinbaseClient: ExchangeClient {
         }
     }
 
+    /// The owner's portfolios, from List Portfolios: each by its uuid, the text a ledger side's `account` carries
+    /// and an `account` parameter takes, with its name, in Coinbase's order. The documentation states the call
+    /// "retrieves all portfolios of a user", so portfolios beyond the key's own are listed, a deleted one included
+    /// as Coinbase lists it (an older move may name it); the key's own account reads still answer for its portfolio
+    /// alone.
+    public func accounts() async throws -> [ExchangeClientAccount] {
+        do {
+            let listed: CoinbasePortfolios = try await send("GET", "/api/v3/brokerage/portfolios")
+            return listed.portfolios.map { ExchangeClientAccount(id: $0.uuid, name: $0.name) }
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.coinbase)
+        }
+    }
+
     /// The key's portfolio's wallets, each by its currency, once, in the order Coinbase lists them: its available and
     /// held money as `total`, the held part as `held`
     ///

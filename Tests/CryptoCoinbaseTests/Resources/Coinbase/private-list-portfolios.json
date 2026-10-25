@@ -1,0 +1,8 @@
+// documentation-derived from https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/portfolios/list-portfolios, fetched 2026-10-25; the 200 response of List Portfolios ("all portfolios of a user"), schema-derived: the key's own portfolio (the uuid Get API Key Permissions states, "" in its recorded fixture, here a placeholder), a second portfolio, and a deleted one, each with name, uuid, type and deleted as the schema lists them
+{
+  "portfolios": [
+    {"name": "Default", "uuid": "00000000-0000-4000-8000-000000000001", "type": "DEFAULT", "deleted": false},
+    {"name": "four-hour-2x", "uuid": "00000000-0000-4000-8000-000000000002", "type": "CONSUMER", "deleted": false},
+    {"name": "retired", "uuid": "00000000-0000-4000-8000-000000000003", "type": "CONSUMER", "deleted": true}
+  ]
+}
