@@ -237,7 +237,7 @@ struct C30ValuesTests {
     @Test("C30: a fill closed by the exchange carries the exchange's reason", .disabled("Classified 2026-10-07: the fill gained positionEffect at the owner's word; the pattern's arity is the projector's shape; see the identity ledger"))
     func fillCarriesTheCloseReason() throws {
         let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.01", "BTC"), price: try price("70123.4", "USDC"), fee: try amount("0.35", "USDC"), order: 77_738_400, id: 1, closedBy: .liquidation, time: ms(1_727_000_003_000), cursor: 113)
-        guard case let .fill(_, _, _, _, _, _, _, closedBy, _, _, _) = item else {
+        guard case let .fill(_, _, _, _, _, _, _, closedBy, _, _, _, _) = item else {
             Issue.record("not a fill")
             return
         }
@@ -261,10 +261,37 @@ struct C30ValuesTests {
         let sum = try amount("100.0", "USDC")
         let deposit = ExchangeClientLedgerItem<String, Int, Int, String, Int>.deposit(sum, id: "T1", time: ms(1), cursor: 1)
         let withdrawal = ExchangeClientLedgerItem<String, Int, Int, String, Int>.withdrawal(sum, id: "T1", time: ms(1), cursor: 1)
-        let move = ExchangeClientLedgerItem<String, Int, Int, String, Int>.internalMove(sum, from: "main", to: "sub", id: "T1", time: ms(1), cursor: 1)
+        let move = ExchangeClientLedgerItem<String, Int, Int, String, Int>.internalMove(sum, from: ExchangeClientLedgerSide(account: "main", wallet: .perpetuals), to: ExchangeClientLedgerSide(account: "sub", wallet: .perpetuals), id: "T1", time: ms(1), cursor: 1)
         #expect(deposit != withdrawal)
         #expect(deposit != move)
         #expect(withdrawal != move)
+    }
+
+    // A fill, a deposit and a withdrawal carry the
+    // wallet they are on, last and defaulting to nil; a move's two sides each name an account and a wallet, either nil
+    // where the exchange states none.
+    @Test("C30: a fill, a deposit and a withdrawal carry their wallet, nil where none is stated")
+    func itemsCarryTheirWallet() throws {
+        let sum = try amount("100.0", "USDC")
+        let unstated = ExchangeClientLedgerItem<String, Int, Int, String, Int>.deposit(sum, id: "T1", time: ms(1), cursor: 1)
+        let onPerpetuals = ExchangeClientLedgerItem<String, Int, Int, String, Int>.deposit(sum, id: "T1", time: ms(1), cursor: 1, wallet: .perpetuals)
+        #expect(unstated != onPerpetuals)
+        guard case let .deposit(_, _, _, _, _, wallet) = unstated else { Issue.record("Not a deposit"); return }
+        #expect(wallet == nil)
+        guard case let .withdrawal(_, _, _, _, _, named) = ExchangeClientLedgerItem<String, Int, Int, String, Int>.withdrawal(sum, id: "T1", time: ms(1), cursor: 1, wallet: .named("xyz")) else { return }
+        #expect(named == .named("xyz"))
+    }
+
+    @Test("C30: a move's sides are an account and a wallet each, either unstated")
+    func aMovesSidesAreAnAccountAndAWallet() throws {
+        let sum = try amount("100.0", "USDC")
+        let between = ExchangeClientLedgerSide(account: "0x01", wallet: .spot)
+        let within = ExchangeClientLedgerSide(account: nil, wallet: .perpetuals)
+        let move = ExchangeClientLedgerItem<String, Int, Int, String, Int>.internalMove(sum, from: between, to: within, id: "T1", time: ms(1), cursor: 1)
+        guard case let .internalMove(_, from, to, _, _, _, _) = move else { Issue.record("Not a move"); return }
+        #expect(from.account == "0x01" && from.wallet == .spot)
+        #expect(to.account == nil && to.wallet == .perpetuals)
+        #expect(ExchangeClientLedgerSide(account: nil, wallet: nil) != within)
     }
 
     // MARK: ExchangeClientKeyFacts, RequestBudget, Notice

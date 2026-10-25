@@ -113,7 +113,8 @@ enum LedgerLine<Name: Hashable & Sendable, OrderId: Hashable & Sendable>: Hashab
     case funding(market: Name, amount: Amount, rate: Fraction, time: Date)
     case deposit(Amount, time: Date)
     case withdrawal(Amount, time: Date)
-    case internalMove(Amount, from: String, to: String, time: Date)
+    // Wiring, 2026-10-25: C30's move sides became ExchangeClientLedgerSide (the account and the wallet on each side); the line carries them as the client hands them up. No assertion changed.
+    case internalMove(Amount, from: ExchangeClientLedgerSide, to: ExchangeClientLedgerSide, time: Date)
 
     var time: Date {
         switch self {
@@ -128,13 +129,13 @@ enum LedgerLine<Name: Hashable & Sendable, OrderId: Hashable & Sendable>: Hashab
 
 func line<Name, OrderId, FillId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, FillId, TransferId, Cursor>) -> LedgerLine<Name, OrderId> {
     switch item {
-    case let .fill(market, side, units, price, fee, order, _, closedBy, time, _, _):
+    case let .fill(market, side, units, price, fee, order, _, closedBy, time, _, _, _):
         .fill(market: market, side: side, units: units, price: price, fee: fee, order: order, closedBy: closedBy, time: time)
     case let .funding(market, amount, rate, time, _, _):
         .funding(market: market, amount: amount, rate: rate, time: time)
-    case let .deposit(amount, _, time, _, _):
+    case let .deposit(amount, _, time, _, _, _):
         .deposit(amount, time: time)
-    case let .withdrawal(amount, _, time, _, _):
+    case let .withdrawal(amount, _, time, _, _, _):
         .withdrawal(amount, time: time)
     case let .internalMove(amount, from, to, _, time, _, _):
         .internalMove(amount, from: from, to: to, time: time)
@@ -143,10 +144,10 @@ func line<Name, OrderId, FillId, TransferId, Cursor>(_ item: ExchangeClientLedge
 
 func cursor<Name, OrderId, FillId, TransferId, Cursor>(_ item: ExchangeClientLedgerItem<Name, OrderId, FillId, TransferId, Cursor>) -> Cursor {
     switch item {
-    case let .fill(_, _, _, _, _, _, _, _, _, cursor, _): cursor
+    case let .fill(_, _, _, _, _, _, _, _, _, cursor, _, _): cursor
     case let .funding(_, _, _, _, cursor, _): cursor
-    case let .deposit(_, _, _, cursor, _): cursor
-    case let .withdrawal(_, _, _, cursor, _): cursor
+    case let .deposit(_, _, _, cursor, _, _): cursor
+    case let .withdrawal(_, _, _, cursor, _, _): cursor
     case let .internalMove(_, _, _, _, _, cursor, _): cursor
     }
 }

@@ -239,6 +239,9 @@ struct KrakenClientTests {
         // places; margin "29151.35371", stated at the pair's five, is nil, neither rounded nor refused.
         #expect(first.openProfit == (try WireDecimal(parsing: "94367.2314").amount(of: Kraken.usd)))
         #expect(first.heldMargin == nil)
+        // OpenPositions states no margin kind: Kraken's spot margin draws on the one account's collateral, and the
+        // client states nothing it does not read.
+        #expect(first.marginKind == nil)
         #expect(state.positions.contains { $0.openProfit == (try? WireDecimal(parsing: "154186.9728").amount(of: Kraken.usd)) && $0.heldMargin == nil })
         #expect(state.mode.name == "spot")
     }
@@ -263,7 +266,7 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route())
         let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
         #expect(items.count == 2) // the two trades; the two ledger entries are those trades' and are not handed up twice
-        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _) = items[0] else {
+        guard case .fill(let market, let side, let units, let price, let fee, let order, _, _, _, let cursor, _, _) = items[0] else {
             Issue.record("Not a fill")
             return
         }
@@ -274,8 +277,10 @@ struct KrakenClientTests {
         #expect(order == (try KrakenOrderId(validating: "OQCLML-BW3P3-BUCMWZ")))
         #expect(cursor == KrakenLedgerCursor(seconds: try WireDecimal(parsing: "1688667769.6396"), read: [try KrakenLedgerId(validating: "TCWJEG-FL4SZ-3FKGH6")]))
         // The fill's id is the trade's own key, the one its ledger entries refer to.
-        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _) = items[0] else { return }
+        guard case .fill(_, _, _, _, _, _, let fillId, _, _, _, _, let wallet) = items[0] else { return }
         #expect(fillId == (try KrakenFillId(validating: "TCWJEG-FL4SZ-3FKGH6")))
+        // The Spot REST API's trades are the spot exchange's.
+        #expect(wallet == .spot)
 
         // Kraken's start is exclusive: the read asks from the ten-thousandth before the cursor's instant.
         let resumed = ReplaySession(route: Kraken.route())
@@ -294,7 +299,7 @@ struct KrakenClientTests {
         #expect(ledgers.contains("LFEE00-TRADE-ENTRY"))
         let session = ReplaySession(route: Kraken.route(["Ledgers": .ok(Data(ledgers.utf8))]))
         let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
-        guard case .fill(_, _, _, _, let fee, _, let fillId, _, _, _, _) = try #require(items.first) else {
+        guard case .fill(_, _, _, _, let fee, _, let fillId, _, _, _, _, _) = try #require(items.first) else {
             Issue.record("Not a fill")
             return
         }
@@ -317,11 +322,42 @@ struct KrakenClientTests {
         let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
         let fees = try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item -> Amount?? in
             switch item {
-            case let .deposit(_, _, _, _, fee), let .withdrawal(_, _, _, _, fee), let .internalMove(_, _, _, _, _, _, fee): .some(fee)
+            case let .deposit(_, _, _, _, fee, _), let .withdrawal(_, _, _, _, fee, _), let .internalMove(_, _, _, _, _, _, fee): .some(fee)
             case .fill, .funding: nil
             }
         }
         #expect(fees == [Amount(baseUnits: 25_000, of: Kraken.usd), Amount(baseUnits: 50_000, of: Kraken.usd), .zero(of: Kraken.usd)])
+    }
+
+    // A move's sides are the account and the wallet on each. Kraken's transfer entry
+    // names no account (it is the one account's) and its subtype names the wallets, as the ledger fields documentation
+    // lists them (support article 360001169383); a deposit and a withdrawal state no wallet.
+    @Test func aTransfersSidesAreTheOneAccountsWalletsBySubtypeAndADepositStatesNoWallet() async throws {
+        let trades = Data(#"{"error":[],"result":{"trades":{},"count":0}}"#.utf8)
+        func entry(_ key: String, _ time: String, _ type: String, _ subtype: String) -> String {
+            #""\#(key)":{"refid":"R\#(key)","time":\#(time),"type":"\#(type)","subtype":"\#(subtype)","aclass":"currency","asset":"ZUSD","amount":"-10.0000","fee":"0.0000","balance":"100.0000"}"#
+        }
+        let ledgers = Data(#"""
+        {"error":[],"result":{"ledger":{
+          \#(entry("L1AAAA-AAAAA-AAAAAA", "1688000001.0", "deposit", "")),
+          \#(entry("L2AAAA-AAAAA-AAAAAA", "1688000002.0", "transfer", "spottofutures")),
+          \#(entry("L3AAAA-AAAAA-AAAAAA", "1688000003.0", "transfer", "spotfromfutures")),
+          \#(entry("L4AAAA-AAAAA-AAAAAA", "1688000004.0", "transfer", "stakingfromspot")),
+          \#(entry("L5AAAA-AAAAA-AAAAAA", "1688000005.0", "transfer", "deallocation")),
+          \#(entry("L6AAAA-AAAAA-AAAAAA", "1688000006.0", "transfer", ""))
+        },"count":6}}
+        """#.utf8)
+        let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
+        let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
+        guard case .deposit(_, _, _, _, _, let wallet) = try #require(items.first) else { Issue.record("Not a deposit"); return }
+        #expect(wallet == nil)
+        let own = { (wallet: ExchangeClientWallet?) in ExchangeClientLedgerSide(account: nil, wallet: wallet) }
+        let sides = items.dropFirst().map { item -> (ExchangeClientLedgerSide, ExchangeClientLedgerSide)? in
+            guard case .internalMove(_, let from, let to, _, _, _, _) = item else { return nil }
+            return (from, to)
+        }
+        #expect(sides.map { $0?.0 } == [own(.spot), own(.perpetuals), own(.spot), own(.named("earn")), own(nil)])
+        #expect(sides.map { $0?.1 } == [own(.perpetuals), own(.spot), own(.named("staking")), own(.spot), own(nil)])
     }
 
     // The documented BalanceEx: each asset's balance as its total, hold_trade as its held part, in the order of the names.
@@ -349,7 +385,7 @@ struct KrakenClientTests {
         let ledgers = Data(#"{"error":[],"result":{"ledger":{"L1AAAA-AAAAA-AAAAAA":{"refid":"FTQcuak-V6Za8qrWnhzTx67yYHz8Tg","time":1688000001.0,"type":"deposit","subtype":"","aclass":"currency","asset":"ZUSD","amount":"1000.0000","fee":"0.0000","balance":"1000.0000"}},"count":1}}"#.utf8)
         let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(trades), "Ledgers": .ok(ledgers)]))
         let items = try await Kraken.client(session).ledgerItems(account: "", since: nil)
-        guard case .deposit(_, let id, _, _, _) = try #require(items.first) else {
+        guard case .deposit(_, let id, _, _, _, _) = try #require(items.first) else {
             Issue.record("Not a deposit")
             return
         }
@@ -371,7 +407,7 @@ struct KrakenClientTests {
         let trades = edit(String(decoding: Recording.body("Kraken/private-trades-history.json"), as: UTF8.self))
         let session = ReplaySession(route: Kraken.route(["TradesHistory": .ok(Data(trades.utf8))]))
         return try await Kraken.client(session).ledgerItems(account: "", since: nil).map { item in
-            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect) = item else { return nil }
+            guard case .fill(_, _, _, _, _, _, _, _, _, _, let effect, _) = item else { return nil }
             return effect
         }
     }
@@ -473,7 +509,7 @@ struct KrakenClientTests {
         let items = try await Kraken.client(session).ledgerItems(account: "", since: since)
         var cursors: [KrakenLedgerCursor] = []
         for item in items {
-            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _) = item else { continue }
+            guard case .fill(_, _, _, _, _, _, _, _, _, let cursor, _, _) = item else { continue }
             cursors.append(cursor)
         }
         return cursors

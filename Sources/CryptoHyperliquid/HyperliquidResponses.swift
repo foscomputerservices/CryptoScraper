@@ -85,8 +85,9 @@ struct HyperliquidClearinghouseState: Decodable, Sendable {
         let marginUsed: WireDecimal?
     }
 
-    // A position's leverage: {"type": "isolated" or "cross", "value": 2, …}.
+    // A position's leverage: {"type": "isolated" or "cross", "value": 2, …}; `type` is the margin's kind as stated.
     struct Leverage: Decodable, Sendable {
+        let type: String
         let value: Int
     }
 
@@ -172,11 +173,19 @@ struct HyperliquidSpotState: Decodable, Sendable {
 
 // `userNonFundingLedgerUpdates`: each item's `delta` by its `type`, the kinds C30 carries read, the others kept as other.
 // A withdrawal's and a move's `fee` is the wire's, `nil` where the item carries none; every fee read is in USDC.
+//
+// A move's two sides are the accounts the update names and the wallet on each, as the documentation's kinds state them
+// (the exchange endpoint names two sends: `usdSend`, "Send usd to another address", and `spotSend`, "Send spot assets
+// to another address"; `subAccountTransfer` beside `subAccountSpotTransfer`; `usdClassTransfer` "from the user's spot
+// wallet to perp wallet and vice versa"): an `internalTransfer` and a `subAccountTransfer` move perpetuals USDC
+// between two accounts; a `spotTransfer` moves spot USDC between two accounts; a `send` names its dexes on each side
+// (`""` the perpetuals dex, `"spot"`, or a builder dex by its name); an `accountClassTransfer` moves between the one
+// account's two wallets, naming no account.
 struct HyperliquidLedgerUpdate: Decodable, Sendable, HyperliquidTimed {
     enum Delta: Sendable {
         case deposit(WireDecimal)
         case withdrawal(WireDecimal, fee: WireDecimal?)
-        case move(WireDecimal, from: String, to: String, fee: WireDecimal?)
+        case move(WireDecimal, from: ExchangeClientLedgerSide, to: ExchangeClientLedgerSide, fee: WireDecimal?)
         case other
     }
 
@@ -205,11 +214,13 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable, HyperliquidTimed {
             self.delta = .withdrawal(try delta.decode(WireDecimal.self, forKey: .usdc), fee: fee)
         case "subAccountTransfer", "internalTransfer":
             self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc),
-                               from: try delta.decode(String.self, forKey: .user), to: try delta.decode(String.self, forKey: .destination), fee: fee)
-        case "send":
+                               from: ExchangeClientLedgerSide(account: try delta.decode(String.self, forKey: .user), wallet: .perpetuals),
+                               to: ExchangeClientLedgerSide(account: try delta.decode(String.self, forKey: .destination), wallet: .perpetuals), fee: fee)
+        case "send", "spotTransfer":
             // Only a send of USDC with its fee in USDC is read: the client knows no other spot token, and a send in one
-            // read as USDC would be a wrong amount. Within one account, the sides are its dexes ("" is the perp dex),
-            // named as accountClassTransfer names them; between accounts, their addresses.
+            // read as USDC would be a wrong amount. Each side is the account the update names and its dex: a `send`
+            // names both dexes ("" is the perpetuals dex); a `spotTransfer`, the older spot send, is on the spot wallet
+            // at both ends.
             let token = try delta.decodeIfPresent(String.self, forKey: .token) ?? "USDC"
             let feeToken = try delta.decodeIfPresent(String.self, forKey: .feeToken) ?? ""
             let nativeTokenFee = try delta.decodeIfPresent(WireDecimal.self, forKey: .nativeTokenFee)
@@ -220,16 +231,22 @@ struct HyperliquidLedgerUpdate: Decodable, Sendable, HyperliquidTimed {
             let user = try delta.decode(String.self, forKey: .user)
             let destination = try delta.decode(String.self, forKey: .destination)
             let amount = try delta.decode(WireDecimal.self, forKey: .amount)
-            if user.lowercased() == destination.lowercased() {
-                let dex = { (name: String?) in name.flatMap { $0.isEmpty ? nil : $0 } ?? "perp" }
-                self.delta = .move(amount, from: dex(try delta.decodeIfPresent(String.self, forKey: .sourceDex)),
-                                   to: dex(try delta.decodeIfPresent(String.self, forKey: .destinationDex)), fee: fee)
-            } else {
-                self.delta = .move(amount, from: user, to: destination, fee: fee)
+            let wallet = { (dex: String?) -> ExchangeClientWallet in
+                switch dex ?? "spot" {
+                case "": .perpetuals
+                case "spot": .spot
+                case let named: .named(named)
+                }
             }
+            let source = try delta.decodeIfPresent(String.self, forKey: .sourceDex)
+            let target = try delta.decodeIfPresent(String.self, forKey: .destinationDex)
+            self.delta = .move(amount, from: ExchangeClientLedgerSide(account: user, wallet: wallet(source)),
+                               to: ExchangeClientLedgerSide(account: destination, wallet: wallet(target)), fee: fee)
         case "accountClassTransfer":
             let toPerp = try delta.decode(Bool.self, forKey: .toPerp)
-            self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc), from: toPerp ? "spot" : "perp", to: toPerp ? "perp" : "spot", fee: nil)
+            self.delta = .move(try delta.decode(WireDecimal.self, forKey: .usdc),
+                               from: ExchangeClientLedgerSide(account: nil, wallet: toPerp ? .spot : .perpetuals),
+                               to: ExchangeClientLedgerSide(account: nil, wallet: toPerp ? .perpetuals : .spot), fee: nil)
         default:
             self.delta = .other
         }

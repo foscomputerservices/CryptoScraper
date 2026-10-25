@@ -359,6 +359,14 @@ public struct KrakenClient: ExchangeClient {
     /// pair's quote (the trade's `refid` entries), the amount the balance moved by at the ledger's four places; Kraken
     /// states the trade's own `fee` at the pair's `cost_decimals` (5 on XBT/USD), finer than the dollar holding, and
     /// that figure is read only where the ledger read holds no entry for the trade (the owner's ruling of 2026-10-24).
+    ///
+    /// A fill's `wallet` is `spot`: the Spot REST API's trades are the spot exchange's, margin ones included. A
+    /// deposit's and a withdrawal's `wallet` is `nil`: Kraken states none on the entry. A transfer's two sides name no
+    /// account (the entry is the one account's) and take their wallets from the entry's `subtype` as Kraken's ledger
+    /// fields documentation lists them: `spottofutures` is `spot` to `perpetuals` and `spotfromfutures` the reverse;
+    /// `spottostaking` and `stakingfromspot` are `spot` to `named("staking")`, `stakingtospot` and `spotfromstaking`
+    /// the reverse; `allocation` is `spot` to `named("earn")` and `deallocation` the reverse. Any other subtype states
+    /// no wallet on either side.
     public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenFillId, KrakenTransferId, KrakenLedgerCursor>] {
         do {
             let start = since.map { [("start", Self.startBefore($0.seconds))] } ?? []
@@ -391,7 +399,7 @@ public struct KrakenClient: ExchangeClient {
                 let fillId = try KrakenFillId(validating: key)
                 items.append((trade.time, id, { cursor in
                     .fill(market: market, side: trade.type == "buy" ? .buy : .sell, units: units, price: price, fee: fee, order: order,
-                          id: fillId, closedBy: nil, time: cursor.time, cursor: cursor, positionEffect: trade.positionEffect)
+                          id: fillId, closedBy: nil, time: cursor.time, cursor: cursor, positionEffect: trade.positionEffect, wallet: .spot)
                 }))
             }
             for (key, entry) in ledger.result.ledger {
@@ -411,7 +419,8 @@ public struct KrakenClient: ExchangeClient {
                 case "withdrawal":
                     items.append((entry.time, id, { .withdrawal(amount, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
                 default:
-                    items.append((entry.time, id, { .internalMove(amount, from: entry.subtype, to: entry.asset, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
+                    let (from, to) = Self.transferSides(subtype: entry.subtype)
+                    items.append((entry.time, id, { .internalMove(amount, from: from, to: to, id: transfer, time: $0.time, cursor: $0, fee: fee) }))
                 }
             }
 
@@ -448,6 +457,22 @@ public struct KrakenClient: ExchangeClient {
         } catch AmountError.belowBaseUnit {
             return nil
         }
+    }
+
+    // A transfer's two sides by the entry's `subtype`, each a wallet of the one account, as Kraken's ledger fields
+    // documentation lists the subtypes (support article 360001169383): the futures wallet is the perpetuals wallet, the
+    // staking and Earn balances are wallets in Kraken's words. An unlisted subtype states no wallet on either side.
+    static func transferSides(subtype: String) -> (from: ExchangeClientLedgerSide, to: ExchangeClientLedgerSide) {
+        let wallets: (ExchangeClientWallet?, ExchangeClientWallet?) = switch subtype {
+        case "spottofutures": (.spot, .perpetuals)
+        case "spotfromfutures": (.perpetuals, .spot)
+        case "spottostaking", "stakingfromspot": (.spot, .named("staking"))
+        case "stakingtospot", "spotfromstaking": (.named("staking"), .spot)
+        case "allocation": (.spot, .named("earn"))
+        case "deallocation": (.named("earn"), .spot)
+        default: (nil, nil)
+        }
+        return (ExchangeClientLedgerSide(account: nil, wallet: wallets.0), ExchangeClientLedgerSide(account: nil, wallet: wallets.1))
     }
 
     // Kraken's `start` is exclusive: the cursor's instant less one ten-thousandth, which a read of it then includes.

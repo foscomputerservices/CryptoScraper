@@ -6,6 +6,27 @@ Each pull request adds its entry under the version it will be released as, dated
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-25
+
+The wallet a ledger item is on, the account and wallet on each side of a move, and a position's margin kind, through every client. PR #39.
+
+### Changed
+
+- **Breaking:** `internalMove`'s `from` and `to` are each an `ExchangeClientLedgerSide`, the account the exchange names on that side (`nil` where it names none, the side being the account read) and the wallet on it (`ExchangeClientWallet`: `perpetuals`, `spot`, or `named` in the exchange's own word; `nil` where it states none), in place of two strings. The case's arity is unchanged.
+- **Breaking:** `fill`, `deposit` and `withdrawal` each gain `wallet: ExchangeClientWallet? = nil`, last: the wallet a fill traded from, a deposit landed on or a withdrawal left, as the exchange states it. A positional pattern over each case needs one more `_`. A consumer lists a perpetuals statement from the items whose wallet is `perpetuals`, never by the market alone.
+- **Hyperliquid:** a spot fill (its `coin` a spot pair's name, `@index` or `PURR/USDC`; mainnet lists both forms beside the perpetuals' coins, probed 2026-10-25) is passed over, not handed up: the client declares no spot token, and the first such fill used to refuse the whole ledger read of any wallet that ever traded spot (`unknownMarket`). The perpetuals fills read with `wallet: .perpetuals`; a perpetual in an undeclared coin still refuses the read.
+- **Hyperliquid:** a `spotTransfer` update, the older spot send between two accounts (mainnet, 2026-10-25: 2141 of them against 130 `send`s among 24 users), is read as a move on the spot wallet at both ends, USDC only, as a `send` is.
+
+### Added
+
+- `ExchangeClientWallet` and `ExchangeClientLedgerSide` on `CryptoExchange`.
+- **Hyperliquid:** a deposit's and a withdrawal's wallet is `perpetuals` (the bridge credits and debits the perpetuals USDC; the documentation: "deposits and Spot to Perp transfers will go toward collateral for those open positions"). A move's sides as the update's kind states them: `internalTransfer` and `subAccountTransfer` name `user` and `destination` on `perpetuals` (the exchange endpoint's `usdSend` and `subAccountTransfer`, beside its `spotSend` and `subAccountSpotTransfer`; mainnet, 2026-10-25: an account whose only update is one inbound `internalTransfer` of 100 with fee 1 holds 99 on perpetuals and no spot USDC. On testnet, a faucet `internalTransfer` was observed to land on spot, by the account's own statement arithmetic: a testnet observation, not coded to); `send` names both with its `sourceDex` and `destinationDex` (`""` the perpetuals dex, `"spot"`, a builder dex as `named`); `accountClassTransfer` names no account, its sides the one account's `spot` and `perpetuals` by `toPerp`. A `send` within one account now names the account on both sides, where it named only the dexes.
+- **Kraken:** a fill's wallet is `spot`; a deposit's and a withdrawal's is `nil` (the entry states none). A transfer's sides name no account and take their wallets from the subtype as Kraken's ledger fields documentation lists them: `spottofutures`/`spotfromfutures` between `spot` and `perpetuals`, `spottostaking`/`stakingfromspot`/`stakingtospot`/`spotfromstaking` between `spot` and `named("staking")`, `allocation`/`deallocation` between `spot` and `named("earn")`; any other subtype states no wallet. The former `from: subtype, to: asset` placeholder is gone.
+- **Coinbase:** a fill's wallet is `perpetuals` where its product is a perpetual future (`contract_expiry_type` "PERPETUAL"), `spot` otherwise.
+- `ExchangeClientPosition` gains `marginKind: ExchangeClientMarginKind?` (`cross` or `isolated`), last and defaulting to `nil`: how the exchange margins the position, as it states it.
+- **Hyperliquid:** a position's `marginKind` is its `leverage.type`, "cross" or "isolated"; `nil` for any other word.
+- **Kraken** and **Coinbase:** `nil`; neither states one.
+
 ## [0.14.0] - 2026-10-24
 
 A fill's own id, the account's fee rates, and a position's open profit and held margin, through every client. PR #38.

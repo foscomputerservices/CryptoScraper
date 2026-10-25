@@ -252,9 +252,9 @@ public struct HyperliquidClient: ExchangeClient {
     /// The value, the withdrawable amount and the open positions of `account`, in USDC and the coins' holdings
     ///
     /// `balance` is `marginSummary.accountValue`. A position's `openProfit` is its `unrealizedPnl` and its `heldMargin`
-    /// its `marginUsed`, both in USDC as stated. `mode` is the account mode of the main wallet (`userAbstraction`),
-    /// whichever account is read. A position the account holds in a coin whose holding is not declared refuses the
-    /// whole read.
+    /// its `marginUsed`, both in USDC as stated; its `marginKind` is its `leverage.type`, "cross" or "isolated", `nil`
+    /// for any other word. `mode` is the account mode of the main wallet (`userAbstraction`), whichever account is
+    /// read. A position the account holds in a coin whose holding is not declared refuses the whole read.
     public func accountState(account: String) async throws -> ExchangeClientAccountState<HyperliquidMarketName> {
         do {
             try declared.get()
@@ -277,7 +277,8 @@ public struct HyperliquidClient: ExchangeClient {
                     mark: try mark.price(of: usdc, per: base, in: registry),
                     liquidationPrice: try held.liquidationPx.map { try $0.price(of: usdc, per: base, in: registry) },
                     openProfit: try held.unrealizedPnl.map { try $0.amount(of: usdc, in: registry) },
-                    heldMargin: try held.marginUsed.map { try $0.amount(of: usdc, in: registry) }
+                    heldMargin: try held.marginUsed.map { try $0.amount(of: usdc, in: registry) },
+                    marginKind: held.leverage.flatMap { Self.marginKinds[$0.type] }
                 ))
             }
             return ExchangeClientAccountState(
@@ -364,6 +365,16 @@ public struct HyperliquidClient: ExchangeClient {
 
     /// What a fill did to the position, from Hyperliquid's `dir` word: "Open Long" and "Open Short" open, "Close Long"
     /// and "Close Short" close; any other word (a flip such as "Long > Short", a spot "Buy") states no effect, `nil`
+    // Whether a fill's `coin` names a spot pair: the documentation's forms, "@{index}" and "PURR/USDC" ("For Spot,
+    // coin should be PURR/USDC for PURR, and @{index}"); a perpetual's coin is its name, "BTC", or a builder dex's
+    // "dex:NAME".
+    static func isSpotPair(_ coin: String) -> Bool {
+        coin.hasPrefix("@") || coin.contains("/")
+    }
+
+    // A position's margin kind by its leverage `type`, as clearinghouseState spells it.
+    static let marginKinds: [String: ExchangeClientMarginKind] = ["cross": .cross, "isolated": .isolated]
+
     static func positionEffect(dir: String) -> ExchangeClientPositionEffect? {
         positionEffects[dir]
     }
@@ -393,13 +404,30 @@ public struct HyperliquidClient: ExchangeClient {
     ///
     /// A withdrawal's and a move's fee is the update's `fee` in USDC, `nil` where it carries none (a deposit and an
     /// `accountClassTransfer` never do, nor has a recorded `subAccountTransfer`); the amount is the update's `usdc` or
-    /// `amount`, as stated. A `send` within one account is a move between its dexes, `"spot"` and `"perp"` (the perp
-    /// dex, which the wire names `""`) or a builder dex by its name; between accounts, a move between their addresses.
-    /// A `send` of a token other than USDC, or whose fee is in one, is not handed up: the client reads no other spot
-    /// token. A fill's `id` is its `tid` (``HyperliquidFillId``); a fill listed without one is refused, the whole read
-    /// with it. A deposit's, a withdrawal's and a move's `id` is the update's `hash` (``HyperliquidTransferId``), the
-    /// same in both accounts' ledgers for a move between them; an update of those kinds without one, or with an
-    /// all-zero one, is refused, the whole read with it.
+    /// `amount`, as stated. A `send` of a token other than USDC, or whose fee is in one, is not handed up: the client
+    /// reads no other spot token. A fill's `id` is its `tid` (``HyperliquidFillId``); a fill listed without one is
+    /// refused, the whole read with it. A deposit's, a withdrawal's and a move's `id` is the update's `hash`
+    /// (``HyperliquidTransferId``), the same in both accounts' ledgers for a move between them; an update of those
+    /// kinds without one, or with an all-zero one, is refused, the whole read with it.
+    ///
+    /// A fill's `wallet` is `perpetuals`: the fills read are the perpetuals'. A spot fill, one whose `coin` is a spot
+    /// pair's name (`"@index"`, or `"BASE/QUOTE"` as `"PURR/USDC"`; mainnet lists both forms beside the perpetuals'
+    /// coins, probed 2026-10-25), is passed over, not handed up: the client declares no spot token, so its units could
+    /// be no amount, and the wallet's perpetuals statement is read rather than refused on the first spot fill (the
+    /// passed-over fills are not counted up). A deposit's
+    /// and a withdrawal's `wallet` is `perpetuals`: the bridge credits and debits the perpetuals USDC (the documentation:
+    /// "deposits and Spot to Perp transfers will go toward collateral for those open positions").
+    ///
+    /// A move's two sides are the accounts the update names and the wallet on each, as Hyperliquid's kinds state them:
+    /// an `internalTransfer` and a `subAccountTransfer` name the `user` and the `destination`, both on `perpetuals`
+    /// (the exchange endpoint's `usdSend` and `subAccountTransfer`, beside its `spotSend` and `subAccountSpotTransfer`;
+    /// on mainnet, 2026-10-25, an account whose only update is one inbound `internalTransfer` of 100 with fee 1 holds
+    /// 99 on perpetuals and no spot USDC; on testnet a faucet `internalTransfer` was observed to land on spot, a
+    /// testnet observation the client does not code to);
+    /// a `send` names both with its `sourceDex` and `destinationDex` (`""` the perpetuals dex, `"spot"`, a builder dex
+    /// by its name as `named`); a `spotTransfer`, the older spot send, names both on `spot`; an `accountClassTransfer`
+    /// names no account, its sides the one account's `spot` and `perpetuals` by `toPerp`. The addresses are as
+    /// Hyperliquid writes them.
     public func ledgerItems(account: String, since: HyperliquidLedgerCursor?) async throws -> [ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>] {
         do {
             try declared.get()
@@ -413,7 +441,7 @@ public struct HyperliquidClient: ExchangeClient {
             // funding by coin, then the other updates by hash; its cursor is made once the order is known.
             typealias Made = (HyperliquidLedgerCursor) -> ExchangeClientLedgerItem<HyperliquidMarketName, HyperliquidOrderId, HyperliquidFillId, HyperliquidTransferId, HyperliquidLedgerCursor>
             var items: [(time: Int64, rank: Int, key: String, make: Made)] = []
-            for fill in fills {
+            for fill in fills where !Self.isSpotPair(fill.coin) {
                 let market = try HyperliquidMarketName(validating: fill.coin)
                 let base = try await self.coin(market).declared()
                 let closedBy: ExchangeClientCloseReason? = fill.liquidation ? .liquidation : fill.dir.contains("Auto-Deleveraging") ? .deleveraging : nil
@@ -429,7 +457,7 @@ public struct HyperliquidClient: ExchangeClient {
                 items.append((fill.time, 0, key, { cursor in
                     .fill(market: market, side: fill.side == "B" ? .buy : .sell, units: units, price: price, fee: fee,
                           order: HyperliquidOrderId(fill.oid), id: HyperliquidFillId(tid), closedBy: closedBy, time: Date(wireMilliseconds: fill.time), cursor: cursor,
-                          positionEffect: Self.positionEffect(dir: fill.dir))
+                          positionEffect: Self.positionEffect(dir: fill.dir), wallet: .perpetuals)
                 }))
             }
             for payment in funding {
@@ -448,12 +476,12 @@ public struct HyperliquidClient: ExchangeClient {
                 case .deposit(let amount):
                     let amount = try amount.amount(of: usdc, in: registry)
                     let id = try HyperliquidTransferId(validating: update.hash ?? "")
-                    made = { .deposit(amount, id: id, time: time, cursor: $0) }
+                    made = { .deposit(amount, id: id, time: time, cursor: $0, wallet: .perpetuals) }
                 case .withdrawal(let amount, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
                     let fee = try fee?.amount(of: usdc, in: registry)
                     let id = try HyperliquidTransferId(validating: update.hash ?? "")
-                    made = { .withdrawal(amount, id: id, time: time, cursor: $0, fee: fee) }
+                    made = { .withdrawal(amount, id: id, time: time, cursor: $0, fee: fee, wallet: .perpetuals) }
                 case .move(let amount, let from, let to, let fee):
                     let amount = try amount.amount(of: usdc, in: registry)
                     let fee = try fee?.amount(of: usdc, in: registry)
