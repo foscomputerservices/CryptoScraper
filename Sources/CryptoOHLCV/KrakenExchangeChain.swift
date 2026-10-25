@@ -124,6 +124,12 @@ public extension KrakenHolding {
     /// Bitcoin on Kraken, "XBT", at 10 decimals, in `Asset.btc`
     static let xbt = KrakenHolding(address: "XBT")
     /// The dollar on Kraken, "USD", at 4 decimals, in `Asset.usd`
+    ///
+    /// Four is the scale of Kraken's ledger (Assets' `decimals` for ZUSD): every movement of the balance, a trade's fee
+    /// among them, is written at it. A pair states its own `cost_decimals` for a trade's cost and a position's cost,
+    /// margin and net, from 2 to 12 by pair on the dollar pairs (live 2026-10-24: 478 pairs at 5, 93 at 8, a few at 10
+    /// to 12), so no one finer scale is the dollar's; the holding stays at the ledger's four (the owner's ruling of
+    /// 2026-10-24). A fill's fee is read from its ledger entry, at four; a position figure stated finer is `nil`.
     static let usd = KrakenHolding(address: "USD")
     /// Ether on Kraken, "ETH", at 10 decimals, in `Asset.eth`
     static let eth = KrakenHolding(address: "ETH")
@@ -398,7 +404,7 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
     ///
     /// - Throws: ``ExchangeClientError/refused(code:text:)`` when the item's amount is in no Kraken holding; the
     ///   encoder's error when its id or cursor does not encode
-    public init<OrderId: Encodable, TransferId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<KrakenMarketName, OrderId, TransferId, Cursor>) throws {
+    public init<OrderId: Encodable, FillId: Encodable, TransferId: Encodable, Cursor: Encodable>(_ item: ExchangeClientLedgerItem<KrakenMarketName, OrderId, FillId, TransferId, Cursor>) throws {
         let baseUnits: Int128
         let instance: AssetInstance
         let time: Date
@@ -407,7 +413,7 @@ public struct KrakenTransaction: CryptoTransaction, Sendable {
         var from: KrakenHolding?
         var to: KrakenHolding?
         switch item {
-        case let .fill(_, _, units, _, _, order, _, fillTime, _, _):
+        case let .fill(_, _, units, _, _, order, _, _, fillTime, _, _):
             (baseUnits, instance, time, id, kind) = (units.baseUnits, units.instance, fillTime, try Self.text(of: order), "fill")
         case let .funding(_, funded, _, fundingTime, cursor, _):
             (baseUnits, instance, time, id, kind) = (funded.baseUnits, funded.instance, fundingTime, try Self.text(of: cursor), "funding")

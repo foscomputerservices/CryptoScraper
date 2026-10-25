@@ -46,6 +46,7 @@ public struct KrakenClient: ExchangeClient {
     public typealias Credential = KrakenCredential
     public typealias MarketName = KrakenMarketName
     public typealias OrderId = KrakenOrderId
+    public typealias FillId = KrakenFillId
     public typealias TransferId = KrakenTransferId
     public typealias Cursor = KrakenLedgerCursor
 
@@ -249,7 +250,11 @@ public struct KrakenClient: ExchangeClient {
     ///
     /// The trade-balance call sends the holding's `wireName` as its `asset`. A position's units are its volume less
     /// the volume closed, and a fully closed one is left out; the entry price is its cost over its volume, the mark
-    /// its value over its units, and the liquidation price is always `nil`. The mode is "spot".
+    /// its value over its units, and the liquidation price is always `nil`. Its `openProfit` is the position's `net`
+    /// (`docalcs`) and its `heldMargin` its `margin`, in the pair's quote as stated, `nil` where Kraken states none or
+    /// states the figure finer than the quote holding's places (a dollar pair's `cost_decimals`, 5 and finer, against
+    /// the dollar's four): the figure is Kraken's estimate, moves no balance, and is neither rounded nor refused (the
+    /// owner's ruling of 2026-10-24). The mode is "spot".
     public func accountState(account: String) async throws -> ExchangeClientAccountState<KrakenMarketName> {
         do {
             let usd = try await holding(named: KrakenHolding.usd.wireName)
@@ -265,7 +270,9 @@ public struct KrakenClient: ExchangeClient {
                     market: market, side: held.type == "buy" ? .buy : .sell, units: units,
                     entryPrice: try price(of: held.cost, per: held.vol, pair),
                     mark: try price(of: held.value, per: WireDecimal(units, in: registry), pair),
-                    liquidationPrice: nil
+                    liquidationPrice: nil,
+                    openProfit: try Self.representable(held.net, of: pair.quote, in: registry),
+                    heldMargin: try Self.representable(held.margin, of: pair.quote, in: registry)
                 ))
             }
             return ExchangeClientAccountState(
@@ -278,6 +285,35 @@ public struct KrakenClient: ExchangeClient {
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
         }
+    }
+
+    /// The rates Kraken applies to the account's trades, one per pair of AssetPairs, from one TradeVolume call naming
+    /// every pair: the pair's `fees` entry is the taker rate and its `fees_maker` entry the maker rate, or the one `fees`
+    /// rate where Kraken states no maker schedule for the pair. Kraken states each as a percentage ("0.2600"), read
+    /// here as the fraction (0.0026). A pair TradeVolume lists no fee for is left out. `account` is not sent: the key
+    /// reads its own fees. Sorted by Kraken's key for the pair.
+    public func feeRates(account: String) async throws -> [ExchangeClientFeeRate<KrakenMarketName>] {
+        do {
+            let pairs: KrakenResult<[String: KrakenPairInfo]> = try await publicGet("AssetPairs", [])
+            let keys = pairs.result.keys.sorted()
+            let volume: KrakenResult<KrakenTradeVolume> = try await privatePost("TradeVolume", [("pair", keys.joined(separator: ","))])
+            var rates: [ExchangeClientFeeRate<KrakenMarketName>] = []
+            for key in keys {
+                guard let taker = volume.result.fees?[key]?.fee else { continue }
+                let maker = volume.result.feesMaker?[key]?.fee ?? taker
+                rates.append(ExchangeClientFeeRate(
+                    scope: .market(try KrakenMarketName(validating: key)), maker: try Self.percent(maker), taker: try Self.percent(taker)
+                ))
+            }
+            return rates
+        } catch {
+            throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
+    }
+
+    // A percentage as the fraction it states: "0.2600" is 0.0026, exactly.
+    static func percent(_ text: WireDecimal) throws -> Fraction {
+        try WireDecimal(digits: text.digits, fractionDigits: text.fractionDigits + 2).fraction()
     }
 
     /// The account's wallet from BalanceEx, each asset by Kraken's name for it, in the order of the names
@@ -318,14 +354,26 @@ public struct KrakenClient: ExchangeClient {
     /// entry's `fee` in the entry's own asset, `nil` where the entry carries none; the amount is the entry's `amount`,
     /// as stated (Kraken's balance after the entry is the one before it, plus the amount, less the fee). Its `id` is
     /// the entry's `refid`, the reference Kraken gives the deposit, withdrawal or transfer; an entry of those kinds
-    /// without one is refused, the whole read with it.
-    public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenTransferId, KrakenLedgerCursor>] {
+    /// without one is refused, the whole read with it. A fill's `id` is the trade's own key in TradesHistory
+    /// (``KrakenFillId``), the transaction id its ledger entries refer to. A fill's `fee` is its ledger entry's in the
+    /// pair's quote (the trade's `refid` entries), the amount the balance moved by at the ledger's four places; Kraken
+    /// states the trade's own `fee` at the pair's `cost_decimals` (5 on XBT/USD), finer than the dollar holding, and
+    /// that figure is read only where the ledger read holds no entry for the trade (the owner's ruling of 2026-10-24).
+    public func ledgerItems(account: String, since: KrakenLedgerCursor?) async throws -> [ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenFillId, KrakenTransferId, KrakenLedgerCursor>] {
         do {
             let start = since.map { [("start", Self.startBefore($0.seconds))] } ?? []
             let trades: KrakenResult<KrakenTrades> = try await privatePost("TradesHistory", start)
             let ledger: KrakenResult<KrakenLedger> = try await privatePost("Ledgers", start)
 
-            typealias Item = ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenTransferId, KrakenLedgerCursor>
+            typealias Item = ExchangeClientLedgerItem<KrakenMarketName, KrakenOrderId, KrakenFillId, KrakenTransferId, KrakenLedgerCursor>
+            // A trade's ledger entries by the trade's id (their `refid`): the one in the pair's quote asset carries the
+            // fee the balance moved by, at the ledger's scale. Matched by Kraken's asset key, so an entry in an asset
+            // the table does not declare is passed over, not refused.
+            var tradeEntries: [String: [KrakenLedger.Entry]] = [:]
+            for entry in ledger.result.ledger.values where entry.type == "trade" {
+                guard let refid = entry.refid else { continue }
+                tradeEntries[refid, default: []].append(entry)
+            }
             // Each item with its instant and its id; the cursor of each is made once the instant's items are known.
             var items: [(time: WireDecimal, id: KrakenLedgerId, make: (KrakenLedgerCursor) throws -> Item)] = []
             for (key, trade) in trades.result.trades {
@@ -334,11 +382,16 @@ public struct KrakenClient: ExchangeClient {
                 let pair = try await self.pair(market).declared()
                 let units = try trade.vol.amount(of: pair.base, in: registry)
                 let price = try trade.price.price(of: pair.quote, per: pair.base, in: registry)
-                let fee = try trade.fee.amount(of: pair.quote, in: registry)
+                // The fee from the trade's ledger entry in the quote, the exact amount Kraken took from the balance at
+                // the ledger's four places; the trade's own `fee`, stated at the pair's `cost_decimals`, where the ledger
+                // read holds no such entry.
+                let ledgerFee = tradeEntries[key]?.first { $0.asset == pair.quoteName }?.fee
+                let fee = try (ledgerFee ?? trade.fee).amount(of: pair.quote, in: registry)
                 let order = try KrakenOrderId(validating: trade.ordertxid)
+                let fillId = try KrakenFillId(validating: key)
                 items.append((trade.time, id, { cursor in
                     .fill(market: market, side: trade.type == "buy" ? .buy : .sell, units: units, price: price, fee: fee, order: order,
-                          closedBy: nil, time: cursor.time, cursor: cursor, positionEffect: trade.positionEffect)
+                          id: fillId, closedBy: nil, time: cursor.time, cursor: cursor, positionEffect: trade.positionEffect)
                 }))
             }
             for (key, entry) in ledger.result.ledger {
@@ -382,6 +435,18 @@ public struct KrakenClient: ExchangeClient {
             return result
         } catch {
             throw ExchangeClientError.mapping(error, translating: ExchangeClientError.kraken)
+        }
+    }
+
+    // A figure Kraken states in `instance`, or nil where it states none or states it finer than the holding's declared
+    // places (a position's `margin` and `net` at the pair's `cost_decimals`, 5 to 12 on the dollar pairs, against the
+    // dollar's four): never rounded, never refused, since the figure is Kraken's estimate and no balance moves by it.
+    static func representable(_ text: WireDecimal?, of instance: AssetInstance, in registry: AssetRegistry) throws -> Amount? {
+        guard let text else { return nil }
+        do {
+            return try text.amount(of: instance, in: registry)
+        } catch AmountError.belowBaseUnit {
+            return nil
         }
     }
 
@@ -502,7 +567,7 @@ public struct KrakenClient: ExchangeClient {
             name: try KrakenMarketName(validating: key),
             base: try KrakenExchangeChain.declaredInstance(wireName: info.base, decimals: baseEntry.decimals, in: registry),
             quote: try KrakenExchangeChain.declaredInstance(wireName: info.quote, decimals: quoteEntry.decimals, in: registry),
-            baseEntry: baseEntry, quoteEntry: quoteEntry
+            baseEntry: baseEntry, quoteEntry: quoteEntry, quoteName: info.quote
         )
         await state.keep(pair, as: [pair.name, try KrakenMarketName(validating: info.altname)])
         return pair
@@ -598,17 +663,20 @@ struct KrakenPair: Sendable {
     let quote: AssetInstance?
     let baseEntry: KrakenAssetEntry
     let quoteEntry: KrakenAssetEntry
+    /// Kraken's key for the quote asset ("ZUSD"), the name a Ledgers entry in it carries as its `asset`
+    let quoteName: String
 
     // A pair both of whose holdings are declared: the only kind a money value is made in.
     struct Declared: Sendable {
         let base: AssetInstance
         let quote: AssetInstance
+        let quoteName: String
     }
 
     func declared() throws -> Declared {
         guard let base else { throw ExchangeClientError.unknownAsset(baseEntry.altname) }
         guard let quote else { throw ExchangeClientError.unknownAsset(quoteEntry.altname) }
-        return Declared(base: base, quote: quote)
+        return Declared(base: base, quote: quote, quoteName: quoteName)
     }
 }
 

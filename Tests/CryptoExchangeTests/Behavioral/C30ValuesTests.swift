@@ -229,15 +229,15 @@ struct C30ValuesTests {
     @Test("C30: a ledger item's cursor is part of its value")
     func ledgerItemCursorIsPartOfItsValue() throws {
         let fee = try amount("0.023712", "USDC")
-        let one = ExchangeClientLedgerItem<String, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.00123", "BTC"), price: try price("64250.4", "USDC"), fee: fee, order: 77_738_308, closedBy: nil, time: ms(1_727_000_001_000), cursor: 111)
-        let two = ExchangeClientLedgerItem<String, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.00123", "BTC"), price: try price("64250.4", "USDC"), fee: fee, order: 77_738_308, closedBy: nil, time: ms(1_727_000_001_000), cursor: 112)
+        let one = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.00123", "BTC"), price: try price("64250.4", "USDC"), fee: fee, order: 77_738_308, id: 1, closedBy: nil, time: ms(1_727_000_001_000), cursor: 111)
+        let two = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.00123", "BTC"), price: try price("64250.4", "USDC"), fee: fee, order: 77_738_308, id: 1, closedBy: nil, time: ms(1_727_000_001_000), cursor: 112)
         #expect(one != two)
     }
 
     @Test("C30: a fill closed by the exchange carries the exchange's reason", .disabled("Classified 2026-10-07: the fill gained positionEffect at the owner's word; the pattern's arity is the projector's shape; see the identity ledger"))
     func fillCarriesTheCloseReason() throws {
-        let item = ExchangeClientLedgerItem<String, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.01", "BTC"), price: try price("70123.4", "USDC"), fee: try amount("0.35", "USDC"), order: 77_738_400, closedBy: .liquidation, time: ms(1_727_000_003_000), cursor: 113)
-        guard case let .fill(_, _, _, _, _, _, closedBy, _, _, _) = item else {
+        let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.fill(market: "BTC", side: .buy, units: try amount("0.01", "BTC"), price: try price("70123.4", "USDC"), fee: try amount("0.35", "USDC"), order: 77_738_400, id: 1, closedBy: .liquidation, time: ms(1_727_000_003_000), cursor: 113)
+        guard case let .fill(_, _, _, _, _, _, _, closedBy, _, _, _) = item else {
             Issue.record("not a fill")
             return
         }
@@ -246,7 +246,7 @@ struct C30ValuesTests {
 
     @Test("C30: a funding payment carries its amount and its rate as a fraction")
     func fundingCarriesAmountAndRate() throws {
-        let item = ExchangeClientLedgerItem<String, Int, String, Int>.funding(market: "BTC", amount: try amount("-0.0153", "USDC"), rate: try fraction("0.0000125"), time: ms(1_727_000_002_000), cursor: 5)
+        let item = ExchangeClientLedgerItem<String, Int, Int, String, Int>.funding(market: "BTC", amount: try amount("-0.0153", "USDC"), rate: try fraction("0.0000125"), time: ms(1_727_000_002_000), cursor: 5)
         guard case let .funding(_, paid, rate, _, _, _) = item else {
             Issue.record("not funding")
             return
@@ -259,9 +259,9 @@ struct C30ValuesTests {
     @Test("C30: deposits, withdrawals and internal moves are distinct kinds")
     func movementsAreDistinctKinds() throws {
         let sum = try amount("100.0", "USDC")
-        let deposit = ExchangeClientLedgerItem<String, Int, String, Int>.deposit(sum, id: "T1", time: ms(1), cursor: 1)
-        let withdrawal = ExchangeClientLedgerItem<String, Int, String, Int>.withdrawal(sum, id: "T1", time: ms(1), cursor: 1)
-        let move = ExchangeClientLedgerItem<String, Int, String, Int>.internalMove(sum, from: "main", to: "sub", id: "T1", time: ms(1), cursor: 1)
+        let deposit = ExchangeClientLedgerItem<String, Int, Int, String, Int>.deposit(sum, id: "T1", time: ms(1), cursor: 1)
+        let withdrawal = ExchangeClientLedgerItem<String, Int, Int, String, Int>.withdrawal(sum, id: "T1", time: ms(1), cursor: 1)
+        let move = ExchangeClientLedgerItem<String, Int, Int, String, Int>.internalMove(sum, from: "main", to: "sub", id: "T1", time: ms(1), cursor: 1)
         #expect(deposit != withdrawal)
         #expect(deposit != move)
         #expect(withdrawal != move)
