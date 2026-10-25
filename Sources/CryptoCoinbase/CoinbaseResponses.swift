@@ -332,3 +332,15 @@ struct CoinbaseStatusPage: Decodable, Sendable {
         case scheduledMaintenances = "scheduled_maintenances"
     }
 }
+
+// List Portfolios: "all portfolios of a user", each with its name, uuid, type and whether it is deleted.
+struct CoinbasePortfolios: Decodable, Sendable {
+    struct Portfolio: Decodable, Sendable {
+        let name: String
+        let uuid: String
+        let type: String?
+        let deleted: Bool?
+    }
+
+    let portfolios: [Portfolio]
+}

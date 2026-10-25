@@ -278,6 +278,22 @@ public struct ExchangeClientFeeRate<Name: Hashable & Sendable>: Hashable, Sendab
     }
 }
 
+/// One of the owner's accounts, as the exchange lists it
+///
+/// `id` is the exchange's own id for the account, the text a ledger side's `account` carries and an `account`
+/// parameter takes (Hyperliquid's address, Coinbase's portfolio uuid); `name` is the name the exchange gives it
+/// (a Hyperliquid sub-account's name, a Coinbase portfolio's), `nil` where it gives none (Hyperliquid's main wallet,
+/// which it names by its address alone).
+public struct ExchangeClientAccount: Codable, Hashable, Sendable {
+    public let id: String
+    public let name: String?
+
+    public init(id: String, name: String?) {
+        self.id = id
+        self.name = name
+    }
+}
+
 /// An account's mode as the exchange names it, and what the mode allows
 public struct ExchangeClientAccountMode: Hashable, Sendable {
     public let name: String

@@ -42,5 +42,6 @@ struct ExchangeClientDefaultsTests {
     @Test func aConformerThatReadsNoWalletIsNotOfferedHoldings() async {
         await #expect(throws: ExchangeClientError.notOffered(member: "holdings")) { try await WalletlessClient().holdings(account: "") }
         await #expect(throws: ExchangeClientError.notOffered(member: "feeRates")) { try await WalletlessClient().feeRates(account: "") }
+        await #expect(throws: ExchangeClientError.notOffered(member: "accounts")) { try await WalletlessClient().accounts() }
     }
 }

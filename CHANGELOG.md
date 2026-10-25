@@ -6,6 +6,17 @@ Each pull request adds its entry under the version it will be released as, dated
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-25
+
+The owner's accounts, as the exchange lists them, so a move's side can be named. PR #40.
+
+### Added
+
+- `accounts()` on `ExchangeClient`: the owner's accounts the key reaches, each an `ExchangeClientAccount` with the exchange's own `id` (the text a ledger side's `account` carries and an `account` parameter takes) and the `name` the exchange gives it, `nil` where it gives none. The default implementation throws `notOffered(member: "accounts")`, so an existing conformer still compiles. A consumer names a `subAccountTransfer`'s other side by matching the side's account to an id here; the names were resolved privately before.
+- **Hyperliquid:** the main wallet the key is the agent of (`userRole`), by its address with no name, then each sub-account of `subAccounts`, by its address (lower-cased) with its name, in Hyperliquid's order.
+- **Coinbase:** List Portfolios, each portfolio by its uuid with its name, in Coinbase's order; the documentation states the call "retrieves all portfolios of a user", a deleted one included as listed. The key's own account reads still answer for its portfolio alone.
+- **Kraken:** `notOffered`; subaccounts are institutional-only ("currently only available to institutional clients") with no listing endpoint.
+
 ## [0.15.0] - 2026-10-25
 
 The wallet a ledger item is on, the account and wallet on each side of a move, and a position's margin kind, through every client. PR #39.

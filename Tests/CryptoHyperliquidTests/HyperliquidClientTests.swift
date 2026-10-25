@@ -577,6 +577,20 @@ struct HyperliquidClientGapsTests {
         #expect(error?.meaning == "malformedResponse")
     }
 
+    // The accounts: the main wallet the key is the agent of (userRole), by its address with no name, then each sub-account
+    // the recorded subAccounts answer lists, by its address with its name, in Hyperliquid's order.
+    @Test func theAccountsAreTheMainWalletThenItsSubAccountsByAddressWithTheirNames() async throws {
+        let accounts = try await Hyperliquid.client(ReplaySession(route: Hyperliquid.route())).accounts()
+        #expect(accounts == [ExchangeClientAccount(id: Hyperliquid.master, name: nil), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000103", name: "probe-churn"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000002", name: "four-hour-2x"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000104", name: "four-hour-1x"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000105", name: "fifteen-min-2x"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000106", name: "fifteen-min-1x"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000107", name: "five-min-2x"), ExchangeClientAccount(id: "0x0000000000000000000000000000000000000108", name: "five-min-1x")])
+        // A ledger side's account is the same text, so a move to the sub-account is matched by it.
+        let items = try await Hyperliquid.client(ReplaySession(route: HyperliquidScannerTests.declaredOnlyRoute())).ledgerItems(account: "four-hour-2x", since: nil)
+        let named = items.compactMap { item -> String? in
+            guard case .internalMove(_, _, let to, _, _, _, _) = item else { return nil }
+            return accounts.first { $0.id == to.account }?.name
+        }
+        #expect(named.contains("four-hour-2x"))
+    }
+
     // userFees: the perpetuals pair (add rests, cross takes) then the spot pair, discounts included as stated.
     @Test func theFeeRatesAreThePerpetualsPairThenTheSpotPair() async throws {
         let session = ReplaySession(route: Hyperliquid.route())
